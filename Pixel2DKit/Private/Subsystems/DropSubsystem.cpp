@@ -2,8 +2,11 @@
 
 
 #include "Subsystems/DropSubsystem.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Item/BaseItem.h"
 #include "Engine/DataTable.h"
+#include "Settings/DataTableSettings.h"
+#include "Engine/DeveloperSettings.h"
 
 
 void UDropSubsystem::Deinitialize()
@@ -27,7 +30,16 @@ void UDropSubsystem::BeginDestroy()
 void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocation, float SpawnFrequency)
 {
 	if (DropData.Items.IsEmpty()) return ;
-	ItemDataTable = LoadObject<UDataTable>(this, TEXT("/Game/Pixel2D/Blueprints/Items/DT_ItemData.DT_ItemData"));
+	UDataTableSubsystem* DataTableSubsystem = GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	if (!DataTableSubsystem) return;
+
+	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
+	// int32 Health = Settings->DefaultPlayerHealth;
+	
+	// const UDataTableSettings D = UDataTableSettings::Get();
+	
+	ItemDataTable = Settings->GetItemData();
+	// ItemDataTable = DataTableSubsystem->GetItemData();
 	if (!ItemDataTable)
 	{
 // 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,

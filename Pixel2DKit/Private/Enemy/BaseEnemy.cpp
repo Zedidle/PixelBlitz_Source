@@ -12,6 +12,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Enemy/EnemyAIController.h"
+#include "Fight/Components/FightComponent.h"
+#include "Fight/Components/HealthComponent.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
@@ -179,6 +181,12 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
+ABaseEnemy::ABaseEnemy()
+{
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealComp"));
+	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
+}
+
 
 bool ABaseEnemy::GetIsAttacking_Implementation()
 {
@@ -242,6 +250,11 @@ void ABaseEnemy::OnReachedEnemyX_EnemyAI_Implementation()
 void ABaseEnemy::OnReachedEnemyY_EnemyAI_Implementation()
 {
 	
+}
+
+void ABaseEnemy::OnBeAttacked_Invulnerable_Implementation()
+{
+	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
 }
 
 void ABaseEnemy::Jump()

@@ -26,6 +26,15 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 
 	
 public:
+	ABaseEnemy();
+	
+	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	class UHealthComponent* HealthComp;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	class UFightComponent* FightComp;
+
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
 	UFUNCTION(BlueprintCallable, Category="Enemy")
@@ -142,7 +151,9 @@ public:
 	void OnReachedEnemyY_EnemyAI_Implementation() override;
 
 
-
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	void OnBeAttacked_Invulnerable();
+	void OnBeAttacked_Invulnerable_Implementation() override;
 
 
 

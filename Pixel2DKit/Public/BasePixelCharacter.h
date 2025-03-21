@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
 #include "Interfaces/Fight_Interface.h"
-// #include "InputAction.h"
-// #include "InputActionValue.h"
 #include "BasePixelCharacter.generated.h"
 
 class UInputAction;
@@ -25,18 +23,29 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	bool PreSpriteLeft = false;
 	FVector FightCenterForCameraOffset = FVector(0.0f);
 	FVector CurCameraOffset = FVector(0.0f);
+
+	FTimerHandle AttackHitTimerHandle;
 	int AttackHitComboNum = 0;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	int AttackHitDashing = 0; // 冲刺中命中
 	
 	virtual void Tick_SaveFallingStartTime();
 	virtual void Tick_SpriteRotation_cpp(); // 漂移式偏转
 	virtual void Tick_SpringArmMotivation_cpp();
 
 	void SetLanding(const bool V, const float time = 0.1f);
-
 	
 public:
 	ABasePixelCharacter();
 
+	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	class UHealthComponent* HealthComp;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	class UFightComponent* FightComp;
+
+	
 	virtual void BeginPlay() override;
 	
 	virtual void Falling() override;
@@ -136,18 +145,54 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Character | Movement")
 	virtual FVector GetDashDirection();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
+	FGameplayTagContainer GetOwnCamp();
+	virtual FGameplayTagContainer GetOwnCamp_Implementation() override;
 	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
+	FGameplayTagContainer GetEnemyCamp();
+	virtual FGameplayTagContainer GetEnemyCamp_Implementation() override;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
 	AActor* GetTarget();
-	virtual AActor* GetTarget_Implementation();
+	virtual AActor* GetTarget_Implementation() override;
 
-	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta) override;
-
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	void OnAttackHiting();
+	virtual void OnAttackHiting_Implementation() override;
 	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	void PowerRepulsion(float Power);
+	virtual void PowerRepulsion_Implementation(float Power) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	void OnBeAttacked_Invulnerable();
+	virtual void OnBeAttacked_Invulnerable_Implementation() override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	int DamagePlus(int inValue, AActor* ActorAcceptDamage);
+	virtual int DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	int OnDefendingHit(int inValue);
+	virtual int OnDefendingHit_Implementation(int inValue) override;
+	
+	
+	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal,
+													const FVector& PreviousLocation, float TimeDelta) override;
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
 
+
+
+	// 外形缩放部分
+	UFUNCTION(BlueprintCallable, Category="Character | Outlook")
+	void SetScale(float rate);
+
+
+
+	
 
 	/*
 	 * ----- 移动输入部分 ----- 

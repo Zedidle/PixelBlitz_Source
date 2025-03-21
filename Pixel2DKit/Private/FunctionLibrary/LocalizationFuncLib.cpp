@@ -2,27 +2,36 @@
 
 
 #include "FunctionLibrary/LocalizationFuncLib.h"
-#include "Basic/BasePixelGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "OnlineSubsystemUtils.h"
+#include "Basic/BasePixelGameInstance.h"
+#include "Subsystems/DataTableSubsystem.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 {
+	UWorld* world = GEngine->GetCurrentPlayWorld();
+	if (!world) return "";
+	
 	FString tDir;
 	FString tName;
 
+	UDataTableSubsystem* DataTableSubsystem = world->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+
+	
 	// 尝试读取表
 	TObjectPtr<UDataTable> ItemDataTable;
 	if (Data.TableName.Split("/", &tDir, &tName, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 	{
 		if (tName == "") return "";
-		ItemDataTable = LoadObject<UDataTable>(nullptr,
-		*FString::Printf(TEXT("/Game/LocalizationData/%s/DT_ML_%s.DT_ML_%s"), *tDir, *tName, *tName));
+		ItemDataTable = DataTableSubsystem->GetLocalizedDataTable(
+			FString::Printf(TEXT("/Game/LocalizationData/%s/DT_ML_%s.DT_ML_%s"), *tDir, *tName, *tName));
 		if (ItemDataTable == nullptr)
 		{
-			ItemDataTable = LoadObject<UDataTable>(nullptr,
-		*FString::Printf(TEXT("/Game/LocalizationData/%s/%s.%s"), *tDir, *tName, *tName));	
+			ItemDataTable = DataTableSubsystem->GetLocalizedDataTable(
+				FString::Printf(TEXT("/Game/LocalizationData/%s/%s.%s"), *tDir, *tName, *tName));
 		}
-	}else
+	}
+	else
 	{
 		tName = Data.TableName;
 		ItemDataTable = LoadObject<UDataTable>(nullptr,
@@ -44,9 +53,6 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 	FName RowName = Data.RowName;
 	FLocalizedStringData* LocalizedString = ItemDataTable->FindRow<FLocalizedStringData>(RowName, TEXT("ULocalizationFuncLibGetLocalizedString"));
 	if (!LocalizedString) return "";
-
-	UWorld* world = GEngine->GetCurrentPlayWorld();
-	if (!world) return "";
 	
 	UGameInstance* gameInstance = world->GetGameInstance();
 	if (!gameInstance) return "";

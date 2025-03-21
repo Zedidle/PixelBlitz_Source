@@ -19,12 +19,12 @@ public class Pixel2DKit : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { 
 			"Core", "CoreUObject", "Engine", "InputCore",
-			"Niagara",
+			"Niagara","GameplayTags",
 			"UMG",
 			// "SteamLeaderboardSubsystem",
 			"OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils",
 			"EnhancedInput",
-			"PaperZD",
+			"PaperZD", "Paper2D",
 			"NavigationSystem"
 			
 		});

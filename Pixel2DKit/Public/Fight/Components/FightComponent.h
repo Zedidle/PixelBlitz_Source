@@ -1,0 +1,61 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "NiagaraSystem.h"
+#include "Components/ActorComponent.h"
+#include "FightComponent.generated.h"
+
+
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+class PIXEL2DKIT_API UFightComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+	TArray<FName> SocketNames;
+
+	UPROPERTY()
+	USceneComponent* CurSceneComponent;
+
+	UPROPERTY()
+	TArray<AActor*> MeleeAttackActorsIgnore;
+
+	UPROPERTY()
+	int CurMeleeDamage;
+
+	UPROPERTY()
+	FVector CurKnockbackForceMelee;
+
+	UPROPERTY()
+	FGameplayTagContainer EnemyTags;
+
+	UPROPERTY()
+	UNiagaraSystem* CurHitEffect;
+
+	UPROPERTY()
+	FVector PreLocation;
+	
+public:	
+	// Sets default values for this component's properties
+	UFightComponent();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components | Fight")
+	float MeleeAttackRadius = 20.f;
+	
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
+public:	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+
+	
+	UFUNCTION(BlueprintCallable, Category="Components|Fight")
+	void MeleeTraceAttack(FName SocketName, USceneComponent* SceneComponent, int Damage, const FVector& KnockbackForce, UNiagaraSystem* HitEffect);
+		
+};

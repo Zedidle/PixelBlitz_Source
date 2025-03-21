@@ -10,6 +10,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Fight/Components/FightComponent.h"
+#include "Fight/Components/HealthComponent.h"
 
 
 void ABasePixelCharacter::Tick_SaveFallingStartTime()
@@ -197,6 +199,8 @@ void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
 
 ABasePixelCharacter::ABasePixelCharacter()
 {
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealComp"));
+	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	
 }
 
@@ -293,7 +297,8 @@ void ABasePixelCharacter::SetLanding(bool V, float time)
 	});
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
-	
+
+
 void ABasePixelCharacter::SetDashing(bool V)
 {
 	bDashing = V;
@@ -389,13 +394,62 @@ FVector ABasePixelCharacter::GetDashDirection()
 	return (Velocity + Acceleration).GetSafeNormal2D();
 }
 
+FGameplayTagContainer ABasePixelCharacter::GetOwnCamp_Implementation()
+{
+	return IFight_Interface::GetOwnCamp_Implementation();
+}
+
+FGameplayTagContainer ABasePixelCharacter::GetEnemyCamp_Implementation()
+{
+	return IFight_Interface::GetEnemyCamp_Implementation();
+}
+
 AActor* ABasePixelCharacter::GetTarget_Implementation()
 {
 	return IFight_Interface::GetTarget_Implementation();
 }
 
+void ABasePixelCharacter::OnAttackHiting_Implementation()
+{
+	if (bDashing)
+	{
+		AttackHitDashing++;
+	}
+	AttackHitComboNum++;
+	if (AttackHitTimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(AttackHitTimerHandle);
+	}
+	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this]
+	{
+		AttackHitComboNum = 0;
+	});
+	GetWorldTimerManager().SetTimer(AttackHitTimerHandle, TimerDelegate, 2, false);
+}
+
+void ABasePixelCharacter::PowerRepulsion_Implementation(float Power)
+{
+	IFight_Interface::PowerRepulsion_Implementation(Power);
+}
+
+void ABasePixelCharacter::OnBeAttacked_Invulnerable_Implementation()
+{
+	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
+}
+
+
+int ABasePixelCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage)
+{
+	return IFight_Interface::DamagePlus_Implementation(inValue, ActorAcceptDamage);
+}
+
+int ABasePixelCharacter::OnDefendingHit_Implementation(int inValue)
+{
+	return IFight_Interface::OnDefendingHit_Implementation(inValue);
+}
+
 void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,
-	const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
+                                                           const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
 {
 	Super::OnWalkingOffLedge_Implementation(PreviousFloorImpactNormal, PreviousFloorContactNormal, PreviousLocation,
 	                                        TimeDelta);
@@ -418,6 +472,24 @@ void ABasePixelCharacter::Landed(const FHitResult& Hit)
 	SetLanding(true);
 	SetJumping(false);
 	SetFalling(false);
+}
+
+void ABasePixelCharacter::SetScale(float rate)
+{
+	float f = 0;
+	FVector InitScale = GetActorScale3D();
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
+		[this, InitScale, rate, &f, &TimerHandle]()
+		{
+			SetActorScale3D(InitScale * FMath::Lerp(1, rate, f));
+			f += 0.02f;
+			if (f > 1)
+			{
+				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+			}
+		});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.02f, true);
 }
 
 void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
