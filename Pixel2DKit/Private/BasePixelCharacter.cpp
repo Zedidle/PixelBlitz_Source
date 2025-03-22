@@ -199,9 +199,19 @@ void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
 
 ABasePixelCharacter::ABasePixelCharacter()
 {
-	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealComp"));
-	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
+	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
+	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	
+}
+
+UHealthComponent* ABasePixelCharacter::GetHealthComponent() const
+{
+	return HealthComponent_CPP;
+}
+
+UFightComponent* ABasePixelCharacter::GetFightComponent() const
+{
+	return FightComponent;
 }
 
 void ABasePixelCharacter::BeginPlay()
@@ -236,13 +246,21 @@ void ABasePixelCharacter::SetDead(bool V)
 	}
 }
 
-void ABasePixelCharacter::SetHurt(bool V)
+void ABasePixelCharacter::SetHurt(const bool V, const float duration)
 {
 	bHurt = V;
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
 		AnimInst->SetHurt(V);
 	}
+	if (!bHurt) return;
+	
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
+[this]{
+			SetHurt(false,0);
+	});
+	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, duration, false);
 }
 
 void ABasePixelCharacter::SetJumping(bool V, const float time)
@@ -257,11 +275,7 @@ void ABasePixelCharacter::SetJumping(bool V, const float time)
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
 [this]{
-			bJumping = false;
-			if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-			{
-				AnimInst->SetJumping(false);
-			}
+			SetJumping(false,0);
 	});
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
@@ -289,11 +303,7 @@ void ABasePixelCharacter::SetLanding(bool V, float time)
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
 [this]{
-			bLanding = false;
-			if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-			{
-				AnimInst->SetLanding(false);
-			}
+			SetLanding(false,0);
 	});
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
@@ -437,15 +447,20 @@ void ABasePixelCharacter::OnBeAttacked_Invulnerable_Implementation()
 	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
 }
 
+bool ABasePixelCharacter::OnBeAttacked_Implementation(AActor* maker, int damage)
+{
+	return IFight_Interface::OnBeAttacked_Implementation(maker, damage);
+}
+
 
 int ABasePixelCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage)
 {
-	return IFight_Interface::DamagePlus_Implementation(inValue, ActorAcceptDamage);
+	return 0;
 }
 
 int ABasePixelCharacter::OnDefendingHit_Implementation(int inValue)
 {
-	return IFight_Interface::OnDefendingHit_Implementation(inValue);
+	return inValue;
 }
 
 void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,

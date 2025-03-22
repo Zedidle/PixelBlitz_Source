@@ -35,16 +35,23 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	virtual void Tick_SpringArmMotivation_cpp();
 
 	void SetLanding(const bool V, const float time = 0.1f);
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"), Category = Fight)
+	TObjectPtr<UHealthComponent> HealthComponent_CPP;
 	
 public:
 	ABasePixelCharacter();
 
-	UPROPERTY(BlueprintReadOnly, Category = Fight)
-	class UHealthComponent* HealthComp;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UHealthComponent* GetHealthComponent() const;
 	
-	UPROPERTY(BlueprintReadOnly, Category = Fight)
-	class UFightComponent* FightComp;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, DisplayName="FightComp", Category = Fight)
+	TObjectPtr<UFightComponent> FightComponent;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UFightComponent* GetFightComponent() const;
+	
 	
 	virtual void BeginPlay() override;
 	
@@ -112,8 +119,9 @@ public:
 	void SetDead(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Movement)
-	void SetHurt(const bool V);
+	void SetHurt(const bool V, const float duration);
 
+	
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetJumping(const bool V, const float time = 0.2f);
 	
@@ -170,6 +178,10 @@ public:
 	void OnBeAttacked_Invulnerable();
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	bool OnBeAttacked(AActor* maker, int damage);
+	virtual bool OnBeAttacked_Implementation(AActor* maker, int damage);
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	int DamagePlus(int inValue, AActor* ActorAcceptDamage);
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage) override;

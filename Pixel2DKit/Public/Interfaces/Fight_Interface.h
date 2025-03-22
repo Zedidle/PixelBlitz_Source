@@ -42,7 +42,10 @@ public:
     void OnBeAttacked_Invulnerable();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    int DamagePlus(int inValue, AActor* ActorAcceptDamage);
+    bool OnBeAttacked(AActor* maker, int damage);
+    
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    int DamagePlus(int inValue, AActor* ActorDamaged);
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     int OnDefendingHit(int iniDamage);

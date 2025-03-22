@@ -26,7 +26,6 @@ public class Pixel2DKit : ModuleRules
 			"EnhancedInput",
 			"PaperZD", "Paper2D",
 			"NavigationSystem"
-			
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{

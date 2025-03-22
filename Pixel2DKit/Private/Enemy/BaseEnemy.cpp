@@ -65,13 +65,21 @@ void ABaseEnemy::SetDead(bool V)
 	}
 }
 
-void ABaseEnemy::SetHurt(bool V)
+void ABaseEnemy::SetHurt(bool V, const float duration)
 {
 	bHurt = V;
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
 		AnimInst->SetHurt(V);
 	}
+	if (!bHurt) return;
+	
+	FTimerHandle TimerHandle;
+	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
+[this]{
+			SetHurt(false, 0);
+	});
+	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, duration, false);
 }
 
 void ABaseEnemy::SetInAttackState(bool V)
@@ -149,11 +157,7 @@ void ABaseEnemy::SetJumping(const bool V, const float time)
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
 [this]{
-			bJumping = false;
-			if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-			{
-				AnimInst->SetJumping(false);
-			}
+			SetJumping(false, 0);
 	});
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 	
@@ -171,19 +175,14 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
 [this]{
-	
-			bLanding = false;
-			if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-			{
-				AnimInst->SetLanding(false);
-			}
+			SetLanding(false, 0);
 	});
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
 ABaseEnemy::ABaseEnemy()
 {
-	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealComp"));
+	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 }
 
@@ -255,6 +254,16 @@ void ABaseEnemy::OnReachedEnemyY_EnemyAI_Implementation()
 void ABaseEnemy::OnBeAttacked_Invulnerable_Implementation()
 {
 	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
+}
+
+int ABaseEnemy::DamagePlus_Implementation(int inValue, AActor* ActorDamaged)
+{
+	return 0;
+}
+
+int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
+{
+	return iniDamage;
 }
 
 void ABaseEnemy::Jump()

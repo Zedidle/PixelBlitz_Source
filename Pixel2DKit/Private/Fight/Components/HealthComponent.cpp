@@ -3,12 +3,15 @@
 
 #include "Fight/Components/HealthComponent.h"
 
+#include "FindInBlueprintManager.h"
 #include "PaperFlipbookComponent.h"
 #include "SceneRenderTargetParameters.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/Fight_Interface.h"
+#include "Kismet/GameplayStatics.h"
+#include "Settings/CameraShakeSettings.h"
 
-
+class ULegacyCameraShake;
 
 int UHealthComponent::CalAcceptDamage(int initDamage, AActor* instigator)
 {
@@ -71,23 +74,34 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 {
 	if (bInvulnerable && !force) return;
 
-	float curTime = 0;
-	bool bFlashing = false; // 是否在受伤闪烁
+	FlashColor = color;
+	PreHurtTime = GetWorld()->GetTimeSeconds();
+	FlashDuration = duration;
 	
 	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this, &TimerHandle, &curTime, &duration, &bFlashing, &color]
+		[this, &TimerHandle]
 		{
-			if (curTime > duration)
+			if (!IsValid(GetOwner()))
 			{
 				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+				return;
 			}
-
-			curTime+=0.2;
+			
+			if (GetWorld()->GetTimeSeconds() - PreHurtTime > FlashDuration)
+			{
+				if (UPaperFlipbookComponent* PF = GetOwner()->GetComponentByClass<UPaperFlipbookComponent>())
+				{
+					PF->SetSpriteColor(FLinearColor::White);
+				}
+				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+				return;
+			}
+			
 			bFlashing = !bFlashing;
 			if (UPaperFlipbookComponent* PF = GetOwner()->GetComponentByClass<UPaperFlipbookComponent>())
 			{
-				PF->SetSpriteColor(bFlashing ? color : FLinearColor::White);
+				PF->SetSpriteColor(bFlashing ? FlashColor : FLinearColor::White);
 			}
 		});
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.2, true);
@@ -110,13 +124,121 @@ UHealthComponent::UHealthComponent()
 }
 
 
+void UHealthComponent::SetInvulnerable(const bool v)
+{
+	bInvulnerable = v;
+}
+
+void UHealthComponent::ModifyMaxHealth(const int32 value, const EStatChange ChangeType, const bool current)
+{
+	if (ChangeType == EStatChange::Increase)
+	{
+		MaxHealth += value;
+		if (current)
+		{
+			SetHealth(CurrentHealth + value, false);
+		}
+	}
+
+	if (ChangeType == EStatChange::Decrease)
+	{
+		MaxHealth -= FMath::Max(0, value);
+		if (current)
+		{
+			SetHealth(CurrentHealth - value, false);
+		}
+	}
+
+	if (ChangeType == EStatChange::Reset)
+	{
+		MaxHealth = value;
+		if (current)
+		{
+			SetHealth(value, false);
+		}
+		else
+		{
+			SetHealth(FMath::Clamp(CurrentHealth, 0, MaxHealth), false);
+		}
+	}
+
+	OnMaxHealthChanged.Broadcast(MaxHealth, ChangeType);
+}
+
+void UHealthComponent::SetHealth(const int32 value, const bool broadcast)
+{
+	int preHealth = CurrentHealth;
+	CurrentHealth = FMath::Clamp(value, 0, MaxHealth);
+	int changedValue = CurrentHealth - preHealth;
+	EStatChange changeType = changedValue > 0 ? EStatChange::Increase : EStatChange::Decrease;
+	if (broadcast)
+	{
+		OnHealthChanged.Broadcast(CurrentHealth, changedValue, changeType, nullptr, false);
+	}
+}
+
+void UHealthComponent::SetEffectBySeconds(const int32 value, const FGameplayTag Tag)
+{
+	if (value == 0)
+	{
+		Tag2EffectHealthPoint.Remove(Tag);
+	}
+	else
+	{
+		Tag2EffectHealthPoint.Add(Tag, value);
+		SetActivateHealthEffectBySeconds();
+	}
+}
+
+
+void UHealthComponent::IncreaseHealth(const int value, AActor* Instigator)
+{
+	int preHealth = CurrentHealth;
+	CurrentHealth = FMath::Clamp(value + CurrentHealth, 0, MaxHealth);
+	OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - preHealth, EStatChange::Increase, Instigator, false);
+}
+
+void UHealthComponent::SetActivateHealthEffectBySeconds(const bool activate)
+{
+	if (!activate)
+	{
+		if (TimerHandle_EffectBySeconds.IsValid() && GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
+		}
+		return;
+	}
+
+	if (GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds)) return;
+	
+	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
+	[this]
+	{
+		if (Tag2EffectHealthPoint.IsEmpty())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
+			return;
+		}
+			
+		for (auto& effect : Tag2EffectHealthPoint)
+		{
+			if (effect.Value > 0)
+			{
+				IncreaseHealth(effect.Value, GetOwner());
+			}
+			else
+			{
+				DecreaseHealth(effect.Value, FVector(0), GetOwner(), true, false, true);
+			}
+		}
+	});
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_EffectBySeconds, TimerDel, 1.0f, true);
+}
+
 // Called when the game starts
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
 
@@ -133,7 +255,17 @@ int UHealthComponent::GetCurrentHealth()
 	return CurrentHealth;
 }
 
-void UHealthComponent::DecreaseHealth(int Damage, const FVector& KnockbackForce, AActor* Instigator, bool bForce,
+int UHealthComponent::GetMaxHealth()
+{
+	return MaxHealth;
+}
+
+float UHealthComponent::GetHealthPercent()
+{
+	return float(CurrentHealth) / float(MaxHealth);
+}
+
+void UHealthComponent::DecreaseHealth(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce,
                                       bool bCauseInvul, bool bInner)
 {
 	if (Damage <= 0) return;
@@ -144,8 +276,28 @@ void UHealthComponent::DecreaseHealth(int Damage, const FVector& KnockbackForce,
 	FGameplayTag PlayerTag = FGameplayTag::RequestGameplayTag(FName("Player"));
 	if (IFight_Interface::Execute_GetOwnCamp(owner).HasTag(PlayerTag))
 	{
-		
-		
+		// 天气影响的伤害增幅
+		float weatherAddPercent = 0.1;
+		Damage = Damage + Damage * weatherAddPercent;
+		if (bInvulnerable && !bForce)
+		{
+			if (owner->Implements<UFight_Interface>())
+			{
+				IFight_Interface::Execute_OnBeAttacked_Invulnerable(owner);
+			}
+			return;
+		}
+		if (!bInner)
+		{
+			if (owner->Implements<UFight_Interface>())
+			{
+				if (IFight_Interface::Execute_OnBeAttacked(owner, Instigator, Damage))
+				{
+					KnockBack(KnockbackForce * 0.9, Instigator);
+					return;
+				}
+			}
+		}
 	}
 
 	// 怪物受伤逻辑
@@ -154,7 +306,6 @@ void UHealthComponent::DecreaseHealth(int Damage, const FVector& KnockbackForce,
 	{
 		if (bInvulnerable && !bForce)
 		{
-			if (!owner->Implements<UFight_Interface>()) return;
 			IFight_Interface::Execute_OnBeAttacked_Invulnerable(owner);
 		}
 	}
@@ -164,7 +315,7 @@ void UHealthComponent::DecreaseHealth(int Damage, const FVector& KnockbackForce,
 
 	int preHealth = CurrentHealth;
 	CurrentHealth = FMath::Max(CurrentHealth - calDamage, 0);
-	OnHealthChanged.Broadcast(CurrentHealth, preHealth - CurrentHealth, EStatChange::Decrease, Instigator, bInner);
+	OnHealthChanged.Broadcast(CurrentHealth, FMath::Abs(preHealth - CurrentHealth), EStatChange::Decrease, Instigator, bInner);
 
 	if (bCauseInvul)
 	{
@@ -173,12 +324,8 @@ void UHealthComponent::DecreaseHealth(int Damage, const FVector& KnockbackForce,
 	if (!bInner)
 	{
 		FlashForDuration();
+		KnockBack(KnockbackForce, Instigator);
 	}
-	
-}
-
-void UHealthComponent::IncreaseHealth()
-{
 }
 
 void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
@@ -199,42 +346,46 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 	}
 	else if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent()))
 	{
-		if (PrimitiveComponent->GetCollisionEnabled() == ECollisionEnabled::QueryAndPhysics)
-		{
-			PrimitiveComponent->AddImpulse(Repel, FName(), true);
-		}
-		else
-		{
-			return;
-		}
+		if (PrimitiveComponent->GetCollisionEnabled() != ECollisionEnabled::QueryAndPhysics) return;
+		PrimitiveComponent->AddImpulse(Repel, FName(), true);
 	}
 	else
 	{
 		return;
 	}
 
-	// 如果受力大于300则属于强效击退
-	if (Repel.Size() > 300)
-	{
-		if (GetOwner()->Implements<UFight_Interface>())
-		{
-			if (IFight_Interface::Execute_GetOwnCamp(GetOwner())
-				.HasTag(FGameplayTag::RequestGameplayTag(FName("Player"))))
-			{
-				
-			}
-		}
-		
-	}
+	const UCameraShakeSettings* CameraShakeSettings = GetDefault<UCameraShakeSettings>();
 
-	
-
-	
+	if (!GetOwner()->Implements<UFight_Interface>()) return;
+	bool bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
 	FVector ownerLocation = GetOwner()->GetActorLocation();
-
-	
-	
-	
-	
+	// 如果受力大于300则属于强效击退
+	if (Repel.Size() > MinPowerRepelForceValue)
+	{
+		if (bOwnerIsPlayer)
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerHitedShake_Powerful,
+				ownerLocation, 0, 500, 0, true);
+		}
+		else
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerHitedShake_Powerful,
+				ownerLocation, 0, 500, 0.2, true);
+		}
+		IFight_Interface::Execute_PowerRepulsion(GetOwner(), Repel.Size());
+	}
+	else
+	{
+		if (bOwnerIsPlayer)
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerHitedShake,
+				ownerLocation, 0, 500, 0, true);
+		}
+		else
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->MonsterHitedShake,
+				ownerLocation, 0, 500, 1, true);
+		}
+	}
 	
 }

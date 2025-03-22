@@ -29,10 +29,10 @@ public:
 	ABaseEnemy();
 	
 	UPROPERTY(BlueprintReadOnly, Category = Fight)
-	class UHealthComponent* HealthComp;
+	TObjectPtr<UHealthComponent> HealthComponent_CPP;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Fight)
-	class UFightComponent* FightComp;
+	TObjectPtr<UFightComponent> FightComp;
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -82,7 +82,7 @@ public:
 	void SetDead(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
-	void SetHurt(const bool V);
+	void SetHurt(const bool V, const float duration);
 	
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetInAttackState(const bool V);
@@ -144,21 +144,25 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	void OnReachedEnemyX_EnemyAI();
-	void OnReachedEnemyX_EnemyAI_Implementation() override;
+	virtual void OnReachedEnemyX_EnemyAI_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	void OnReachedEnemyY_EnemyAI();
-	void OnReachedEnemyY_EnemyAI_Implementation() override;
-
-
+	virtual void OnReachedEnemyY_EnemyAI_Implementation() override;
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	void OnBeAttacked_Invulnerable();
-	void OnBeAttacked_Invulnerable_Implementation() override;
+	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	int DamagePlus(int inValue, AActor* ActorDamaged);
+	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	int OnDefendingHit(int iniDamage);
+	virtual int OnDefendingHit_Implementation(int iniDamage) override;
 
-
-
+	
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
 

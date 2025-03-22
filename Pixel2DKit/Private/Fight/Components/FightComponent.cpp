@@ -49,7 +49,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			TArray<FHitResult> OutHits;
 			UKismetSystemLibrary::SphereTraceMulti(GetWorld(), PreLocation, end, MeleeAttackRadius,
 				ETraceTypeQuery::TraceTypeQuery2, false, MeleeAttackActorsIgnore,
-				EDrawDebugTrace::ForDuration, OutHits, true, FLinearColor::Red,
+				EDrawDebugTrace::None, OutHits, true, FLinearColor::Red,
 				FLinearColor::Green, 1);
 			if (OutHits.IsEmpty()) return;
 			for (auto& hit : OutHits)
@@ -63,7 +63,6 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 				if (UHealthComponent* HealthComponent = HitActor->GetComponentByClass<UHealthComponent>())
 				{
-					// HealthComponent
 					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), CurHitEffect, hit.ImpactPoint);
 					HealthComponent->DecreaseHealth(CurMeleeDamage, -hit.Normal * CurKnockbackForceMelee, Owner);
 					IFight_Interface::Execute_OnAttackHiting(Owner);

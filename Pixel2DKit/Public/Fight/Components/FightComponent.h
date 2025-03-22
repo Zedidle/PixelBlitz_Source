@@ -9,7 +9,7 @@
 #include "FightComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PIXEL2DKIT_API UFightComponent : public UActorComponent
 {
 	GENERATED_BODY()
