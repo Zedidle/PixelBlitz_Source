@@ -84,11 +84,14 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 		{
 			if (!IsValid(GetOwner()))
 			{
-				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+				if (UWorld* world = GetWorld())
+				{
+					world->GetTimerManager().ClearTimer(TimerHandle);
+				}
 				return;
 			}
 			
-			if (GetWorld()->GetTimeSeconds() - PreHurtTime > FlashDuration)
+			if (IsValid(GetWorld()) && GetWorld()->GetTimeSeconds() - PreHurtTime > FlashDuration)
 			{
 				if (UPaperFlipbookComponent* PF = GetOwner()->GetComponentByClass<UPaperFlipbookComponent>())
 				{
@@ -108,9 +111,13 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 	
 }
 
-FVector UHealthComponent::GetRepel(FVector IncomeRepel, AActor* Instigator)
+FVector UHealthComponent::GetRepel(FVector IncomeRepel, const AActor* Instigator) const
 {
-	return IncomeRepel;
+	if (!IsValid(Instigator)) return IncomeRepel;
+	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel - RepelResistance;
+
+	FVector dir = (GetOwner()->GetActorLocation() - Instigator->GetActorLocation()).GetSafeNormal2D();
+	return  dir * IncomeRepel.Size2D() + IncomeRepel.Z;
 }
 
 // Sets default values for this component's properties
@@ -195,7 +202,10 @@ void UHealthComponent::IncreaseHealth(const int value, AActor* Instigator)
 {
 	int preHealth = CurrentHealth;
 	CurrentHealth = FMath::Clamp(value + CurrentHealth, 0, MaxHealth);
-	OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - preHealth, EStatChange::Increase, Instigator, false);
+	if (CurrentHealth - preHealth > 0)
+	{
+		OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - preHealth, EStatChange::Increase, Instigator, false);
+	}
 }
 
 void UHealthComponent::SetActivateHealthEffectBySeconds(const bool activate)
@@ -315,7 +325,11 @@ void UHealthComponent::DecreaseHealth(int Damage, const FVector KnockbackForce, 
 
 	int preHealth = CurrentHealth;
 	CurrentHealth = FMath::Max(CurrentHealth - calDamage, 0);
-	OnHealthChanged.Broadcast(CurrentHealth, FMath::Abs(preHealth - CurrentHealth), EStatChange::Decrease, Instigator, bInner);
+	int changedValue = FMath::Abs(preHealth - CurrentHealth);
+	if (changedValue > 0)
+	{
+		OnHealthChanged.Broadcast(CurrentHealth, changedValue, EStatChange::Decrease, Instigator, bInner);
+	}
 
 	if (bCauseInvul)
 	{

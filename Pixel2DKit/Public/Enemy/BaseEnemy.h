@@ -41,6 +41,10 @@ public:
 	bool SetPixelCharacter(AActor* Character);
 
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
+	FVector BasicAttackRepel = FVector(50,50,100); // 基础攻击击退力度
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
+	FVector CurAttackRepel = FVector(50,50,100); // 基础攻击击退力度
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
 	float RandomMoveRange = 200.0f; // 巡逻时随机移动的范围

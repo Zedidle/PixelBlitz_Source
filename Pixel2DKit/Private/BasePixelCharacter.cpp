@@ -154,18 +154,10 @@ void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
 		{
 			case 0: // 镜头前瞻
 			{
-				// FVector Location = GetActorLocation() + 0.4 * Velocity.X + 0.4 * Velocity.Y + 0.2 * Velocity.Z;
-					FVector Location = GetActorLocation() +
-						FVector( FMath::GetMappedRangeValueClamped(
-									FVector2D(-400.0, 400),
-									FVector2D(-160, 160), Velocity.X),
-									FMath::GetMappedRangeValueClamped(
-									FVector2D(-400.0, 400),
-									FVector2D(-160, 160), Velocity.Y),
-									FMath::GetMappedRangeValueClamped(
-									FVector2D(-1000, 1000),
-									FVector2D(-200, 200), Velocity.Z));
-					
+				Velocity.X *= 0.4;
+				Velocity.Y *= 0.4;
+				Velocity.Z *= 0.2;
+				FVector Location = GetActorLocation() + Velocity;
 				FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
 						(d > 0 ? 1 : FMath::GetMappedRangeValueClamped(FVector2D(-1, 0), FVector2D(0.2, 1), d));
 				SpringArm->SetWorldLocation(Location + FightOffset);

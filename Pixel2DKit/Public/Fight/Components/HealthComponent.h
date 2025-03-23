@@ -74,7 +74,7 @@ class UHealthComponent : public UActorComponent
 	void OnHurtInvulnerable();
 	
 	
-	FVector GetRepel(FVector IncomeRepel, AActor* Instigator);
+	FVector GetRepel(FVector IncomeRepel, const AActor* Instigator) const;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
 	FOnHealthChangedSignature OnHealthChanged;
@@ -91,7 +91,7 @@ public:
 	UHealthComponent();
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bInvulnerable; // 是否处于无敌帧
+	bool bInvulnerable = false; // 是否处于无敌帧
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	void InvulnerableForDuration(float duration);
