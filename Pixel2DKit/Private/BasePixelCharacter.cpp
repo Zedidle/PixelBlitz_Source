@@ -21,11 +21,11 @@ void ABasePixelCharacter::Tick_SaveFallingStartTime()
 		if (!PreFrameFalling)
 		{
 			PreFrameFalling = true;
-			if (GetWorld())
+			if (UWorld* World = GetWorld())
 			{
 // 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red,
 // FString::Printf(TEXT("Tick_SaveFallingStartTime: %d"),  __LINE__));
-				FallingStartTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+				FallingStartTime = World->TimeSeconds;
 			}
 		}
 	}
@@ -348,9 +348,9 @@ void ABasePixelCharacter::SetMoving(bool V)
 
 float ABasePixelCharacter::GetFallingTime()
 {
-	if (GetWorld())
+	if (UWorld* World = GetWorld())
 	{
-		return UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - FallingStartTime;
+		return World->TimeSeconds - FallingStartTime;
 	}
 	return 0;
 }
@@ -493,10 +493,10 @@ void ABasePixelCharacter::SetScale(float rate)
 			f += 0.02f;
 			if (f > 1)
 			{
-				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+				GetWorldTimerManager().ClearTimer(TimerHandle);
 			}
 		});
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.02f, true);
+	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, 0.02f, true);
 }
 
 void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

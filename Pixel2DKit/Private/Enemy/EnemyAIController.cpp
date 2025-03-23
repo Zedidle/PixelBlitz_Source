@@ -8,9 +8,6 @@
 
 void AEnemyAIController::SimpleMoveToLocation(const FVector& Dest)
 {
-	// UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
-	// FAIMoveRequest
-	
 	FAIMoveRequest MoveRequest(Dest);
 	MoveRequest.SetNavigationFilter(nullptr)
 		.SetUsePathfinding(false) // 不使用路径查询，直接移动（如果没有NavMesh事先构建导航，则无法移动）
@@ -26,17 +23,6 @@ void AEnemyAIController::SimpleMoveToLocation(const FVector& Dest)
 		.SetUserFlags(0);
 
 	MoveTo(MoveRequest);
-	
-	// FPathFindingQuery PFQuery;
- //    if (BuildPathfindingQuery(MoveRequest, PFQuery))
- //    {
- //    	FNavPathSharedPtr Path;
- //    	FindPathForMoveRequest(MoveRequest, PFQuery, Path);
-	// 	if (Path.IsValid())
-	// 	{
-	// 		RequestMove(MoveRequest, Path);
-	// 	}
- //    }
 }
 
 FPathFollowingRequestResult AEnemyAIController::MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath)

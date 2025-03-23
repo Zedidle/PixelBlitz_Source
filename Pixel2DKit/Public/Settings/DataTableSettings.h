@@ -32,8 +32,8 @@ public:
 
 
 	
-	TMap<FName, TObjectPtr<UDataTable>> LocalizedDataTables;
-	UDataTable* GetLocalizedDataTable(const FString& Path);
+	mutable TMap<FName, TObjectPtr<UDataTable>> LocalizedDataTables;
+	UDataTable* GetLocalizedDataTable(const FString& Path) const;
 
 
 	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath2.ToString()); }

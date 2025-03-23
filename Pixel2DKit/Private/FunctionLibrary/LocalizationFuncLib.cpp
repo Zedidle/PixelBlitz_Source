@@ -5,45 +5,44 @@
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystemUtils.h"
 #include "Basic/BasePixelGameInstance.h"
-#include "Subsystems/DataTableSubsystem.h"
+#include "Settings/DataTableSettings.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 {
 	UWorld* world = GEngine->GetCurrentPlayWorld();
-	if (!world) return "";
+	if (!IsValid(world)) return "";
 	
 	FString tDir;
 	FString tName;
 
-	UDataTableSubsystem* DataTableSubsystem = world->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
-
+	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
 	
 	// 尝试读取表
 	TObjectPtr<UDataTable> ItemDataTable;
 	if (Data.TableName.Split("/", &tDir, &tName, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 	{
 		if (tName == "") return "";
-		ItemDataTable = DataTableSubsystem->GetLocalizedDataTable(
+		ItemDataTable = Settings->GetLocalizedDataTable(
 			FString::Printf(TEXT("/Game/LocalizationData/%s/DT_ML_%s.DT_ML_%s"), *tDir, *tName, *tName));
-		if (ItemDataTable == nullptr)
+		if (!IsValid(ItemDataTable))
 		{
-			ItemDataTable = DataTableSubsystem->GetLocalizedDataTable(
+			ItemDataTable = Settings->GetLocalizedDataTable(
 				FString::Printf(TEXT("/Game/LocalizationData/%s/%s.%s"), *tDir, *tName, *tName));
 		}
 	}
 	else
 	{
 		tName = Data.TableName;
-		ItemDataTable = LoadObject<UDataTable>(nullptr,
-		*FString::Printf(TEXT("/Game/LocalizationData/DT_ML_%s.DT_ML_%s"),  *tName, *tName));
-		if (ItemDataTable == nullptr)
+		ItemDataTable = Settings->GetLocalizedDataTable(
+			FString::Printf(TEXT("/Game/LocalizationData/DT_ML_%s.DT_ML_%s"),  *tName, *tName));
+		if (!IsValid(ItemDataTable))
 		{
-			ItemDataTable = LoadObject<UDataTable>(nullptr,
-		*FString::Printf(TEXT("/Game/LocalizationData/%s.%s"), *tName, *tName));	
+			ItemDataTable = Settings->GetLocalizedDataTable(
+			FString::Printf(TEXT("/Game/LocalizationData/%s.%s"), *tName, *tName));	
 		}
 	}
 	
-	if (!ItemDataTable)
+	if (!IsValid(ItemDataTable))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
 		FString::Printf(TEXT("ULocalizationFuncLib::GetLocalizedString  %s not found, %d"), *Data.TableName,__LINE__));

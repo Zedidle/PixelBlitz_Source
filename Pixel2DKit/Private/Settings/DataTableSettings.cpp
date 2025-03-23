@@ -20,7 +20,7 @@ TObjectPtr<UDataTable> UDataTableSettings::GetData(const FString& Path) const
 	return nullptr;
 }
 
-UDataTable* UDataTableSettings::GetLocalizedDataTable(const FString& Path)
+UDataTable* UDataTableSettings::GetLocalizedDataTable(const FString& Path) const
 {
 	if (LocalizedDataTables.Contains(*Path))
 	{

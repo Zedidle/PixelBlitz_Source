@@ -38,7 +38,8 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	AActor* Owner = GetOwner();
 	if (!Owner) return;
-	if (!GetWorld()) return;
+	UWorld* World = GetWorld();
+	if (!IsValid(World)) return;
 	
 	if (Owner->Implements<UFight_Interface>() && IFight_Interface::Execute_GetIsAttacking(Owner))
 	{
@@ -47,7 +48,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 			FVector end = CurSceneComponent->GetSocketLocation(name);
 
 			TArray<FHitResult> OutHits;
-			UKismetSystemLibrary::SphereTraceMulti(GetWorld(), PreLocation, end, MeleeAttackRadius,
+			UKismetSystemLibrary::SphereTraceMulti(World, PreLocation, end, MeleeAttackRadius,
 				ETraceTypeQuery::TraceTypeQuery2, false, MeleeAttackActorsIgnore,
 				EDrawDebugTrace::None, OutHits, true, FLinearColor::Red,
 				FLinearColor::Green, 1);
@@ -63,7 +64,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 				if (UHealthComponent* HealthComponent = HitActor->GetComponentByClass<UHealthComponent>())
 				{
-					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), CurHitEffect, hit.ImpactPoint);
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, CurHitEffect, hit.ImpactPoint);
 					HealthComponent->DecreaseHealth(CurMeleeDamage, CurKnockbackForceMelee, Owner);
 					IFight_Interface::Execute_OnAttackHiting(Owner);
 				}

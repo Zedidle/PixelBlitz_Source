@@ -2,9 +2,7 @@
 
 
 #include "Anim/PixelAnimInstance.h"
-#include "MyObject.h"
 
 void UPixelAnimInstance::TestFunction()
 {
-	UMyObject;
 }

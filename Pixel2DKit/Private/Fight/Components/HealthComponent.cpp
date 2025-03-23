@@ -210,23 +210,29 @@ void UHealthComponent::IncreaseHealth(const int value, AActor* Instigator)
 
 void UHealthComponent::SetActivateHealthEffectBySeconds(const bool activate)
 {
+	UWorld* world = GetWorld();
+	if (!IsValid(world)) return;
+	
 	if (!activate)
 	{
 		if (TimerHandle_EffectBySeconds.IsValid() && GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
 		{
-			GetWorld()->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
+			world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
 		}
 		return;
 	}
 
-	if (GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds)) return;
+	if (world->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds)) return;
 	
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
 	[this]
 	{
+		UWorld* world = GetWorld();
+		if (!IsValid(world)) return;
+		
 		if (Tag2EffectHealthPoint.IsEmpty())
 		{
-			GetWorld()->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
+			world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
 			return;
 		}
 			
@@ -242,13 +248,24 @@ void UHealthComponent::SetActivateHealthEffectBySeconds(const bool activate)
 			}
 		}
 	});
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_EffectBySeconds, TimerDel, 1.0f, true);
+	world->GetTimerManager().SetTimer(TimerHandle_EffectBySeconds, TimerDel, 1.0f, true);
 }
 
 // Called when the game starts
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	UWorld* world = GetWorld();
+	if (!IsValid(world)) return;
+	if (TimerHandle_EffectBySeconds.IsValid() && GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
+	{
+		world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
+	}
 }
 
 
@@ -374,16 +391,17 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 	bool bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
 	FVector ownerLocation = GetOwner()->GetActorLocation();
 	// 如果受力大于300则属于强效击退
-	if (Repel.Size() > MinPowerRepelForceValue)
+	const UWorld* World = GetWorld();
+	if (World && Repel.Size() > MinPowerRepelForceValue)
 	{
 		if (bOwnerIsPlayer)
 		{
-			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerHitedShake_Powerful,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->PlayerHitedShake_Powerful,
 				ownerLocation, 0, 500, 0, true);
 		}
 		else
 		{
-			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerHitedShake_Powerful,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->PlayerHitedShake_Powerful,
 				ownerLocation, 0, 500, 0.2, true);
 		}
 		IFight_Interface::Execute_PowerRepulsion(GetOwner(), Repel.Size());
@@ -392,12 +410,12 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 	{
 		if (bOwnerIsPlayer)
 		{
-			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerHitedShake,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->PlayerHitedShake,
 				ownerLocation, 0, 500, 0, true);
 		}
 		else
 		{
-			UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->MonsterHitedShake,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->MonsterHitedShake,
 				ownerLocation, 0, 500, 1, true);
 		}
 	}

@@ -285,7 +285,7 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	if (!PixelCharacter) return;
 
 	UWorld* World = GetWorld();
-	if (!World) return;
+	if (!IsValid(World)) return;
 
 	float f = USpaceFuncLib::ActorAtActorRight(PixelCharacter,this) ? 180 : 0;
 

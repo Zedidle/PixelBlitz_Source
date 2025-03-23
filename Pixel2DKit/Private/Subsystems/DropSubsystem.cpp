@@ -2,7 +2,6 @@
 
 
 #include "Subsystems/DropSubsystem.h"
-#include "Subsystems/DataTableSubsystem.h"
 #include "Item/BaseItem.h"
 #include "Engine/DataTable.h"
 #include "Settings/DataTableSettings.h"
@@ -30,16 +29,10 @@ void UDropSubsystem::BeginDestroy()
 void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocation, float SpawnFrequency)
 {
 	if (DropData.Items.IsEmpty()) return ;
-	UDataTableSubsystem* DataTableSubsystem = GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
-	if (!DataTableSubsystem) return;
-
 	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
-	// int32 Health = Settings->DefaultPlayerHealth;
-	
-	// const UDataTableSettings D = UDataTableSettings::Get();
+	if (!IsValid(Settings)) return;
 	
 	ItemDataTable = Settings->GetItemData();
-	// ItemDataTable = DataTableSubsystem->GetItemData();
 	if (!ItemDataTable)
 	{
 // 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
