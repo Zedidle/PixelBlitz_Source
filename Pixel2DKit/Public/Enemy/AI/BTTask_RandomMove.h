@@ -17,7 +17,7 @@ class PIXEL2DKIT_API UBTTask_RandomMove : public UBTTask_BlueprintBase
 	float MinDirSwitchDistance = 100; // 最小的方向重置距离
 	
 	float CurRotateValue = 30;  // 当前转向角度范围 
-	float MaxRotateValue = 120;  // 最大转向角度，当碰到悬崖逐渐增大
+	float MaxRotateValue = 150;  // 最大转向角度，当碰到悬崖逐渐增大
 	float MinRotateValue = 20;  // 最小转向角度，当顺利导航逐渐减少
 
 	FVector CurTargetLocation;

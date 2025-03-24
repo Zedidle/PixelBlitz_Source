@@ -26,6 +26,13 @@ EBTNodeResult::Type UBTTask_EnemyMoveToAttackLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
+	if (BlackboardComponent->GetValueAsBool(FName("bInAttackState")))
+	{
+		FinishExecute(false);
+		return EBTNodeResult::Failed;
+	}
+	
+
 	UObject* PlayerPawn = BlackboardComponent->GetValueAsObject(FName("PlayerPawn"));
 	if (!PlayerPawn)
 	{

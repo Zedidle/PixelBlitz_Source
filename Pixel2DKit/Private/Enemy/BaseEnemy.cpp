@@ -25,10 +25,7 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 	if (Character == nullptr)
 	{
 		PixelCharacter = nullptr;
-		if (UEnemyAIComponent* EnemyAIComponent = GetComponentByClass<UEnemyAIComponent>())
-		{
-			EnemyAIComponent->PixelCharacter = nullptr;			
-		}
+		EnemyAIComponent->PixelCharacter = nullptr;			
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), nullptr);
@@ -39,10 +36,7 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 	if (ABasePixelCharacter* C = Cast<ABasePixelCharacter>(Character))
 	{
 		PixelCharacter = C;
-		if (UEnemyAIComponent* EnemyAIComponent = GetComponentByClass<UEnemyAIComponent>())
-		{
-			EnemyAIComponent->PixelCharacter = PixelCharacter;			
-		}
+		EnemyAIComponent->PixelCharacter = PixelCharacter;			
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PixelCharacter);
@@ -88,6 +82,10 @@ void ABaseEnemy::SetInAttackState(bool V)
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
 		AnimInst->SetInAttackState(V);
+	}
+	if (UBlackboardComponent* BlackboardComponent = GetController()->FindComponentByClass<UBlackboardComponent>())
+	{
+		BlackboardComponent->SetValueAsBool(FName("bInAttackState"), V);
 	}
 }
 
@@ -184,6 +182,7 @@ ABaseEnemy::ABaseEnemy()
 {
 	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
+	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 }
 
 
@@ -209,25 +208,18 @@ float ABaseEnemy::GetRandomMoveRange_Implementation()
 
 bool ABaseEnemy::InAtttckRange_EnemyAI_Implementation()
 {
-	if (UEnemyAIComponent* EnemyAIComponent = GetComponentByClass<UEnemyAIComponent>())
-	{
-		return EnemyAIComponent->InAttackRangeX_EnemyAI() || EnemyAIComponent->InAttackRangeY_EnemyAI(); 	
-	}
-	return false;
+	return EnemyAIComponent->InAttackRangeX_EnemyAI() || EnemyAIComponent->InAttackRangeY_EnemyAI(); 	
 }
 
 void ABaseEnemy::OnReachedAttackLocation_EnemyAI_Implementation()
 {
-	if (UEnemyAIComponent* EnemyAIComponent = GetComponentByClass<UEnemyAIComponent>())
+	if (EnemyAIComponent->InAttackRangeX_EnemyAI())
 	{
-		if (EnemyAIComponent->InAttackRangeX_EnemyAI())
-		{
-			OnReachedEnemyX_EnemyAI();
-		}
-		else if (EnemyAIComponent->InAttackRangeY_EnemyAI())
-		{
-			OnReachedEnemyY_EnemyAI();
-		}
+		OnReachedEnemyX_EnemyAI();
+	}
+	else if (EnemyAIComponent->InAttackRangeY_EnemyAI())
+	{
+		OnReachedEnemyY_EnemyAI();
 	}
 }
 

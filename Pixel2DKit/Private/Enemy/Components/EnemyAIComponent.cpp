@@ -83,7 +83,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		);
 
 		// 检查是否命中
-		if (bHit && HitResult.GetActor())
+		if (bHit && HitResult.GetActor() || USpaceFuncLib::CheckCliffProcess(OwnerLocation, OwnerLocation + TempTargetOffset, GetCheckCliffHeight_EnemyAI()))
 		{
 			blockR += DistanceScale;
 			continue;
@@ -199,7 +199,9 @@ FVector UEnemyAIComponent::GetTargetLocationY()
 
 float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 {
-	if (!GetOwner()) return 0;
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return 50;
+	
 	UCapsuleComponent* CapsuleComponent = GetOwner()->GetComponentByClass<UCapsuleComponent>();
 	UCharacterMovementComponent* CharacterMovmentComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>();
 	if (!CapsuleComponent || !CharacterMovmentComponent) return 0;

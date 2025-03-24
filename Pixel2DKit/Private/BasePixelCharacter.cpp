@@ -4,7 +4,6 @@
 #include "BasePixelCharacter.h"
 #include "BasePixelAnimInstance.h"
 #include "PaperFlipbookComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Basic/BasePixelGameInstance.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -145,17 +144,14 @@ void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
 	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
-	// FVector offsetX = Velocity.ProjectOnTo(GetMoveForwardVector());
-	// FVector offsetY = Velocity.ProjectOnTo(GetFaceToCamera());
-	
 	if (UBasePixelGameInstance* GameInstance = Cast<UBasePixelGameInstance>(GetGameInstance()))
 	{
 		switch (GameInstance->VideoSetting_CameraMode)
 		{
 			case 0: // 镜头前瞻
 			{
-				Velocity.X *= 0.4;
-				Velocity.Y *= 0.4;
+				Velocity.X *= 0.35;
+				Velocity.Y *= 0.35;
 				Velocity.Z *= 0.2;
 				FVector Location = GetActorLocation() + Velocity;
 				FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
@@ -181,7 +177,7 @@ void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
 	if (AttackHitComboNum > 0)
 	{
 		SpringArm->TargetArmLength = UKismetMathLibrary::Lerp( SpringArm->TargetArmLength,
-			CurSpringArmLength * FMath::Max(0.7, 1 - AttackHitComboNum * 0.05),0.08);
+			CurSpringArmLength * FMath::Max(0.75, 1 - AttackHitComboNum * 0.05),0.08);
 	}
 	else
 	{
@@ -189,11 +185,24 @@ void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
 	}
 }
 
+void ABasePixelCharacter::Tick_CalCameraOffset()
+{
+	if (SurCameraOffset.Size() < 0.01) return;
+	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
+	if (!IsValid(SpringArm)) return;
+	
+	UWorld* World = GetWorld();
+	if (!IsValid(World)) return;
+	FVector DeltaLocation = SurCameraOffset * World->GetDeltaSeconds() * 2.5;
+	SpringArm->AddWorldOffset(DeltaLocation);
+	CurCameraOffset += DeltaLocation;
+	SurCameraOffset -= DeltaLocation;
+}
+
 ABasePixelCharacter::ABasePixelCharacter()
 {
 	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
-	
 }
 
 UHealthComponent* ABasePixelCharacter::GetHealthComponent() const
@@ -209,8 +218,19 @@ UFightComponent* ABasePixelCharacter::GetFightComponent() const
 void ABasePixelCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
+}
+
+void ABasePixelCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(ScaleTimerHandle);
+	}
+	
 }
 
 void ABasePixelCharacter::Falling()
@@ -227,6 +247,11 @@ FVector ABasePixelCharacter::GetMoveForwardVector()
 FVector ABasePixelCharacter::GetFaceToCamera()
 {
 	return FRotator(0, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
+}
+
+void ABasePixelCharacter::AddCameraOffset(const FVector& V)
+{
+	SurCameraOffset += V;
 }
 
 void ABasePixelCharacter::SetDead(bool V)
@@ -363,10 +388,11 @@ void ABasePixelCharacter::Tick(float DeltaSeconds)
 	Tick_SaveFallingStartTime();
 	Tick_SpriteRotation_cpp();
 	Tick_SpringArmMotivation_cpp();
+	Tick_CalCameraOffset();
 	
 	if (GetCharacterMovement())
 	{
-		SetMoving(GetCharacterMovement()->Velocity.Length() > 1.0f);
+		SetMoving(GetCharacterMovement()->Velocity.Size() > 1.0f);
 	}
 	
 }
@@ -393,7 +419,7 @@ FVector ABasePixelCharacter::GetDashDirection()
 		return GetActorForwardVector();
 	}
 
-	return (Velocity + Acceleration).GetSafeNormal2D();
+	return (Velocity + Acceleration * 2).GetSafeNormal2D();
 }
 
 FGameplayTagContainer ABasePixelCharacter::GetOwnCamp_Implementation()
@@ -481,22 +507,22 @@ void ABasePixelCharacter::Landed(const FHitResult& Hit)
 	SetFalling(false);
 }
 
-void ABasePixelCharacter::SetScale(float rate)
+void ABasePixelCharacter::SetScale(const float targetValue)
 {
-	float f = 0;
-	FVector InitScale = GetActorScale3D();
-	FTimerHandle TimerHandle;
+	ScaleLerpValue = 0;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this, InitScale, rate, &f, &TimerHandle]()
+		[this, targetValue]()
 		{
-			SetActorScale3D(InitScale * FMath::Lerp(1, rate, f));
-			f += 0.02f;
-			if (f > 1)
+			SetActorScale3D(InitScale * FMath::Lerp(ScaleCurValue, targetValue, ScaleLerpValue));
+			ScaleLerpValue += 0.01f;
+			if (ScaleLerpValue > 1)
 			{
-				GetWorldTimerManager().ClearTimer(TimerHandle);
+				ScaleCurValue = targetValue;
+				SetActorScale3D(InitScale * ScaleCurValue);
+				GetWorldTimerManager().ClearTimer(ScaleTimerHandle);
 			}
 		});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, 0.02f, true);
+	GetWorldTimerManager().SetTimer(ScaleTimerHandle, TimerDel, 0.01f, true);
 }
 
 void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -561,8 +587,7 @@ void ABasePixelCharacter::AddMovementInput(FVector WorldDirection, float ScaleVa
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
 
-	// 还需通过 AbilityComponent 补充技能【急转向】逻辑
-	// 急转测试
+	// 还需通过 **AbilityComponent** 补充技能【急转向】逻辑
 	if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
 	{
 		float speed = GetCharacterMovement()->Velocity.Length();

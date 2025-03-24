@@ -63,7 +63,7 @@ float USpaceFuncLib::GetDistanceY(AActor* A, AActor* B, const int PlayerIndex)
 bool USpaceFuncLib::CheckCliff(const FVector& StartLocation, const float CliffHeight)
 {
 	const UWorld* World = GEngine->GetCurrentPlayWorld();
-	if (!World) return false;
+	if (!IsValid(World)) return false;
 
 	const FVector EndLocation = StartLocation - FVector(0, 0, CliffHeight);
 
@@ -86,7 +86,7 @@ bool USpaceFuncLib::CheckCliffProcess(const FVector& StartLocation, const FVecto
 		{
 			return true;
 		}
-		LerpPercent *= 0.9;
+		LerpPercent *= 0.8;
 	}
 	return false;
 }

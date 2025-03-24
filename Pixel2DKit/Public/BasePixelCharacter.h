@@ -21,18 +21,30 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	float FallingStartTime;
 	bool PreFrameFalling = false;
 	bool PreSpriteLeft = false;
-	FVector FightCenterForCameraOffset = FVector(0.0f);
-	FVector CurCameraOffset = FVector(0.0f);
 
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FVector FightCenterForCameraOffset = FVector(0.0f);
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FVector CurCameraOffset = FVector(0.0f);
+	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FVector SurCameraOffset = FVector(0.0f);
+
+	FTimerHandle ScaleTimerHandle;
 	FTimerHandle AttackHitTimerHandle;
 	int AttackHitComboNum = 0;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	int AttackHitDashing = 0; // 冲刺中命中
+
+	float ScaleLerpValue = 0;
+	float ScaleCurValue = 1.0f;
+	FVector InitScale;
+	
 	
 	virtual void Tick_SaveFallingStartTime();
 	virtual void Tick_SpriteRotation_cpp(); // 漂移式偏转
 	virtual void Tick_SpringArmMotivation_cpp();
+	virtual void Tick_CalCameraOffset();
 
 	void SetLanding(const bool V, const float time = 0.1f);
 
@@ -54,6 +66,7 @@ public:
 	
 	
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 	
 	virtual void Falling() override;
 
@@ -68,13 +81,16 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendYaw = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
+	float BasicSpringArmLength = 280.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
 	float CurSpringArmLength = 280.0f;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = View)
 	FVector GetMoveForwardVector();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = View)
 	FVector GetFaceToCamera();
-
+	UFUNCTION(BlueprintCallable, Category = View)
+	void AddCameraOffset(const FVector& V);
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bDead;
@@ -200,7 +216,7 @@ public:
 
 	// 外形缩放部分
 	UFUNCTION(BlueprintCallable, Category="Character | Outlook")
-	void SetScale(float rate);
+	void SetScale(const float targetValue);
 
 
 

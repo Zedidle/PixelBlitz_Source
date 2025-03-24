@@ -58,16 +58,16 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 	{
 		CurTargetLocation = Pawn->GetActorLocation() + curDistance * dir;
 		curDistance = CliffCheckRate * curDistance;
-		if (!USpaceFuncLib::CheckCliff(Pawn->GetActorLocation() + curDistance * dir, 50))
+		if (UEnemyAIComponent* EnemyAIComponent = Pawn->GetComponentByClass<UEnemyAIComponent>())
 		{
-			if (UEnemyAIComponent* EnemyAIComponent = Pawn->GetComponentByClass<UEnemyAIComponent>())
+			if (!USpaceFuncLib::CheckCliff(CurTargetLocation, EnemyAIComponent->GetCheckCliffHeight_EnemyAI()))
 			{
-					CurTargetLocation = EnemyAIComponent->GetMoveDotDirRandLocation(CurTargetLocation);
+				CurTargetLocation = EnemyAIComponent->GetMoveDotDirRandLocation(CurTargetLocation);
+				Controller->SimpleMoveToLocation(CurTargetLocation);
+				FinishExecute(true);
+				CurRotateValue = FMath::Clamp( CurRotateValue * 0.9 -5, MinRotateValue, MaxRotateValue);
+				return EBTNodeResult::Succeeded;
 			}
-			Controller->SimpleMoveToLocation(CurTargetLocation);
-			FinishExecute(true);
-			CurRotateValue = FMath::Clamp( CurRotateValue * 0.9 -5, MinRotateValue, MaxRotateValue);
-			return EBTNodeResult::Succeeded;
 		}
 	}
 

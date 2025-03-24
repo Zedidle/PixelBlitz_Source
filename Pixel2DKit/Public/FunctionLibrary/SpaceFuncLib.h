@@ -33,10 +33,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static float GetDistanceY(AActor* A, AActor* B, const int PlayerIndex = 0);
-	
+
+	// 判断目标下方是否有悬崖
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool CheckCliff(const FVector& StartLocation, const float CliffHeight = 50);
-	
+
+	// 判断是否过程是否有悬崖
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool CheckCliffProcess(const FVector& StartLocation, const FVector& EndLocation, const float CliffHeight = 50);
 	

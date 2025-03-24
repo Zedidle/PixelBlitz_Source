@@ -9,6 +9,9 @@
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "BaseEnemy.generated.h"
 
+class UEnemyAIComponent;
+class UHealthComponent;
+class UFightComponent;
 /**
  * 
  */
@@ -27,6 +30,9 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	
 public:
 	ABaseEnemy();
+
+	UPROPERTY(BlueprintReadWrite, Category = EnemyAI)
+	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UHealthComponent> HealthComponent_CPP;
@@ -47,7 +53,7 @@ public:
 	FVector CurAttackRepel = FVector(50,50,100); // 基础攻击击退力度
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
-	float RandomMoveRange = 200.0f; // 巡逻时随机移动的范围
+	float RandomMoveRange = 100.0f; // 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bDead; 

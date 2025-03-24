@@ -3,9 +3,7 @@
 
 #include "Fight/Components/HealthComponent.h"
 
-#include "FindInBlueprintManager.h"
 #include "PaperFlipbookComponent.h"
-#include "SceneRenderTargetParameters.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
@@ -78,15 +76,14 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 	PreHurtTime = GetWorld()->GetTimeSeconds();
 	FlashDuration = duration;
 	
-	FTimerHandle TimerHandle;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this, &TimerHandle]
+		[this]
 		{
 			if (!IsValid(GetOwner()))
 			{
 				if (UWorld* world = GetWorld())
 				{
-					world->GetTimerManager().ClearTimer(TimerHandle);
+					world->GetTimerManager().ClearTimer(FlashTimerHandle);
 				}
 				return;
 			}
@@ -97,7 +94,7 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 				{
 					PF->SetSpriteColor(FLinearColor::White);
 				}
-				GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+				GetWorld()->GetTimerManager().ClearTimer(FlashTimerHandle);
 				return;
 			}
 			
@@ -107,7 +104,7 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 				PF->SetSpriteColor(bFlashing ? FlashColor : FLinearColor::White);
 			}
 		});
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 0.2, true);
+	GetWorld()->GetTimerManager().SetTimer(FlashTimerHandle, TimerDel, 0.2, true);
 	
 }
 
@@ -262,10 +259,15 @@ void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	UWorld* world = GetWorld();
 	if (!IsValid(world)) return;
-	if (TimerHandle_EffectBySeconds.IsValid() && GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
+	if (TimerHandle_EffectBySeconds.IsValid() && world->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
 	{
 		world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
 	}
+	if (FlashTimerHandle.IsValid() && world->GetTimerManager().IsTimerActive(FlashTimerHandle))
+	{
+		world->GetTimerManager().ClearTimer(FlashTimerHandle);
+	}
+	
 }
 
 

@@ -53,6 +53,7 @@ class UHealthComponent : public UActorComponent
 	bool bFlashing = false; // 是否在受伤闪烁
 	FLinearColor FlashColor = FLinearColor::Red; // 闪烁颜色
 	float FlashDuration = 1;
+	FTimerHandle FlashTimerHandle;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	bool bInRock = false; // 是否处于霸体状态
