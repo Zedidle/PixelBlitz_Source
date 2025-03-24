@@ -178,7 +178,9 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
-ABaseEnemy::ABaseEnemy()
+
+ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
+: Super(ObjectInitializer)
 {
 	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));

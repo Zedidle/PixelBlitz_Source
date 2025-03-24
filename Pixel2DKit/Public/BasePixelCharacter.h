@@ -53,8 +53,8 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	TObjectPtr<UHealthComponent> HealthComponent_CPP;
 	
 public:
-	ABasePixelCharacter();
-
+	ABasePixelCharacter(const FObjectInitializer& ObjectInitializer);
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
 	UHealthComponent* GetHealthComponent() const;
 	

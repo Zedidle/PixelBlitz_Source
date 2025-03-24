@@ -7,20 +7,15 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-// Sets default values for this component's properties
-UEnemyAIComponent::UEnemyAIComponent()
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
+{
+	
 }
 
-
-
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, float DotDirPerRotate, float MaxRotateValue,
-	float DefaultDirRotate, const float MinDirectlyDistance)
+                                                     float DefaultDirRotate, const float MinDirectlyDistance)
 {
 	if (GetOwner() == nullptr) return FVector::ZeroVector;
 	FVector OwnerLocation = GetOwner()->GetActorLocation();

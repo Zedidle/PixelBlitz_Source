@@ -8,7 +8,7 @@
 #include "EnemyAIComponent.generated.h"
 
 
-UCLASS( Abstract, Blueprintable, BlueprintType, ClassGroup=(Enemy), meta=(BlueprintSpawnableComponent) )
+UCLASS( BlueprintType )
 class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -24,7 +24,7 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	
 public:	
 	// Sets default values for this component's properties
-	UEnemyAIComponent();
+	UEnemyAIComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
 	ABasePixelCharacter* PixelCharacter;

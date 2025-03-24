@@ -199,7 +199,9 @@ void ABasePixelCharacter::Tick_CalCameraOffset()
 	SurCameraOffset -= DeltaLocation;
 }
 
-ABasePixelCharacter::ABasePixelCharacter()
+
+ABasePixelCharacter::ABasePixelCharacter(const FObjectInitializer& ObjectInitializer)
+	:Super(ObjectInitializer)
 {
 	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));

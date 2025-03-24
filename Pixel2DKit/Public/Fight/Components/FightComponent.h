@@ -42,8 +42,9 @@ class PIXEL2DKIT_API UFightComponent : public UActorComponent
 	
 public:	
 	// Sets default values for this component's properties
-	UFightComponent();
+	UFightComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components | Fight")
 	float MeleeAttackRadius = 15.f;
 	

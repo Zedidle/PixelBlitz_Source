@@ -29,9 +29,9 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 
 	
 public:
-	ABaseEnemy();
+	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UPROPERTY(BlueprintReadWrite, Category = EnemyAI)
+	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Fight)
