@@ -90,7 +90,9 @@ class UHealthComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();
-
+	UHealthComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	~UHealthComponent();
+	
 	UPROPERTY(BlueprintReadOnly)
 	bool bInvulnerable = false; // 是否处于无敌帧
 

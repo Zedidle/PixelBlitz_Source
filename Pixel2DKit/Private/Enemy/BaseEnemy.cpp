@@ -25,7 +25,10 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 	if (Character == nullptr)
 	{
 		PixelCharacter = nullptr;
-		EnemyAIComponent->PixelCharacter = nullptr;			
+		if (IsValid(EnemyAIComponent))
+		{
+			EnemyAIComponent->PixelCharacter = nullptr;			
+		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), nullptr);
@@ -36,7 +39,10 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 	if (ABasePixelCharacter* C = Cast<ABasePixelCharacter>(Character))
 	{
 		PixelCharacter = C;
-		EnemyAIComponent->PixelCharacter = PixelCharacter;			
+		if (IsValid(EnemyAIComponent))
+		{
+			EnemyAIComponent->PixelCharacter = PixelCharacter;			
+		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PixelCharacter);

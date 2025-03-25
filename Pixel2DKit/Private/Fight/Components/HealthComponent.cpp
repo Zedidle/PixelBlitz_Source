@@ -111,10 +111,13 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 FVector UHealthComponent::GetRepel(FVector IncomeRepel, const AActor* Instigator) const
 {
 	if (!IsValid(Instigator)) return IncomeRepel;
-	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel - RepelResistance;
-
-	FVector dir = (GetOwner()->GetActorLocation() - Instigator->GetActorLocation()).GetSafeNormal2D();
-	return  dir * IncomeRepel.Size2D() + IncomeRepel.Z;
+	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel;
+	IncomeRepel.X = IncomeRepel.X > 0 ? FMath::Max(IncomeRepel.X - RepelResistance.X, 0) : FMath::Min(IncomeRepel.X + RepelResistance.X, 0);
+	IncomeRepel.Y = IncomeRepel.Y > 0 ? FMath::Max(IncomeRepel.Y - RepelResistance.Y, 0) : FMath::Min(IncomeRepel.Y + RepelResistance.Y, 0);
+	
+	FVector Result = (GetOwner()->GetActorLocation() - Instigator->GetActorLocation()).GetSafeNormal2D() * IncomeRepel.Size2D();
+	Result.Z = IncomeRepel.Z;
+	return Result;
 }
 
 // Sets default values for this component's properties
@@ -125,6 +128,14 @@ UHealthComponent::UHealthComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+}
+
+UHealthComponent::UHealthComponent(const FObjectInitializer& ObjectInitializer)
+{
+}
+
+UHealthComponent::~UHealthComponent()
+{
 }
 
 
@@ -365,7 +376,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 {
 	if (bInRock)
 	{
-		// SpawnFloatingText 击退无效
+		// **AbilityComponent** SpawnFloatingText 击退无效
 		return;
 	}
 

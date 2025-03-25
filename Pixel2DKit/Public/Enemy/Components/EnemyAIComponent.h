@@ -28,24 +28,30 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
 	ABasePixelCharacter* PixelCharacter;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	bool CanAttackY = false;	// 是否能基于Y方向发起攻击
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackPatienceTime = 5;   // 如果 n 秒内都打不到玩家，则回到巡逻状态
 
+	// 是否能基于Y方向发起攻击
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRange_X = 50.0f;  // 发起攻击时，与目标在X方向的距离
+	bool CanAttackY = false;	
 
+	// 如果 n 秒内都打不到玩家，则回到巡逻状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRange_Y = 50.0f;  // 发起攻击时，与目标在Y方向的距离
+	float AttackPatienceTime = 5;   
 
+	// 发起攻击时，与目标在X方向的距离
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRangeOffset_X = 5.0f;  // 发起攻击时，与目标在Y方向的距离偏差
+	float AttackRange_X = 50.0f;  
 
+	// 发起攻击时，与目标在Y方向的距离
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRangeOffset_Y = 5.0f;  // 发起攻击时，与目标在Y方向的距离偏差
+	float AttackRange_Y = 50.0f;  
+
+	// 发起攻击时，与目标在Y方向的距离偏差
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
+	float AttackRangeOffset_X = 5.0f;  
+
+	// 发起攻击时，与目标在Y方向的距离偏差
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
+	float AttackRangeOffset_Y = 5.0f;  
 
 	
 	/* 向量点积法 弱随机移动到目标位置
