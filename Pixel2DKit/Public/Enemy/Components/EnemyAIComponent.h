@@ -5,7 +5,26 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "BasePixelCharacter.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "EnemyAIComponent.generated.h"
+
+
+
+
+USTRUCT(BlueprintType)
+struct FActionFieldDistance
+{
+	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D DistanceNear = {0, 100};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D DistanceMid = {100, 300};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D DistanceFar = {300, 600};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D DistanceRemote = {600, 9999};
+};
+
 
 
 UCLASS( BlueprintType )
@@ -53,6 +72,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
 	float AttackRangeOffset_Y = 5.0f;  
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
+	FActionFieldDistance ActionFieldDistance;
 	
 	/* 向量点积法 弱随机移动到目标位置
 	 * TargetLocation - 目标位置
@@ -72,13 +93,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	bool InAttackRangeY_EnemyAI();
 
+	// 获取在X方向（相对玩家的东西方向）的攻击位置
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	FVector GetAttackLocation_EnemyAI();
 	FVector GetTargetLocationX();
 	FVector GetTargetLocationY();
 
+
+	// 获取 接近/远离 (-1 / 1)玩家的行动域位置
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
+	FVector GetActionFieldLocation(const bool bNear = true);
+
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	float GetCheckCliffHeight_EnemyAI();
+
+	UFUNCTION(Blueprintable, Blueprintable, Category = "EnemyAI")
+	EActionField GetActionFieldByPlayer() const;
 	
 	
 protected:

@@ -8,7 +8,7 @@
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "FunctionLibrary/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
-#include "BasePixelAnimInstance.h"
+#include "Anim/BasePixelAnimInstance.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Enemy/EnemyAIController.h"
@@ -63,6 +63,12 @@ void ABaseEnemy::SetDead(bool V)
 	{
 		BlackboardComponent->SetValueAsBool(FName("bDead"), V);
 	}
+
+	if (bDead)
+	{
+		bAttackStartX = false;
+		bAttackStartY = false;
+	}
 }
 
 void ABaseEnemy::SetHurt(bool V, const float duration)
@@ -84,7 +90,7 @@ void ABaseEnemy::SetHurt(bool V, const float duration)
 
 void ABaseEnemy::SetInAttackState(bool V)
 {
-	bInAttackEffect = V;
+	bInAttackState = V;
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
 		AnimInst->SetInAttackState(V);
@@ -276,6 +282,95 @@ void ABaseEnemy::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	SetLanding(true);
+}
+
+void ABaseEnemy::ActionAtPlayerEastNear_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerEastNear_Implementation(Distance);
+
+	if (IsValid(EnemyAIComponent) && EnemyAIComponent->InAttackRangeX_EnemyAI())
+	{
+		OnReachedAttackLocation_EnemyAI();
+	}
+}
+
+void ABaseEnemy::ActionAtPlayerEastMid_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerEastMid_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerEastFar_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerEastFar_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerEastRemote_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerEastRemote_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerWestNear_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerWestNear_Implementation(Distance);
+	if (IsValid(EnemyAIComponent) && EnemyAIComponent->InAttackRangeX_EnemyAI())
+	{
+		OnReachedAttackLocation_EnemyAI();
+	}
+}
+
+void ABaseEnemy::ActionAtPlayerWestMid_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerWestMid_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerWestFar_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerWestFar_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerWestRemote_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerWestRemote_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerNorthNear_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerNorthNear_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerNorthMid_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerNorthMid_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerNorthFar_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerNorthFar_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerNorthRemote_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerNorthRemote_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerSouthNear_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerSouthNear_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerSouthMid_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerSouthMid_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerSouthFar_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerSouthFar_Implementation(Distance);
+}
+
+void ABaseEnemy::ActionAtPlayerSouthRemote_Implementation(float Distance)
+{
+	IEnemyAI_Interface::ActionAtPlayerSouthRemote_Implementation(Distance);
 }
 
 void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)

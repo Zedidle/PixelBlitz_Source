@@ -163,18 +163,14 @@ FVector UEnemyAIComponent::GetTargetLocationX()
 	// 基于方位的左或右偏移
 	FVector Offset = Dir * AttackRange_X;
 
+
+	EWorldDirection Direction = USpaceFuncLib::ActorAtActorWorldDirection(GetOwner(), PixelCharacter);
+	
 	// 选择较近的一侧
 	if (USpaceFuncLib::ActorAtActorRight(PixelCharacter, GetOwner()))
 	{
 		Offset *= -1;
 	}
-
-	// 目标点是悬崖，则再次调整方向
-	// if (USpaceFuncLib::CheckCliffProcess(GetOwner()->GetActorLocation(),
-	// 	PixelCharacter->GetActorLocation() + Offset, GetCheckCliffHeight_EnemyAI()))
-	// {
-	// 	Offset *= -1;
-	// }
 
 	return GetMoveDotDirRandLocation(PixelCharacter->GetActorLocation() + Offset);
 }
@@ -192,6 +188,69 @@ FVector UEnemyAIComponent::GetTargetLocationY()
 	return GetMoveDotDirRandLocation(PixelCharacter->GetActorLocation() + Offset);
 }
 
+FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
+{
+	if (!IsValid(GetOwner())) return FVector(0);
+	if (!IsValid(PixelCharacter)) return GetOwner()->GetActorLocation();
+
+	const FVector PlayerLocation = PixelCharacter->GetActorLocation();
+	const FVector OwnerLocation = GetOwner()->GetActorLocation();
+	float Distance = (PlayerLocation - OwnerLocation).Size2D();
+	FVector Dir = (OwnerLocation - PlayerLocation).GetSafeNormal2D();
+
+
+	FVector TargetLocation;
+	
+	if (ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y)
+	{
+		if (bNear)
+		{
+			// 默认近战移动
+			TargetLocation = GetAttackLocation_EnemyAI();
+		}
+		else
+		{
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceMid.X + 10);
+		}
+	}
+	else if (ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y)
+	{
+		if (bNear)
+		{
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceNear.Y - 10);
+		}
+		else
+		{
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceFar.X + 10);
+		}
+	}
+	else if (ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y)
+	{
+		if (bNear)
+		{
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceFar.Y - 10);
+		}
+		else
+		{
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceRemote.X + 10);
+		}
+	}
+	else if (ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y)
+	{
+		if (bNear)
+		{
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceRemote.X - 10);
+		}
+		else
+		{
+			TargetLocation = OwnerLocation + Dir * 100;
+		}
+	}
+
+	return GetMoveDotDirRandLocation(TargetLocation);
+}
+
+
 float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 {
 	AActor* Owner = GetOwner();
@@ -203,6 +262,95 @@ float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 	
 	float ScaleZ = GetOwner()->GetActorScale3D().Z;
 	return ScaleZ * (CharacterMovmentComponent->MaxStepHeight + CapsuleComponent->GetUnscaledCapsuleHalfHeight());
+}
+
+EActionField UEnemyAIComponent::GetActionFieldByPlayer() const
+{
+	if (!IsValid(PixelCharacter)) return EActionField::None;
+	if (!IsValid(GetOwner())) return EActionField::None;
+	
+	EWorldDirection Dir = USpaceFuncLib::ActorAtActorWorldDirection(GetOwner(), PixelCharacter, PixelCharacter->CurBlendYaw);
+	float Distance = (GetOwner()->GetActorLocation() - PixelCharacter->GetActorLocation()).Size2D();
+	
+	
+	if (Dir == EWorldDirection::East)
+	{
+		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
+		{
+			return EActionField::EastNear;
+		}
+		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
+		{
+			return EActionField::EastMid;	
+		}
+		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
+		{
+			return EActionField::EastMid;	
+		}
+		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
+		{
+			return EActionField::EastMid;	
+		}
+	}
+	else if (Dir == EWorldDirection::West)
+	{
+		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
+		{
+			return EActionField::WestNear;
+		}
+		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
+		{
+			return EActionField::WestMid;	
+		}
+		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
+		{
+			return EActionField::WestMid;	
+		}
+		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
+		{
+			return EActionField::WestMid;	
+		}
+	}
+	else if (Dir == EWorldDirection::North)
+	{
+		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
+		{
+			return EActionField::NorthNear;
+		}
+		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
+		{
+			return EActionField::NorthMid;	
+		}
+		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
+		{
+			return EActionField::NorthMid;	
+		}
+		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
+		{
+			return EActionField::NorthMid;	
+		}
+	}
+	else if (Dir == EWorldDirection::South)
+	{
+		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
+		{
+			return EActionField::SouthNear;
+		}
+		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
+		{
+			return EActionField::SouthMid;	
+		}
+		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
+		{
+			return EActionField::SouthMid;	
+		}
+		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
+		{
+			return EActionField::SouthMid;	
+		}
+	}
+
+	return None;
 }
 
 

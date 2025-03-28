@@ -67,6 +67,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bInAttackEffect;
 
+
+	
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bAttackStartX;
 
@@ -175,6 +177,86 @@ public:
 	
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
+
+
+
+
+
+
+
+
+	// 战斗的行动模式
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerEastNear(float Distance);
+	virtual void ActionAtPlayerEastNear_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerEastMid(float Distance);
+	virtual void ActionAtPlayerEastMid_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerEastFar(float Distance);
+	virtual void ActionAtPlayerEastFar_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerEastRemote(float Distance);
+	virtual void ActionAtPlayerEastRemote_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerWestNear(float Distance);
+	virtual void ActionAtPlayerWestNear_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerWestMid(float Distance);
+	virtual void ActionAtPlayerWestMid_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerWestFar(float Distance);
+	virtual void ActionAtPlayerWestFar_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerWestRemote(float Distance);
+	virtual void ActionAtPlayerWestRemote_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerNorthNear(float Distance);
+	virtual void ActionAtPlayerNorthNear_Implementation(float Distance) override;
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerNorthMid(float Distance);
+	virtual void ActionAtPlayerNorthMid_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerNorthFar(float Distance);
+	virtual void ActionAtPlayerNorthFar_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerNorthRemote(float Distance);
+	virtual void ActionAtPlayerNorthRemote_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerSouthNear(float Distance);
+	virtual void ActionAtPlayerSouthNear_Implementation(float Distance) override;
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerSouthMid(float Distance);
+	virtual void ActionAtPlayerSouthMid_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerSouthFar(float Distance);
+	virtual void ActionAtPlayerSouthFar_Implementation(float Distance) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	void ActionAtPlayerSouthRemote(float Distance);
+	virtual void ActionAtPlayerSouthRemote_Implementation(float Distance) override;
+
+
+
+
+
+
+
+
 
 	
 protected:

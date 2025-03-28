@@ -6,6 +6,17 @@
 #include "UObject/NoExportTypes.h"
 #include "SpaceFuncLib.generated.h"
 
+UENUM(BlueprintType)
+enum EWorldDirection
+{
+	East,
+	North,
+	West,
+	South
+};
+
+
+
 /**
  * 
  */
@@ -27,6 +38,11 @@ public:
 	// 判断A、B的上下关系
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool ActorAtActorUP(AActor* A, AActor* B);
+
+	// 计算两个Actor之间世界相对方位
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static EWorldDirection ActorAtActorWorldDirection(AActor* A, AActor* B, const float OffsetRotation = 0);
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static float GetDistanceX(AActor* A, AActor* B, const int PlayerIndex = 0);
@@ -45,6 +61,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static FVector GetDirection2DFromPlayerViewPoint(const int PlayerIndex = 0);
 
+
+
+
+	
 	
 };
 	

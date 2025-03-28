@@ -39,6 +39,10 @@ public class Pixel2DKit : ModuleRules
 		
 		// Uncomment if you are using online features
 		PrivateDependencyModuleNames.Add("OnlineSubsystemSteam");
+		PrivateDependencyModuleNames.AddRange( new string[]
+		{
+			
+		});
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 	}

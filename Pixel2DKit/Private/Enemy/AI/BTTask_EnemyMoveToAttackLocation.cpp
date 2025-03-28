@@ -67,8 +67,8 @@ EBTNodeResult::Type UBTTask_EnemyMoveToAttackLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
-	
-	FVector TargetLocation = EnemyAIComponent->GetAttackLocation_EnemyAI();
+	// 朝更近的区间走去
+	FVector TargetLocation = EnemyAIComponent->GetActionFieldLocation(true);
 	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(
 		Pawn->GetActorLocation(),TargetLocation,
 			EnemyAIComponent->GetCheckCliffHeight_EnemyAI()

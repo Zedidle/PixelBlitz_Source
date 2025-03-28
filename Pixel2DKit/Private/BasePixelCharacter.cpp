@@ -2,7 +2,7 @@
 
 
 #include "BasePixelCharacter.h"
-#include "BasePixelAnimInstance.h"
+#include "Anim/BasePixelAnimInstance.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Basic/BasePixelGameInstance.h"
