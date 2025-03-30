@@ -67,7 +67,7 @@ void UBasePixelAnimInstance::SetHurt(bool V)
 }
 
 
-void UBasePixelAnimInstance::SetActionField(const uint8 field)
+void UBasePixelAnimInstance::SetActionField(const EActionField field)
 {
 	CurActionFiled = field;
 }

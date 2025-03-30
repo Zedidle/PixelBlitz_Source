@@ -103,7 +103,7 @@ public:
 	// 一般是怪物专用
 	// 当前相对于玩家角色的行动区间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	uint8 CurActionFiled;
+	TEnumAsByte<EActionField> CurActionFiled;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bAttackStartX;
@@ -121,7 +121,7 @@ public:
 	bool bDefendHurt;  // 处于防御状态被攻击
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetActionField(const uint8 field);
+	void SetActionField(const EActionField field);
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	void SetAttackStartX(const bool V);
