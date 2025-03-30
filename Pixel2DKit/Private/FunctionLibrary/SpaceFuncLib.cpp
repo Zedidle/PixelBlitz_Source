@@ -50,25 +50,24 @@ EWorldDirection USpaceFuncLib::ActorAtActorWorldDirection(AActor* A, AActor* B, 
 	
 	float d = dir.Dot(BasicDir);
 
-	UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
-		B->GetActorLocation(), FVector(0.5,-0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
-	
-	UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
-		B->GetActorLocation(), FVector(-0.5,-0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
-
-	UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
-		B->GetActorLocation(), FVector(-0.5,0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
-	
-	UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
-		B->GetActorLocation(), FVector(0.5,0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
-		
+	// UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
+	// 	B->GetActorLocation(), FVector(0.5,-0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
+	//
+	// UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
+	// 	B->GetActorLocation(), FVector(-0.5,-0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
+	//
+	// UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
+	// 	B->GetActorLocation(), FVector(-0.5,0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
+	//
+	// UKismetSystemLibrary::DrawDebugLine(A->GetWorld(),
+	// 	B->GetActorLocation(), FVector(0.5,0.5,0)*100 + B->GetActorLocation(), FLinearColor::White, 2, 1);
+	// 	
 	
 	if (d >= FMath::Cos(45.0f))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
 		FString::Printf(TEXT("怪物在角色的东方: %d"), __LINE__));
 		
-
 		return East;
 	}
 

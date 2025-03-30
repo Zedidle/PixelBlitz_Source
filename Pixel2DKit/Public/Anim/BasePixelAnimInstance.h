@@ -4,24 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "PaperZDAnimInstance.h"
-#include "AnimNodes/PaperZDAnimNode_Base.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "BasePixelAnimInstance.generated.h"
-
-enum EActionField : uint8;
-struct FPaperZDAnimDataLink;
-class UPaperZDAnimSequence_Flipbook;
-
-USTRUCT(BlueprintType)
-struct FPaperZDAnimDataLinks
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<UPaperZDAnimSequence_Flipbook*> AnimSequences;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<int> AnimSequencesRate;
-};
 
 /**
  * 
@@ -31,16 +15,7 @@ class PIXEL2DKIT_API UBasePixelAnimInstance : public UPaperZDAnimInstance
 {
 	GENERATED_BODY()
 
-	// 怪物各方位的攻击动画概率分布
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "true"))
-	TMap<TEnumAsByte<EActionField>, FPaperZDAnimDataLinks> ActionFieldToAnimData;
 
-	// 攻击间隔待机动画
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = "true"))
-	UPaperZDAnimSequence_Flipbook* AttackIdleAnim;
-
-
-	
 public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
@@ -128,7 +103,7 @@ public:
 	// 一般是怪物专用
 	// 当前相对于玩家角色的行动区间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	TEnumAsByte<EActionField> CurActionFiled;
+	uint8 CurActionFiled;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bAttackStartX;
@@ -146,7 +121,7 @@ public:
 	bool bDefendHurt;  // 处于防御状态被攻击
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetActionField(const EActionField field);
+	void SetActionField(const uint8 field);
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	void SetAttackStartX(const bool V);

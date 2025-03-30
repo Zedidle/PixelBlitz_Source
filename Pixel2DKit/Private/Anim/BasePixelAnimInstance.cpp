@@ -3,8 +3,6 @@
 
 #include "Anim/BasePixelAnimInstance.h"
 #include "AIController.h"
-#include "AnimSequences/PaperZDAnimSequence_Flipbook.h"
-#include "Navigation/PathFollowingComponent.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
 
@@ -69,7 +67,7 @@ void UBasePixelAnimInstance::SetHurt(bool V)
 }
 
 
-void UBasePixelAnimInstance::SetActionField(const EActionField field)
+void UBasePixelAnimInstance::SetActionField(const uint8 field)
 {
 	CurActionFiled = field;
 }
@@ -108,8 +106,7 @@ void UBasePixelAnimInstance::Tick(float DeltaTime)
 	
 	if (IsValid(GetOwningActor()))
 	{
-		AAIController* AIController = UAIBlueprintHelperLibrary::GetAIController(GetOwningActor());
-		if (AIController)
+		if (AAIController* AIController = UAIBlueprintHelperLibrary::GetAIController(GetOwningActor()))
 		{
 
 			eMoveStatus = AIController->GetMoveStatus();

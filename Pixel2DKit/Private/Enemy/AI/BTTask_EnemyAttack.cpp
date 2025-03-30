@@ -30,7 +30,7 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
 		if (!IsValid(Player))
 		{
 			FinishAbort();
-			return EBTNodeResult::Failed;	
+			return EBTNodeResult::Failed;
 		}
 		float distance = (Player->GetActorLocation() - Pawn->GetActorLocation()).Size2D();
 		EActionField ActionField = EnemyAIComponent->GetActionFieldByPlayer();
