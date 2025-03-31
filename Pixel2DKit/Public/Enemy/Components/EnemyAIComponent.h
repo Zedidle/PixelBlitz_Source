@@ -33,13 +33,17 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	GENERATED_BODY()
 
 	// 调整近战怪物的 ”进攻欲望“
-	float BlockDirModifyValue = 100; // 基于阻挡因子的方向调整基值, 该值越大，欲望越低
-	float BlockValueWeekValue = 0.7; // 每次寻路成功后，进行一次阻挡因子衰减， 该值越小，欲望越大
+	// 基于阻挡因子的方向调整基值, 该值越大，欲望越低
+	float BlockDirModifyValue = 100; 
+	// 每次寻路成功后，进行一次阻挡因子衰减， 该值越小，欲望越大
+	float BlockValueWeekValue = 0.7; 
 
-	
-	float BlockValue = 0.0f; // 阻挡因子，动态改变，该值越大时默认偏转角度越大
+	// 阻挡因子，动态改变，该值越大时默认偏转角度越大
+	float BlockValue = 0.0f; 
 
-
+	// 方向惯性因子
+	float PreDirValue = 1.0f; 
+	FVector PreDir = FVector::ZeroVector;
 	
 public:	
 	// Sets default values for this component's properties

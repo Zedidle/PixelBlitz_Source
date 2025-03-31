@@ -6,6 +6,7 @@
 #include "FunctionLibrary/SpaceFuncLib.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer)
@@ -30,7 +31,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		return OwnerLocation + DefaultDirVector;
 	}
 	
-	TMap<int, FVector> TargetOffsetMap;
+	TMap<FVector, int> TargetOffsetMap;
 	int totalR = 0;
 	float blockR = 0; // 阻挡因子
 	int n = -1;
@@ -85,9 +86,9 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		}
 
 		float tmpBlockAvg = blockR * (MaxRotateValue - DotDirPerRotate * n) / MaxRotateValue;
-		tmpR = (DistanceScale + tmpBlockAvg ) * 100 + 500;
+		tmpR = (DistanceScale + tmpBlockAvg ) * 100 + 400;
 		totalR += tmpR;
-		TargetOffsetMap.FindOrAdd(tmpR) = TempTargetOffset;
+		TargetOffsetMap.FindOrAdd(TempTargetOffset) = tmpR;
 		
 		blockR -= tmpBlockAvg;
 	}
@@ -99,21 +100,29 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 	// 	UKismetSystemLibrary::DrawDebugLine(GetWorld(), OwnerLocation, OwnerLocation + v.Value, color, 0.2f, 0.5);
 	// }
 
-	TArray<int> values;
+	TArray<FVector> values;
 	TargetOffsetMap.GetKeys(values);
 	int tmpV = 0;
 	int randV = FMath::RandRange(0, totalR);
 	for (int i = 0; i < values.Num(); i++)
 	{
-		tmpV += values[i];
+		tmpV += TargetOffsetMap[values[i]];
 		if (tmpV >= randV)
 		{
 			BlockValue = BlockValue * BlockValueWeekValue;
-			return TargetOffsetMap[values[i]] + OwnerLocation;
+			FVector CurDir = values[i].GetSafeNormal2D();
+			if (!PreDir.IsZero())
+			{
+				CurDir = UKismetMathLibrary::VLerp(PreDir, CurDir ,PreDirValue);
+			}
+			
+			PreDir = CurDir;
+			return values[i].Size() * CurDir + OwnerLocation;
 		}
 	}
 
 	BlockValue += FMath::Abs(blockR);
+	PreDir = FVector::ZeroVector;
 	return OwnerLocation;
 }
 
