@@ -27,7 +27,7 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 		PixelCharacter = nullptr;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->PixelCharacter = nullptr;			
+			EnemyAIComponent->SetPixelCharacter(PixelCharacter);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
@@ -41,7 +41,7 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 		PixelCharacter = C;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->PixelCharacter = PixelCharacter;			
+			EnemyAIComponent->SetPixelCharacter(PixelCharacter);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
@@ -220,7 +220,7 @@ float ABaseEnemy::GetRandomMoveRange_Implementation()
 	return RandomMoveRange;
 }
 
-bool ABaseEnemy::InAtttckRange_EnemyAI_Implementation()
+bool ABaseEnemy::InAttackRange_EnemyAI_Implementation()
 {
 	return EnemyAIComponent->InAttackRangeX_EnemyAI() || EnemyAIComponent->InAttackRangeY_EnemyAI(); 	
 }

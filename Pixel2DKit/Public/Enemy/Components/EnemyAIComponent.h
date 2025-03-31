@@ -44,7 +44,10 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	// 方向惯性因子
 	float PreDirValue = 0.7f; 
 	FVector PreDir = FVector::ZeroVector;
-	
+
+	// 发现玩家后，如果 n 秒后没攻击到玩家，就放弃追踪
+	FTimerHandle AttackPatienceTimerHandle;
+
 public:	
 	// Sets default values for this component's properties
 	UEnemyAIComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -81,7 +84,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
 	FActionFieldDistance ActionFieldDistance;
+
+
+	UFUNCTION(BlueprintCallable, Category="Enemy")
+	void SetPixelCharacter(ABasePixelCharacter* Character);
 	
+
 	/* 向量点积法 弱随机移动到目标位置
 	 * TargetLocation - 目标位置
 	 * DotDirPerRotate - 每次偏转角度
@@ -118,6 +126,9 @@ public:
 	UFUNCTION(Blueprintable, Blueprintable, Category = "EnemyAI")
 	EActionField GetActionFieldByPlayer() const;
 	
+	
+
+
 	
 protected:
 	// Called when the game starts

@@ -139,8 +139,8 @@ public:
 	virtual float GetRandomMoveRange_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool InAtttckRange_EnemyAI();
-	virtual bool InAtttckRange_EnemyAI_Implementation() override;
+	bool InAttackRange_EnemyAI();
+	virtual bool InAttackRange_EnemyAI_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	void OnReachedAttackLocation_EnemyAI();

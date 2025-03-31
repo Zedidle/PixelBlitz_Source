@@ -16,6 +16,27 @@ UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer
 	
 }
 
+void UEnemyAIComponent::SetPixelCharacter(ABasePixelCharacter* Character)
+{
+	if (AttackPatienceTimerHandle.IsValid())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(AttackPatienceTimerHandle);
+	}
+	
+	if (Character == nullptr) return;
+	
+	PixelCharacter = Character;
+	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda(
+		[this]()
+		{
+			if (ABaseEnemy* Owner = Cast<ABaseEnemy>(GetOwner()))
+			{
+				Owner->SetPixelCharacter(nullptr);
+			}
+		});
+	GetWorld()->GetTimerManager().SetTimer(AttackPatienceTimerHandle, TimerDelegate,AttackPatienceTime,false );
+}
+
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, float DotDirPerRotate, float MaxRotateValue,
                                                      float DefaultDirRotate, const float MinDirectlyDistance)
 {
