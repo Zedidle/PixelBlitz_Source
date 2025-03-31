@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Enemy/AI/BTTask_EnemyAttack.h"
+#include "Enemy/AI/BTTask_EnemyAction.h"
 #include "AIController.h"
 #include "Anim/BasePixelAnimInstance.h"
 #include "PaperZDAnimationComponent.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 
-EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_EnemyAction::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	if (!AIOwner || !AIOwner->GetPawn())
 	{
@@ -42,70 +42,70 @@ EBTNodeResult::Type UBTTask_EnemyAttack::ExecuteTask(UBehaviorTreeComponent& Own
 			AnimInst->SetActionField(ActionField);
 		}
 		
-		if (ActionField == EActionField::EastNear)
+		if (ActionField == EastNear)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastNear(Pawn, distance);
 		}
-		if (ActionField == EActionField::EastMid)
+		if (ActionField == EastMid)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastMid(Pawn, distance);
 		}
-		if (ActionField == EActionField::EastFar)
+		if (ActionField == EastFar)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastFar(Pawn, distance);
 		}
-		if (ActionField == EActionField::EastFar)
+		if (ActionField == EastRemote)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastRemote(Pawn, distance);
 		}
 
-		if (ActionField == EActionField::WestNear)
+		if (ActionField == WestNear)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestNear(Pawn, distance);
 		}
-		if (ActionField == EActionField::WestMid)
+		if (ActionField == WestMid)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestMid(Pawn, distance);
 		}
-		if (ActionField == EActionField::WestFar)
+		if (ActionField == WestFar)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestFar(Pawn, distance);
 		}
-		if (ActionField == EActionField::WestFar)
+		if (ActionField == WestRemote)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestRemote(Pawn, distance);
 		}
 
-		if (ActionField == EActionField::NorthNear)
+		if (ActionField == NorthNear)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthNear(Pawn, distance);
 		}
-		if (ActionField == EActionField::NorthMid)
+		if (ActionField == NorthMid)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthMid(Pawn, distance);
 		}
-		if (ActionField == EActionField::NorthFar)
+		if (ActionField == NorthFar)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthFar(Pawn, distance);
 		}
-		if (ActionField == EActionField::NorthFar)
+		if (ActionField == NorthRemote)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthRemote(Pawn, distance);
 		}
 
-		if (ActionField == EActionField::SouthNear)
+		if (ActionField == SouthNear)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthNear(Pawn, distance);
 		}
-		if (ActionField == EActionField::SouthMid)
+		if (ActionField == SouthMid)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthMid(Pawn, distance);
 		}
-		if (ActionField == EActionField::SouthFar)
+		if (ActionField == SouthFar)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthFar(Pawn, distance);
 		}
-		if (ActionField == EActionField::SouthFar)
+		if (ActionField == SouthRemote)
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthRemote(Pawn, distance);
 		}

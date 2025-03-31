@@ -8,6 +8,7 @@
 #include "Enemy/BaseEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 
 
 UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer)
@@ -179,40 +180,17 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 	return OwnerLocation;
 }
 
-bool UEnemyAIComponent::InAttackRangeX_EnemyAI()
-{
-	if (!PixelCharacter || !GetOwner()) return false;
-	float distanceX = USpaceFuncLib::GetDistanceX(GetOwner(), PixelCharacter, 0);
-	float distanceY = USpaceFuncLib::GetDistanceY(GetOwner(), PixelCharacter, 0);
-
-	return distanceY < AttackRangeOffset_Y &&
-			distanceX < AttackRange_X + AttackRangeOffset_X;
-}
-
-bool UEnemyAIComponent::InAttackRangeY_EnemyAI()
-{
-	if (!PixelCharacter || !GetOwner()) return false;
-	if (!CanAttackY) return false;
-
-	float distanceX = USpaceFuncLib::GetDistanceX(GetOwner(), PixelCharacter, 0);
-	float distanceY = USpaceFuncLib::GetDistanceY(GetOwner(), PixelCharacter, 0);
-
-	return distanceY < AttackRange_Y + AttackRangeOffset_Y &&
-			distanceX < AttackRange_X + AttackRangeOffset_X;
-}
-
-FVector UEnemyAIComponent::GetAttackLocation_EnemyAI()
+FVector UEnemyAIComponent::GetMeleeAttackLocation()
 {
 	if (!GetOwner() || !PixelCharacter) return FVector(0);
 
 	FVector LocationX = GetTargetLocationX();
-	if (!CanAttackY) return LocationX;
 
-	FVector LocationY = GetTargetLocationY();
-	if (FVector::Distance(GetOwner()->GetActorLocation(), LocationX) > FVector::Distance(GetOwner()->GetActorLocation(), LocationY))
-	{
-		return LocationY;
-	}
+	// FVector LocationY = GetTargetLocationY();
+	// if (FVector::Distance(GetOwner()->GetActorLocation(), LocationX) > FVector::Distance(GetOwner()->GetActorLocation(), LocationY))
+	// {
+	// 	return LocationY;
+	// }
 	return LocationX;
 }
 
@@ -259,17 +237,13 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	const FVector OwnerLocation = GetOwner()->GetActorLocation();
 	float Distance = (PlayerLocation - OwnerLocation).Size2D();
 	FVector Dir = (OwnerLocation - PlayerLocation).GetSafeNormal2D();
-	EActionField ActionField = GetActionFieldByPlayer();
-
-	
 
 	FVector TargetLocation;
-	
 	if (ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y)
 	{
 		if (bNear)
 		{
-			TargetLocation = GetAttackLocation_EnemyAI();
+			TargetLocation = GetMeleeAttackLocation();
 		}
 		else
 		{

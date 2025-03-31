@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Enemy/AI/BTTask_EnemyMoveToAttackLocation.h"
+#include "Enemy/AI/BTTask_EnemyMoveToActionLocation.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BTFunctionLibrary.h"
@@ -11,13 +11,13 @@
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 
 
-UBTTask_EnemyMoveToAttackLocation::UBTTask_EnemyMoveToAttackLocation()
+UBTTask_EnemyMoveToActionLocation::UBTTask_EnemyMoveToActionLocation()
 {
 	TickInterval.Interval = 0.1f;
 	
 }
 
-EBTNodeResult::Type UBTTask_EnemyMoveToAttackLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	UBlackboardComponent* BlackboardComponent = OwnerComp.GetBlackboardComponent();
 	if (!BlackboardComponent)
@@ -83,7 +83,7 @@ EBTNodeResult::Type UBTTask_EnemyMoveToAttackLocation::ExecuteTask(UBehaviorTree
 	return EBTNodeResult::InProgress;
 }
 
-void UBTTask_EnemyMoveToAttackLocation::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
+void UBTTask_EnemyMoveToActionLocation::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
 	float DeltaSeconds)
 {
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);

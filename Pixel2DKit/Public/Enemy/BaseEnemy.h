@@ -46,14 +46,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Enemy")
 	bool SetPixelCharacter(AActor* Character);
 
+	// 基础攻击击退力度
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
+	FVector BasicAttackRepel = FVector(50,50,100); 
 
+	// 基础攻击击退力度
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
-	FVector BasicAttackRepel = FVector(50,50,100); // 基础攻击击退力度
+	FVector CurAttackRepel = FVector(50,50,100); 
+
+	// 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
-	FVector CurAttackRepel = FVector(50,50,100); // 基础攻击击退力度
-	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
-	float RandomMoveRange = 100.0f; // 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
+	float RandomMoveRange = 100.0f; 
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bDead; 
@@ -67,13 +70,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bInAttackEffect;
 
-
-	
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
-	bool bAttackStartX;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
-	bool bAttackStartY;
+	bool bAttackAnimToggle;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bInDefendState;
@@ -103,11 +101,8 @@ public:
 	void SetInAttackEffect(const bool V);
 	
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
-	void SetAttackStartX(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
-	void SetAttackStartY(const bool V);
-
+	void SetAttackAnimToggle(const bool V);
+	
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetInDefendState(const bool V);
 
@@ -139,28 +134,20 @@ public:
 	virtual float GetRandomMoveRange_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool InAttackRange_EnemyAI();
-	virtual bool InAttackRange_EnemyAI_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void OnReachedAttackLocation_EnemyAI();
-	virtual void OnReachedAttackLocation_EnemyAI_Implementation() override;
+	bool InAttackRange();
+	virtual bool InAttackRange_Implementation() override;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
 	bool CanMove_EnemyAI();
 	virtual bool CanMove_EnemyAI_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
+	bool CanAttack();
+	virtual bool CanAttack_Implementation() override;
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
 	bool Dash_EnemyAI();
 	virtual bool Dash_EnemyAI_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void OnReachedEnemyX_EnemyAI();
-	virtual void OnReachedEnemyX_EnemyAI_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void OnReachedEnemyY_EnemyAI();
-	virtual void OnReachedEnemyY_EnemyAI_Implementation() override;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	void OnBeAttacked_Invulnerable();

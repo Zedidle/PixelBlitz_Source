@@ -36,9 +36,9 @@ void UBasePixelAnimInstance::SetInAttackState(bool V)
 	bInAttackState = V;
 }
 
-void UBasePixelAnimInstance::SetAttackStart(bool V)
+void UBasePixelAnimInstance::SetAttackAnimToggle(bool V)
 {
-	bAttackStart = V;
+	bAttackAnimToggle = V;
 }
 
 void UBasePixelAnimInstance::SetInAttackEffect(bool V)
@@ -72,15 +72,6 @@ void UBasePixelAnimInstance::SetActionField(const EActionField field)
 	CurActionFiled = field;
 }
 
-void UBasePixelAnimInstance::SetAttackStartX(const bool V)
-{
-	bAttackStartX = V;
-}
-
-void UBasePixelAnimInstance::SetAttackStartY(const bool V)
-{
-	bAttackStartY = V;
-}
 
 void UBasePixelAnimInstance::SetDefendState(const bool V)
 {

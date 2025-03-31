@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlueprintBase.h"
-#include "BTTask_EnemyAttack.generated.h"
+#include "BTTask_EnemyAction.generated.h"
 
 /**
- * 
+ * Enemy 判断当前所处方位与距离，并执行该方位的行动
  */
 UCLASS()
-class PIXEL2DKIT_API UBTTask_EnemyAttack : public UBTTask_BlueprintBase
+class PIXEL2DKIT_API UBTTask_EnemyAction : public UBTTask_BlueprintBase
 {
 	GENERATED_BODY()
 

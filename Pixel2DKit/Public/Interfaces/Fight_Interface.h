@@ -22,6 +22,9 @@ public:
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     AActor* GetTarget();
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+    bool CanAttack();
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     bool GetIsAttacking();

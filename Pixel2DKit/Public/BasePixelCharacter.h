@@ -100,6 +100,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bHurt;
 
+	// 处于击退的硬直状态
+	UPROPERTY(BlueprintReadOnly, Category = Movement)
+	bool bRepulsion;
+	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bJumping;
 	
@@ -111,9 +115,18 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDashing;
-	
+
+	// 用于管理攻击冷却, 目前暂无用于动画控制
+	UPROPERTY(BlueprintReadWrite, Category = Animation)
+	bool bInAttackStatus;
+
+	// 用于管理攻击效果生效，暂不用于动画控制
+	UPROPERTY(BlueprintReadWrite, Category = Animation)
+	bool bInAttackEffect;
+
+	// 仅仅用于控制攻击动画开关
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	bool bAttackStart;  //仅用于控制攻击动画开始
+	bool bAttackAnimToggle;  
 
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackHolding;
@@ -132,13 +145,21 @@ public:
 	void AddBlendYaw(float V);
 	
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	bool GetIsAttacking();
+	virtual bool GetIsAttacking_Implementation() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
+	bool CanAttack();
+	virtual bool CanAttack_Implementation() override;
+	
+	
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetDead(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetHurt(const bool V, const float duration);
-
+	
 	
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetJumping(const bool V, const float time = 0.2f);
@@ -150,7 +171,7 @@ public:
 	void SetDashing(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Anim)
-	void SetAttackStart(const bool V);
+	void SetAttackAnimToggle(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Anim)
 	void SetAttackHolding(const bool V);
@@ -171,6 +192,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Character | Movement")
 	virtual FVector GetDashDirection();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	bool IsAlive();
+	virtual bool IsAlive_Implementation() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
 	FGameplayTagContainer GetOwnCamp();
@@ -209,6 +234,8 @@ public:
 	virtual int OnDefendingHit_Implementation(int inValue) override;
 	
 	
+
+	
 	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal,
 													const FVector& PreviousLocation, float TimeDelta) override;
 	virtual void Jump() override;
@@ -245,6 +272,11 @@ public:
 	void Move2D(const FInputActionValue& Value);
 	
 };
+
+inline bool ABasePixelCharacter::CanAttack_Implementation()
+{
+	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead;
+}
 
 inline void ABasePixelCharacter::SetBlendPitch(float V)
 {

@@ -17,22 +17,19 @@ public:
 	float GetRandomMoveRange();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	bool InAttackRange_EnemyAI();
+	bool InAttackRange();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void OnReachedAttackLocation_EnemyAI();
-	
+	void OnReachedLocation();
+
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	bool CanMove_EnemyAI();
-
+	
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	bool Dash_EnemyAI();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void OnReachedEnemyX_EnemyAI();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void OnReachedEnemyY_EnemyAI();
 
 
 

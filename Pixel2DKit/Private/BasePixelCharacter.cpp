@@ -256,6 +256,11 @@ void ABasePixelCharacter::AddCameraOffset(const FVector& V)
 	SurCameraOffset += V;
 }
 
+bool ABasePixelCharacter::GetIsAttacking_Implementation()
+{
+	return bInAttackStatus || bAttackHolding || bAttackFire;
+}
+
 void ABasePixelCharacter::SetDead(bool V)
 {
 	bDead = V;
@@ -337,12 +342,12 @@ void ABasePixelCharacter::SetDashing(bool V)
 	}
 }
 
-void ABasePixelCharacter::SetAttackStart(bool V)
+void ABasePixelCharacter::SetAttackAnimToggle(bool V)
 {
-	bAttackStart = V;
+	bAttackAnimToggle = V;
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
-		AnimInst->SetAttackStart(V);
+		AnimInst->SetAttackAnimToggle(V);
 	}
 }
 
@@ -422,6 +427,11 @@ FVector ABasePixelCharacter::GetDashDirection()
 	}
 
 	return (Velocity + Acceleration * 2).GetSafeNormal2D();
+}
+
+bool ABasePixelCharacter::IsAlive_Implementation()
+{
+	return GetHealthComponent()->GetCurrentHealth() > 0;
 }
 
 FGameplayTagContainer ABasePixelCharacter::GetOwnCamp_Implementation()

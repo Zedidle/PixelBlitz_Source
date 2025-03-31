@@ -66,8 +66,9 @@ void ABaseEnemy::SetDead(bool V)
 
 	if (bDead)
 	{
-		bAttackStartX = false;
-		bAttackStartY = false;
+		bAttackAnimToggle = false;
+		bInAttackState = false;
+		bInAttackEffect = false;
 	}
 }
 
@@ -110,21 +111,12 @@ void ABaseEnemy::SetInAttackEffect(bool V)
 	}
 }
 
-void ABaseEnemy::SetAttackStartX(const bool V)
+void ABaseEnemy::SetAttackAnimToggle(const bool V)
 {
-	bAttackStartX = V;
+	bAttackAnimToggle = V;
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
-		AnimInst->SetAttackStartX(V);
-	}
-}
-
-void ABaseEnemy::SetAttackStartY(const bool V)
-{
-	bAttackStartY = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetAttackStartY(V);
+		AnimInst->SetAttackAnimToggle(V);
 	}
 }
 
@@ -202,7 +194,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 
 bool ABaseEnemy::GetIsAttacking_Implementation()
 {
-	return false;
+	return bInAttackEffect || bInAttackState || bAttackAnimToggle;
 }
 
 bool ABaseEnemy::IsAlive_Implementation()
@@ -220,26 +212,34 @@ float ABaseEnemy::GetRandomMoveRange_Implementation()
 	return RandomMoveRange;
 }
 
-bool ABaseEnemy::InAttackRange_EnemyAI_Implementation()
+bool ABaseEnemy::InAttackRange_Implementation()
 {
-	return EnemyAIComponent->InAttackRangeX_EnemyAI() || EnemyAIComponent->InAttackRangeY_EnemyAI(); 	
+	// 后续改为在不同怪物精准的ActionField的行为定义:
+	// 如果怪物处于某范围有对应的行为判断反馈为 true，则切换对应状态
+	// return EnemyAIComponent->InAttackRangeX_EnemyAI() || EnemyAIComponent->InAttackRangeY_EnemyAI();
+	uint8 index = 0;
+	uint8 max = StaticEnum<EActionField>()->GetMaxEnumValue();
+
+	// 不同方位的攻击位置判断
+	while (++index < max)
+	{
+	}
+	
+	return false;
 }
 
-void ABaseEnemy::OnReachedAttackLocation_EnemyAI_Implementation()
-{
-	if (EnemyAIComponent->InAttackRangeX_EnemyAI())
-	{
-		OnReachedEnemyX_EnemyAI();
-	}
-	else if (EnemyAIComponent->InAttackRangeY_EnemyAI())
-	{
-		OnReachedEnemyY_EnemyAI();
-	}
-}
 
 bool ABaseEnemy::CanMove_EnemyAI_Implementation()
 {
-	return !bDead || !bHurt || !bInAttackState || !bInAttackEffect;
+	return !bDead && !bHurt && !bInAttackState && !bInAttackEffect;
+}
+
+bool ABaseEnemy::CanAttack_Implementation()
+{
+	if (!IsValid(PixelCharacter)) return false;
+	if (!PixelCharacter->IsAlive()) return false;
+	
+	return !bDead && !bInAttackState;
 }
 
 bool ABaseEnemy::Dash_EnemyAI_Implementation()
@@ -247,15 +247,6 @@ bool ABaseEnemy::Dash_EnemyAI_Implementation()
 	return false;
 }
 
-void ABaseEnemy::OnReachedEnemyX_EnemyAI_Implementation()
-{
-	
-}
-
-void ABaseEnemy::OnReachedEnemyY_EnemyAI_Implementation()
-{
-	
-}
 
 void ABaseEnemy::OnBeAttacked_Invulnerable_Implementation()
 {
@@ -284,13 +275,14 @@ void ABaseEnemy::Landed(const FHitResult& Hit)
 	SetLanding(true);
 }
 
+// 最基本的东侧近战判定
 void ABaseEnemy::ActionAtPlayerEastNear_Implementation(float Distance)
 {
 	IEnemyAI_Interface::ActionAtPlayerEastNear_Implementation(Distance);
 
-	if (IsValid(EnemyAIComponent) && EnemyAIComponent->InAttackRangeX_EnemyAI())
+	if (InAttackRange())
 	{
-		OnReachedAttackLocation_EnemyAI();
+		// 攻击行为	
 	}
 }
 
@@ -309,13 +301,14 @@ void ABaseEnemy::ActionAtPlayerEastRemote_Implementation(float Distance)
 	IEnemyAI_Interface::ActionAtPlayerEastRemote_Implementation(Distance);
 }
 
+// 西侧近战判定
 void ABaseEnemy::ActionAtPlayerWestNear_Implementation(float Distance)
 {
 	IEnemyAI_Interface::ActionAtPlayerWestNear_Implementation(Distance);
-	if (IsValid(EnemyAIComponent) && EnemyAIComponent->InAttackRangeX_EnemyAI())
-	{
-		OnReachedAttackLocation_EnemyAI();
-	}
+	// if (IsValid(EnemyAIComponent) && EnemyAIComponent->InAttackRangeX_EnemyAI())
+	// {
+	// 	OnReachedAttackLocation_EnemyAI();
+	// }
 }
 
 void ABaseEnemy::ActionAtPlayerWestMid_Implementation(float Distance)

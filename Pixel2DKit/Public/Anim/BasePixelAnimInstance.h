@@ -40,7 +40,7 @@ public:
 	bool bInAttackState;  // 整体上是否处于攻击状态（起手预备 - 生效 - 后摇）
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	bool bAttackStart;
+	bool bAttackAnimToggle;
 
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bInAttackEffect; // 处于攻击状态的效应时间 （例如近战碰撞盒子的生效期间）
@@ -58,7 +58,6 @@ public:
 	int eMoveStatus;
 
 	
-
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	virtual void SetDead(const bool V);
 
@@ -81,7 +80,7 @@ public:
 	virtual void SetInAttackState(const bool V);
 	
 	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetAttackStart(const bool V);
+	virtual void SetAttackAnimToggle(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	virtual void SetInAttackEffect(const bool V);
@@ -105,11 +104,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	TEnumAsByte<EActionField> CurActionFiled;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	bool bAttackStartX;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	bool bAttackStartY;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bInDefendState; // 是否处于防御状态
@@ -122,13 +116,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	void SetActionField(const EActionField field);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetAttackStartX(const bool V);
 	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetAttackStartY(const bool V);
-
 	UFUNCTION(BlueprintCallable, Category = Animation)
 	void SetDefendState(const bool V);
 	

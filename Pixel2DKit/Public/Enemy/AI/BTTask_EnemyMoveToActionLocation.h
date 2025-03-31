@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/Tasks/BTTask_BlueprintBase.h"
-#include "BTTask_EnemyMoveToAttackLocation.generated.h"
+#include "BTTask_EnemyMoveToActionLocation.generated.h"
 
 /**
- * 
+ * Enemy 朝玩家行动，一般是越走越近
  */
 UCLASS()
-class PIXEL2DKIT_API UBTTask_EnemyMoveToAttackLocation : public UBTTask_BlueprintBase
+class PIXEL2DKIT_API UBTTask_EnemyMoveToActionLocation : public UBTTask_BlueprintBase
 {
 	GENERATED_BODY()
 
@@ -18,7 +18,7 @@ class PIXEL2DKIT_API UBTTask_EnemyMoveToAttackLocation : public UBTTask_Blueprin
 	
 
 public:
-	UBTTask_EnemyMoveToAttackLocation();
+	UBTTask_EnemyMoveToActionLocation();
 
 
 	

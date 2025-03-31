@@ -57,11 +57,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
 	ABasePixelCharacter* PixelCharacter;
-
-	// 是否能基于Y方向发起攻击
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	bool CanAttackY = false;	
-
+	
 	// 如果 n 秒内都打不到玩家，则回到巡逻状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
 	float AttackPatienceTime = 5;   
@@ -102,15 +98,10 @@ public:
 								const float MaxRotateValue = 90, const float DefaultDirRotate = 0, const float MinDirectlyDistance = 50);
 
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	bool InAttackRangeX_EnemyAI();
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	bool InAttackRangeY_EnemyAI();
 
 	// 获取在X方向（相对玩家的东西方向）的攻击位置
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	FVector GetAttackLocation_EnemyAI();
+	FVector GetMeleeAttackLocation();
 	FVector GetTargetLocationX();
 	FVector GetTargetLocationY();
 
