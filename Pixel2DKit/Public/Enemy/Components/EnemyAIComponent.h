@@ -49,6 +49,9 @@ public:
 	// Sets default values for this component's properties
 	UEnemyAIComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	// 随时变化的当前目标位置
+	FVector CurTargetLocation;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
 	ABasePixelCharacter* PixelCharacter;
 

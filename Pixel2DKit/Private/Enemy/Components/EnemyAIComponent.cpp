@@ -5,6 +5,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "FunctionLibrary/SpaceFuncLib.h"
 #include "Components/CapsuleComponent.h"
+#include "Enemy/BaseEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -28,7 +29,38 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 	if (MinDirectlyDistance > DefaultDirVector.Length())
 	{
 		BlockValue = 0;
-		return OwnerLocation + DefaultDirVector;
+		FVector Location = OwnerLocation + DefaultDirVector;
+		// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
+		TArray<AActor*> ActorsToIgnore;
+		ActorsToIgnore.Add(GetOwner()); // 忽略自己
+		TArray<FHitResult> OutHits;
+		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, Location, 100, 
+	TraceTypeQuery4, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
+	true, FLinearColor::Red, FLinearColor::Green, 0.5f);
+		
+		for (auto& result:OutHits)
+		{
+			if (!IsValid(result.GetActor())) continue;
+			if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(result.GetActor()))
+			{
+				if (DefaultDirVector.GetSafeNormal2D().Dot((Enemy->GetActorLocation() - OwnerLocation).GetSafeNormal2D()) < 0.8) continue;
+				
+				if (UEnemyAIComponent* EnemyAIComp = Enemy->GetComponentByClass<UEnemyAIComponent>())
+				{
+					if (EnemyAIComp->CurTargetLocation.Equals(Location, 10))
+					{
+						if (DefaultDirVector.Size() > (Enemy->GetActorLocation() - EnemyAIComp->CurTargetLocation).Size())
+						{
+							CurTargetLocation = OwnerLocation - 0.5 * FMath::FRand() * DefaultDirVector;
+							return CurTargetLocation;
+						}
+					}
+				}
+			}
+		}
+
+		CurTargetLocation = Location;
+		return Location;
 	}
 	
 	TMap<FVector, int> TargetOffsetMap;
@@ -206,7 +238,9 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	const FVector OwnerLocation = GetOwner()->GetActorLocation();
 	float Distance = (PlayerLocation - OwnerLocation).Size2D();
 	FVector Dir = (OwnerLocation - PlayerLocation).GetSafeNormal2D();
+	EActionField ActionField = GetActionFieldByPlayer();
 
+	
 
 	FVector TargetLocation;
 	
@@ -214,8 +248,18 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	{
 		if (bNear)
 		{
-			// 默认近战移动
-			TargetLocation = GetAttackLocation_EnemyAI();
+			if (ActionField == NorthNear || ActionField == SouthNear)
+			{
+				if (!CanAttackY)
+				{
+					// 移动至相距最近的东侧或西侧
+				}
+			}
+			else
+			{
+				// 东侧、西侧的默认近战攻击位
+				TargetLocation = GetAttackLocation_EnemyAI();
+			}
 		}
 		else
 		{
@@ -256,7 +300,9 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 		}
 	}
 
-	return GetMoveDotDirRandLocation(TargetLocation);
+	
+	CurTargetLocation = GetMoveDotDirRandLocation(TargetLocation);
+	return CurTargetLocation;
 }
 
 
