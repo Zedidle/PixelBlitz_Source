@@ -113,7 +113,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 			FVector CurDir = values[i].GetSafeNormal2D();
 			if (!PreDir.IsZero())
 			{
-				CurDir = UKismetMathLibrary::VLerp(PreDir, CurDir ,PreDirValue);
+				CurDir = UKismetMathLibrary::VLerp(CurDir, PreDir, PreDirValue);
 			}
 			
 			PreDir = CurDir;

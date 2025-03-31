@@ -42,7 +42,7 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	float BlockValue = 0.0f; 
 
 	// 方向惯性因子
-	float PreDirValue = 1.0f; 
+	float PreDirValue = 0.7f; 
 	FVector PreDir = FVector::ZeroVector;
 	
 public:	
