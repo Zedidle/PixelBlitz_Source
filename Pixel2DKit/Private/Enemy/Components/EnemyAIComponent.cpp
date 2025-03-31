@@ -248,18 +248,7 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	{
 		if (bNear)
 		{
-			if (ActionField == NorthNear || ActionField == SouthNear)
-			{
-				if (!CanAttackY)
-				{
-					// 移动至相距最近的东侧或西侧
-				}
-			}
-			else
-			{
-				// 东侧、西侧的默认近战攻击位
-				TargetLocation = GetAttackLocation_EnemyAI();
-			}
+			TargetLocation = GetAttackLocation_EnemyAI();
 		}
 		else
 		{
@@ -328,80 +317,80 @@ EActionField UEnemyAIComponent::GetActionFieldByPlayer() const
 	float Distance = (GetOwner()->GetActorLocation() - PixelCharacter->GetActorLocation()).Size2D();
 	
 	
-	if (Dir == EWorldDirection::East)
+	if (Dir == East)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return EActionField::EastNear;
+			return EastNear;
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return EActionField::EastMid;	
+			return EastMid;	
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return EActionField::EastMid;	
+			return EastFar;	
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return EActionField::EastMid;	
+			return EastRemote;	
 		}
 	}
-	else if (Dir == EWorldDirection::West)
+	else if (Dir == West)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return EActionField::WestNear;
+			return WestNear;
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return EActionField::WestMid;	
+			return WestMid;	
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return EActionField::WestMid;	
+			return WestFar;	
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return EActionField::WestMid;	
+			return WestRemote;	
 		}
 	}
-	else if (Dir == EWorldDirection::North)
+	else if (Dir == North)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return EActionField::NorthNear;
+			return NorthNear;
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return EActionField::NorthMid;	
+			return NorthMid;	
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return EActionField::NorthMid;	
+			return NorthFar;	
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return EActionField::NorthMid;	
+			return NorthRemote;	
 		}
 	}
-	else if (Dir == EWorldDirection::South)
+	else if (Dir == South)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return EActionField::SouthNear;
+			return SouthNear;
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return EActionField::SouthMid;	
+			return SouthMid;	
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return EActionField::SouthMid;	
+			return SouthFar;	
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return EActionField::SouthMid;	
+			return SouthRemote;	
 		}
 	}
 

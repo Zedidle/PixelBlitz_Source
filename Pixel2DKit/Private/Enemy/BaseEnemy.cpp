@@ -377,7 +377,7 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
 	if (GetIsAttacking()) return;
 	if (!IsAlive()) return;
-	if (!PixelCharacter) return;
+	if (!IsValid(PixelCharacter)) return;
 
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
@@ -389,7 +389,51 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	UGameplayStatics::GetPlayerCameraManager(World, 0 )->GetActorEyesViewPoint(L,R);
 	R = UKismetMathLibrary::FindLookAtRotation (L, GetActorLocation());
 
-	SetActorRotation(FRotator(0, f + R.Yaw - 90, 0));
+
+	FVector PlayerForward = PixelCharacter->GetMoveForwardVector();
+	FVector PlayerToSelf = (GetActorLocation() - PixelCharacter->GetActorLocation()).GetSafeNormal2D();
+	float c = PlayerForward.Dot(PlayerToSelf);
+	float d = FMath::Acos(c) * 180 / PI;
+
+	float z = PlayerForward.Cross(PlayerToSelf).Z;
+	
+	float yaw = f + R.Yaw - 90;
+	
+	// 判断怪物是否在玩家的东侧或西侧
+	EActionField ActionField = EnemyAIComponent->GetActionFieldByPlayer();
+	if (ActionField == EastNear || ActionField == EastMid)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
+		FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: East, %d"),  __LINE__));
+		if (z > 0)
+		{
+			SetActorRotation(FRotator(0, yaw + d, 0));
+		}
+		else
+		{
+			SetActorRotation(FRotator(0, yaw - d, 0));
+		}
+	}
+	else if (ActionField == WestNear || ActionField == WestMid)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
+FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: west, %d"),  __LINE__));
+		if (z > 0)
+		{
+			SetActorRotation(FRotator(0, yaw + d + 180, 0));
+		}
+		else
+		{
+			SetActorRotation(FRotator(0, yaw - d + 180, 0));
+		}
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
+FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: None, %d"),  __LINE__));
+		SetActorRotation(FRotator(0, yaw, 0));
+	}
+	
 }
 
 void ABaseEnemy::Tick(float DeltaSeconds)
