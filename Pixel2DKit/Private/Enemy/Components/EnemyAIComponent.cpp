@@ -228,7 +228,7 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	{
 		if (bNear)
 		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceFar.Y - 10);
+			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceMid.Y - 10);
 		}
 		else
 		{
