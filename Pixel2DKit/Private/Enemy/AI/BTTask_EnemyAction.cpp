@@ -35,6 +35,10 @@ EBTNodeResult::Type UBTTask_EnemyAction::ExecuteTask(UBehaviorTreeComponent& Own
 		float distance = (Player->GetActorLocation() - Pawn->GetActorLocation()).Size2D();
 		EActionField ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
+FString::Printf(TEXT("UBTTask_EnemyAction %d, %d"), ActionField ,__LINE__));
+		
+		
 		// 设置行动区间
 		if (UPaperZDAnimationComponent* AnimInstanceComp = Pawn->GetComponentByClass<UPaperZDAnimationComponent>())
 		{

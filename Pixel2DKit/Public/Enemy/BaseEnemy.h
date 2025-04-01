@@ -115,11 +115,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetJumping(const bool V, const float time = 0.2f);
 
-	
-	
+
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
 	bool GetIsAttacking();
 	virtual bool GetIsAttacking_Implementation() override;
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
 	bool IsAlive();
@@ -166,10 +166,8 @@ public:
 	virtual void Landed(const FHitResult& Hit) override;
 
 
-
-
-
-
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	void TryAttack();
 
 
 	// 战斗的行动模式
@@ -254,3 +252,4 @@ protected:
 
 	
 };
+

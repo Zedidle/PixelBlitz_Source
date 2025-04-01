@@ -258,7 +258,7 @@ void ABasePixelCharacter::AddCameraOffset(const FVector& V)
 
 bool ABasePixelCharacter::GetIsAttacking_Implementation()
 {
-	return bInAttackStatus || bAttackHolding || bAttackFire;
+	return bInAttackEffect;
 }
 
 void ABasePixelCharacter::SetDead(bool V)

@@ -14,6 +14,7 @@
 #include "Enemy/EnemyAIController.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
@@ -194,7 +195,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 
 bool ABaseEnemy::GetIsAttacking_Implementation()
 {
-	return bInAttackEffect || bInAttackState || bAttackAnimToggle;
+	return bInAttackEffect;
 }
 
 bool ABaseEnemy::IsAlive_Implementation()
@@ -274,6 +275,16 @@ void ABaseEnemy::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 	SetLanding(true);
 }
+
+void ABaseEnemy::TryAttack_Implementation()
+{
+	if (!CanAttack()) return;
+	SetAttackAnimToggle(true);
+	SetInAttackState(true);
+	GetCharacterMovement()->StopMovementImmediately();
+}
+
+
 
 // 最基本的东侧近战判定
 void ABaseEnemy::ActionAtPlayerEastNear_Implementation(float Distance)
@@ -396,8 +407,6 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	EActionField ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 	if (ActionField == EastNear || ActionField == EastMid)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
-		FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: East, %d"),  __LINE__));
 		if (z > 0)
 		{
 			SetActorRotation(FRotator(0, yaw + d, 0));
@@ -409,8 +418,6 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	}
 	else if (ActionField == WestNear || ActionField == WestMid)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
-FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: west, %d"),  __LINE__));
 		if (z > 0)
 		{
 			SetActorRotation(FRotator(0, yaw + d + 180, 0));
@@ -422,8 +429,6 @@ FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: west, %d"),  __LINE__));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
-FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter: None, %d"),  __LINE__));
 		SetActorRotation(FRotator(0, yaw, 0));
 	}
 	

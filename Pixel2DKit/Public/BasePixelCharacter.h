@@ -144,7 +144,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddBlendYaw(float V);
 	
-
+	// 近战攻击生效碰撞期
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	bool GetIsAttacking();
 	virtual bool GetIsAttacking_Implementation() override;
