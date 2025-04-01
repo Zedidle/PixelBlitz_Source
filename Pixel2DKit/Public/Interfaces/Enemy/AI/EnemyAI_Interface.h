@@ -13,7 +13,7 @@ class PIXEL2DKIT_API IEnemyAI_Interface
 	GENERATED_BODY()
     
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,  Category="EnemyAI_Interface")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	float GetRandomMoveRange();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
@@ -23,14 +23,10 @@ public:
 	void OnReachedLocation();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	bool CanMove_EnemyAI();
-	
+	bool CanMove();
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	bool Dash_EnemyAI();
-
-
-
+	bool Dash();
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")

@@ -30,13 +30,22 @@ void ABasePixelCharacter::Tick_SaveFallingStartTime()
 	}
 }
 
-void ABasePixelCharacter::Tick_SpriteRotation_cpp()
+void ABasePixelCharacter::Tick_SpriteRotation()
 {
 	if (!GetCharacterMovement() || GetCharacterMovement()->Velocity.Size2D() < 1.0f) return;
 
 	if (!GetSprite()) return;
-	
-	FVector Velocity = GetCharacterMovement()->Velocity;
+
+
+	FVector Velocity;
+	if (GetCharacterMovement()->IsMovingOnGround())
+	{
+		Velocity = GetCharacterMovement()->Velocity;
+	}
+	else
+	{
+		Velocity = GetCharacterMovement()->GetCurrentAcceleration();
+	}
 
 	float d = FVector::DotProduct(Velocity.GetSafeNormal2D(0.1f), GetFaceToCamera());
 	float cz = FVector::CrossProduct(Velocity.GetSafeNormal2D(0.1f), GetFaceToCamera()).Z;
@@ -130,7 +139,7 @@ void ABasePixelCharacter::Tick_SpriteRotation_cpp()
 	DeltaBlendYaw = 0;
 }
 
-void ABasePixelCharacter::Tick_SpringArmMotivation_cpp()
+void ABasePixelCharacter::Tick_SpringArmMotivation()
 {
 	if (!GetCharacterMovement()) return;
 	if (!GetComponentByClass<USpringArmComponent>()) return;
@@ -393,8 +402,8 @@ void ABasePixelCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Tick_SaveFallingStartTime();
-	Tick_SpriteRotation_cpp();
-	Tick_SpringArmMotivation_cpp();
+	Tick_SpriteRotation();
+	Tick_SpringArmMotivation();
 	Tick_CalCameraOffset();
 	
 	if (GetCharacterMovement())

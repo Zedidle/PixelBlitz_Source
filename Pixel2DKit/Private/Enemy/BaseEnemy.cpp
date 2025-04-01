@@ -199,6 +199,9 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
+
+	// 近战的默认方位，针对不同怪物需要重定义
+	ActionFieldsCanAttack = { WestNear, EastNear };
 }
 
 
@@ -222,39 +225,36 @@ float ABaseEnemy::GetRandomMoveRange_Implementation()
 	return RandomMoveRange;
 }
 
-bool ABaseEnemy::InAttackRange_Implementation()
-{
-	// 后续改为在不同怪物精准的ActionField的行为定义:
-	// 如果怪物处于某范围有对应的行为判断反馈为 true，则切换对应状态
-	// return EnemyAIComponent->InAttackRangeX_EnemyAI() || EnemyAIComponent->InAttackRangeY_EnemyAI();
-	uint8 index = 0;
-	uint8 max = StaticEnum<EActionField>()->GetMaxEnumValue();
-
-	// 不同方位的攻击位置判断
-	while (++index < max)
-	{
-	}
-	
-	return false;
-}
-
-
-bool ABaseEnemy::CanMove_EnemyAI_Implementation()
+bool ABaseEnemy::CanMove_Implementation()
 {
 	return !bDead && !bHurt && !bInAttackState && !bInAttackEffect;
+}
+
+bool ABaseEnemy::InAttackRange_Implementation()
+{
+	if (IsValid(EnemyAIComponent))
+	{
+		EActionField Field = EnemyAIComponent->GetActionFieldByPlayer();
+		if (!ActionFieldsCanAttack.Contains(Field)) return false;
+		
+		float distance = GetDistanceToPlayer();
+		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
+	}
+	return false;
 }
 
 bool ABaseEnemy::CanAttack_Implementation()
 {
 	if (!IsValid(PixelCharacter)) return false;
-	if (!PixelCharacter->IsAlive()) return false;
+	if (!IFight_Interface::Execute_IsAlive(PixelCharacter)) return false;
 	
 	return !bDead && !bInAttackState;
 }
 
-bool ABaseEnemy::Dash_EnemyAI_Implementation()
+bool ABaseEnemy::Dash_Implementation()
 {
 	return false;
+
 }
 
 
@@ -287,8 +287,8 @@ void ABaseEnemy::Landed(const FHitResult& Hit)
 
 void ABaseEnemy::TryAttack_Implementation()
 {
-	if (!CanAttack()) return;
-	if (!InAttackRange()) return;
+	if (!Execute_CanAttack(this)) return;
+	if (!Execute_InAttackRange(this)) return;
 	
 	SetAttackAnimToggle(true);
 	SetInAttackState(true);
@@ -375,102 +375,11 @@ void ABaseEnemy::ActionAtPlayerSouthRemote_Implementation(float Distance)
 {
 }
 
-bool ABaseEnemy::InAttackRange_EastNear_Implementation(float Distance)
-{
-	if (IsValid(EnemyAIComponent))
-	{
-		float distance = GetDistanceToPlayer();
-		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
-	}
-	return false;
-}
-
-bool ABaseEnemy::InAttackRange_EastMid_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_EastMid_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_EastFar_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_EastFar_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_EastRemote_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_EastRemote_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_WestNear_Implementation(float Distance)
-{
-	if (IsValid(EnemyAIComponent))
-	{
-		float distance = GetDistanceToPlayer();
-		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
-	}
-	return false;
-}
-
-bool ABaseEnemy::InAttackRange_WestMid_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_WestMid_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_WestFar_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_WestFar_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_WestRemote_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_WestRemote_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_NorthNear_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_NorthNear_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_NorthMid_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_NorthMid_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_NorthFar_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_NorthFar_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_NorthRemote_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_NorthRemote_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_SouthNear_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_SouthNear_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_SouthMid_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_SouthMid_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_SouthFar_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_SouthFar_Implementation(Distance);
-}
-
-bool ABaseEnemy::InAttackRange_SouthRemote_Implementation(float Distance)
-{
-	return IEnemyAI_Interface::InAttackRange_SouthRemote_Implementation(Distance);
-}
-
-
 
 void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
-	if (GetIsAttacking()) return;
-	if (!IsAlive()) return;
+	if (Execute_GetIsAttacking(this)) return;
+	if (!Execute_IsAlive(this)) return;
 	if (!IsValid(PixelCharacter)) return;
 
 	UWorld* World = GetWorld();

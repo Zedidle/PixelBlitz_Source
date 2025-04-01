@@ -42,8 +42,8 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	
 	
 	virtual void Tick_SaveFallingStartTime();
-	virtual void Tick_SpriteRotation_cpp(); // 漂移式偏转
-	virtual void Tick_SpringArmMotivation_cpp();
+	virtual void Tick_SpriteRotation(); // 漂移式偏转
+	virtual void Tick_SpringArmMotivation();
 	virtual void Tick_CalCameraOffset();
 
 	void SetLanding(const bool V, const float time = 0.1f);
@@ -145,12 +145,7 @@ public:
 	void AddBlendYaw(float V);
 	
 	// 近战攻击生效碰撞期
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	bool GetIsAttacking();
 	virtual bool GetIsAttacking_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool CanAttack();
 	virtual bool CanAttack_Implementation() override;
 	
 	
@@ -193,47 +188,20 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Character | Movement")
 	virtual FVector GetDashDirection();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	bool IsAlive();
+
+	// IFight_Interface
 	virtual bool IsAlive_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
-	FGameplayTagContainer GetOwnCamp();
 	virtual FGameplayTagContainer GetOwnCamp_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
-	FGameplayTagContainer GetEnemyCamp();
 	virtual FGameplayTagContainer GetEnemyCamp_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
-	AActor* GetTarget();
 	virtual AActor* GetTarget_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	void OnAttackHiting();
 	virtual void OnAttackHiting_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	void PowerRepulsion(float Power);
 	virtual void PowerRepulsion_Implementation(float Power) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	void OnBeAttacked_Invulnerable();
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	bool OnBeAttacked(AActor* maker, int damage);
-	virtual bool OnBeAttacked_Implementation(AActor* maker, int damage);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	int DamagePlus(int inValue, AActor* ActorAcceptDamage);
+	virtual bool OnBeAttacked_Implementation(AActor* maker, int damage) override;
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	int OnDefendingHit(int inValue);
 	virtual int OnDefendingHit_Implementation(int inValue) override;
 	
-	
+
 
 	
 	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal,
@@ -275,7 +243,7 @@ public:
 
 inline bool ABasePixelCharacter::CanAttack_Implementation()
 {
-	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead;
+	return !Execute_GetIsAttacking(this) && !bDashing && !bRepulsion &&	!bHurt && !bDead;
 }
 
 inline void ABasePixelCharacter::SetBlendPitch(float V)
@@ -294,8 +262,6 @@ inline void ABasePixelCharacter::AddBlendYaw(float V)
 {
 	DeltaBlendYaw = -V;
 	CurBlendYaw += V;
-// 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow,
-// FString::Printf(TEXT("ABasePixelCharacter::AddBlendYaw CurBlendYaw:%f, DeltaBlendYaw:%f ,  %d"), CurBlendYaw, DeltaBlendYaw, __LINE__));
 }
 
 

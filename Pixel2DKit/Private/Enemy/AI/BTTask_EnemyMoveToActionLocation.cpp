@@ -55,13 +55,13 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 	
-	if (!IEnemyAI_Interface::Execute_CanMove_EnemyAI(Pawn))
+	if (!IEnemyAI_Interface::Execute_CanMove(Pawn))
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
 	
-	if (IEnemyAI_Interface::Execute_Dash_EnemyAI(Pawn))
+	if (IEnemyAI_Interface::Execute_Dash(Pawn))
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;

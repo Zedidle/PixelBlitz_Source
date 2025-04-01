@@ -7,6 +7,7 @@
 #include "BasePixelCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "BaseEnemy.generated.h"
 
 class UEnemyAIComponent;
@@ -87,6 +88,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
 	bool bLanding;
+
+	virtual void Jump() override;
+	virtual void Landed(const FHitResult& Hit) override;
+
 	
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetDead(const bool V);
@@ -118,23 +123,20 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
 	float GetDistanceToPlayer() const;
 	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	void TryAttack();
+
+	
 	virtual bool GetIsAttacking_Implementation() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
 	virtual float GetRandomMoveRange_Implementation() override;
-	virtual bool CanMove_EnemyAI_Implementation() override;
+	virtual bool CanMove_Implementation() override;
 	virtual bool CanAttack_Implementation() override;
-	virtual bool Dash_EnemyAI_Implementation() override;
+	virtual bool Dash_Implementation() override;
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
-	
-	virtual void Jump() override;
-	virtual void Landed(const FHitResult& Hit) override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	void TryAttack();
-	
 	
 	// 战斗的行动模式
 	virtual void ActionAtPlayerEastNear_Implementation(float Distance) override;
@@ -156,23 +158,9 @@ public:
 
 	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
 	virtual bool InAttackRange_Implementation() override;
-	virtual bool InAttackRange_EastNear_Implementation(float Distance) override;
-	virtual bool InAttackRange_EastMid_Implementation(float Distance) override;
-	virtual bool InAttackRange_EastFar_Implementation(float Distance) override;
-	virtual bool InAttackRange_EastRemote_Implementation(float Distance) override;
-	virtual bool InAttackRange_WestNear_Implementation(float Distance) override;
-	virtual bool InAttackRange_WestMid_Implementation(float Distance) override;
-	virtual bool InAttackRange_WestFar_Implementation(float Distance) override;
-	virtual bool InAttackRange_WestRemote_Implementation(float Distance) override;
-	virtual bool InAttackRange_NorthNear_Implementation(float Distance) override;
-	virtual bool InAttackRange_NorthMid_Implementation(float Distance) override;
-	virtual bool InAttackRange_NorthFar_Implementation(float Distance) override;
-	virtual bool InAttackRange_NorthRemote_Implementation(float Distance) override;
-	virtual bool InAttackRange_SouthNear_Implementation(float Distance) override;
-	virtual bool InAttackRange_SouthMid_Implementation(float Distance) override;
-	virtual bool InAttackRange_SouthFar_Implementation(float Distance) override;
-	virtual bool InAttackRange_SouthRemote_Implementation(float Distance) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
+	TSet<TEnumAsByte<EActionField>> ActionFieldsCanAttack;
 	
 	
 protected:
