@@ -2,7 +2,6 @@
 
 
 #include "Fight/Components/HealthComponent.h"
-
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/Fight_Interface.h"

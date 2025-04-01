@@ -115,140 +115,70 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetJumping(const bool V, const float time = 0.2f);
 
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
-	bool GetIsAttacking();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	float GetDistanceToPlayer() const;
+	
 	virtual bool GetIsAttacking_Implementation() override;
-
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
-	bool IsAlive();
 	virtual bool IsAlive_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Fight_Interface")
-	AActor* GetTarget();
 	virtual AActor* GetTarget_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	float GetRandomMoveRange();
 	virtual float GetRandomMoveRange_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool InAttackRange();
-	virtual bool InAttackRange_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool CanMove_EnemyAI();
 	virtual bool CanMove_EnemyAI_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool CanAttack();
 	virtual bool CanAttack_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="EnemyAI_Interface")
-	bool Dash_EnemyAI();
 	virtual bool Dash_EnemyAI_Implementation() override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	void OnBeAttacked_Invulnerable();
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	int DamagePlus(int inValue, AActor* ActorDamaged);
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-	int OnDefendingHit(int iniDamage);
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
-
 	
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
-
-
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	void TryAttack();
-
-
+	
+	
 	// 战斗的行动模式
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerEastNear(float Distance);
 	virtual void ActionAtPlayerEastNear_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerEastMid(float Distance);
 	virtual void ActionAtPlayerEastMid_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerEastFar(float Distance);
 	virtual void ActionAtPlayerEastFar_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerEastRemote(float Distance);
 	virtual void ActionAtPlayerEastRemote_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerWestNear(float Distance);
 	virtual void ActionAtPlayerWestNear_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerWestMid(float Distance);
 	virtual void ActionAtPlayerWestMid_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerWestFar(float Distance);
 	virtual void ActionAtPlayerWestFar_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerWestRemote(float Distance);
 	virtual void ActionAtPlayerWestRemote_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerNorthNear(float Distance);
 	virtual void ActionAtPlayerNorthNear_Implementation(float Distance) override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerNorthMid(float Distance);
 	virtual void ActionAtPlayerNorthMid_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerNorthFar(float Distance);
 	virtual void ActionAtPlayerNorthFar_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerNorthRemote(float Distance);
 	virtual void ActionAtPlayerNorthRemote_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerSouthNear(float Distance);
 	virtual void ActionAtPlayerSouthNear_Implementation(float Distance) override;
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerSouthMid(float Distance);
 	virtual void ActionAtPlayerSouthMid_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerSouthFar(float Distance);
 	virtual void ActionAtPlayerSouthFar_Implementation(float Distance) override;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	void ActionAtPlayerSouthRemote(float Distance);
 	virtual void ActionAtPlayerSouthRemote_Implementation(float Distance) override;
 
+	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
+	virtual bool InAttackRange_Implementation() override;
+	virtual bool InAttackRange_EastNear_Implementation(float Distance) override;
+	virtual bool InAttackRange_EastMid_Implementation(float Distance) override;
+	virtual bool InAttackRange_EastFar_Implementation(float Distance) override;
+	virtual bool InAttackRange_EastRemote_Implementation(float Distance) override;
+	virtual bool InAttackRange_WestNear_Implementation(float Distance) override;
+	virtual bool InAttackRange_WestMid_Implementation(float Distance) override;
+	virtual bool InAttackRange_WestFar_Implementation(float Distance) override;
+	virtual bool InAttackRange_WestRemote_Implementation(float Distance) override;
+	virtual bool InAttackRange_NorthNear_Implementation(float Distance) override;
+	virtual bool InAttackRange_NorthMid_Implementation(float Distance) override;
+	virtual bool InAttackRange_NorthFar_Implementation(float Distance) override;
+	virtual bool InAttackRange_NorthRemote_Implementation(float Distance) override;
+	virtual bool InAttackRange_SouthNear_Implementation(float Distance) override;
+	virtual bool InAttackRange_SouthMid_Implementation(float Distance) override;
+	virtual bool InAttackRange_SouthFar_Implementation(float Distance) override;
+	virtual bool InAttackRange_SouthRemote_Implementation(float Distance) override;
 
-
-
-
-
-
-
-
+	
 	
 protected:
 	void Tick_KeepFaceToPixelCharacter(float DeltaSeconds);
 
 	virtual void Tick(float DeltaSeconds) override;
-	
 
 	
 };

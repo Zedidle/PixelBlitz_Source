@@ -13,7 +13,7 @@ class PIXEL2DKIT_API IEnemyAI_Interface
 	GENERATED_BODY()
     
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,  Category="EnemyAI_Interface")
 	float GetRandomMoveRange();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
@@ -68,12 +68,45 @@ public:
 	void ActionAtPlayerSouthFar(float Distance);
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	void ActionAtPlayerSouthRemote(float Distance);
+
+
+
 	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_EastNear(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_EastMid(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_EastFar(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_EastRemote(float Distance);
 	
-
-
-
-
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_WestNear(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_WestMid(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_WestFar(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_WestRemote(float Distance);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_NorthNear(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_NorthMid(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_NorthFar(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_NorthRemote(float Distance);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_SouthNear(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_SouthMid(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_SouthFar(float Distance);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
+	bool InAttackRange_SouthRemote(float Distance);
 
 	
 };

@@ -52,6 +52,9 @@ public:
 	// Sets default values for this component's properties
 	UEnemyAIComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UPROPERTY(BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
+	class ABaseEnemy* Owner = nullptr;
+	
 	// 随时变化的当前目标位置
 	FVector CurTargetLocation;
 	
@@ -62,26 +65,13 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
 	float AttackPatienceTime = 5;   
 
-	// 发起攻击时，与目标在X方向的距离
+	// 最远的攻击距离, 20 - 50 为默认小怪攻击距离；
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRange_X = 50.0f;  
-
-	// 发起攻击时，与目标在Y方向的距离
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRange_Y = 50.0f;  
-
-	// 发起攻击时，与目标在Y方向的距离偏差
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRangeOffset_X = 5.0f;  
-
-	// 发起攻击时，与目标在Y方向的距离偏差
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
-	float AttackRangeOffset_Y = 5.0f;  
+	FVector2D AttackRange = {20.0f, 50.0f};  
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
 	FActionFieldDistance ActionFieldDistance;
-
-
+	
 	UFUNCTION(BlueprintCallable, Category="Enemy")
 	void SetPixelCharacter(ABasePixelCharacter* Character);
 	
@@ -96,14 +86,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Camera, meta = (AllowPrivateAccess))
 	FVector GetMoveDotDirRandLocation(const FVector TargetLocation, const float DotDirPerRotate = 15.0f,
 								const float MaxRotateValue = 90, const float DefaultDirRotate = 0, const float MinDirectlyDistance = 50);
-
 	
 
 	// 获取在X方向（相对玩家的东西方向）的攻击位置
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	FVector GetMeleeAttackLocation();
-	FVector GetTargetLocationX();
-	FVector GetTargetLocationY();
+	FVector GetAttackLocation();
 
 
 	// 获取 接近/远离 (-1 / 1)玩家的行动域位置

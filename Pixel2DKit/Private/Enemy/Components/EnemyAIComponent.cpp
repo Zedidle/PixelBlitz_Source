@@ -180,53 +180,25 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 	return OwnerLocation;
 }
 
-FVector UEnemyAIComponent::GetMeleeAttackLocation()
+FVector UEnemyAIComponent::GetAttackLocation()
 {
-	if (!GetOwner() || !PixelCharacter) return FVector(0);
+	if (!IsValid(Owner)) return FVector::Zero();
+	if (!IsValid( PixelCharacter)) return FVector::Zero();	
 
-	FVector LocationX = GetTargetLocationX();
-
-	// FVector LocationY = GetTargetLocationY();
-	// if (FVector::Distance(GetOwner()->GetActorLocation(), LocationX) > FVector::Distance(GetOwner()->GetActorLocation(), LocationY))
-	// {
-	// 	return LocationY;
-	// }
-	return LocationX;
-}
-
-FVector UEnemyAIComponent::GetTargetLocationX()
-{
-	if (!GetOwner() || !PixelCharacter) return FVector(0);
-
-	FVector Dir = FRotator(0, 90, 0).RotateVector(USpaceFuncLib::GetDirection2DFromPlayerViewPoint(0));
-	
-	// 基于方位的左或右偏移
-	FVector Offset = Dir * AttackRange_X;
-
-
-	EWorldDirection Direction = USpaceFuncLib::ActorAtActorWorldDirection(GetOwner(), PixelCharacter);
-	
-	// 选择较近的一侧
-	if (USpaceFuncLib::ActorAtActorRight(PixelCharacter, GetOwner()))
+	FVector Dir = (Owner->GetActorLocation() - PixelCharacter->GetActorLocation()).GetSafeNormal2D();
+	if (Owner->GetDistanceToPlayer() < AttackRange.X)
 	{
-		Offset *= -1;
+		return PixelCharacter->GetActorLocation() + (AttackRange.X + 5) * Dir;
 	}
 
-	return GetMoveDotDirRandLocation(PixelCharacter->GetActorLocation() + Offset);
-}
-
-FVector UEnemyAIComponent::GetTargetLocationY()
-{
-	if (!GetOwner() || !PixelCharacter) return FVector(0);
-
-	FVector Dir = USpaceFuncLib::GetDirection2DFromPlayerViewPoint(0);
-	FVector Offset = Dir * AttackRange_Y;
-	if (USpaceFuncLib::ActorAtActorFront(GetOwner(), PixelCharacter))
+	if (Owner->GetDistanceToPlayer() > AttackRange.Y)
 	{
-		Offset *= -1;	
+		return PixelCharacter->GetActorLocation() + (AttackRange.Y - 5) * Dir;
 	}
-	return GetMoveDotDirRandLocation(PixelCharacter->GetActorLocation() + Offset);
+
+	return Owner->GetActorLocation();
 }
+
 
 FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 {
@@ -243,7 +215,7 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	{
 		if (bNear)
 		{
-			TargetLocation = GetMeleeAttackLocation();
+			TargetLocation = GetAttackLocation();
 		}
 		else
 		{
@@ -292,7 +264,6 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 
 float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 {
-	AActor* Owner = GetOwner();
 	if (!IsValid(Owner)) return 50;
 	
 	UCapsuleComponent* CapsuleComponent = GetOwner()->GetComponentByClass<UCapsuleComponent>();
@@ -397,8 +368,7 @@ EActionField UEnemyAIComponent::GetActionFieldByPlayer() const
 void UEnemyAIComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
+	Owner = Cast<ABaseEnemy>(GetOwner());
 	
 }
 

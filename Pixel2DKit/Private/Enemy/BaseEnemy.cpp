@@ -166,6 +166,15 @@ void ABaseEnemy::SetJumping(const bool V, const float time)
 	
 }
 
+float ABaseEnemy::GetDistanceToPlayer() const
+{
+	if (IsValid(PixelCharacter))
+	{
+		return (PixelCharacter->GetActorLocation() - GetActorLocation()).Size();
+	}
+	return 99999;
+}
+
 void ABaseEnemy::SetLanding(const bool V, const float time)
 {
 	bLanding = V;
@@ -279,6 +288,8 @@ void ABaseEnemy::Landed(const FHitResult& Hit)
 void ABaseEnemy::TryAttack_Implementation()
 {
 	if (!CanAttack()) return;
+	if (!InAttackRange()) return;
+	
 	SetAttackAnimToggle(true);
 	SetInAttackState(true);
 	GetCharacterMovement()->StopMovementImmediately();
@@ -289,93 +300,172 @@ void ABaseEnemy::TryAttack_Implementation()
 // 最基本的东侧近战判定
 void ABaseEnemy::ActionAtPlayerEastNear_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerEastNear_Implementation(Distance);
-
-	if (InAttackRange())
-	{
-		// 攻击行为	
-	}
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerEastMid_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerEastMid_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerEastFar_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerEastFar_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerEastRemote_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerEastRemote_Implementation(Distance);
+	TryAttack();
 }
 
-// 西侧近战判定
 void ABaseEnemy::ActionAtPlayerWestNear_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerWestNear_Implementation(Distance);
-	// if (IsValid(EnemyAIComponent) && EnemyAIComponent->InAttackRangeX_EnemyAI())
-	// {
-	// 	OnReachedAttackLocation_EnemyAI();
-	// }
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerWestMid_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerWestMid_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerWestFar_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerWestFar_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerWestRemote_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerWestRemote_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerNorthNear_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerNorthNear_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerNorthMid_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerNorthMid_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerNorthFar_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerNorthFar_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerNorthRemote_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerNorthRemote_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerSouthNear_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerSouthNear_Implementation(Distance);
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerSouthMid_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerSouthMid_Implementation(Distance);
 }
 
 void ABaseEnemy::ActionAtPlayerSouthFar_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerSouthFar_Implementation(Distance);
 }
 
 void ABaseEnemy::ActionAtPlayerSouthRemote_Implementation(float Distance)
 {
-	IEnemyAI_Interface::ActionAtPlayerSouthRemote_Implementation(Distance);
 }
+
+bool ABaseEnemy::InAttackRange_EastNear_Implementation(float Distance)
+{
+	if (IsValid(EnemyAIComponent))
+	{
+		float distance = GetDistanceToPlayer();
+		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
+	}
+	return false;
+}
+
+bool ABaseEnemy::InAttackRange_EastMid_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_EastMid_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_EastFar_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_EastFar_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_EastRemote_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_EastRemote_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_WestNear_Implementation(float Distance)
+{
+	if (IsValid(EnemyAIComponent))
+	{
+		float distance = GetDistanceToPlayer();
+		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
+	}
+	return false;
+}
+
+bool ABaseEnemy::InAttackRange_WestMid_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_WestMid_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_WestFar_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_WestFar_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_WestRemote_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_WestRemote_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_NorthNear_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_NorthNear_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_NorthMid_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_NorthMid_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_NorthFar_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_NorthFar_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_NorthRemote_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_NorthRemote_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_SouthNear_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_SouthNear_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_SouthMid_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_SouthMid_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_SouthFar_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_SouthFar_Implementation(Distance);
+}
+
+bool ABaseEnemy::InAttackRange_SouthRemote_Implementation(float Distance)
+{
+	return IEnemyAI_Interface::InAttackRange_SouthRemote_Implementation(Distance);
+}
+
+
 
 void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
