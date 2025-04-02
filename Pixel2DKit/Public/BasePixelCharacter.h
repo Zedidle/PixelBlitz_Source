@@ -66,7 +66,7 @@ public:
 	
 	
 	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	virtual void Falling() override;
 
@@ -145,7 +145,7 @@ public:
 	void AddBlendYaw(float V);
 	
 	// 近战攻击生效碰撞期
-	virtual bool GetIsAttacking_Implementation() override;
+	virtual bool GetIsAttacking() override;
 	virtual bool CanAttack_Implementation() override;
 	
 	
@@ -243,7 +243,7 @@ public:
 
 inline bool ABasePixelCharacter::CanAttack_Implementation()
 {
-	return !Execute_GetIsAttacking(this) && !bDashing && !bRepulsion &&	!bHurt && !bDead;
+	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead;
 }
 
 inline void ABasePixelCharacter::SetBlendPitch(float V)

@@ -41,8 +41,10 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
 	
-	if (Owner->Implements<UFight_Interface>() && IFight_Interface::Execute_GetIsAttacking(Owner))
+	if (IFight_Interface* FightOwner = Cast<IFight_Interface>(Owner))
 	{
+		if (!FightOwner->GetIsAttacking()) return;
+		
 		for (auto& name : SocketNames)
 		{
 			FVector end = CurSceneComponent->GetSocketLocation(name);

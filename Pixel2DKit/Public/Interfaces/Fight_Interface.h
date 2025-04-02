@@ -26,12 +26,11 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
     bool CanAttack();
     
-    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    bool GetIsAttacking();
+    UFUNCTION(Category="Fight_Interface")
+    virtual bool GetIsAttacking() = 0;
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     bool IsAlive();
-
 
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")

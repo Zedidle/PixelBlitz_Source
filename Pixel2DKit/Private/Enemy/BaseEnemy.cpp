@@ -205,7 +205,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 }
 
 
-bool ABaseEnemy::GetIsAttacking_Implementation()
+bool ABaseEnemy::GetIsAttacking()
 {
 	return bInAttackEffect;
 }
@@ -301,6 +301,8 @@ void ABaseEnemy::TryAttack_Implementation()
 void ABaseEnemy::ActionAtPlayerEastNear_Implementation(float Distance)
 {
 	TryAttack();
+	// 或者远离 / 接近玩家
+	// …… 任意行动
 }
 
 void ABaseEnemy::ActionAtPlayerEastMid_Implementation(float Distance)
@@ -378,7 +380,7 @@ void ABaseEnemy::ActionAtPlayerSouthRemote_Implementation(float Distance)
 
 void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
-	if (Execute_GetIsAttacking(this)) return;
+	if (GetIsAttacking()) return;
 	if (!Execute_IsAlive(this)) return;
 	if (!IsValid(PixelCharacter)) return;
 

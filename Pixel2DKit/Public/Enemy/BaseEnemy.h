@@ -127,7 +127,7 @@ public:
 	void TryAttack();
 
 	
-	virtual bool GetIsAttacking_Implementation() override;
+	virtual bool GetIsAttacking() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
 	virtual float GetRandomMoveRange_Implementation() override;

@@ -265,7 +265,7 @@ void ABasePixelCharacter::AddCameraOffset(const FVector& V)
 	SurCameraOffset += V;
 }
 
-bool ABasePixelCharacter::GetIsAttacking_Implementation()
+bool ABasePixelCharacter::GetIsAttacking()
 {
 	return bInAttackEffect;
 }
