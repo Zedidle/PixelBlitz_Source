@@ -3,11 +3,9 @@
 
 #include "Anim/AnimNotify//ZDAN_OnAttackAnimOff.h"
 #include "Anim/BasePixelAnimInstance.h"
+#include "Subsystems/PixelAnimSubsystem.h"
 
 void UZDAN_OnAttackAnimOff::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
 {
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(OwningInstance))
-	{
-		AnimInst->SetAttackAnimToggle(false);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(OwningInstance, FName(TEXT("bAttackAnimToggle")), false);
 }

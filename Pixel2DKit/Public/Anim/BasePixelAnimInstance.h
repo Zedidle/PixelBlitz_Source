@@ -57,55 +57,16 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	int eMoveStatus;
-
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetDead(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetHurt(const bool V);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetMoving(const bool V);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetJumping(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetFalling(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetLanding(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetInAttackState(const bool V);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetAttackAnimToggle(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetInAttackEffect(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetAttackHolding(const bool V);
-
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetAttackFire(const bool V);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	virtual void SetDashing(const bool V);
-
-
 	
 
-
+	UFUNCTION(BlueprintCallable, Category = Animation)
+	void SetActionField(const EActionField field);
 
 	// 一般是怪物专用
 	// 当前相对于玩家角色的行动区间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	TEnumAsByte<EActionField> CurActionFiled;
 	
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bInDefendState; // 是否处于防御状态
 
@@ -115,18 +76,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bDefendHurt;  // 处于防御状态被攻击
 
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetActionField(const EActionField field);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetDefendState(const bool V);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetDefendStart(const bool V);
-	
-	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetDefendHurt(const bool V);
-	
 
 	
 	

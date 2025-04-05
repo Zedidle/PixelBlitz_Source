@@ -274,19 +274,14 @@ bool ABasePixelCharacter::GetIsAttacking()
 void ABasePixelCharacter::SetDead(bool V)
 {
 	bDead = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetDead(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
 }
 
 void ABasePixelCharacter::SetHurt(const bool V, const float duration)
 {
 	bHurt = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetHurt(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
+	
 	if (!bHurt) return;
 	
 	FTimerHandle TimerHandle;
@@ -300,10 +295,8 @@ void ABasePixelCharacter::SetHurt(const bool V, const float duration)
 void ABasePixelCharacter::SetJumping(bool V, const float time)
 {
 	bJumping = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetJumping(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
+	
 	if (!bJumping) return;
 
 	FTimerHandle TimerHandle;
@@ -323,10 +316,7 @@ void ABasePixelCharacter::SetFalling(bool V)
 void ABasePixelCharacter::SetLanding(bool V, float time)
 {
 	bLanding = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetLanding(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
 
 	if (!bLanding) return;
 
@@ -343,37 +333,25 @@ void ABasePixelCharacter::SetLanding(bool V, float time)
 void ABasePixelCharacter::SetDashing(bool V)
 {
 	bDashing = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetDashing(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDashing")), V);
 }
 
 void ABasePixelCharacter::SetAttackAnimToggle(bool V)
 {
 	bAttackAnimToggle = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetAttackAnimToggle(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
 }
 
 void ABasePixelCharacter::SetAttackHolding(bool V)
 {
 	bAttackHolding = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetAttackHolding(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackHolding")), V);
 }
 
 void ABasePixelCharacter::SetAttackFire(bool V)
 {
 	bAttackFire = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetAttackFire(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackFire")), V);
 }
 
 void ABasePixelCharacter::SetMoving(bool V)

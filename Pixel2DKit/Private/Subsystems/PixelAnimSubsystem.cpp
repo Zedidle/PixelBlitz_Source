@@ -11,7 +11,20 @@ void UPixelAnimSubsystem::SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInst
 	UClass* Class = AnimInstance->GetClass();
 	FProperty* Property = Class->FindPropertyByName(PropertyName);
 	if (Property && Property->IsA<FBoolProperty>()) {
-		FBoolProperty* P = CastField<FBoolProperty>(Property);
+		const FBoolProperty* P = CastField<FBoolProperty>(Property);
+		P->SetPropertyValue_InContainer(AnimInstance, V);
+		UE_LOG(LogTemp, Warning, TEXT("UPixelAnimSubsystem::SetAnimInstanceProperty, Set %s to %d"), *PropertyName.ToString(), V);
+	} else {
+		UE_LOG(LogTemp, Error, TEXT("UPixelAnimSubsystem::SetAnimInstanceProperty, Property %s not found or type mismatch!"), *PropertyName.ToString());
+	}
+}
+
+void UPixelAnimSubsystem::SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, float V)
+{
+	UClass* Class = AnimInstance->GetClass();
+	FProperty* Property = Class->FindPropertyByName(PropertyName);
+	if (Property && Property->IsA<FFloatProperty>()) {
+		const FFloatProperty* P = CastField<FFloatProperty>(Property);
 		P->SetPropertyValue_InContainer(AnimInstance, V);
 		UE_LOG(LogTemp, Warning, TEXT("UPixelAnimSubsystem::SetAnimInstanceProperty, Set %s to %f"), *PropertyName.ToString(), V);
 	} else {
@@ -19,13 +32,15 @@ void UPixelAnimSubsystem::SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInst
 	}
 }
 
-void UPixelAnimSubsystem::SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName,
-	float V)
-{
-	
-}
-
 void UPixelAnimSubsystem::SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, int V)
 {
-	
+	UClass* Class = AnimInstance->GetClass();
+	FProperty* Property = Class->FindPropertyByName(PropertyName);
+	if (Property && Property->IsA<FIntProperty>()) {
+		const FIntProperty* P = CastField<FIntProperty>(Property);
+		P->SetPropertyValue_InContainer(AnimInstance, V);
+		UE_LOG(LogTemp, Warning, TEXT("UPixelAnimSubsystem::SetAnimInstanceProperty, Set %s to %d"), *PropertyName.ToString(), V);
+	} else {
+		UE_LOG(LogTemp, Error, TEXT("UPixelAnimSubsystem::SetAnimInstanceProperty, Property %s not found or type mismatch!"), *PropertyName.ToString());
+	}
 }

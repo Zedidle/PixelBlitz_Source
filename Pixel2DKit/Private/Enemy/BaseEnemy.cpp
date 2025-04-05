@@ -55,10 +55,8 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 void ABaseEnemy::SetDead(bool V)
 {
 	bDead = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetDead(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
+	
 	if (UBlackboardComponent* BlackboardComponent = GetController()->FindComponentByClass<UBlackboardComponent>())
 	{
 		BlackboardComponent->SetValueAsBool(FName("bDead"), V);
@@ -75,10 +73,8 @@ void ABaseEnemy::SetDead(bool V)
 void ABaseEnemy::SetHurt(bool V, const float duration)
 {
 	bHurt = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetHurt(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
+
 	if (!bHurt) return;
 	
 	FTimerHandle TimerHandle;
@@ -92,11 +88,8 @@ void ABaseEnemy::SetHurt(bool V, const float duration)
 void ABaseEnemy::SetInAttackState(bool V)
 {
 	bInAttackState = V;
-	// UPixelAnimSubsystem::SetAnimProperty();
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetInAttackState(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackState")), V);
+	
 	if (UBlackboardComponent* BlackboardComponent = GetController()->FindComponentByClass<UBlackboardComponent>())
 	{
 		BlackboardComponent->SetValueAsBool(FName("bInAttackState"), V);
@@ -106,56 +99,38 @@ void ABaseEnemy::SetInAttackState(bool V)
 void ABaseEnemy::SetInAttackEffect(bool V)
 {
 	bInAttackEffect = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetInAttackEffect(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackEffect")), V);
 }
 
 void ABaseEnemy::SetAttackAnimToggle(const bool V)
 {
 	bAttackAnimToggle = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetAttackAnimToggle(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
 }
 
 void ABaseEnemy::SetInDefendState(const bool V)
 {
 	bInDefendState = V;
-	
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetDefendState(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInDefendState")), V);
 }
 
 void ABaseEnemy::SetDefendStart(const bool V)
 {
 	bDefendStart = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetDefendState(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDefendStart")), V);
 }
 
 void ABaseEnemy::SetDefendHurt(const bool V)
 {
 	bDefendHurt = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetDefendHurt(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDefendHurt")), V);
 }
 
 void ABaseEnemy::SetJumping(const bool V, const float time)
 {
 	bJumping = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetJumping(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
+	
 	if (!bJumping) return;
 	
 	FTimerHandle TimerHandle;
@@ -179,10 +154,8 @@ float ABaseEnemy::GetDistanceToPlayer() const
 void ABaseEnemy::SetLanding(const bool V, const float time)
 {
 	bLanding = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetLanding(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
+	
 	if (!bLanding) return;
 	
 	FTimerHandle TimerHandle;
