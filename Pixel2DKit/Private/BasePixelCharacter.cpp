@@ -11,6 +11,7 @@
 #include "EnhancedInputComponent.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
+#include "Subsystems/PixelAnimSubsystem.h"
 
 
 void ABasePixelCharacter::Tick_SaveFallingStartTime()
@@ -316,10 +317,7 @@ void ABasePixelCharacter::SetJumping(bool V, const float time)
 void ABasePixelCharacter::SetFalling(bool V)
 {
 	bFalling = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetFalling(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bFalling")), V);
 }
 
 void ABasePixelCharacter::SetLanding(bool V, float time)
@@ -381,10 +379,7 @@ void ABasePixelCharacter::SetAttackFire(bool V)
 void ABasePixelCharacter::SetMoving(bool V)
 {
 	bMoving = V;
-	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
-	{
-		AnimInst->SetMoving(V);
-	}
+	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bMoving")), V);
 }
 
 float ABasePixelCharacter::GetFallingTime()
@@ -406,11 +401,10 @@ void ABasePixelCharacter::Tick(float DeltaSeconds)
 	Tick_SpringArmMotivation();
 	Tick_CalCameraOffset();
 	
-	if (GetCharacterMovement())
+	if (IsValid(GetCharacterMovement()))
 	{
 		SetMoving(GetCharacterMovement()->Velocity.Size() > 1.0f);
 	}
-	
 }
 
 FVector ABasePixelCharacter::GetDashDirection()

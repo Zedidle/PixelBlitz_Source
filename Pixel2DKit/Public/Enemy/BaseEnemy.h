@@ -157,7 +157,7 @@ public:
 	virtual void ActionAtPlayerSouthRemote_Implementation(float Distance) override;
 
 	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
-	virtual bool InAttackRange_Implementation() override;
+	virtual bool InAttackRange() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
 	TSet<TEnumAsByte<EActionField>> ActionFieldsCanAttack;

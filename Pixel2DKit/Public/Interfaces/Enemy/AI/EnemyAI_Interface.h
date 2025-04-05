@@ -16,8 +16,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	float GetRandomMoveRange();
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	bool InAttackRange();
+	UFUNCTION(Category="EnemyAI_Interface")
+	virtual bool InAttackRange() = 0;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
 	void OnReachedLocation();

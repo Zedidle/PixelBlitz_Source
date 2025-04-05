@@ -35,9 +35,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bFalling;
-
+	
+	// 整体上是否处于攻击状态（起手预备 - 生效 - 后摇）
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	bool bInAttackState;  // 整体上是否处于攻击状态（起手预备 - 生效 - 后摇）
+	bool bInAttackState; 
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackAnimToggle;

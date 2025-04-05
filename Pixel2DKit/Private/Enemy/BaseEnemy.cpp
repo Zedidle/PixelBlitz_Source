@@ -2,8 +2,6 @@
 
 
 #include "Enemy/BaseEnemy.h"
-
-#include <filesystem>
 #include "Components/WidgetComponent.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "FunctionLibrary/SpaceFuncLib.h"
@@ -15,6 +13,7 @@
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Subsystems/PixelAnimSubsystem.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
@@ -93,6 +92,7 @@ void ABaseEnemy::SetHurt(bool V, const float duration)
 void ABaseEnemy::SetInAttackState(bool V)
 {
 	bInAttackState = V;
+	// UPixelAnimSubsystem::SetAnimProperty();
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
 		AnimInst->SetInAttackState(V);
@@ -124,6 +124,7 @@ void ABaseEnemy::SetAttackAnimToggle(const bool V)
 void ABaseEnemy::SetInDefendState(const bool V)
 {
 	bInDefendState = V;
+	
 	if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(GetAnimInstance()))
 	{
 		AnimInst->SetDefendState(V);
@@ -230,7 +231,7 @@ bool ABaseEnemy::CanMove_Implementation()
 	return !bDead && !bHurt && !bInAttackState && !bInAttackEffect;
 }
 
-bool ABaseEnemy::InAttackRange_Implementation()
+bool ABaseEnemy::InAttackRange()
 {
 	if (IsValid(EnemyAIComponent))
 	{
@@ -288,7 +289,7 @@ void ABaseEnemy::Landed(const FHitResult& Hit)
 void ABaseEnemy::TryAttack_Implementation()
 {
 	if (!Execute_CanAttack(this)) return;
-	if (!Execute_InAttackRange(this)) return;
+	if (!InAttackRange()) return;
 	
 	SetAttackAnimToggle(true);
 	SetInAttackState(true);
