@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "PaperZDAnimInstance.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "BasePixelAnimInstance.generated.h"
@@ -60,12 +61,12 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable, Category = Animation)
-	void SetActionField(const EActionField field);
+	void SetActionField(const FGameplayTag& field);
 
 	// 一般是怪物专用
 	// 当前相对于玩家角色的行动区间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	TEnumAsByte<EActionField> CurActionFiled;
+	FGameplayTag CurActionFiled;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bInDefendState; // 是否处于防御状态

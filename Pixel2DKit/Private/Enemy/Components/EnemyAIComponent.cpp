@@ -2,6 +2,8 @@
 
 
 #include "Enemy/Components/EnemyAIComponent.h"
+
+#include "GameplayTagsManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "FunctionLibrary/SpaceFuncLib.h"
 #include "Components/CapsuleComponent.h"
@@ -274,10 +276,10 @@ float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 	return ScaleZ * (CharacterMovmentComponent->MaxStepHeight + CapsuleComponent->GetUnscaledCapsuleHalfHeight());
 }
 
-EActionField UEnemyAIComponent::GetActionFieldByPlayer() const
+FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const
 {
-	if (!IsValid(PixelCharacter)) return EActionField::None;
-	if (!IsValid(GetOwner())) return EActionField::None;
+	if (!IsValid(PixelCharacter)) return FGameplayTag();
+	if (!IsValid(GetOwner())) return FGameplayTag();
 	
 	EWorldDirection Dir = USpaceFuncLib::ActorAtActorWorldDirection(GetOwner(), PixelCharacter, PixelCharacter->CurBlendYaw);
 	float Distance = (GetOwner()->GetActorLocation() - PixelCharacter->GetActorLocation()).Size2D();
@@ -287,80 +289,80 @@ EActionField UEnemyAIComponent::GetActionFieldByPlayer() const
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return EastNear;
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.East.Near")));
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return EastMid;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.East.Mid")));
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return EastFar;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.East.Far")));
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return EastRemote;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.East.Remote")));
 		}
 	}
 	else if (Dir == West)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return WestNear;
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.West.Near")));
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return WestMid;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.West.Mid")));
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return WestFar;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.West.Far")));
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return WestRemote;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.West.Remote")));
 		}
 	}
 	else if (Dir == North)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return NorthNear;
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.North.Near")));
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return NorthMid;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.North.Mid")));
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return NorthFar;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.North.Far")));
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return NorthRemote;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.North.Remote")));
 		}
 	}
 	else if (Dir == South)
 	{
 		if( ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y )
 		{
-			return SouthNear;
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.South.Near")));
 		}
 		if( ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y )
 		{
-			return SouthMid;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.South.Mid")));
 		}
 		if( ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y )
 		{
-			return SouthFar;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.South.Far")));
 		}
 		if( ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y )
 		{
-			return SouthRemote;	
+			return UGameplayTagsManager::Get().RequestGameplayTag(FName(TEXT("ActionField.South.Remote")));
 		}
 	}
 
-	return None;
+	return FGameplayTag();
 }
 
 

@@ -175,7 +175,8 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 
 	// 近战的默认方位，针对不同怪物需要重定义
-	ActionFieldsCanAttack = { WestNear, EastNear };
+	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
+	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.East.Near")));
 }
 
 
@@ -208,8 +209,8 @@ bool ABaseEnemy::InAttackRange()
 {
 	if (IsValid(EnemyAIComponent))
 	{
-		EActionField Field = EnemyAIComponent->GetActionFieldByPlayer();
-		if (!ActionFieldsCanAttack.Contains(Field)) return false;
+		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
+		if (!ActionFieldsCanAttack.HasTag(ActionField)) return false;
 		
 		float distance = GetDistanceToPlayer();
 		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
@@ -379,8 +380,9 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	float yaw = f + R.Yaw - 90;
 	
 	// 判断怪物是否在玩家的东侧或西侧
-	EActionField ActionField = EnemyAIComponent->GetActionFieldByPlayer();
-	if (ActionField == EastNear || ActionField == EastMid)
+	FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
+	if (ActionField.GetTagName() == TEXT("ActionField.East.Near") ||
+		ActionField.GetTagName() == TEXT("ActionField.East.Mid"))
 	{
 		if (z > 0)
 		{
@@ -391,7 +393,8 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 			SetActorRotation(FRotator(0, yaw - d, 0));
 		}
 	}
-	else if (ActionField == WestNear || ActionField == WestMid)
+	else if (ActionField.GetTagName() == TEXT("ActionField.West.Near") ||
+		ActionField.GetTagName() == TEXT("ActionField.West.Mid"))
 	{
 		if (z > 0)
 		{

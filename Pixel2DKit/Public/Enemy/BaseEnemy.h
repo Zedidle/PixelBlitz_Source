@@ -160,7 +160,7 @@ public:
 	virtual bool InAttackRange() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
-	TSet<TEnumAsByte<EActionField>> ActionFieldsCanAttack;
+	FGameplayTagContainer ActionFieldsCanAttack;
 	
 	
 protected:

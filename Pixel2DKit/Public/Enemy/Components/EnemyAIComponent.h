@@ -102,7 +102,7 @@ public:
 	float GetCheckCliffHeight_EnemyAI();
 
 	UFUNCTION(Blueprintable, Blueprintable, Category = "EnemyAI")
-	EActionField GetActionFieldByPlayer() const;
+	FGameplayTag GetActionFieldByPlayer() const;
 	
 	
 

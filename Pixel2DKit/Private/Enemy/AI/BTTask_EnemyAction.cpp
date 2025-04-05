@@ -33,10 +33,10 @@ EBTNodeResult::Type UBTTask_EnemyAction::ExecuteTask(UBehaviorTreeComponent& Own
 			return EBTNodeResult::Failed;
 		}
 		float distance = (Player->GetActorLocation() - Pawn->GetActorLocation()).Size2D();
-		EActionField ActionField = EnemyAIComponent->GetActionFieldByPlayer();
+		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
-FString::Printf(TEXT("UBTTask_EnemyAction %d, %d"), ActionField ,__LINE__));
+FString::Printf(TEXT("UBTTask_EnemyAction %s, %d"), *ActionField.ToString() ,__LINE__));
 		
 		
 		// 设置行动区间
@@ -45,71 +45,71 @@ FString::Printf(TEXT("UBTTask_EnemyAction %d, %d"), ActionField ,__LINE__));
 			if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(AnimInstanceComp->GetAnimInstance()))
 			AnimInst->SetActionField(ActionField);
 		}
-		
-		if (ActionField == EastNear)
+
+		if (ActionField.GetTagName() == "ActionField.East.Near")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastNear(Pawn, distance);
 		}
-		if (ActionField == EastMid)
+		if (ActionField.GetTagName() == "ActionField.East.Mid")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastMid(Pawn, distance);
 		}
-		if (ActionField == EastFar)
+		if (ActionField.GetTagName() == "ActionField.East.Far")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastFar(Pawn, distance);
 		}
-		if (ActionField == EastRemote)
+		if (ActionField.GetTagName() == "ActionField.East.Remote")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerEastRemote(Pawn, distance);
 		}
 
-		if (ActionField == WestNear)
+		if (ActionField.GetTagName() == "ActionField.West.Near")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestNear(Pawn, distance);
 		}
-		if (ActionField == WestMid)
+		if (ActionField.GetTagName() == "ActionField.West.Mid")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestMid(Pawn, distance);
 		}
-		if (ActionField == WestFar)
+		if (ActionField.GetTagName() == "ActionField.West.Far")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestFar(Pawn, distance);
 		}
-		if (ActionField == WestRemote)
+		if (ActionField.GetTagName() == "ActionField.West.Remote")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerWestRemote(Pawn, distance);
 		}
 
-		if (ActionField == NorthNear)
+		if (ActionField.GetTagName() == "ActionField.North.Near")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthNear(Pawn, distance);
 		}
-		if (ActionField == NorthMid)
+		if (ActionField.GetTagName() == "ActionField.North.Mid")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthMid(Pawn, distance);
 		}
-		if (ActionField == NorthFar)
+		if (ActionField.GetTagName() == "ActionField.North.Far")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthFar(Pawn, distance);
 		}
-		if (ActionField == NorthRemote)
+		if (ActionField.GetTagName() == "ActionField.North.Remote")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerNorthRemote(Pawn, distance);
 		}
 
-		if (ActionField == SouthNear)
+		if (ActionField.GetTagName() == "ActionField.South.Near")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthNear(Pawn, distance);
 		}
-		if (ActionField == SouthMid)
+		if (ActionField.GetTagName() == "ActionField.South.Mid")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthMid(Pawn, distance);
 		}
-		if (ActionField == SouthFar)
+		if (ActionField.GetTagName() == "ActionField.South.Far")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthFar(Pawn, distance);
 		}
-		if (ActionField == SouthRemote)
+		if (ActionField.GetTagName() == "ActionField.South.Remote")
 		{
 			IEnemyAI_Interface::Execute_ActionAtPlayerSouthRemote(Pawn, distance);
 		}

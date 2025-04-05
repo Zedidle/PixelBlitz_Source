@@ -6,7 +6,7 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
 
-void UBasePixelAnimInstance::SetActionField(const EActionField field)
+void UBasePixelAnimInstance::SetActionField(const FGameplayTag& field)
 {
 	CurActionFiled = field;
 }
