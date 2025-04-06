@@ -24,7 +24,7 @@ void ABasePixelCharacter::Tick_SaveFallingStartTime()
 			if (UWorld* World = GetWorld())
 			{
 // 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red,
-// FString::Printf(TEXT("Tick_SaveFallingStartTime: %d"),  __LINE__));
+//				FString::Printf(TEXT("Tick_SaveFallingStartTime: %d"),  __LINE__));
 				FallingStartTime = World->TimeSeconds;
 			}
 		}
@@ -36,7 +36,6 @@ void ABasePixelCharacter::Tick_SpriteRotation()
 	if (!GetCharacterMovement() || GetCharacterMovement()->Velocity.Size2D() < 1.0f) return;
 
 	if (!GetSprite()) return;
-
 
 	FVector Velocity;
 	if (GetCharacterMovement()->IsMovingOnGround())

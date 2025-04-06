@@ -2,11 +2,14 @@
 
 
 #include "Fight/Components/HealthComponent.h"
+
+#include "GameDelegates.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/CameraShakeSettings.h"
+#include "FunctionLibrary/CommonFuncLib.h"
 
 class ULegacyCameraShake;
 
@@ -375,7 +378,8 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 {
 	if (bInRock)
 	{
-		// **AbilityComponent** SpawnFloatingText 击退无效
+		UCommonFuncLib::SpawnFloatingTextDefault(TEXT("Buff/BuffEffectText"), TEXT("Buff_Stoic"),
+			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.9, 0.9));
 		return;
 	}
 

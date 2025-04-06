@@ -25,7 +25,8 @@ public class Pixel2DKit : ModuleRules
 			"OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils",
 			"EnhancedInput",
 			"PaperZD", "Paper2D",
-			"NavigationSystem"
+			"NavigationSystem",
+			"UMGEditor"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{

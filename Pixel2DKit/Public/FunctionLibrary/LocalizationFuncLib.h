@@ -66,7 +66,9 @@ USTRUCT(BlueprintType)
 struct FLocationTableData
 {
 	GENERATED_BODY()
-
+	FLocationTableData(){}
+	FLocationTableData(const FString& InTableName, const FName& InRowName): TableName(InTableName), RowName(InRowName){}
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString TableName;
 
