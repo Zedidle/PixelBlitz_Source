@@ -71,9 +71,10 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void Falling() override;
 
+	
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicMoveSpeed = 200.f;
 	
@@ -148,17 +149,30 @@ public:
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddBlendYaw(float V);
 	
-	// 近战攻击生效碰撞期
-	virtual bool GetIsAttacking() override;
-	virtual bool CanAttack_Implementation() override;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Movement)
+	float GetFallingTime();
 	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Character | Movement")
+	virtual FVector GetDashDirection();
+
+	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal,
+													const FVector& PreviousLocation, float TimeDelta) override;
+	virtual void Jump() override;
+	virtual void Landed(const FHitResult& Hit) override;
 	
+	// 外形缩放部分
+	UFUNCTION(BlueprintCallable, Category="Character | Outlook")
+	void SetScale(const float targetValue);
+
+
+
+
+#pragma region Animation
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetDead(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetHurt(const bool V, const float duration);
-	
 	
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetJumping(const bool V, const float time = 0.2f);
@@ -180,20 +194,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = Anim)
 	void SetMoving(const bool V);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Movement)
-	float GetFallingTime();
+#pragma endregion
 
 	
-	
-	virtual void Tick(float DeltaSeconds) override;
-
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Character | Movement")
-	virtual FVector GetDashDirection();
-
-
-	// IFight_Interface
+#pragma region IFight_Interface
+	virtual bool GetIsAttacking() override;
+	virtual bool CanAttack_Implementation() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual FGameplayTagContainer GetOwnCamp_Implementation() override;
 	virtual FGameplayTagContainer GetEnemyCamp_Implementation() override;
@@ -204,28 +210,11 @@ public:
 	virtual bool OnBeAttacked_Implementation(AActor* maker, int damage) override;
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage) override;
 	virtual int OnDefendingHit_Implementation(int inValue) override;
-	
+	virtual void OnAttackHolding_Implementation() override;
+#pragma endregion
 
 
-	
-	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal,
-													const FVector& PreviousLocation, float TimeDelta) override;
-	virtual void Jump() override;
-	virtual void Landed(const FHitResult& Hit) override;
-
-
-
-	// 外形缩放部分
-	UFUNCTION(BlueprintCallable, Category="Character | Outlook")
-	void SetScale(const float targetValue);
-
-
-
-	
-
-	/*
-	 * ----- 移动输入部分 ----- 
-	 */
+#pragma region Input 
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
 	UInputAction* Action_MoveFront; // 朝向摄像机移动
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
@@ -242,6 +231,7 @@ public:
 	void MoveX(const FInputActionValue& Value);
 	void MoveY(const FInputActionValue& Value);
 	void Move2D(const FInputActionValue& Value);
+#pragma endregion
 	
 };
 

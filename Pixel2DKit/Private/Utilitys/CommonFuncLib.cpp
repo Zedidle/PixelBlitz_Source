@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FunctionLibrary/CommonFuncLib.h"
+#include "Utilitys/CommonFuncLib.h"
 
 #include "NiagaraMeshRendererProperties.h"
 #include "NiagaraRibbonRendererProperties.h"
@@ -9,7 +9,7 @@
 #include "VisualizeTexture.h"
 #include "Settings/UserWidgetSettings.h"
 #include "UserWidget/UWBaseFloatingText.h"
-#include "FunctionLibrary/LocalizationFuncLib.h"
+#include "Utilitys/LocalizationFuncLib.h"
 
 
 namespace FloatingTextColor

@@ -9,6 +9,6 @@ public class Pixel2DKitTarget : TargetRules
 	{
 		Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "Pixel2DKit" } );
+		ExtraModuleNames.AddRange( new string[] { "Pixel2DKit", "AClient" } );
 	}
 }

@@ -5,7 +5,7 @@
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Enemy/BaseEnemy.h"
 #include "AIController.h"
-#include "FunctionLibrary/SpaceFuncLib.h"
+#include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/Components/EnemyAIComponent.h"

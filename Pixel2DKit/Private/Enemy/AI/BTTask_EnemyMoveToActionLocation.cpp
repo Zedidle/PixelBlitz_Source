@@ -7,7 +7,7 @@
 #include "BehaviorTree/BTFunctionLibrary.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/Components/EnemyAIComponent.h"
-#include "FunctionLibrary/SpaceFuncLib.h"
+#include "Utilitys/SpaceFuncLib.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 
 

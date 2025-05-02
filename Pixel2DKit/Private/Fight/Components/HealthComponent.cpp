@@ -9,7 +9,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/CameraShakeSettings.h"
-#include "FunctionLibrary/CommonFuncLib.h"
+#include "Utilitys/CommonFuncLib.h"
 
 class ULegacyCameraShake;
 

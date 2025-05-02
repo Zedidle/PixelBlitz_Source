@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FunctionLibrary/SpaceFuncLib.h"
+#include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMaterialLibrary.h"

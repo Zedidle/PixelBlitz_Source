@@ -2,7 +2,7 @@
 
 
 #include "Character/BasePixelCharacter.h"
-#include "Anim/BasePixelAnimInstance.h"
+#include "Animation/BasePixelAnimInstance.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Basic/BasePixelGameInstance.h"
@@ -473,6 +473,11 @@ int ABasePixelCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcc
 int ABasePixelCharacter::OnDefendingHit_Implementation(int inValue)
 {
 	return inValue;
+}
+
+void ABasePixelCharacter::OnAttackHolding_Implementation()
+{
+	IFight_Interface::OnAttackHolding_Implementation();
 }
 
 void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,

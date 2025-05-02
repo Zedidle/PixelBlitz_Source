@@ -4,30 +4,6 @@
 
 #include "CoreMinimal.h"
 
-// 相对玩家的行动区间
-UENUM(BlueprintType)
-enum EActionField : uint8
-{
-	// 玩家无效时
-	None,
-	
-	EastNear,
-	EastMid,
-	EastFar,
-	EastRemote,
+#define CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Pointer) if(nullptr==(Pointer)){return;}
 
-	NorthNear,
-	NorthMid,
-	NorthFar,
-	NorthRemote,
 
-	WestNear,
-	WestMid,
-	WestFar,
-	WestRemote,
-
-	SouthNear,
-	SouthMid,
-	SouthFar,
-	SouthRemote
-};

@@ -51,5 +51,8 @@ public:
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     int OnDefendingHit(int iniDamage);
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAttackHolding();
     
 };

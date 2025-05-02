@@ -5,7 +5,7 @@
 
 #include "GameplayTagsManager.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "FunctionLibrary/SpaceFuncLib.h"
+#include "Utilitys/SpaceFuncLib.h"
 #include "Components/CapsuleComponent.h"
 #include "Enemy/BaseEnemy.h"
 #include "GameFramework/CharacterMovementComponent.h"

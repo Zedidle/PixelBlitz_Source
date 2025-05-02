@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "FunctionLibrary/SceneFuncLib.h"
+#include "Utilitys/SceneFuncLib.h"
 
 void USceneFuncLib::SetActorWorldRotationByQuat(AActor* Actor, const FQuat& NewRotation)
 {
