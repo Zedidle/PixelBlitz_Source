@@ -13,5 +13,8 @@ UCLASS()
 class PIXEL2DKIT_API UZDAN_OnAttackHolding : public UPaperZDAnimNotify
 {
 	GENERATED_BODY()
-	
+
+
+public:
+	virtual void OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance = nullptr) override;
 };
