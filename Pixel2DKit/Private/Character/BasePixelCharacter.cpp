@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BasePixelCharacter.h"
+#include "Character/BasePixelCharacter.h"
 #include "Anim/BasePixelAnimInstance.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -12,6 +12,7 @@
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Subsystems/PixelAnimSubsystem.h"
+#include "Character/Components/AbilityComponent.h"
 
 
 void ABasePixelCharacter::Tick_SaveFallingStartTime()
@@ -214,6 +215,7 @@ ABasePixelCharacter::ABasePixelCharacter(const FObjectInitializer& ObjectInitial
 {
 	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
+	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 }
 
 UHealthComponent* ABasePixelCharacter::GetHealthComponent() const
@@ -583,7 +585,7 @@ void ABasePixelCharacter::AddMovementInput(FVector WorldDirection, float ScaleVa
 	if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
 	{
 		float speed = GetCharacterMovement()->Velocity.Length();
-		GetCharacterMovement()->Velocity = 0.5 * speed * dir;
+		GetCharacterMovement()->Velocity = 0.2 * speed * dir;
 	}
 }
 

@@ -18,6 +18,9 @@ class PIXEL2DKIT_API UBasePixelAnimInstance : public UPaperZDAnimInstance
 
 
 public:
+	// static TMap<FName, FProperty> CachedProperties;
+	// virtual void PostInitProperties() override;
+
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDead;

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
-#include "BasePixelCharacter.h"
+#include "Character/BasePixelCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Pixel2DKit/Pixel2DKit.h"

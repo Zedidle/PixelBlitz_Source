@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "BasePixelCharacter.h"
+#include "Character/BasePixelCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "EnemyAIComponent.generated.h"
 

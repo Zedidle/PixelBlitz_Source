@@ -9,6 +9,7 @@
 
 class UInputAction;
 struct FInputActionValue;
+class UAbilityComponent;
 
 /**
  * 
@@ -60,6 +61,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, DisplayName="FightComp", Category = Fight)
 	TObjectPtr<UFightComponent> FightComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, DisplayName="AbilityComp", Category = Fight)
+	TObjectPtr<UAbilityComponent> AbilityComponent;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
 	UFightComponent* GetFightComponent() const;

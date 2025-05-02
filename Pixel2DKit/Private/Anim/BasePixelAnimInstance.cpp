@@ -6,6 +6,16 @@
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
 
+// void UBasePixelAnimInstance::PostInitProperties()
+// {
+// 	Super::PostInitProperties();
+// 	UClass* Class = GetClass();
+// 	for (TFieldIterator<FProperty> It(Class); It; ++It) {
+// 		FProperty* Prop = *It;
+// 		CachedProperties.Add(Prop->GetFName(), *Prop);
+// 	}
+// }
+
 void UBasePixelAnimInstance::SetActionField(const FGameplayTag& field)
 {
 	CurActionFiled = field;

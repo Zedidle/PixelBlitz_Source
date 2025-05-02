@@ -18,8 +18,8 @@ class PIXEL2DKIT_API UPixelAnimSubsystem : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 	public:
-
-	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, bool V);
-	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, float V);
-	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, int V);
+	
+	template <typename T>
+	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, T V);
 };
+
