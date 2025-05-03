@@ -6,6 +6,7 @@
 #include "Engine/DataTable.h"
 #include "Settings/DataTableSettings.h"
 #include "Engine/DeveloperSettings.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 
 
 void UDropSubsystem::Deinitialize()
@@ -33,12 +34,7 @@ void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocat
 	if (!IsValid(Settings)) return;
 	
 	ItemDataTable = Settings->GetItemData();
-	if (!ItemDataTable)
-	{
-// 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
-// FString::Printf(TEXT("UDropSubsystem ItemDataTable InValid, %d"), __LINE__));
-		return;
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ItemDataTable)
 	
 	FTimerHandle timerHandle;
 	TimerHandles.Add(timerHandle);

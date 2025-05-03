@@ -480,6 +480,11 @@ void ABasePixelCharacter::OnAttackHolding_Implementation()
 	IFight_Interface::OnAttackHolding_Implementation();
 }
 
+void ABasePixelCharacter::OnDefendingHitEffect_Implementation()
+{
+	IFight_Interface::OnDefendingHitEffect_Implementation();
+}
+
 void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,
                                                            const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
 {

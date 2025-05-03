@@ -92,7 +92,7 @@ public:
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
 
-	
+#pragma region Animations
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetDead(const bool V);
 
@@ -119,14 +119,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
 	void SetJumping(const bool V, const float time = 0.2f);
+#pragma endregion
 
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
 	float GetDistanceToPlayer() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	void TryAttack();
 
-	
+#pragma region Fight_Interface
 	virtual bool GetIsAttacking() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
@@ -137,7 +139,10 @@ public:
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
+	virtual void OnDieEnd_Implementation() override;
+#pragma endregion
 	
+#pragma region ActionFields
 	// 战斗的行动模式
 	virtual void ActionAtPlayerEastNear_Implementation(float Distance) override;
 	virtual void ActionAtPlayerEastMid_Implementation(float Distance) override;
@@ -155,7 +160,9 @@ public:
 	virtual void ActionAtPlayerSouthMid_Implementation(float Distance) override;
 	virtual void ActionAtPlayerSouthFar_Implementation(float Distance) override;
 	virtual void ActionAtPlayerSouthRemote_Implementation(float Distance) override;
+#pragma endregion ActionFields
 
+	
 	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
 	virtual bool InAttackRange() override;
 

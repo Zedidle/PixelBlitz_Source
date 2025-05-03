@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Utilitys/PixelCustomStruct.h"
+
 #include "PixelGameModeBase.generated.h"
+
+
 
 /**
  * 
@@ -14,12 +18,30 @@ class PIXEL2DKIT_API APixelGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<EWeather> WeatherType;
 
 
-	public:
 
+	
+#pragma region Sound Setting
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Setting")
+	float SoundSetting_Arg_MusicBasicMulti = 1.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound Setting")
+	float SoundSetting_Arg_VolumeBasicMulti = 1.0f;
+	
+#pragma endregion
+
+
+
+
+
+	
+#pragma region Nav
 	UFUNCTION(BlueprintCallable, Category = "Nav")
 	void NavRebuild();
-	
+#pragma endregion
 	
 };

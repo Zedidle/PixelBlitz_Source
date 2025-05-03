@@ -19,29 +19,41 @@ class PIXEL2DKIT_API UBasePixelGameInstance : public UGameInstance
 
 	
 public:
-
-	// GeneralSetting
+	
+#pragma region GeneralSetting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GeneralSetting")
 	uint8 GeneralSetting_Language;
+#pragma endregion
 
+
+
+#pragma region VideoSetting
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VideoSetting")
+	int VideoSetting_CameraMode;
+#pragma endregion
 
 
 	
-	// VideoSetting
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VideoSetting")
-	int VideoSetting_CameraMode;
+#pragma region SoundSetting
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SoundSetting")
+	bool SoundSetting_ToggleAll = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SoundSetting")
+	float SoundSetting_VolumeValue = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SoundSetting")
+	float SoundSetting_MusicValue = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SoundSetting")
+	float SoundSetting_UIValue = 1.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SoundSetting")
+	float SoundSetting_UIValue_BasicArg = 1.0f;
+	
+#pragma endregion
 
-
-
-
-
-
-
-
-	// GameSetting
+	
+#pragma region GameSetting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameSetting")
 	bool GameSetting_ShowDamageFloatText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameSetting")
@@ -50,6 +62,7 @@ public:
 	bool GameSetting_ShowGoldsFloatText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameSetting")
 	bool GameSetting_ShowBlood;
+#pragma endregion
 
 	
 };

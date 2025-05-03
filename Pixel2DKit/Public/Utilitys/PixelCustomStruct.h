@@ -25,6 +25,23 @@ class PIXEL2DKIT_API UPixelCustomStruct : public UObject
 
 
 
+#pragma region Enum
+
+UENUM(BlueprintType)
+enum EWeather : uint8
+{
+	Overcast UMETA(DisplayName = "阴"),
+	Fog UMETA(DisplayName = "雾"),
+	Sand UMETA(DisplayName = "沙"),
+	Snow UMETA(DisplayName = "雪"),
+	Rain UMETA(DisplayName = "雨"),
+	Sunny UMETA(DisplayName = "晴")
+	
+};
+
+
+#pragma endregion
+
 
 // 相对玩家的行动区间
 // UENUM(BlueprintType)

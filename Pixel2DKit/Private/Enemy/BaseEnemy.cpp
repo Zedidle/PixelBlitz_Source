@@ -248,6 +248,12 @@ int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 	return iniDamage;
 }
 
+void ABaseEnemy::OnDieEnd_Implementation()
+{
+	IFight_Interface::OnDieEnd_Implementation();
+	
+}
+
 void ABaseEnemy::Jump()
 {
 	Super::Jump();

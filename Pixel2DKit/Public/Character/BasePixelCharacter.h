@@ -211,6 +211,7 @@ public:
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage) override;
 	virtual int OnDefendingHit_Implementation(int inValue) override;
 	virtual void OnAttackHolding_Implementation() override;
+	virtual void OnDefendingHitEffect_Implementation() override;
 #pragma endregion
 
 
