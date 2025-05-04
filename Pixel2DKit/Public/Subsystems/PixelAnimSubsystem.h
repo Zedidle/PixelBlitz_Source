@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Animation/BasePixelAnimInstance.h"
 #include "PixelAnimSubsystem.generated.h"
 
 class UPaperZDAnimInstance;
@@ -20,6 +21,37 @@ class PIXEL2DKIT_API UPixelAnimSubsystem : public UGameInstanceSubsystem
 	public:
 	
 	template <typename T>
-	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, T V);
+	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, T V)
+	{
+		if (AnimInstance == nullptr) return;
+	
+		UClass* Class = AnimInstance->GetClass();
+		FProperty* Property = Class->FindPropertyByName(PropertyName);
+	
+		if constexpr (std::is_same_v<T, bool>)
+		{
+			if (Property && Property->IsA<FBoolProperty>())
+			{
+				const FBoolProperty* P = CastField<FBoolProperty>(Property);
+				P->SetPropertyValue_InContainer(AnimInstance, V);
+			}
+		}
+		else if constexpr (std::is_same_v<T, float>)
+		{
+			if (Property && Property->IsA<FFloatProperty>())
+			{
+				const FFloatProperty* P = CastField<FFloatProperty>(Property);
+				P->SetPropertyValue_InContainer(AnimInstance, V);
+			}
+		}
+		else if constexpr (std::is_same_v<T, int>)
+		{
+			if (Property && Property->IsA<FIntProperty>())
+			{
+				const FIntProperty* P = CastField<FIntProperty>(Property);
+				P->SetPropertyValue_InContainer(AnimInstance, V);
+			}
+		}
+	}
 };
 
