@@ -272,6 +272,11 @@ bool ABasePixelCharacter::GetIsAttacking()
 	return bInAttackEffect;
 }
 
+bool ABasePixelCharacter::GetIsDefending()
+{
+	return false;
+}
+
 void ABasePixelCharacter::SetDead(bool V)
 {
 	bDead = V;
@@ -483,6 +488,26 @@ void ABasePixelCharacter::OnAttackHolding_Implementation()
 void ABasePixelCharacter::OnDefendingHitEffect_Implementation()
 {
 	IFight_Interface::OnDefendingHitEffect_Implementation();
+}
+
+void ABasePixelCharacter::OnAnimVulnerableBegin_Implementation()
+{
+	IFight_Interface::OnAnimVulnerableBegin_Implementation();
+}
+
+void ABasePixelCharacter::OnAnimVulnerableEnd_Implementation()
+{
+	IFight_Interface::OnAnimVulnerableEnd_Implementation();
+}
+
+void ABasePixelCharacter::OnDashEffectBegin_Implementation()
+{
+	IFight_Interface::OnDashEffectBegin_Implementation();
+}
+
+void ABasePixelCharacter::OnDashEffectEnd_Implementation()
+{
+	IFight_Interface::OnDashEffectEnd_Implementation();
 }
 
 void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,

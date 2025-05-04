@@ -29,6 +29,9 @@ public:
     UFUNCTION(Category="Fight_Interface")
     virtual bool GetIsAttacking() = 0;
 
+    UFUNCTION(Category="Fight_Interface")
+    virtual bool GetIsDefending() = 0;
+    
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     bool IsAlive();
 
@@ -60,6 +63,31 @@ public:
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnDieEnd();
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnRemoteAttackEffect();
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnRemoteAttackEnd();
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAnimVulnerableBegin();
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAnimVulnerableEnd();
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnDashEffectBegin();
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnDashEffectEnd();
+    
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnDefendEffectBegin();
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnDefendEffectEnd();
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAttackEffectBegin();
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAttackEffectEnd();
     
     
 };

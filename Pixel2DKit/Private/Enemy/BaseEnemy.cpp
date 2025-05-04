@@ -14,6 +14,7 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Subsystems/PixelAnimSubsystem.h"
+#include "Utilitys/CommonFuncLib.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
@@ -185,6 +186,11 @@ bool ABaseEnemy::GetIsAttacking()
 	return bInAttackEffect;
 }
 
+bool ABaseEnemy::GetIsDefending()
+{
+	return bInDefendState;
+}
+
 bool ABaseEnemy::IsAlive_Implementation()
 {
 	return !bDead;
@@ -245,13 +251,49 @@ int ABaseEnemy::DamagePlus_Implementation(int inValue, AActor* ActorDamaged)
 
 int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 {
+	if (GetIsDefending())
+	{
+		UCommonFuncLib::SpawnFloatingTextDefault(TEXT("Ability/AbilityPassive"), TEXT("Defend"), GetActorLocation(),
+			FLinearColor(0.491, 0.672, 0.672));
+		SetDefendHurt(true);
+		return iniDamage / 2;
+	}
 	return iniDamage;
 }
 
 void ABaseEnemy::OnDieEnd_Implementation()
 {
 	IFight_Interface::OnDieEnd_Implementation();
-	
+}
+
+void ABaseEnemy::OnRemoteAttackEffect_Implementation()
+{
+	IFight_Interface::OnRemoteAttackEffect_Implementation();
+}
+
+void ABaseEnemy::OnRemoteAttackEnd_Implementation()
+{
+	IFight_Interface::OnRemoteAttackEnd_Implementation();
+}
+
+void ABaseEnemy::OnDefendEffectBegin_Implementation()
+{
+	IFight_Interface::OnDefendEffectBegin_Implementation();
+}
+
+void ABaseEnemy::OnDefendEffectEnd_Implementation()
+{
+	IFight_Interface::OnDefendEffectEnd_Implementation();
+}
+
+void ABaseEnemy::OnAttackEffectBegin_Implementation()
+{
+	IFight_Interface::OnAttackEffectBegin_Implementation();
+}
+
+void ABaseEnemy::OnAttackEffectEnd_Implementation()
+{
+	IFight_Interface::OnAttackEffectEnd_Implementation();
 }
 
 void ABaseEnemy::Jump()

@@ -199,6 +199,7 @@ public:
 	
 #pragma region IFight_Interface
 	virtual bool GetIsAttacking() override;
+	virtual bool GetIsDefending() override;
 	virtual bool CanAttack_Implementation() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual FGameplayTagContainer GetOwnCamp_Implementation() override;
@@ -212,6 +213,10 @@ public:
 	virtual int OnDefendingHit_Implementation(int inValue) override;
 	virtual void OnAttackHolding_Implementation() override;
 	virtual void OnDefendingHitEffect_Implementation() override;
+	virtual void OnAnimVulnerableBegin_Implementation() override;
+	virtual void OnAnimVulnerableEnd_Implementation() override;
+	virtual void OnDashEffectBegin_Implementation() override;
+	virtual void OnDashEffectEnd_Implementation() override;
 #pragma endregion
 
 

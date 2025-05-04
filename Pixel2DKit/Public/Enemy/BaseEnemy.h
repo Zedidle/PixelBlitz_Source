@@ -130,6 +130,7 @@ public:
 
 #pragma region Fight_Interface
 	virtual bool GetIsAttacking() override;
+	virtual bool GetIsDefending() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
 	virtual float GetRandomMoveRange_Implementation() override;
@@ -140,6 +141,12 @@ public:
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
 	virtual void OnDieEnd_Implementation() override;
+	virtual void OnRemoteAttackEffect_Implementation() override;
+	virtual void OnRemoteAttackEnd_Implementation() override;
+	virtual void OnDefendEffectBegin_Implementation() override;
+	virtual void OnDefendEffectEnd_Implementation() override;
+	virtual void OnAttackEffectBegin_Implementation() override;
+	virtual void OnAttackEffectEnd_Implementation() override;
 #pragma endregion
 	
 #pragma region ActionFields
