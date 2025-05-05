@@ -121,10 +121,15 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDashing;
 
+	
 	// 用于管理攻击冷却, 目前暂无用于动画控制
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackStatus;
 
+	// 处于攻击前摇
+	UPROPERTY(BlueprintReadWrite, Category = Animation)
+	bool bAttackStartup;
+	
 	// 用于管理攻击效果生效，暂不用于动画控制
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackEffect;
@@ -133,9 +138,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackAnimToggle;  
 
+	// 攻击蓄力中
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackHolding;
 
+	// 蓄力攻击释放
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackFire;
 	
@@ -243,7 +250,7 @@ public:
 
 inline bool ABasePixelCharacter::CanAttack_Implementation()
 {
-	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead;
+	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead && !bInAttackStatus;
 }
 
 inline void ABasePixelCharacter::SetBlendPitch(float V)
