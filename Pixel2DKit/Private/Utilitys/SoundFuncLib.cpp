@@ -26,9 +26,15 @@ void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, flo
 	
 	const UCustomResourceSettings* ResourceSetting = GetDefault<UCustomResourceSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceSetting)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceSetting->Attenuation_Default)
-	
-	UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume, 1.0f, 0.0f, ResourceSetting->Attenuation_Default.Get());
+
+	if (ResourceSetting->Attenuation_Default)
+	{
+		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume, 1.0f, 0.0f, ResourceSetting->Attenuation_Default.Get());
+	}
+	else
+	{
+		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume);
+	}
 }
 
 void USoundFuncLib::PlaySound2D(USoundBase* Sound, float Volume)
