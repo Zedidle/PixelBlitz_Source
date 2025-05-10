@@ -10,9 +10,13 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Enemy/EnemyAIController.h"
+#include "Enemy/EnemyDataAsset.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/PawnSensingComponent.h"
+#include "Subsystems/DataTableSubsystem.h"
+#include "Subsystems/DropSubsystem.h"
 #include "Subsystems/PixelAnimSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
 
@@ -152,6 +156,44 @@ float ABaseEnemy::GetDistanceToPlayer() const
 	return 99999;
 }
 
+void ABaseEnemy::LoadEnemyData()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset)
+	UDataTable* DataTable = DataAsset->EnemyLevelDataTable.Get();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	UDataTableSubsystem* DataTableManager = GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
+
+	EnemyData = DataTableManager->FindRow<FEnemyData>(DataTable, EnemyLevel);
+
+	HealthComponent->ModifyMaxHealth(EnemyData.HP, EStatChange::Reset, true);
+	SetActorScale3D(FVector(EnemyData.BodyScale));
+	DropData = EnemyData.Drop;
+	LoadLookDeterrence(EnemyData.LookDeterrence);
+
+	BasicAttackDamage = EnemyData.AttackDamage;
+	CurAttackDamage = BasicAttackDamage;
+	AttackInterval = EnemyData.AttackInterval;
+	
+	EnemyAIComponent->AttackRange = EnemyData.AttackRange;
+	GetCharacterMovement()->MaxAcceleration = EnemyData.MoveAcceleration;
+	GetCharacterMovement()->MaxWalkSpeed = EnemyData.MoveSpeed;
+
+	BasicAttackRepel = EnemyData.AttackKnockbackForce;
+	CurAttackRepel = BasicAttackRepel;
+
+	PawnSensingComponent->SightRadius = EnemyData.SightRadius;
+	LostEnemyTime = EnemyData.LostEnemyTime;
+
+	HealthComponent->RepelResistance = EnemyData.RepelResistance;
+	
+	
+	
+	
+	
+}
+
 void ABaseEnemy::SetLanding(const bool V, const float time)
 {
 	bLanding = V;
@@ -171,13 +213,46 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
-	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
+
+	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComponent"));
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 
 	// 近战的默认方位，针对不同怪物需要重定义
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.East.Near")));
+
+
+
+}
+
+void ABaseEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+	LoadEnemyData();
+}
+
+void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
+{
+}
+
+void ABaseEnemy::OnDie_Implementation()
+{
+
+	
+
+
+	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
+	DropSubsystem->SpawnItems(DropData, GetActorLocation(), 0.2f);
+
+	OnEnemyDeath.Broadcast(this);
+}
+
+
+void LoadLookDeterrence(int32 Level)
+{
+	
 }
 
 

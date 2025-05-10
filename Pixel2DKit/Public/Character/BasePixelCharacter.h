@@ -3,22 +3,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "PaperZDCharacter.h"
 #include "Interfaces/Fight_Interface.h"
+#include "AbilitySystemInterface.h"
 #include "BasePixelCharacter.generated.h"
 
 class UInputAction;
-struct FInputActionValue;
 class UAbilityComponent;
+class UPixelAbilitySystemComponent;
 
-/**
- * 
- */
+struct FInputActionValue;
+
+
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFight_Interface
+class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFight_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	class UPixelCharacterDataAsset* DataAsset;
+
+	
 	float FallingStartTime;
 	bool PreFrameFalling = false;
 	bool PreSpriteLeft = false;
@@ -50,23 +56,40 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	void SetLanding(const bool V, const float time = 0.1f);
 
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess = "true"), Category = Fight)
-	TObjectPtr<UHealthComponent> HealthComponent_CPP;
+
+
+
+protected:
+#pragma region GAS
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPixelAbilitySystemComponent* AbilitySystem = nullptr;
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	TWeakObjectPtr<class UPixelAttributeSet> AttributeSetBase;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GAS)
+	UPixelAttributeSet* GetAttributeSet() const;
+#pragma endregion
+	
+
 	
 public:
 	ABasePixelCharacter(const FObjectInitializer& ObjectInitializer);
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UHealthComponent* GetHealthComponent() const;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, DisplayName="FightComp", Category = Fight)
-	TObjectPtr<UFightComponent> FightComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, DisplayName="AbilityComp", Category = Fight)
-	TObjectPtr<UAbilityComponent> AbilityComponent;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	UHealthComponent* HealthComponent;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UFightComponent* GetFightComponent() const;
+	UHealthComponent* GetHealthComponent() { return HealthComponent; }
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UFightComponent> FightComponent;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UFightComponent* GetFightComponent() { return FightComponent; }
+
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UAbilityComponent> AbilityComponent;
 	
 	
 	virtual void BeginPlay() override;
@@ -74,7 +97,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void Falling() override;
 
-	
+
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicMoveSpeed = 200.f;
 	
@@ -99,6 +122,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddCameraOffset(const FVector& V);
 
+	UPROPERTY(BlueprintReadonly, Category = Movement)
+	int32 MaxJumpCount = 2;
+	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bDead;
 	
@@ -149,6 +175,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bMoving;
 
+	
+	
 	UFUNCTION(BlueprintCallable, Category = View)
 	void SetBlendPitch(float V);
 	UFUNCTION(BlueprintCallable, Category = View)

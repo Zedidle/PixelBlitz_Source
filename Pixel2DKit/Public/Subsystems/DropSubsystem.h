@@ -23,17 +23,6 @@ struct FItemData: public FTableRowBase
 };
 
 
-USTRUCT(BlueprintType)
-struct FDrop
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
-	TMap<FName, int> Items; // 物品及对应概率比率
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
-	int DropTotalNum = 1;
-};
 
 
 

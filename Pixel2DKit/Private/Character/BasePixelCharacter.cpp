@@ -9,10 +9,14 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Character/PixelCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Subsystems/PixelAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
+#include "PlayerState/PixelCharacterPlayerState.h"
+#include "Sound/SoundCue.h"
+#include "Utilitys/SoundFuncLib.h"
 
 
 void ABasePixelCharacter::Tick_SaveFallingStartTime()
@@ -213,19 +217,9 @@ void ABasePixelCharacter::Tick_CalCameraOffset()
 ABasePixelCharacter::ABasePixelCharacter(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	HealthComponent_CPP = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent_CPP"));
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
-}
-
-UHealthComponent* ABasePixelCharacter::GetHealthComponent() const
-{
-	return HealthComponent_CPP;
-}
-
-UFightComponent* ABasePixelCharacter::GetFightComponent() const
-{
-	return FightComponent;
 }
 
 void ABasePixelCharacter::BeginPlay()
@@ -233,6 +227,8 @@ void ABasePixelCharacter::BeginPlay()
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
+
+	
 }
 
 void ABasePixelCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -250,6 +246,22 @@ void ABasePixelCharacter::Falling()
 {
 	Super::Falling();
 	SetFalling(true);
+}
+
+UAbilitySystemComponent* ABasePixelCharacter::GetAbilitySystemComponent() const
+{
+	
+	if(const APixelCharacterPlayerState* CharacterPlayerState = Cast<APixelCharacterPlayerState>(GetPlayerState()))
+	{
+		return CharacterPlayerState->GetAbilitySystemComponent();
+	}
+
+	return nullptr;
+}
+
+UPixelAttributeSet* ABasePixelCharacter::GetAttributeSet() const
+{
+	return AttributeSetBase.Get();
 }
 
 FVector ABasePixelCharacter::GetMoveForwardVector()
@@ -531,6 +543,12 @@ void ABasePixelCharacter::Jump()
 void ABasePixelCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
+
+	if (DataAsset && DataAsset->LandedSound)
+	{
+		USoundFuncLib::PlaySoundAtLocation(DataAsset->LandedSound.Get(), GetActorLocation(), 1.0f);
+	}
+	
 	SetLanding(true);
 	SetJumping(false);
 	SetFalling(false);

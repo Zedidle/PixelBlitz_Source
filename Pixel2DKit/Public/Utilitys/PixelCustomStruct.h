@@ -43,6 +43,19 @@ enum EWeather : uint8
 #pragma endregion
 
 
+USTRUCT(BlueprintType)
+struct FDrop
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	TMap<FName, int> Items; // 物品及对应概率比率
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	int DropTotalNum = 1;
+};
+
+
 // 相对玩家的行动区间
 // UENUM(BlueprintType)
 // enum EActionField : uint8

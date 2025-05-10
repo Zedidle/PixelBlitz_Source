@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,15 +5,73 @@
 #include "Character/BasePixelCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
-#include "Pixel2DKit/Pixel2DKit.h"
+#include "Utilitys/PixelCustomStruct.h"
+#include "Engine/DataTable.h"
 #include "BaseEnemy.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, ABaseEnemy*)
+
+
+USTRUCT(BlueprintType)
+struct FEnemyData : public FTableRowBase 
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 Level;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 HP;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BodyScale;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 AttackDamage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float AttackInterval;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float MoveSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float MoveAcceleration;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 LookDeterrence;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 AttackComplexity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FVector AttackKnockbackForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FVector RepelResistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float SightRadius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float LostEnemyTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FDrop Drop;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FVector2D AttackRange;
+};
+
+
+
+
+class UPawnSensingComponent;
 class UEnemyAIComponent;
 class UHealthComponent;
 class UFightComponent;
-/**
- * 
- */
+class UEnemyDataAsset;
+
 UCLASS()
 class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface
 {
@@ -24,19 +80,38 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	UPROPERTY()
 	ABasePixelCharacter* PixelCharacter;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	UEnemyDataAsset* DataAsset;
+
+	void LoadEnemyData();
 
 
+	
 	void SetLanding(const bool V, const float time = 0.1f);
 
 	
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, meta=(AllowPrivateAccess=true))
+	void LoadLookDeterrence(int32 Level);
+	void LoadLookDeterrence_Implementation(int32 Level);
+	
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, meta=(AllowPrivateAccess=true))
+	void OnDie();
+	void OnDie_Implementation();
+	FOnEnemyDeath OnEnemyDeath;
+	
+	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
+	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
+	
 	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UHealthComponent> HealthComponent_CPP;
+	TObjectPtr<UHealthComponent> HealthComponent;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UFightComponent> FightComp;
@@ -47,6 +122,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Enemy")
 	bool SetPixelCharacter(AActor* Character);
 
+	UPROPERTY(BlueprintReadOnly)
+	FEnemyData EnemyData;
+	
+	UPROPERTY()
+	FDrop DropData;
+
+	UPROPERTY()
+	int32 BasicAttackDamage = 10;
+
+	UPROPERTY()
+	int32 CurAttackDamage = 10;
+	
+	UPROPERTY(BlueprintReadWrite)
+	float AttackInterval = 2.0f;
+
+	UPROPERTY()
+	float BasicMoveSpeed = 100.0f;
+
+	UPROPERTY(BlueprintReadOnly);
+	float LostEnemyTime = 5.0f;
+	
+	
+	
 	// 基础攻击击退力度
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
 	FVector BasicAttackRepel = FVector(50,50,100); 
@@ -176,6 +274,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
 	FGameplayTagContainer ActionFieldsCanAttack;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
+	FName EnemyLevel = "1"; 
 	
 protected:
 	void Tick_KeepFaceToPixelCharacter(float DeltaSeconds);

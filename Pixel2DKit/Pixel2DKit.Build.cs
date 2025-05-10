@@ -11,9 +11,8 @@ public class Pixel2DKit : ModuleRules
 	
         	PublicIncludePaths.AddRange(
 			new string[] {
-                		Path.Combine(ModuleDirectory, "Public"),
-                		Path.Combine(ModuleDirectory, "Public/Steam")
-		                
+                Path.Combine(ModuleDirectory, "Public"),
+                Path.Combine(ModuleDirectory, "Public/Steam")
 			}
 		);
 
@@ -21,12 +20,13 @@ public class Pixel2DKit : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore",
 			"Niagara","GameplayTags",
 			"UMG","AIModule","DeveloperSettings",
+			"GameplayAbilities", "GameplayTasks", 
 			// "SteamLeaderboardSubsystem",
 			"OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils",
 			"EnhancedInput",
 			"PaperZD", "Paper2D",
 			"NavigationSystem",
-			"UMGEditor"
+			"UMGEditor", "GameplayAbilities"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
