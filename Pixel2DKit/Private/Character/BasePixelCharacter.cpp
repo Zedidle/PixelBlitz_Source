@@ -19,6 +19,14 @@
 #include "Utilitys/SoundFuncLib.h"
 
 
+void ABasePixelCharacter::LoadData()
+{
+	if (!DataAsset) return;
+	BasicMaxJumpCount = DataAsset->MaxJumpCount;
+	CurMaxJumpCount = BasicMaxJumpCount;
+	BasicMaxJumpCount = DataAsset->BasicJumpMaxHoldTime;
+}
+
 void ABasePixelCharacter::Tick_SaveFallingStartTime()
 {
 	if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
@@ -227,8 +235,6 @@ void ABasePixelCharacter::BeginPlay()
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
-
-	
 }
 
 void ABasePixelCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)

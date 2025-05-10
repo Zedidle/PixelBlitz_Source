@@ -23,7 +23,7 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	class UPixelCharacterDataAsset* DataAsset;
-
+	void LoadData();
 	
 	float FallingStartTime;
 	bool PreFrameFalling = false;
@@ -122,8 +122,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddCameraOffset(const FVector& V);
 
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	int32 CurMaxJumpCount = 2;
 	UPROPERTY(BlueprintReadonly, Category = Movement)
-	int32 MaxJumpCount = 2;
+	int32 BasicMaxJumpCount = 2;
+	UPROPERTY(BlueprintReadonly, Category = Movement)
+	float BasicJumpMaxHoldTime = 0.3f;
+
+	
 	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bDead;
