@@ -26,6 +26,8 @@ class PIXEL2DKIT_API UPixelAnimSubsystem : public UGameInstanceSubsystem
 		if (AnimInstance == nullptr) return;
 	
 		UClass* Class = AnimInstance->GetClass();
+
+		// FindPropertyByName 据说是效率奇差，如何优化？
 		FProperty* Property = Class->FindPropertyByName(PropertyName);
 	
 		if constexpr (std::is_same_v<T, bool>)

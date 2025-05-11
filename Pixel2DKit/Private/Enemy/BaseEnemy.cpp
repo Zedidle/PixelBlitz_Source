@@ -156,7 +156,7 @@ float ABaseEnemy::GetDistanceToPlayer() const
 	return 99999;
 }
 
-void ABaseEnemy::LoadEnemyData()
+void ABaseEnemy::LoadEnemyData_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset)
 	UDataTable* DataTable = DataAsset->EnemyLevelDataTable.Get();
@@ -187,11 +187,6 @@ void ABaseEnemy::LoadEnemyData()
 	LostEnemyTime = EnemyData.LostEnemyTime;
 
 	HealthComponent->RepelResistance = EnemyData.RepelResistance;
-	
-	
-	
-	
-	
 }
 
 void ABaseEnemy::SetLanding(const bool V, const float time)

@@ -83,7 +83,6 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	UEnemyDataAsset* DataAsset;
 
-	void LoadEnemyData();
 
 
 	
@@ -95,6 +94,10 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void LoadEnemyData();
+	// void LoadEnemyData_Implementation();
+	
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, meta=(AllowPrivateAccess=true))
 	void LoadLookDeterrence(int32 Level);
 	void LoadLookDeterrence_Implementation(int32 Level);
