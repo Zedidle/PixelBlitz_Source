@@ -297,7 +297,7 @@ bool ABaseEnemy::InAttackRange()
 bool ABaseEnemy::CanAttack_Implementation()
 {
 	if (!IsValid(PixelCharacter)) return false;
-	if (!IFight_Interface::Execute_IsAlive(PixelCharacter)) return false;
+	if (!Execute_IsAlive(PixelCharacter)) return false;
 	
 	return !bDead && !bInAttackState;
 }

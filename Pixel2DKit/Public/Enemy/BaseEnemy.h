@@ -131,10 +131,10 @@ public:
 	UPROPERTY()
 	FDrop DropData;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	int32 BasicAttackDamage = 10;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	int32 CurAttackDamage = 10;
 	
 	UPROPERTY(BlueprintReadWrite)

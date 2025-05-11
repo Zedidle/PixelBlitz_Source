@@ -43,7 +43,11 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	
 	if (IFight_Interface* FightOwner = Cast<IFight_Interface>(Owner))
 	{
-		if (!FightOwner->GetIsAttacking()) return;
+		if (!FightOwner->GetIsAttacking())
+		{
+			SetComponentTickEnabled(false);
+			return;
+		}
 		
 		for (auto& name : SocketNames)
 		{
