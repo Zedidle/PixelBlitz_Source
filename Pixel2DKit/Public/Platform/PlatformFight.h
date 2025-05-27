@@ -21,7 +21,7 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 	ABasePixelCharacter* PlayerCharacter;
 
 	UPROPERTY(BlueprintReadOnly)

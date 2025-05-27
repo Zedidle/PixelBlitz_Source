@@ -57,7 +57,7 @@ ABaseEnemy* AEnemySpawner::SpawnEnemy()
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 				SelfEnemy = Cast<ABaseEnemy>(GetWorld()->SpawnActor(ele.Key.Get(), SpawnTransform, SpawnParams));
-
+				SelfEnemy->Initialize(EnemyLevel);
 				if (SelfEnemy)
 				{
 					for (auto Tag : Tags)

@@ -31,6 +31,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClassRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName EnemyLevel;
 	
 	UFUNCTION(BlueprintCallable)
 	ABaseEnemy* SpawnEnemy();

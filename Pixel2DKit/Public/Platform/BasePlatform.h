@@ -30,14 +30,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TEnumAsByte<EComponentMobility::Type> EMovable = EComponentMobility::Static;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn))
 	float FloatSpeedPeroid = 1.0;
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	float DistanceRandomRatio = 0.1;
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	FVector FloatDirection = FVector(0,0,1);
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn))
 	float FloatDistance = 0.1;
 
 

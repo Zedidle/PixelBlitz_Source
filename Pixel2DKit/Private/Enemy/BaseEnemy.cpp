@@ -156,7 +156,7 @@ float ABaseEnemy::GetDistanceToPlayer() const
 	return 99999;
 }
 
-void ABaseEnemy::LoadEnemyData_Implementation()
+void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset)
 	UDataTable* DataTable = DataAsset->EnemyLevelDataTable.Get();
@@ -222,10 +222,15 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 
 }
 
+void ABaseEnemy::Initialize(FName Level)
+{
+	EnemyLevel = Level;
+	LoadEnemyData(EnemyLevel);
+}
+
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	LoadEnemyData();
 }
 
 void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)

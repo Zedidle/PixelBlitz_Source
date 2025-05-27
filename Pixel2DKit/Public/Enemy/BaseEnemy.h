@@ -93,17 +93,18 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	void Initialize(FName Level);
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintNativeEvent)
-	void LoadEnemyData();
-	// void LoadEnemyData_Implementation();
+	void LoadEnemyData(FName Level);
+	void LoadEnemyData_Implementation(FName Level);
 	
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, meta=(AllowPrivateAccess=true))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void LoadLookDeterrence(int32 Level);
 	void LoadLookDeterrence_Implementation(int32 Level);
 	
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, meta=(AllowPrivateAccess=true))
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnDie();
 	void OnDie_Implementation();
 

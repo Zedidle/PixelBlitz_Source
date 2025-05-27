@@ -355,6 +355,11 @@ void ABasePixelCharacter::SetLanding(bool V, float time)
 
 void ABasePixelCharacter::OnDie_Implementation()
 {
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->Velocity = FVector(0, 0, 0);
+	}
+	
 	OnPlayerDie.Broadcast();
 }
 
