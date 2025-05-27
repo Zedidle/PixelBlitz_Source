@@ -4,6 +4,7 @@
 #include "Animation/Notify//ZDAN_OnAttackAnimOff.h"
 #include "Animation/BasePixelAnimInstance.h"
 #include "Character/BasePixelCharacter.h"
+#include "Enemy/BaseEnemy.h"
 #include "Subsystems/PixelAnimSubsystem.h"
 
 void UZDAN_OnAttackAnimOff::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
@@ -16,6 +17,10 @@ void UZDAN_OnAttackAnimOff::OnReceiveNotify_Implementation(UPaperZDAnimInstance*
 		if (ABasePixelCharacter* PixelCharacter = Cast<ABasePixelCharacter>(PaperZDCharacter))
 		{
 			PixelCharacter->SetAttackAnimToggle(false);
+		}
+		else if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(PaperZDCharacter))
+		{
+			Enemy->SetAttackAnimToggle(false);
 		}
 	}
 }

@@ -234,10 +234,6 @@ void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
 
 void ABaseEnemy::OnDie_Implementation()
 {
-
-	
-
-
 	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
 	DropSubsystem->SpawnItems(DropData, GetActorLocation(), 0.2f);
 

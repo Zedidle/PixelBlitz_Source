@@ -9,7 +9,8 @@
 #include "Engine/DataTable.h"
 #include "BaseEnemy.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, ABaseEnemy*)
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, ABaseEnemy*, Enemy);
 
 
 USTRUCT(BlueprintType)
@@ -105,6 +106,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, meta=(AllowPrivateAccess=true))
 	void OnDie();
 	void OnDie_Implementation();
+
+	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDeath OnEnemyDeath;
 	
 	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
@@ -277,7 +280,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
 	FGameplayTagContainer ActionFieldsCanAttack;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight", meta = (ExposeOnSpawn = true))
 	FName EnemyLevel = "1"; 
 	
 protected:

@@ -9,6 +9,9 @@
 #include "AbilitySystemInterface.h"
 #include "BasePixelCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
+
+
 class UInputAction;
 class UAbilityComponent;
 class UPixelAbilitySystemComponent;
@@ -29,6 +32,10 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 	bool PreFrameFalling = false;
 	bool PreSpriteLeft = false;
 
+public:
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerDie OnPlayerDie;
+	
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FVector FightCenterForCameraOffset = FVector(0.0f);
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
@@ -55,8 +62,9 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 
 	void SetLanding(const bool V, const float time = 0.1f);
 
-
-
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnDie();
+	void OnDie_Implementation();
 
 
 protected:
@@ -189,6 +197,8 @@ public:
 	void SetBlendYaw(float V);
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddBlendYaw(float V);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = View)
+	void AddViewYaw(float V, bool bPlayerControl);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Movement)
 	float GetFallingTime();

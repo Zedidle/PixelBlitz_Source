@@ -353,6 +353,11 @@ void ABasePixelCharacter::SetLanding(bool V, float time)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
+void ABasePixelCharacter::OnDie_Implementation()
+{
+	OnPlayerDie.Broadcast();
+}
+
 
 void ABasePixelCharacter::SetDashing(bool V)
 {
@@ -382,6 +387,11 @@ void ABasePixelCharacter::SetMoving(bool V)
 {
 	bMoving = V;
 	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bMoving")), V);
+}
+
+
+void ABasePixelCharacter::AddViewYaw_Implementation(float V, bool bPlayerControl)
+{
 }
 
 float ABasePixelCharacter::GetFallingTime()
