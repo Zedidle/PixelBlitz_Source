@@ -26,6 +26,15 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
+
+	OnPXAttributeChange.Broadcast(Attribute, OldValue, NewValue);
+
+	// if (Attribute == GetEnergyAttribute())
+	// {
+	// 	GetOwningActor()
+	// }
+	
+	
 }
 
 bool UPXAttributeSet::GetAttrCurrentValueByName(FName AttrName, float& OutValue)

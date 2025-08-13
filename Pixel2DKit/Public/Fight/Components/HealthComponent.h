@@ -82,13 +82,6 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
 	FOnHealthChangedSignature OnHPChanged;
 	
-	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
-	FMaxHealthChanged OnMaxHPChanged;
-
-	
-
-
-	
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();

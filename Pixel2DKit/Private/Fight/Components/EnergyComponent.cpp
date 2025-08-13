@@ -136,13 +136,16 @@ int32 UEnergyComponent::GetMaxEnergy()
 
 void UEnergyComponent::SetMaxEnergy(int32 NewValue)
 {
-	if (const AActor* TargetActor = GetOwner())
-	{
-		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
-		{
-			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxEnergyAttribute(), NewValue);
-		}
-	}
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return;
+	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
+	if (!IsValid(TargetASC)) return;
+	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	if (!IsValid(PixelAS)) return;
+
+	NewValue = FMath::Max(NewValue, 0);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxEnergyAttribute(), NewValue);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), NewValue);
 }
 
 bool UEnergyComponent::IsEnergyEnough(int32 Cost)

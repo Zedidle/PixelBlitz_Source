@@ -30,13 +30,13 @@ class PIXEL2DKIT_API UPXAttributeSet : public UAttributeSet
 
 
 public:
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool GetAttrCurrentValueByName(FName AttrName, float& OutValue);
 	
 	UFUNCTION(BlueprintCallable)
 	bool SetAttrCurrentValueByName(FName AttrName, float Value);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool GetAttrBaseValueByName(FName AttrName, float& OutValue);
 
 	UFUNCTION(BlueprintCallable)
@@ -49,6 +49,7 @@ private:
 	
 	
 public:
+	UPROPERTY(BlueprintAssignable, Category = "AttributeSet|Prop")
 	FOnPixelAttributeChangeDelegate OnPXAttributeChange;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", ReplicatedUsing = OnRep_HP)

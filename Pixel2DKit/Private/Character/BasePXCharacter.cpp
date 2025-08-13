@@ -241,17 +241,28 @@ void ABasePXCharacter::BeginPlay()
 	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
 
-	// AttributeSet 初始化
+
 	
-	// if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
-	// {
-	// 	const auto EffectContext = AbilitySystem->MakeEffectContext();
-	// 	const auto SpecHandle = AbilitySystem->MakeOutgoingSpec(TestGE->GetClass(), 1, EffectContext);
-	// 	if (SpecHandle.IsValid())
-	// 	{
-	// 		AbilitySystem->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), AbilitySystem);
-	// 	}
-	// }
+	// AttributeSet 初始化
+	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
+	{
+		// const auto EffectContext = AbilitySystem->MakeEffectContext();
+		// const auto SpecHandle = AbilitySystem->MakeOutgoingSpec(TestGE->GetClass(), 1, EffectContext);
+		// if (SpecHandle.IsValid())
+		// {
+		// 	AbilitySystem->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), AbilitySystem);
+		// }
+		
+		for (auto Ability : InitAbilitiesToGive)
+		{
+			AbilitySystem->K2_GiveAbility(Ability);
+		}
+		
+		for (auto Ability : InitAbilitiesToActivate)
+		{
+			AbilitySystem->K2_GiveAbilityAndActivateOnce(Ability);
+		}	
+	}
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)

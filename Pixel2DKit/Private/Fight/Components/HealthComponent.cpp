@@ -192,7 +192,7 @@ void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, co
 		}
 	}
 
-	OnMaxHPChanged.Broadcast(MaxHealth, ChangeType);
+	// OnMaxHPChanged.Broadcast(MaxHealth, ChangeType);
 }
 
 void UHealthComponent::SetHP(const int32 value, const bool broadcast)

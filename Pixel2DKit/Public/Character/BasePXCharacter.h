@@ -7,6 +7,7 @@
 #include "PaperZDCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "AbilitySystemInterface.h"
+#include "Abilities/GameplayAbility.h"
 #include "BasePXCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
@@ -107,6 +108,12 @@ protected:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	TWeakObjectPtr<class UPXAttributeSet> AttributeSetBase;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToActivate;
 
 #pragma endregion
 	
