@@ -46,8 +46,6 @@ class UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// int MaxHealth = 100;
-	// int CurrentHealth = 100;
 	float OnHurtInvulnerableDelay = 0.1;  // 受到伤害后的一段时候才会触发无敌帧，支持短时间内的连击，后续考虑拉长并多段连击，攻击命中后会续时
 	float InvulnerableDuration = 0.5; // 无敌帧时间
 

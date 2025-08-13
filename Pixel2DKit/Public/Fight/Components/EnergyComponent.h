@@ -47,22 +47,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	ABasePXCharacter* PlayerCharacter;
-
-	UPROPERTY(BlueprintReadOnly)
-	FTimerHandle TimerHandle_Recover;
 	
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	// int32 StartingEnergy;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	// int32 MaxEnergy;
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	// int32 CurrentEnergy;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 RecoverSpeed;
-
-	// 后续恢复改用GameplayEffect
-	UPROPERTY()
-	FTimerHandle RecoverTimer;
+	int32 RecoverLevel;
 	
 protected:
 	// Called when the game starts
@@ -71,13 +58,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnEnergyChanged OnEnergyChanged;
-
-	UPROPERTY(BlueprintAssignable)
-	FOnMaxEnergyChanged OnMaxEnergyChanged;
-
 	
 	UFUNCTION(BlueprintCallable)
 	bool DecreaseEnergy(int32 Amount, AActor* Instigator);

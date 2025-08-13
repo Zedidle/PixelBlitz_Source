@@ -61,7 +61,6 @@ bool UEnergyComponent::DecreaseEnergy(int32 Amount, AActor* Instigator)
 				{
 					CurValue -= Consume;
 					TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), CurValue);
-					OnEnergyChanged.Broadcast(CurValue, EStatChange::Increase, Instigator);
 					return true;
 				}
 			}
@@ -86,7 +85,6 @@ void UEnergyComponent::IncreaseEnergy(int32 Amount, AActor* Instigator)
 			{
 				float NewValue = FMath::Min(PixelAS->GetEnergy() + Amount, PixelAS->GetMaxEnergy());
 				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), NewValue);
-				OnEnergyChanged.Broadcast(NewValue, EStatChange::Increase, Instigator);
 			}
 		}
 	}
@@ -99,7 +97,6 @@ void UEnergyComponent::SetEnergy(int32 NewValue, AActor* Instigator)
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
 		{
 			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), NewValue);
-			OnEnergyChanged.Broadcast(NewValue, EStatChange::Reset, Instigator);
 		}
 	}
 }

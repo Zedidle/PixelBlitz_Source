@@ -21,6 +21,17 @@ void UPXAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
+	
+	if(Attribute == GetHPAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHP());
+	}
+
+	if(Attribute == GetEnergyAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxEnergy());
+	}
+	
 }
 
 void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)

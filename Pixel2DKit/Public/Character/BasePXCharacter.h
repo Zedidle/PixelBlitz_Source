@@ -113,7 +113,7 @@ protected:
 	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToActivate;
+	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
 
 #pragma endregion
 	

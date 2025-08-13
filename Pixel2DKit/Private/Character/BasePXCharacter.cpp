@@ -257,10 +257,26 @@ void ABasePXCharacter::BeginPlay()
 		{
 			AbilitySystem->K2_GiveAbility(Ability);
 		}
+
+		FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
 		
-		for (auto Ability : InitAbilitiesToActivate)
+		for (auto Effect : InitEffects)
 		{
-			AbilitySystem->K2_GiveAbilityAndActivateOnce(Ability);
+			// AbilitySystem->ApplyGameplayEffectToSelf(Effect.Get());
+			// 创建效果实例
+			UGameplayEffect* GameplayEffect = Effect->GetDefaultObject<UGameplayEffect>();
+			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
+				Effect, 
+				1.0f, 
+				EffectContext
+			);
+        
+			if (SpecHandle.IsValid())
+			{
+				// 应用效果到自身
+				AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			}
 		}	
 	}
 }
