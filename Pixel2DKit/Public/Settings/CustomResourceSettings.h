@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "Utilitys/PixelCustomStruct.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "CustomResourceSettings.generated.h"
 
 class UNiagaraSystem;

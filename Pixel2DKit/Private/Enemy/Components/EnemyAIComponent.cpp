@@ -19,7 +19,7 @@ UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer
 	
 }
 
-void UEnemyAIComponent::SetPixelCharacter(ABasePixelCharacter* Character)
+void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
 {
 	if (AttackPatienceTimerHandle.IsValid())
 	{

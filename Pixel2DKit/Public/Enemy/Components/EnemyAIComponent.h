@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Character/BasePixelCharacter.h"
+#include "Character/BasePXCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "EnemyAIComponent.generated.h"
 
@@ -59,7 +59,7 @@ public:
 	FVector CurTargetLocation;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
-	ABasePixelCharacter* PixelCharacter;
+	ABasePXCharacter* PixelCharacter;
 	
 	// 如果 n 秒内都打不到玩家，则回到巡逻状态
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
@@ -73,7 +73,7 @@ public:
 	FActionFieldDistance ActionFieldDistance;
 	
 	UFUNCTION(BlueprintCallable, Category="Enemy")
-	void SetPixelCharacter(ABasePixelCharacter* Character);
+	void SetPixelCharacter(ABasePXCharacter* Character);
 	
 
 	/* 向量点积法 弱随机移动到目标位置

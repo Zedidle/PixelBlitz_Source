@@ -71,7 +71,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 				if (UHealthComponent* HealthComponent = HitActor->GetComponentByClass<UHealthComponent>())
 				{
 					UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, CurHitEffect, hit.ImpactPoint);
-					HealthComponent->DecreaseHealth(CurMeleeDamage, CurKnockbackForceMelee, Owner);
+					HealthComponent->DecreaseHP(CurMeleeDamage, CurKnockbackForceMelee, Owner);
 					IFight_Interface::Execute_OnAttackHiting(Owner);
 				}
 			}

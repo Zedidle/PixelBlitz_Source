@@ -3,18 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbilitySystemComponent.h"
-#include "PixelAbilitySystemComponent.generated.h"
+#include "GAS/AttributeSet/PXAttributeSet.h"
+#include "PXCharacterAttributeSet.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPixelAbilitySystemComponent : public UAbilitySystemComponent
+class PIXEL2DKIT_API UPXCharacterAttributeSet : public UPXAttributeSet
 {
 	GENERATED_BODY()
-
 public:
+	
 	
 
 };

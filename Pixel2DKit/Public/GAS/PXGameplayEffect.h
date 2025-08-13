@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
-#include "PixelGameplayEffect.generated.h"
+#include "PXGameplayEffect.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPixelGameplayEffect : public UGameplayEffect
+class PIXEL2DKIT_API UPXGameplayEffect : public UGameplayEffect
 {
 	GENERATED_BODY()
 	

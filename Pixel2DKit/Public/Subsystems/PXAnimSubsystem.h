@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Animation/BasePixelAnimInstance.h"
-#include "PixelAnimSubsystem.generated.h"
+#include "PXAnimSubsystem.generated.h"
 
 class UPaperZDAnimInstance;
 
@@ -14,7 +14,7 @@ class UPaperZDAnimInstance;
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPixelAnimSubsystem : public UGameInstanceSubsystem
+class PIXEL2DKIT_API UPXAnimSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 

@@ -2,16 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
-#include "Character/BasePixelCharacter.h"
+#include "Character/BasePXCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
-#include "Utilitys/PixelCustomStruct.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "Engine/DataTable.h"
+#include "GAS/PXEnemyASComponent.h"
 #include "BaseEnemy.generated.h"
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, ABaseEnemy*, Enemy);
 
+
+class UPXEnemyAttributeSet;
 
 USTRUCT(BlueprintType)
 struct FEnemyData : public FTableRowBase 
@@ -74,17 +77,15 @@ class UFightComponent;
 class UEnemyDataAsset;
 
 UCLASS()
-class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface
+class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 	
 	UPROPERTY()
-	ABasePixelCharacter* PixelCharacter;
+	ABasePXCharacter* PixelCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	UEnemyDataAsset* DataAsset;
-
-
 
 	
 	void SetLanding(const bool V, const float time = 0.1f);
@@ -233,6 +234,26 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	void TryAttack();
 
+
+
+
+#pragma region GAS
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPXEnemyASComponent* AbilitySystem = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPXEnemyAttributeSet* AttributeSet = nullptr;
+	
+	
+#pragma endregion
+
+
+
+
+
+	
 #pragma region Fight_Interface
 	virtual bool GetIsAttacking() override;
 	virtual bool GetIsDefending() override;

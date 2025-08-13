@@ -5,11 +5,16 @@
 
 #include "GameDelegates.h"
 #include "PaperFlipbookComponent.h"
+#include "Character/BasePXCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/CameraShakeSettings.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "AbilitySystemInterface.h"
+#include "AbilitySystemGlobals.h"
+#include "GAS/AttributeSet/PXAttributeSet.h"
 
 class ULegacyCameraShake;
 
@@ -32,7 +37,7 @@ int UHealthComponent::CalAcceptDamage(int initDamage, AActor* instigator)
 		return tmpDamageAdd + initDamage;
 	}
 
-	if (GetCurrentHealth() <= 0) return 0;
+	if (GetCurrentHP() <= 0) return 0;
 	
 	// 判断是否为BOSS
 	if (ownerTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Enemy.BOSS"))))
@@ -146,51 +151,70 @@ void UHealthComponent::SetInvulnerable(const bool v)
 	bInvulnerable = v;
 }
 
-void UHealthComponent::ModifyMaxHealth(const int32 value, const EStatChange ChangeType, const bool current)
+void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current)
 {
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return;
+	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
+	if (!IsValid(TargetASC)) return;
+	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	if (!IsValid(PixelAS)) return;
+
+	value = FMath::Max(value, 0);
+	
+	int CurrentHealth = PixelAS->GetHP();
+	int MaxHealth = PixelAS->GetMaxHP();
+	
 	if (ChangeType == EStatChange::Increase)
 	{
 		MaxHealth += value;
 		if (current)
 		{
-			SetHealth(CurrentHealth + value, false);
+			SetHP(CurrentHealth + value, false);
 		}
 	}
 
 	if (ChangeType == EStatChange::Decrease)
 	{
-		MaxHealth -= FMath::Max(0, value);
+		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), FMath::Max(0, MaxHealth - value));
 		if (current)
 		{
-			SetHealth(CurrentHealth - value, false);
+			SetHP(FMath::Max(0, CurrentHealth - value), false);
 		}
 	}
 
 	if (ChangeType == EStatChange::Reset)
 	{
-		MaxHealth = value;
-		if (current)
+		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), value);
+		if (current || value < CurrentHealth)
 		{
-			SetHealth(value, false);
-		}
-		else
-		{
-			SetHealth(FMath::Clamp(CurrentHealth, 0, MaxHealth), false);
+			SetHP(value, false);
 		}
 	}
 
-	OnMaxHealthChanged.Broadcast(MaxHealth, ChangeType);
+	OnMaxHPChanged.Broadcast(MaxHealth, ChangeType);
 }
 
-void UHealthComponent::SetHealth(const int32 value, const bool broadcast)
+void UHealthComponent::SetHP(const int32 value, const bool broadcast)
 {
-	int preHealth = CurrentHealth;
-	CurrentHealth = FMath::Clamp(value, 0, MaxHealth);
-	int changedValue = CurrentHealth - preHealth;
-	EStatChange changeType = changedValue > 0 ? EStatChange::Increase : EStatChange::Decrease;
-	if (broadcast)
+	AActor* TargetActor = GetOwner();
+	if (!IsValid(TargetActor)) return;
+
+	if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
 	{
-		OnHealthChanged.Broadcast(CurrentHealth, changedValue, changeType, nullptr, false);
+		if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+		{
+			int preHealth = PixelAS->GetHP();
+			int CurrentHealth = FMath::Clamp(value, 0, PixelAS->GetMaxHP());
+			int changedValue = CurrentHealth - preHealth;
+			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
+		
+			EStatChange changeType = changedValue > 0 ? EStatChange::Increase : EStatChange::Decrease;
+			if (broadcast)
+			{
+				OnHPChanged.Broadcast(CurrentHealth, changedValue, changeType, nullptr, false);
+			}
+		}
 	}
 }
 
@@ -208,13 +232,25 @@ void UHealthComponent::SetEffectBySeconds(const int32 value, const FGameplayTag 
 }
 
 
-void UHealthComponent::IncreaseHealth(const int value, AActor* Instigator)
+void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
 {
-	int preHealth = CurrentHealth;
-	CurrentHealth = FMath::Clamp(value + CurrentHealth, 0, MaxHealth);
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return;
+	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
+	if (!IsValid(TargetASC)) return;
+	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	if (!IsValid(PixelAS)) return;
+
+	value = FMath::Max(value, 0);
+	
+	int preHealth = PixelAS->GetHP();
+	int MaxHealth = PixelAS->GetMaxHP();
+	int CurrentHealth = FMath::Min(value + preHealth, MaxHealth);
+
 	if (CurrentHealth - preHealth > 0)
 	{
-		OnHealthChanged.Broadcast(CurrentHealth, CurrentHealth - preHealth, EStatChange::Increase, Instigator, false);
+		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
+		OnHPChanged.Broadcast(CurrentHealth, CurrentHealth - preHealth, EStatChange::Increase, Instigator, false);
 	}
 }
 
@@ -250,11 +286,11 @@ void UHealthComponent::SetActivateHealthEffectBySeconds(const bool activate)
 		{
 			if (effect.Value > 0)
 			{
-				IncreaseHealth(effect.Value, GetOwner());
+				IncreaseHP(effect.Value, GetOwner());
 			}
 			else
 			{
-				DecreaseHealth(effect.Value, FVector(0), GetOwner(), true, false, true);
+				DecreaseHP(effect.Value, FVector(0), GetOwner(), true, false, true);
 			}
 		}
 	});
@@ -292,48 +328,76 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-int UHealthComponent::GetCurrentHealth()
+int UHealthComponent::GetCurrentHP()
 {
-	return CurrentHealth;
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			{
+				return PixelAS->GetHP();
+			}
+		}
+	}
+	
+	return 0;
 }
 
-int UHealthComponent::GetMaxHealth()
+int UHealthComponent::GetMaxHP()
 {
-	return MaxHealth;
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			{
+				return PixelAS->GetMaxHP();
+			}
+		}
+	}
+
+	return 100;
 }
 
-float UHealthComponent::GetHealthPercent()
+float UHealthComponent::GetHPPercent()
 {
-	return float(CurrentHealth) / float(MaxHealth);
+	return float(GetCurrentHP()) / float(GetMaxHP());
 }
 
-void UHealthComponent::DecreaseHealth(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce,
+void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce,
                                       bool bCauseInvul, bool bInner)
 {
 	if (Damage <= 0) return;
-	AActor* owner = GetOwner();
-	if (!owner->Implements<UFight_Interface>()) return;
+	AActor* Owner = GetOwner();
+	if (!Owner->Implements<UFight_Interface>()) return;
+
+	if (!IsValid(Owner)) return;
+	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
+	if (!IsValid(TargetASC)) return;
+	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	if (!IsValid(PixelAS)) return;
 
 	// 玩家受伤逻辑
 	FGameplayTag PlayerTag = FGameplayTag::RequestGameplayTag(FName("Player"));
-	if (IFight_Interface::Execute_GetOwnCamp(owner).HasTag(PlayerTag))
+	if (IFight_Interface::Execute_GetOwnCamp(Owner).HasTag(PlayerTag))
 	{
 		// 天气影响的伤害增幅
 		float weatherAddPercent = 0.1;
 		Damage = Damage + Damage * weatherAddPercent;
 		if (bInvulnerable && !bForce)
 		{
-			if (owner->Implements<UFight_Interface>())
+			if (Owner->Implements<UFight_Interface>())
 			{
-				IFight_Interface::Execute_OnBeAttacked_Invulnerable(owner);
+				IFight_Interface::Execute_OnBeAttacked_Invulnerable(Owner);
 			}
 			return;
 		}
 		if (!bInner)
 		{
-			if (owner->Implements<UFight_Interface>())
+			if (Owner->Implements<UFight_Interface>())
 			{
-				if (IFight_Interface::Execute_OnBeAttacked(owner, Instigator, Damage))
+				if (IFight_Interface::Execute_OnBeAttacked(Owner, Instigator, Damage))
 				{
 					KnockBack(KnockbackForce * 0.9, Instigator);
 					return;
@@ -344,23 +408,24 @@ void UHealthComponent::DecreaseHealth(int Damage, const FVector KnockbackForce, 
 
 	// 怪物受伤逻辑
 	FGameplayTag EnemyTag = FGameplayTag::RequestGameplayTag(FName("Enemy"));
-	if (IFight_Interface::Execute_GetOwnCamp(owner).HasTag(EnemyTag))
+	if (IFight_Interface::Execute_GetOwnCamp(Owner).HasTag(EnemyTag))
 	{
 		if (bInvulnerable && !bForce)
 		{
-			IFight_Interface::Execute_OnBeAttacked_Invulnerable(owner);
+			IFight_Interface::Execute_OnBeAttacked_Invulnerable(Owner);
 		}
 	}
 
 	int calDamage = CalAcceptDamage(Damage, Instigator);
-	calDamage = IFight_Interface::Execute_OnDefendingHit(owner, calDamage);
+	calDamage = IFight_Interface::Execute_OnDefendingHit(Owner, calDamage);
 
-	int preHealth = CurrentHealth;
-	CurrentHealth = FMath::Max(CurrentHealth - calDamage, 0);
+	int preHealth = PixelAS->GetHP();
+	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
 	int changedValue = FMath::Abs(preHealth - CurrentHealth);
 	if (changedValue > 0)
 	{
-		OnHealthChanged.Broadcast(CurrentHealth, changedValue, EStatChange::Decrease, Instigator, bInner);
+		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
+		OnHPChanged.Broadcast(CurrentHealth, changedValue, EStatChange::Decrease, Instigator, bInner);
 	}
 
 	if (bCauseInvul)

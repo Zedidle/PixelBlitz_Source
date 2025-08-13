@@ -7,6 +7,7 @@
 #include "Settings/DataTableSettings.h"
 #include "Engine/DeveloperSettings.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Utilitys/PXCustomStruct.h"
 
 
 void UDropSubsystem::Deinitialize()

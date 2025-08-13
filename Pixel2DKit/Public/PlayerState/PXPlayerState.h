@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "AbilitySystemInterface.h"
-#include "PixelPlayerState.generated.h"
+#include "PXPlayerState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API APixelPlayerState : public APlayerState, public IAbilitySystemInterface
+class PIXEL2DKIT_API APXPlayerState : public APlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 

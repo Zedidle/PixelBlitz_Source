@@ -46,8 +46,8 @@ class UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	int MaxHealth = 100;
-	int CurrentHealth = 100;
+	// int MaxHealth = 100;
+	// int CurrentHealth = 100;
 	float OnHurtInvulnerableDelay = 0.1;  // 受到伤害后的一段时候才会触发无敌帧，支持短时间内的连击，后续考虑拉长并多段连击，攻击命中后会续时
 	float InvulnerableDuration = 0.5; // 无敌帧时间
 
@@ -80,10 +80,10 @@ public:
 	FVector GetRepel(FVector IncomeRepel, const AActor* Instigator) const;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
-	FOnHealthChangedSignature OnHealthChanged;
+	FOnHealthChangedSignature OnHPChanged;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
-	FMaxHealthChanged OnMaxHealthChanged;
+	FMaxHealthChanged OnMaxHPChanged;
 
 	
 
@@ -109,10 +109,10 @@ public:
 	virtual void SetInvulnerable(const bool v);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void ModifyMaxHealth(const int32 value, const EStatChange ChangeType, const bool current);
+	virtual void ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void SetHealth(const int32 value, const bool broadcast = true);
+	virtual void SetHP(const int32 value, const bool broadcast = true);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void SetEffectBySeconds(const int32 value, const FGameplayTag Tag);
@@ -127,17 +127,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Health")
-	int GetCurrentHealth();
+	int GetCurrentHP();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Health")
-	int GetMaxHealth();
+	int GetMaxHP();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Health")
-	float GetHealthPercent();
+	float GetHPPercent();
 	
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void DecreaseHealth(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce = false, bool bCauseInvul = true, bool bInner = false);
+	virtual void DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce = false, bool bCauseInvul = true, bool bInner = false);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void IncreaseHealth(const int value, AActor* Instigator);
+	virtual void IncreaseHP(int32 value, AActor* Instigator);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	void SetActivateHealthEffectBySeconds(const bool activate = true); 

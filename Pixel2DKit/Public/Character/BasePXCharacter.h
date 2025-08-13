@@ -7,25 +7,53 @@
 #include "PaperZDCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "AbilitySystemInterface.h"
-#include "BasePixelCharacter.generated.h"
+#include "BasePXCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 
 
+USTRUCT(BlueprintType)
+struct FWeatherEffectData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SightDistancePercent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 HealthEffectPerSecond;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeedEffectPercent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveAccelerationPercent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StaminaConsumePercent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DamageAddPercent;
+};
+
+
+
+
 class UInputAction;
 class UAbilityComponent;
-class UPixelAbilitySystemComponent;
+class UPXASComponent;
+class UEnergyComponent;
 
 struct FInputActionValue;
 
 
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFight_Interface, public IAbilitySystemInterface
+class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
-	class UPixelCharacterDataAsset* DataAsset;
+	class UPXCharacterDataAsset* DataAsset;
 	void LoadData();
 	
 	float FallingStartTime;
@@ -35,6 +63,9 @@ class PIXEL2DKIT_API ABasePixelCharacter : public APaperZDCharacter, public IFig
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerDie OnPlayerDie;
+
+	UPROPERTY(BlueprintReadWrite)
+	FWeatherEffectData WeatherEffect;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FVector FightCenterForCameraOffset = FVector(0.0f);
@@ -54,6 +85,10 @@ public:
 	float ScaleCurValue = 1.0f;
 	FVector InitScale;
 	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	TSubclassOf<class UGameplayEffect> TestGE;
+
 	
 	virtual void Tick_SaveFallingStartTime();
 	virtual void Tick_SpriteRotation(); // 漂移式偏转
@@ -69,26 +104,29 @@ public:
 
 protected:
 #pragma region GAS
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UPixelAbilitySystemComponent* AbilitySystem = nullptr;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
-	TWeakObjectPtr<class UPixelAttributeSet> AttributeSetBase;
+	TWeakObjectPtr<class UPXAttributeSet> AttributeSetBase;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GAS)
-	UPixelAttributeSet* GetAttributeSet() const;
 #pragma endregion
 	
 
 	
 public:
-	ABasePixelCharacter(const FObjectInitializer& ObjectInitializer);
+	ABasePXCharacter(const FObjectInitializer& ObjectInitializer);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GAS)
+	UPXAttributeSet* GetAttributeSet() const;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	UHealthComponent* HealthComponent;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
 	UHealthComponent* GetHealthComponent() { return HealthComponent; }
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	UEnergyComponent* EnergyComponent;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UEnergyComponent* GetEnergyComponent() { return EnergyComponent; }
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UFightComponent> FightComponent;
@@ -292,24 +330,24 @@ public:
 	
 };
 
-inline bool ABasePixelCharacter::CanAttack_Implementation()
+inline bool ABasePXCharacter::CanAttack_Implementation()
 {
 	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead && !bInAttackStatus;
 }
 
-inline void ABasePixelCharacter::SetBlendPitch(float V)
+inline void ABasePXCharacter::SetBlendPitch(float V)
 {
 	CurBlendPitch = V;
 }
 
 
-inline void ABasePixelCharacter::SetBlendYaw(float V)
+inline void ABasePXCharacter::SetBlendYaw(float V)
 {
 	DeltaBlendYaw = 0;
 	CurBlendYaw = V;
 }
 
-inline void ABasePixelCharacter::AddBlendYaw(float V)
+inline void ABasePXCharacter::AddBlendYaw(float V)
 {
 	DeltaBlendYaw = -V;
 	CurBlendYaw += V;

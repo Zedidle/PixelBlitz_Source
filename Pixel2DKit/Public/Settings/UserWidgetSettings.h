@@ -21,6 +21,8 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
 	TSubclassOf<UUWBaseFloatingText> FloatingText_Default;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
+	TSubclassOf<UUserWidget> CenterWordTip;
 	
 	
 };

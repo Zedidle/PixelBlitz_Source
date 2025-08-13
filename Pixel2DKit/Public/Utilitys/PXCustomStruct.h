@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "PixelCustomStruct.generated.h"
+#include "PXCustomStruct.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPixelCustomStruct : public UObject
+class PIXEL2DKIT_API UPXCustomStruct : public UObject
 {
 	GENERATED_BODY()
 	

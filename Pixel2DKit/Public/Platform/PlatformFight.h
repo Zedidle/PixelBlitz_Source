@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/BasePixelCharacter.h"
+#include "Character/BasePXCharacter.h"
 #include "Enemy/BaseEnemy.h"
 #include "Enemy/EnemySpawner.h"
 #include "Platform/BasePlatform.h"
@@ -22,7 +22,7 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 public:
 
 	UPROPERTY(BlueprintReadWrite)
-	ABasePixelCharacter* PlayerCharacter;
+	ABasePXCharacter* PlayerCharacter;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABaseEnemy*> Enemies;

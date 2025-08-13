@@ -3,18 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GAS/AttributeSet/PixelAttributeSet.h"
-#include "PixelCharacterAttributeSet.generated.h"
+#include "GAS/AttributeSet/PXAttributeSet.h"
+#include "PXEnemyAttributeSet.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPixelCharacterAttributeSet : public UPixelAttributeSet
+class PIXEL2DKIT_API UPXEnemyAttributeSet : public UPXAttributeSet
 {
 	GENERATED_BODY()
 public:
 	
 	
-
 };

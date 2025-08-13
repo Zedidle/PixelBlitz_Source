@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "PixelCharacterDataAsset.generated.h"
+#include "PXCharacterDataAsset.generated.h"
 
 
 UCLASS()
-class PIXEL2DKIT_API UPixelCharacterDataAsset : public UDataAsset
+class PIXEL2DKIT_API UPXCharacterDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 

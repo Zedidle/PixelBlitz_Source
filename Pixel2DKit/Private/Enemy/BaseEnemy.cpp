@@ -14,10 +14,11 @@
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GAS/AttributeSet/PXEnemyAttributeSet.h"
 #include "Perception/PawnSensingComponent.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/DropSubsystem.h"
-#include "Subsystems/PixelAnimSubsystem.h"
+#include "Subsystems/PXAnimSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
@@ -41,7 +42,7 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 		return true;
 	}
 	
-	if (ABasePixelCharacter* C = Cast<ABasePixelCharacter>(Character))
+	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(Character))
 	{
 		PixelCharacter = C;
 		if (IsValid(EnemyAIComponent))
@@ -60,7 +61,7 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 void ABaseEnemy::SetDead(bool V)
 {
 	bDead = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
 	
 	if (UBlackboardComponent* BlackboardComponent = GetController()->FindComponentByClass<UBlackboardComponent>())
 	{
@@ -78,7 +79,7 @@ void ABaseEnemy::SetDead(bool V)
 void ABaseEnemy::SetHurt(bool V, const float duration)
 {
 	bHurt = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
 
 	if (!bHurt) return;
 	
@@ -93,7 +94,7 @@ void ABaseEnemy::SetHurt(bool V, const float duration)
 void ABaseEnemy::SetInAttackState(bool V)
 {
 	bInAttackState = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackState")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackState")), V);
 	
 	if (UBlackboardComponent* BlackboardComponent = GetController()->FindComponentByClass<UBlackboardComponent>())
 	{
@@ -104,37 +105,37 @@ void ABaseEnemy::SetInAttackState(bool V)
 void ABaseEnemy::SetInAttackEffect(bool V)
 {
 	bInAttackEffect = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackEffect")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackEffect")), V);
 }
 
 void ABaseEnemy::SetAttackAnimToggle(const bool V)
 {
 	bAttackAnimToggle = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
 }
 
 void ABaseEnemy::SetInDefendState(const bool V)
 {
 	bInDefendState = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInDefendState")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInDefendState")), V);
 }
 
 void ABaseEnemy::SetDefendStart(const bool V)
 {
 	bDefendStart = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDefendStart")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDefendStart")), V);
 }
 
 void ABaseEnemy::SetDefendHurt(const bool V)
 {
 	bDefendHurt = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDefendHurt")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDefendHurt")), V);
 }
 
 void ABaseEnemy::SetJumping(const bool V, const float time)
 {
 	bJumping = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
 	
 	if (!bJumping) return;
 	
@@ -167,7 +168,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	EnemyData = DataTableManager->FindRow<FEnemyData>(DataTable, EnemyLevel);
 
-	HealthComponent->ModifyMaxHealth(EnemyData.HP, EStatChange::Reset, true);
+	HealthComponent->ModifyMaxHP(EnemyData.HP, EStatChange::Reset, true);
 	SetActorScale3D(FVector(EnemyData.BodyScale));
 	DropData = EnemyData.Drop;
 	LoadLookDeterrence(EnemyData.LookDeterrence);
@@ -192,7 +193,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 void ABaseEnemy::SetLanding(const bool V, const float time)
 {
 	bLanding = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
 	
 	if (!bLanding) return;
 	
@@ -218,7 +219,10 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.East.Near")));
 
-
+	AbilitySystem = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
+	AbilitySystem->SetIsReplicated(true);
+	
+	AttributeSet = CreateDefaultSubobject<UPXEnemyAttributeSet>(TEXT("AttributeSetBase"));
 
 }
 
@@ -251,6 +255,11 @@ void LoadLookDeterrence(int32 Level)
 	
 }
 
+
+UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
+{
+	return AbilitySystem;
+}
 
 bool ABaseEnemy::GetIsAttacking()
 {

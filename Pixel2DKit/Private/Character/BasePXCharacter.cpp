@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/BasePixelCharacter.h"
+#include "Character/BasePXCharacter.h"
+
+#include "AbilitySystemComponent.h"
 #include "Animation/BasePixelAnimInstance.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -9,17 +11,19 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
-#include "Character/PixelCharacterDataAsset.h"
+#include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
-#include "Subsystems/PixelAnimSubsystem.h"
+#include "Fight/Components/EnergyComponent.h"
+#include "Subsystems/PXAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
-#include "PlayerState/PixelCharacterPlayerState.h"
+#include "GAS/PXASComponent.h"
+#include "PlayerState/PXCharacterPlayerState.h"
 #include "Sound/SoundCue.h"
 #include "Utilitys/SoundFuncLib.h"
 
 
-void ABasePixelCharacter::LoadData()
+void ABasePXCharacter::LoadData()
 {
 	if (!DataAsset) return;
 	BasicMaxJumpCount = DataAsset->MaxJumpCount;
@@ -27,7 +31,7 @@ void ABasePixelCharacter::LoadData()
 	BasicMaxJumpCount = DataAsset->BasicJumpMaxHoldTime;
 }
 
-void ABasePixelCharacter::Tick_SaveFallingStartTime()
+void ABasePXCharacter::Tick_SaveFallingStartTime()
 {
 	if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
 	{
@@ -36,15 +40,13 @@ void ABasePixelCharacter::Tick_SaveFallingStartTime()
 			PreFrameFalling = true;
 			if (UWorld* World = GetWorld())
 			{
-// 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red,
-//				FString::Printf(TEXT("Tick_SaveFallingStartTime: %d"),  __LINE__));
 				FallingStartTime = World->TimeSeconds;
 			}
 		}
 	}
 }
 
-void ABasePixelCharacter::Tick_SpriteRotation()
+void ABasePXCharacter::Tick_SpriteRotation()
 {
 	if (!GetCharacterMovement() || GetCharacterMovement()->Velocity.Size2D() < 1.0f) return;
 
@@ -152,7 +154,7 @@ void ABasePixelCharacter::Tick_SpriteRotation()
 	DeltaBlendYaw = 0;
 }
 
-void ABasePixelCharacter::Tick_SpringArmMotivation()
+void ABasePXCharacter::Tick_SpringArmMotivation()
 {
 	if (!GetCharacterMovement()) return;
 	if (!GetComponentByClass<USpringArmComponent>()) return;
@@ -207,7 +209,7 @@ void ABasePixelCharacter::Tick_SpringArmMotivation()
 	}
 }
 
-void ABasePixelCharacter::Tick_CalCameraOffset()
+void ABasePXCharacter::Tick_CalCameraOffset()
 {
 	if (SurCameraOffset.Size() < 0.01) return;
 	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
@@ -222,22 +224,37 @@ void ABasePixelCharacter::Tick_CalCameraOffset()
 }
 
 
-ABasePixelCharacter::ABasePixelCharacter(const FObjectInitializer& ObjectInitializer)
+ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
+
+	// ASC 初始化
 }
 
-void ABasePixelCharacter::BeginPlay()
+void ABasePXCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
+
+	// AttributeSet 初始化
+	
+	// if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
+	// {
+	// 	const auto EffectContext = AbilitySystem->MakeEffectContext();
+	// 	const auto SpecHandle = AbilitySystem->MakeOutgoingSpec(TestGE->GetClass(), 1, EffectContext);
+	// 	if (SpecHandle.IsValid())
+	// 	{
+	// 		AbilitySystem->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), AbilitySystem);
+	// 	}
+	// }
 }
 
-void ABasePixelCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -248,16 +265,16 @@ void ABasePixelCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 }
 
-void ABasePixelCharacter::Falling()
+void ABasePXCharacter::Falling()
 {
 	Super::Falling();
 	SetFalling(true);
 }
 
-UAbilitySystemComponent* ABasePixelCharacter::GetAbilitySystemComponent() const
+UAbilitySystemComponent* ABasePXCharacter::GetAbilitySystemComponent() const
 {
 	
-	if(const APixelCharacterPlayerState* CharacterPlayerState = Cast<APixelCharacterPlayerState>(GetPlayerState()))
+	if(const APXCharacterPlayerState* CharacterPlayerState = Cast<APXCharacterPlayerState>(GetPlayerState()))
 	{
 		return CharacterPlayerState->GetAbilitySystemComponent();
 	}
@@ -265,46 +282,47 @@ UAbilitySystemComponent* ABasePixelCharacter::GetAbilitySystemComponent() const
 	return nullptr;
 }
 
-UPixelAttributeSet* ABasePixelCharacter::GetAttributeSet() const
+
+UPXAttributeSet* ABasePXCharacter::GetAttributeSet() const
 {
 	return AttributeSetBase.Get();
 }
 
-FVector ABasePixelCharacter::GetMoveForwardVector()
+FVector ABasePXCharacter::GetMoveForwardVector()
 {
 	return FRotator(0, CurBlendYaw,0 ).RotateVector(FVector(1,0,0));
 }
 
-FVector ABasePixelCharacter::GetFaceToCamera()
+FVector ABasePXCharacter::GetFaceToCamera()
 {
 	return FRotator(0, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
 }
 
-void ABasePixelCharacter::AddCameraOffset(const FVector& V)
+void ABasePXCharacter::AddCameraOffset(const FVector& V)
 {
 	SurCameraOffset += V;
 }
 
-bool ABasePixelCharacter::GetIsAttacking()
+bool ABasePXCharacter::GetIsAttacking()
 {
 	return bInAttackEffect;
 }
 
-bool ABasePixelCharacter::GetIsDefending()
+bool ABasePXCharacter::GetIsDefending()
 {
 	return false;
 }
 
-void ABasePixelCharacter::SetDead(bool V)
+void ABasePXCharacter::SetDead(bool V)
 {
 	bDead = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
 }
 
-void ABasePixelCharacter::SetHurt(const bool V, const float duration)
+void ABasePXCharacter::SetHurt(const bool V, const float duration)
 {
 	bHurt = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
 	
 	if (!bHurt) return;
 	
@@ -316,10 +334,10 @@ void ABasePixelCharacter::SetHurt(const bool V, const float duration)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, duration, false);
 }
 
-void ABasePixelCharacter::SetJumping(bool V, const float time)
+void ABasePXCharacter::SetJumping(bool V, const float time)
 {
 	bJumping = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
 	
 	if (!bJumping) return;
 
@@ -331,16 +349,16 @@ void ABasePixelCharacter::SetJumping(bool V, const float time)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
-void ABasePixelCharacter::SetFalling(bool V)
+void ABasePXCharacter::SetFalling(bool V)
 {
 	bFalling = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bFalling")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bFalling")), V);
 }
 
-void ABasePixelCharacter::SetLanding(bool V, float time)
+void ABasePXCharacter::SetLanding(bool V, float time)
 {
 	bLanding = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
 
 	if (!bLanding) return;
 
@@ -353,7 +371,7 @@ void ABasePixelCharacter::SetLanding(bool V, float time)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
-void ABasePixelCharacter::OnDie_Implementation()
+void ABasePXCharacter::OnDie_Implementation()
 {
 	if (GetCharacterMovement())
 	{
@@ -364,42 +382,42 @@ void ABasePixelCharacter::OnDie_Implementation()
 }
 
 
-void ABasePixelCharacter::SetDashing(bool V)
+void ABasePXCharacter::SetDashing(bool V)
 {
 	bDashing = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDashing")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDashing")), V);
 }
 
-void ABasePixelCharacter::SetAttackAnimToggle(bool V)
+void ABasePXCharacter::SetAttackAnimToggle(bool V)
 {
 	bAttackAnimToggle = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
 }
 
-void ABasePixelCharacter::SetAttackHolding(bool V)
+void ABasePXCharacter::SetAttackHolding(bool V)
 {
 	bAttackHolding = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackHolding")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackHolding")), V);
 }
 
-void ABasePixelCharacter::SetAttackFire(bool V)
+void ABasePXCharacter::SetAttackFire(bool V)
 {
 	bAttackFire = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackFire")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackFire")), V);
 }
 
-void ABasePixelCharacter::SetMoving(bool V)
+void ABasePXCharacter::SetMoving(bool V)
 {
 	bMoving = V;
-	UPixelAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bMoving")), V);
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bMoving")), V);
 }
 
 
-void ABasePixelCharacter::AddViewYaw_Implementation(float V, bool bPlayerControl)
+void ABasePXCharacter::AddViewYaw_Implementation(float V, bool bPlayerControl)
 {
 }
 
-float ABasePixelCharacter::GetFallingTime()
+float ABasePXCharacter::GetFallingTime()
 {
 	if (UWorld* World = GetWorld())
 	{
@@ -410,7 +428,7 @@ float ABasePixelCharacter::GetFallingTime()
 
 
 
-void ABasePixelCharacter::Tick(float DeltaSeconds)
+void ABasePXCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Tick_SaveFallingStartTime();
@@ -424,7 +442,7 @@ void ABasePixelCharacter::Tick(float DeltaSeconds)
 	}
 }
 
-FVector ABasePixelCharacter::GetDashDirection()
+FVector ABasePXCharacter::GetDashDirection()
 {
 	FVector Velocity = GetVelocity();
 	if (Velocity.IsZero())
@@ -449,27 +467,27 @@ FVector ABasePixelCharacter::GetDashDirection()
 	return (Velocity + Acceleration * 2).GetSafeNormal2D();
 }
 
-bool ABasePixelCharacter::IsAlive_Implementation()
+bool ABasePXCharacter::IsAlive_Implementation()
 {
-	return GetHealthComponent()->GetCurrentHealth() > 0;
+	return GetHealthComponent()->GetCurrentHP() > 0;
 }
 
-FGameplayTagContainer ABasePixelCharacter::GetOwnCamp_Implementation()
+FGameplayTagContainer ABasePXCharacter::GetOwnCamp_Implementation()
 {
 	return IFight_Interface::GetOwnCamp_Implementation();
 }
 
-FGameplayTagContainer ABasePixelCharacter::GetEnemyCamp_Implementation()
+FGameplayTagContainer ABasePXCharacter::GetEnemyCamp_Implementation()
 {
 	return IFight_Interface::GetEnemyCamp_Implementation();
 }
 
-AActor* ABasePixelCharacter::GetTarget_Implementation()
+AActor* ABasePXCharacter::GetTarget_Implementation()
 {
 	return IFight_Interface::GetTarget_Implementation();
 }
 
-void ABasePixelCharacter::OnAttackHiting_Implementation()
+void ABasePXCharacter::OnAttackHiting_Implementation()
 {
 	if (bDashing)
 	{
@@ -487,63 +505,63 @@ void ABasePixelCharacter::OnAttackHiting_Implementation()
 	GetWorldTimerManager().SetTimer(AttackHitTimerHandle, TimerDelegate, 2, false);
 }
 
-void ABasePixelCharacter::PowerRepulsion_Implementation(float Power)
+void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
 	IFight_Interface::PowerRepulsion_Implementation(Power);
 }
 
-void ABasePixelCharacter::OnBeAttacked_Invulnerable_Implementation()
+void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 {
 	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
 }
 
-bool ABasePixelCharacter::OnBeAttacked_Implementation(AActor* maker, int damage)
+bool ABasePXCharacter::OnBeAttacked_Implementation(AActor* maker, int damage)
 {
 	return IFight_Interface::OnBeAttacked_Implementation(maker, damage);
 }
 
 
-int ABasePixelCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage)
+int ABasePXCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage)
 {
 	return 0;
 }
 
-int ABasePixelCharacter::OnDefendingHit_Implementation(int inValue)
+int ABasePXCharacter::OnDefendingHit_Implementation(int inValue)
 {
 	return inValue;
 }
 
-void ABasePixelCharacter::OnAttackHolding_Implementation()
+void ABasePXCharacter::OnAttackHolding_Implementation()
 {
 	IFight_Interface::OnAttackHolding_Implementation();
 }
 
-void ABasePixelCharacter::OnDefendingHitEffect_Implementation()
+void ABasePXCharacter::OnDefendingHitEffect_Implementation()
 {
 	IFight_Interface::OnDefendingHitEffect_Implementation();
 }
 
-void ABasePixelCharacter::OnAnimVulnerableBegin_Implementation()
+void ABasePXCharacter::OnAnimVulnerableBegin_Implementation()
 {
 	IFight_Interface::OnAnimVulnerableBegin_Implementation();
 }
 
-void ABasePixelCharacter::OnAnimVulnerableEnd_Implementation()
+void ABasePXCharacter::OnAnimVulnerableEnd_Implementation()
 {
 	IFight_Interface::OnAnimVulnerableEnd_Implementation();
 }
 
-void ABasePixelCharacter::OnDashEffectBegin_Implementation()
+void ABasePXCharacter::OnDashEffectBegin_Implementation()
 {
 	IFight_Interface::OnDashEffectBegin_Implementation();
 }
 
-void ABasePixelCharacter::OnDashEffectEnd_Implementation()
+void ABasePXCharacter::OnDashEffectEnd_Implementation()
 {
 	IFight_Interface::OnDashEffectEnd_Implementation();
 }
 
-void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,
+void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,
                                                            const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
 {
 	Super::OnWalkingOffLedge_Implementation(PreviousFloorImpactNormal, PreviousFloorContactNormal, PreviousLocation,
@@ -553,7 +571,7 @@ void ABasePixelCharacter::OnWalkingOffLedge_Implementation(const FVector& Previo
 	GetCharacterMovement()->MaxWalkSpeed = BasicMoveSpeed;
 }
 
-void ABasePixelCharacter::Jump()
+void ABasePXCharacter::Jump()
 {
 	Super::Jump();
 	SetJumping(true);
@@ -561,7 +579,7 @@ void ABasePixelCharacter::Jump()
 }
 
 
-void ABasePixelCharacter::Landed(const FHitResult& Hit)
+void ABasePXCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
@@ -575,7 +593,7 @@ void ABasePixelCharacter::Landed(const FHitResult& Hit)
 	SetFalling(false);
 }
 
-void ABasePixelCharacter::SetScale(const float targetValue)
+void ABasePXCharacter::SetScale(const float targetValue)
 {
 	ScaleLerpValue = 0;
 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
@@ -593,7 +611,7 @@ void ABasePixelCharacter::SetScale(const float targetValue)
 	GetWorldTimerManager().SetTimer(ScaleTimerHandle, TimerDel, 0.01f, true);
 }
 
-void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
@@ -604,7 +622,7 @@ void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 			Action_MoveBack,
 			ETriggerEvent::Triggered,
 			this,
-			&ABasePixelCharacter::MoveY
+			&ABasePXCharacter::MoveY
 		);
 	}
 	
@@ -614,7 +632,7 @@ void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 			Action_MoveFront,
 			ETriggerEvent::Triggered,
 			this,
-			&ABasePixelCharacter::MoveY
+			&ABasePXCharacter::MoveY
 		);
 	}
 
@@ -624,7 +642,7 @@ void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 			Action_MoveLeft,
 			ETriggerEvent::Triggered,
 			this,
-			&ABasePixelCharacter::MoveX
+			&ABasePXCharacter::MoveX
 		);
 	}
 
@@ -634,7 +652,7 @@ void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 			Action_MoveRight,
 			ETriggerEvent::Triggered,
 			this,
-			&ABasePixelCharacter::MoveX
+			&ABasePXCharacter::MoveX
 		);
 	}
 
@@ -644,12 +662,12 @@ void ABasePixelCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 			Action_MoveGP,
 			ETriggerEvent::Triggered,
 			this,
-			&ABasePixelCharacter::Move2D
+			&ABasePXCharacter::Move2D
 		);
 	}
 }
 
-void ABasePixelCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
+void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
 {
 	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
@@ -663,7 +681,7 @@ void ABasePixelCharacter::AddMovementInput(FVector WorldDirection, float ScaleVa
 	}
 }
 
-void ABasePixelCharacter::MoveX(const FInputActionValue& Value)
+void ABasePXCharacter::MoveX(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
@@ -671,7 +689,7 @@ void ABasePixelCharacter::MoveX(const FInputActionValue& Value)
 	
 }
 
-void ABasePixelCharacter::MoveY(const FInputActionValue& Value)
+void ABasePXCharacter::MoveY(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
@@ -679,7 +697,7 @@ void ABasePixelCharacter::MoveY(const FInputActionValue& Value)
 	
 }
 
-void ABasePixelCharacter::Move2D(const FInputActionValue& Value)
+void ABasePXCharacter::Move2D(const FInputActionValue& Value)
 {
 	FVector2D AxisValue = Value.Get<FVector2D>();
 	if (AxisValue.X == 0 && AxisValue.Y == 0) return;

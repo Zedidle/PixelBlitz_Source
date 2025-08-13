@@ -150,7 +150,7 @@ void APlatformFight::ActivateFight(bool bActivate)
 void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
-	if (ABasePixelCharacter* C = Cast<ABasePixelCharacter>(OtherActor))
+	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
 	{
 		PlayerCharacter = C;
 		SetActorTickEnabled(true);
