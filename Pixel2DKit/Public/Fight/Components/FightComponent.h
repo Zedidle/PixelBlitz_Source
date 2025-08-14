@@ -28,7 +28,7 @@ class PIXEL2DKIT_API UFightComponent : public UActorComponent
 	UPROPERTY()
 	FVector CurKnockbackForceMelee;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	FGameplayTagContainer EnemyTags;
 
 	UPROPERTY()

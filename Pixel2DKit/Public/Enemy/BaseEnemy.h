@@ -94,7 +94,10 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
+	void Initialize_Implementation(FName Level);
+
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintNativeEvent)
@@ -115,13 +118,13 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
 	
-	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
 	
-	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UHealthComponent> HealthComponent;
 	
-	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UFightComponent> FightComp;
 
 	
