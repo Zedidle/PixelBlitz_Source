@@ -225,6 +225,10 @@ void ABasePXCharacter::Tick_CalCameraOffset()
 }
 
 
+void ABasePXCharacter::LoadAbility_Implementation()
+{
+}
+
 ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {

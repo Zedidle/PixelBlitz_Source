@@ -14,6 +14,9 @@ class PIXEL2DKIT_API UPXCharacterDataAsset : public UDataAsset
 
 public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSoftObjectPtr<UDataTable> AbilityDataTable;
+	
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<USoundCue> LandedSound;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)

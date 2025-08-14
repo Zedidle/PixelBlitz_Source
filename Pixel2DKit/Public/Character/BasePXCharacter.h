@@ -54,8 +54,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
-	class UPXCharacterDataAsset* DataAsset;
+
 	void LoadData();
 	
 	float FallingStartTime;
@@ -63,6 +62,10 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	bool PreSpriteLeft = false;
 
 public:
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	class UPXCharacterDataAsset* DataAsset;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerDie OnPlayerDie;
 
@@ -118,6 +121,8 @@ protected:
 
 #pragma endregion
 	
+	
+
 
 	
 public:
@@ -267,7 +272,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Character | Outlook")
 	void SetScale(const float targetValue);
 
-
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void LoadAbility();
 
 
 #pragma region Animation
