@@ -17,6 +17,7 @@
 #include "Fight/Components/EnergyComponent.h"
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
+#include "Character/Components/BuffComponent.h"
 #include "GAS/PXASComponent.h"
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "Sound/SoundCue.h"
@@ -231,7 +232,8 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
-
+	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	
 	// ASC 初始化
 }
 
@@ -240,8 +242,6 @@ void ABasePXCharacter::BeginPlay()
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
-
-
 	
 	// AttributeSet 初始化
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())

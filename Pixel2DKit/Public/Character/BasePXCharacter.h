@@ -42,6 +42,7 @@ struct FWeatherEffectData
 
 class UInputAction;
 class UAbilityComponent;
+class UBuffComponent;
 class UPXASComponent;
 class UEnergyComponent;
 
@@ -140,10 +141,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
 	UFightComponent* GetFightComponent() { return FightComponent; }
 
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UAbilityComponent> AbilityComponent;
-	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UAbilityComponent* GetAbilityComponent() { return AbilityComponent; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UBuffComponent> BuffComponent;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UBuffComponent* GetBuffComponent() { return BuffComponent; }
+
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
