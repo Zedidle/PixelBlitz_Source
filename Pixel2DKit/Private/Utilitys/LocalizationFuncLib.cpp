@@ -75,3 +75,10 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 	
 	return "";
 }
+
+FString ULocalizationFuncLib::GetBuffText(FName BuffName)
+{
+	const FLocationTableData D = FLocationTableData("Buff/BuffText", BuffName);
+	return GetLocalizedString(D);
+}
+

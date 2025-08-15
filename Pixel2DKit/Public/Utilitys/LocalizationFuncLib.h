@@ -88,6 +88,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LocalizationFuncLib")
 	static FString GetLocalizedString(const FLocationTableData& Data);
 
-	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LocalizationFuncLib")
+	static FString GetBuffText(FName BuffName);
 	
 };

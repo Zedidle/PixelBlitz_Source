@@ -8,6 +8,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
+#include "Interfaces/Buff_Interface.h"
 #include "BasePXCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
@@ -50,7 +51,7 @@ struct FInputActionValue;
 
 
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IAbilitySystemInterface
+class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IBuff_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -165,6 +166,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicMoveSpeed = 200.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	float BasicAirControl = 1.0f;
 	
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendPitch = -20.0f;
@@ -328,6 +332,22 @@ public:
 	virtual void OnDashEffectEnd_Implementation() override;
 #pragma endregion
 
+	
+#pragma region IBuff_Interface
+	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
+	virtual void BuffUpdate_Speed_Implementation() override;
+	virtual void BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime) override;
+	virtual void BuffUpdate_Attack_Implementation() override;
+	virtual void BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
+	virtual void BuffUpdate_Sight_Implementation() override;
+	virtual int32 Buff_CalDamage_Implementation(int32 InDamage) override;
+	virtual void AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent) override;
+	virtual void RemoveBuff_Implementation(FGameplayTag Tag) override;
+	virtual float GetShortSightResistancePercent_Implementation() override;
+	virtual float GetSlowDownResistancePercent_Implementation() override;
+#pragma endregion
+	
+	
 
 #pragma region Input 
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")

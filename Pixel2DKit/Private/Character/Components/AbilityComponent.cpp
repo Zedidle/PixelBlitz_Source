@@ -5,6 +5,8 @@
 
 #include "Character/BasePXCharacter.h"
 #include "Character/PXCharacterDataAsset.h"
+#include "Fight/Components/HealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/DataTableFunctionLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/DataTableSubsystem.h"
@@ -77,8 +79,7 @@ void UAbilityComponent::LearnAbility(FName AbilityIndex)
 
 void UAbilityComponent::LoadAbility()
 {
-	AActor* Owner = GetOwner();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityDataTable)
 
 	for (auto Index : TempTestAbilityIndexes)
@@ -86,7 +87,7 @@ void UAbilityComponent::LoadAbility()
 		TakeEffectAbilityIndexes.AddUnique(Index);
 	}
 
-	UDataTableSubsystem* DataTableManager = Owner->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	UDataTableSubsystem* DataTableManager = PXCharacter->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
 	for (auto Index : TakeEffectAbilityIndexes)
 	{
@@ -113,13 +114,64 @@ void UAbilityComponent::LoadAbility()
 	}
 
 
-	/**
-	 *通用技能加载部分，专属技能在 PXCharacter 子类中的LoadAbility自定义
-	 *
-	 *
-	 *
-	 **/
+# pragma region 通用技能加载部分，专属技能在 PXCharacter 子类中的LoadAbility自定义
 
+	// 空中移动的控制（暂且无用）
+	FGameplayTag Tag;
+
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AirMoveEffectAddPercent");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTag[Tag]);
+	}
+	else
+	{
+		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl;
+	}
+
+
+	// 跳跃上升时间
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.JumpMaxHoldTimePlus");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTag[Tag];
+	}
+	else
+	{
+		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime;
+	}
+
+
+	// 附加跳跃次数
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.MaxJumpCountPlus");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		PXCharacter->CurMaxJumpCount = PXCharacter->BasicMaxJumpCount + EffectGameplayTag[Tag];
+	}
+	else
+	{
+		PXCharacter->CurMaxJumpCount = PXCharacter->BasicMaxJumpCount;
+	}
+
+
+	// 霸体
+	if (UHealthComponent* HealthComponent = PXCharacter->GetComponentByClass<UHealthComponent>())
+	{
+		Tag = FGameplayTag::RequestGameplayTag("AbilitySet.Stoic");
+		HealthComponent->bInRock = EffectGameplayTag.Contains(Tag);
+		if (HealthComponent->bInRock)
+		{
+			// AddBuff
+			ULocalizationFuncLib::GetBuffText(FName("Buff_Rock"));
+			
+			
+		}
+		
+	}
+	
+	
+#pragma endregion 
+	
 	
 	if (PXCharacter)
 	{

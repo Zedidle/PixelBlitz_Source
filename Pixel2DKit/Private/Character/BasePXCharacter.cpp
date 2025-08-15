@@ -592,8 +592,65 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 	IFight_Interface::OnDashEffectEnd_Implementation();
 }
 
+void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
+{
+	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);
+}
+
+void ABasePXCharacter::BuffUpdate_Speed_Implementation()
+{
+	IBuff_Interface::BuffUpdate_Speed_Implementation();
+}
+
+void ABasePXCharacter::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
+{
+	IBuff_Interface::BuffEffect_Attack_Implementation(Tag, Percent, Value, SustainTime);
+}
+
+void ABasePXCharacter::BuffUpdate_Attack_Implementation()
+{
+	IBuff_Interface::BuffUpdate_Attack_Implementation();
+}
+
+void ABasePXCharacter::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
+{
+	IBuff_Interface::BuffEffect_Sight_Implementation(Tag, Percent, Value, SustainTime);
+}
+
+void ABasePXCharacter::BuffUpdate_Sight_Implementation()
+{
+	IBuff_Interface::BuffUpdate_Sight_Implementation();
+}
+
+int32 ABasePXCharacter::Buff_CalDamage_Implementation(int32 InDamage)
+{
+	return IBuff_Interface::Buff_CalDamage_Implementation(InDamage);
+}
+
+void ABasePXCharacter::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
+	bool Permanent)
+{
+	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
+}
+
+void ABasePXCharacter::RemoveBuff_Implementation(FGameplayTag Tag)
+{
+	IBuff_Interface::RemoveBuff_Implementation(Tag);
+}
+
+float ABasePXCharacter::GetShortSightResistancePercent_Implementation()
+{
+	return IBuff_Interface::GetShortSightResistancePercent_Implementation();
+}
+
+float ABasePXCharacter::GetSlowDownResistancePercent_Implementation()
+{
+	return IBuff_Interface::GetSlowDownResistancePercent_Implementation();
+}
+
+
 void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,
-                                                           const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
+                                                        const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
 {
 	Super::OnWalkingOffLedge_Implementation(PreviousFloorImpactNormal, PreviousFloorContactNormal, PreviousLocation,
 	                                        TimeDelta);
