@@ -5,6 +5,7 @@
 
 #include "Character/BasePXCharacter.h"
 #include "Character/PXCharacterDataAsset.h"
+#include "Character/Components/BuffComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/DataTableFunctionLibrary.h"
@@ -162,11 +163,12 @@ void UAbilityComponent::LoadAbility()
 		if (HealthComponent->bInRock)
 		{
 			// AddBuff
-			ULocalizationFuncLib::GetBuffText(FName("Buff_Rock"));
-			
-			
+			FString BuffName = ULocalizationFuncLib::GetBuffText(FName("Buff_Rock"));
+			if (PXCharacter->BuffComponent)
+			{
+				PXCharacter->BuffComponent->AddBuff(Tag, BuffName, FLinearColor(FColor::Purple), false);
+			}
 		}
-		
 	}
 	
 	

@@ -122,3 +122,24 @@ struct FAbility: public FTableRowBase
 
 
 #pragma endregion
+
+
+
+#pragma region Buff
+
+USTRUCT(BlueprintType)
+struct FBuffValueEffect
+{
+	GENERATED_BODY()
+	FBuffValueEffect(){}
+	FBuffValueEffect(float Percent, float Value): EffectedPercent(Percent), EffectedValue(Value){}
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	float EffectedPercent;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	float EffectedValue;
+
+};
+
+#pragma endregion 
