@@ -6,7 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "Utilitys/PXCustomStruct.h"
 
-#include "PixelGameModeBase.generated.h"
+#include "PXGameMode.generated.h"
 
 
 
@@ -14,7 +14,7 @@
  * 
  */
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API APixelGameModeBase : public AGameModeBase
+class PIXEL2DKIT_API APXGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 

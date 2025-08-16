@@ -162,7 +162,6 @@ void UAbilityComponent::LoadAbility()
 		HealthComponent->bInRock = EffectGameplayTag.Contains(Tag);
 		if (HealthComponent->bInRock)
 		{
-			// AddBuff
 			FString BuffName = ULocalizationFuncLib::GetBuffText(FName("Buff_Rock"));
 			if (PXCharacter->BuffComponent)
 			{

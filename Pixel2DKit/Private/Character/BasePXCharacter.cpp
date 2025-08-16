@@ -7,7 +7,7 @@
 #include "Animation/BasePixelAnimInstance.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Basic/BasePixelGameInstance.h"
+#include "Basic/PXGameInstance.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
@@ -169,7 +169,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
-	if (UBasePixelGameInstance* GameInstance = Cast<UBasePixelGameInstance>(GetGameInstance()))
+	if (UPXGameInstance* GameInstance = Cast<UPXGameInstance>(GetGameInstance()))
 	{
 		switch (GameInstance->VideoSetting_CameraMode)
 		{

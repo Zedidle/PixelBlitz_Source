@@ -5,7 +5,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "PaperFlipbookComponent.h"
 #include "PaperZDCharacter.h"
-#include "Basic/PixelGameModeBase.h"
+#include "Basic/PXGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
@@ -33,7 +33,7 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 
 
 	// 粒子特效
-	APixelGameModeBase* GM = Cast<APixelGameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+	APXGameMode* GM = Cast<APXGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GM)
 	
 	TSoftObjectPtr<UNiagaraSystem> NS = ResourceSettings->WeatherTypeToNiagara.FindRef(GM->WeatherType);

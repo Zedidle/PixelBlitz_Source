@@ -2,8 +2,8 @@
 
 
 #include "Utilitys/SoundFuncLib.h"
-#include "Basic/BasePixelGameInstance.h"
-#include "Basic/PixelGameModeBase.h"
+#include "Basic/PXGameInstance.h"
+#include "Basic/PXGameMode.h"
 #include "CompGeom/FitOrientedBox3.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
@@ -14,11 +14,11 @@ void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, flo
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
-	UBasePixelGameInstance* GI = Cast< UBasePixelGameInstance >(UGameplayStatics::GetGameInstance(World));
+	UPXGameInstance* GI = Cast< UPXGameInstance >(UGameplayStatics::GetGameInstance(World));
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GI)
 	if (!GI->SoundSetting_ToggleAll) return;
 
-	APixelGameModeBase* GameMode = Cast<APixelGameModeBase>(UGameplayStatics::GetGameMode(World));
+	APXGameMode* GameMode = Cast<APXGameMode>(UGameplayStatics::GetGameMode(World));
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameMode)
 
 	float _Volume = GameMode->SoundSetting_Arg_MusicBasicMulti * GI->SoundSetting_VolumeValue * Volume;
@@ -42,11 +42,11 @@ void USoundFuncLib::PlaySound2D(USoundBase* Sound, float Volume)
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
-	UBasePixelGameInstance* GI = Cast< UBasePixelGameInstance >(UGameplayStatics::GetGameInstance(World));
+	UPXGameInstance* GI = Cast< UPXGameInstance >(UGameplayStatics::GetGameInstance(World));
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GI)
 	if (!GI->SoundSetting_ToggleAll) return;
 
-	APixelGameModeBase* GameMode = Cast<APixelGameModeBase>(UGameplayStatics::GetGameMode(World));
+	APXGameMode* GameMode = Cast<APXGameMode>(UGameplayStatics::GetGameMode(World));
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameMode)
 
 	float _Volume = GameMode->SoundSetting_Arg_VolumeBasicMulti * GI->SoundSetting_VolumeValue * Volume;
@@ -58,7 +58,7 @@ void USoundFuncLib::PlayUISound(USoundBase* Sound, float Volume)
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
-	UBasePixelGameInstance* GI = Cast< UBasePixelGameInstance >(UGameplayStatics::GetGameInstance(World));
+	UPXGameInstance* GI = Cast< UPXGameInstance >(UGameplayStatics::GetGameInstance(World));
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GI)
 	if (!GI->SoundSetting_ToggleAll) return;
 
@@ -71,11 +71,11 @@ float USoundFuncLib::GetCurVolumeValue()
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	if (!World) return 0.0f;
 	
-	UBasePixelGameInstance* GI = Cast< UBasePixelGameInstance >(UGameplayStatics::GetGameInstance(World));
+	UPXGameInstance* GI = Cast< UPXGameInstance >(UGameplayStatics::GetGameInstance(World));
 	if (!GI) return 0.0f;
 	if (!GI->SoundSetting_ToggleAll) return 0.0f;
 
-	APixelGameModeBase* GameMode = Cast<APixelGameModeBase>(UGameplayStatics::GetGameMode(World));
+	APXGameMode* GameMode = Cast<APXGameMode>(UGameplayStatics::GetGameMode(World));
 	if (!GameMode) return 1.0f;
 
 	return GameMode->SoundSetting_Arg_VolumeBasicMulti * GI->SoundSetting_VolumeValue;

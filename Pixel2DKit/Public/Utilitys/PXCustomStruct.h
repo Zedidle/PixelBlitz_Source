@@ -34,7 +34,16 @@ enum EWeather : uint8
 
 #pragma endregion
 
-
+#pragma region EStyleType
+UENUM(BlueprintType)
+enum EStyleType : uint8
+{
+	Normal UMETA(DisplayName = "正常"),
+	Cartoon UMETA(DisplayName = "卡通"),
+	Hero UMETA(DisplayName = "英雄"),
+	Old UMETA(DisplayName = "黑白")
+};
+#pragma endregion
 
 #pragma region EAbilityQuality
 UENUM(BlueprintType)
@@ -125,7 +134,7 @@ struct FAbility: public FTableRowBase
 
 
 
-#pragma region Buff
+#pragma region FBuffValueEffect
 
 USTRUCT(BlueprintType)
 struct FBuffValueEffect
@@ -143,3 +152,39 @@ struct FBuffValueEffect
 };
 
 #pragma endregion 
+
+
+
+#pragma region CharacterAttribute
+
+USTRUCT(BlueprintType)
+struct FCharacterAttribute
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float SpringArmLengthSight;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int MaxHealth;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int MaxEnergy;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int BasicAttackValue;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float WalkMoveSpeed;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float WalkMoveAcceleration;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float JumpHeight;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float RepelResistPercent;
+	
+};
+#pragma endregion

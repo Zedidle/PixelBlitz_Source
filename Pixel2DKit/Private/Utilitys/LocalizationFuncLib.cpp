@@ -4,7 +4,7 @@
 #include "Utilitys/LocalizationFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystemUtils.h"
-#include "Basic/BasePixelGameInstance.h"
+#include "Basic/PXGameInstance.h"
 #include "Settings/DataTableSettings.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
@@ -56,7 +56,7 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 	UGameInstance* gameInstance = world->GetGameInstance();
 	if (!gameInstance) return "";
 	
-	UBasePixelGameInstance* GI = Cast<UBasePixelGameInstance>(gameInstance);
+	UPXGameInstance* GI = Cast<UPXGameInstance>(gameInstance);
 	if (!GI) return "";
 	
 	switch (static_cast<ELanguageEnum>(GI->GeneralSetting_Language))
