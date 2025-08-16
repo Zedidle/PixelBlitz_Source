@@ -105,6 +105,14 @@ void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
 	
 }
 
+void UBuffComponent::SetBuffStateWdigetVisibility(ESlateVisibility InVisibility)
+{
+	if (BuffStateWidget)
+	{
+		BuffStateWidget->SetVisibility(InVisibility);
+	}
+}
+
 void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
 	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);

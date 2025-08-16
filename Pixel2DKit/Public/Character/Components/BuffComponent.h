@@ -15,6 +15,14 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent, public IBuff_Inter
 {
 	GENERATED_BODY()
 
+	
+	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Speed;
+	TMap<FGameplayTag, float> Tag2BuffEndTime_Speed;
+	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Attack;
+	TMap<FGameplayTag, float> Tag2BuffEndTime_Attack;
+	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Sight;
+	TMap<FGameplayTag, float> Tag2BuffEndTime_Sight;
+	
 public:	
 	// Sets default values for this component's properties
 	UBuffComponent();
@@ -23,21 +31,22 @@ public:
 	TSubclassOf<UBuffStateWidget> BuffStateWidgetClass;
 	UPROPERTY()
 	UBuffStateWidget* BuffStateWidget = nullptr;
-	
+
+	UPROPERTY(BlueprintReadOnly)
 	float EffectedValue_Speed;
+	UPROPERTY(BlueprintReadOnly)
 	float EffectedPercent_Speed;
-	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Speed;
-	TMap<FGameplayTag, float> Tag2BuffEndTime_Speed;
 
+	UPROPERTY(BlueprintReadOnly)
 	float EffectedValue_Attack;
+	UPROPERTY(BlueprintReadOnly)
 	float EffectedPercent_Attack;
-	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Attack;
-	TMap<FGameplayTag, float> Tag2BuffEndTime_Attack;
 
+	UPROPERTY(BlueprintReadOnly)
 	float EffectedValue_Sight;
+	UPROPERTY(BlueprintReadOnly)
 	float EffectedPercent_Sight;
-	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Sight;
-	TMap<FGameplayTag, float> Tag2BuffEndTime_Sight;
+
 	
 	
 	
@@ -50,7 +59,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool BuffExist(FGameplayTag Tag) const;
 
 
@@ -63,6 +72,10 @@ public:
 	void RemoveBuff_Speed(FGameplayTag Tag);
 	UFUNCTION()
 	void RemoveBuff_EffectAll(FGameplayTag Tag);
+
+
+	UFUNCTION(BlueprintCallable)
+	void SetBuffStateWdigetVisibility(ESlateVisibility InVisibility);
 
 	
 	
