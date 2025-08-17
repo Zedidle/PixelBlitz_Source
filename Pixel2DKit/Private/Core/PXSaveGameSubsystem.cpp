@@ -251,6 +251,17 @@ UPXAchievementsSaveGame* UPXSaveGameSubsystem::LoadAchievementsData()
     return AchievementsSaveGame;
 }
 
+bool UPXSaveGameSubsystem::CompleteAchievement(FName AchievementRowName)
+{
+    if (AchievementsSaveGame->Achieve_CompletedAchievements.Contains(AchievementRowName)) return false;
+
+    AchievementsSaveGame->Achieve_CompletedAchievements.Add(AchievementRowName);
+
+    SaveAchievementsData();
+
+    return true;
+}
+
 void UPXSaveGameSubsystem::SaveShopData()
 {
     bool result = UGameplayStatics::SaveGameToSlot(ShopSaveGame, SlotName_Shop, UserIndex);

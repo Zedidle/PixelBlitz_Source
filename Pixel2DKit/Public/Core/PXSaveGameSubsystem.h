@@ -98,6 +98,9 @@ public:
 	void SaveAchievementsData();
 	UPXAchievementsSaveGame* LoadAchievementsData();
 
+	UFUNCTION(BlueprintCallable, Category = "SaveGame | Achievements")
+	bool CompleteAchievement(FName AchievementRowName);
+	
 #pragma endregion 
 
 
