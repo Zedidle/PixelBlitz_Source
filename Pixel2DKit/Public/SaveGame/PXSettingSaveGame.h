@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/Subsystem.h"
-#include "PXSettingSubsystem.generated.h"
+#include "GameFramework/SaveGame.h"
+#include "PXSettingSaveGame.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPXSettingSubsystem : public USubsystem
+class PIXEL2DKIT_API UPXSettingSaveGame : public USaveGame
 {
 	GENERATED_BODY()
 	

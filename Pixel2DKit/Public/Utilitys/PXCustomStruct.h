@@ -155,7 +155,7 @@ struct FBuffValueEffect
 
 
 
-#pragma region CharacterAttribute
+#pragma region FCharacterAttribute
 
 USTRUCT(BlueprintType)
 struct FCharacterAttribute
