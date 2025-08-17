@@ -13,5 +13,9 @@ UCLASS()
 class PIXEL2DKIT_API UPXShopSaveGame : public USaveGame
 {
 	GENERATED_BODY()
-	
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+	TMap<FName, int> Shop_ItemRemainNum;
+
 };

@@ -13,5 +13,16 @@ UCLASS()
 class PIXEL2DKIT_API UPXTalentsSaveGame : public USaveGame
 {
 	GENERATED_BODY()
-	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	TMap<TEnumAsByte<EWeather>, int> Talent_KillBOSSNum_InWeatherType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	int Talent_TotalPickupGolds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	int Talent_TotalDeathNum;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	int Talent_TotalPerfectDodgeTimes;
 };

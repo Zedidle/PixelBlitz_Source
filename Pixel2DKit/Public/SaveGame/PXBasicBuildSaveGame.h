@@ -6,11 +6,13 @@
 #include "GameFramework/SaveGame.h"
 #include "PXBasicBuildSaveGame.generated.h"
 
-USTRUCT(BlueprintType)
-struct FPXBasicBuildSaveData
+
+
+UCLASS()
+class PIXEL2DKIT_API UPXBasicBuildSaveGame : public USaveGame
 {
 	GENERATED_BODY()
-
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
 	int RemainGoldNum;
 
@@ -28,15 +30,4 @@ struct FPXBasicBuildSaveData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
 	TArray<FName> UnlockTalentIndexes;
-
-	
-};
-
-
-UCLASS()
-class PIXEL2DKIT_API UPXBasicBuildSaveGame : public USaveGame
-{
-	GENERATED_BODY()
-public:
-	FPXBasicBuildSaveData Data;
 };
