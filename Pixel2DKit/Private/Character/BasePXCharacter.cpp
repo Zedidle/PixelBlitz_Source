@@ -18,8 +18,10 @@
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
+#include "Core/PXSaveGameSubsystem.h"
 #include "GAS/PXASComponent.h"
 #include "PlayerState/PXCharacterPlayerState.h"
+#include "SaveGame/PXSettingSaveGame.h"
 #include "Sound/SoundCue.h"
 #include "Utilitys/SoundFuncLib.h"
 
@@ -169,34 +171,37 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
-	if (UPXGameInstance* GameInstance = Cast<UPXGameInstance>(GetGameInstance()))
+	if (UPXSaveGameSubsystem* SettingSaveGame = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>())
 	{
-		switch (GameInstance->VideoSetting_CameraMode)
+		if (UPXSettingSaveGame* SaveGame = SettingSaveGame->GetSettingData())
 		{
+			switch (SaveGame->VideoSetting_CameraMode)
+			{
 			case 0: // 镜头前瞻
-			{
-				Velocity.X *= 0.35;
-				Velocity.Y *= 0.35;
-				Velocity.Z *= 0.2;
-				FVector Location = GetActorLocation() + Velocity;
-				FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
-						(d > 0 ? 1 : FMath::GetMappedRangeValueClamped(FVector2D(-1, 0), FVector2D(0.2, 1), d));
-				SpringArm->SetWorldLocation(Location + FightOffset);
-				break;
-			}
+				{
+					Velocity.X *= 0.35;
+					Velocity.Y *= 0.35;
+					Velocity.Z *= 0.2;
+					FVector Location = GetActorLocation() + Velocity;
+					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
+							(d > 0 ? 1 : FMath::GetMappedRangeValueClamped(FVector2D(-1, 0), FVector2D(0.2, 1), d));
+					SpringArm->SetWorldLocation(Location + FightOffset);
+					break;
+				}
 			case 1: // 镜头跟随
-			{
-				SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
-				FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 280;
-				SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
-				break;
-			}
+				{
+					SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
+					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 280;
+					SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
+					break;
+				}
 			default:
-			{
-				break;
+				{
+					break;
+				}
 			}
 		}
-	}	
+	}
 	
 	// 攻击命中导致的视野下降
 	if (AttackHitComboNum > 0)

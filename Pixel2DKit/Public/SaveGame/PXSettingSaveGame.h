@@ -28,7 +28,7 @@ public:
 	int VideoSetting_Resolution;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
-	UTexture* VideoSetting_PPVColorGradingLUT;
+	TSoftObjectPtr<UTexture> VideoSetting_PPVColorGradingLUT;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
 	int VideoSetting_ScreenMode;

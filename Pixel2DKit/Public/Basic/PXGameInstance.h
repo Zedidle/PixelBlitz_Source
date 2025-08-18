@@ -107,62 +107,61 @@ public:
 #pragma endregion
 	
 #pragma region BasicBuild
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	int Basic_RemainGoldNum;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	TArray<FName> Basic_ChoicedTalentIndexes;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	int Basic_TotalTalentPoint;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	int Basic_MaxTalentPoint;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	TArray<FName> Basic_UnlockAbilityIndexes;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	TArray<FName> Basic_UnlockTalentIndexes;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	// int Basic_RemainGoldNum;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	// TArray<FName> Basic_ChoicedTalentIndexes;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	// int Basic_TotalTalentPoint;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	// int Basic_MaxTalentPoint;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	// TArray<FName> Basic_UnlockAbilityIndexes;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	// TArray<FName> Basic_UnlockTalentIndexes;
 	
 #pragma endregion 
-	
-	
+
 #pragma region VideoSetting
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
-	int VideoSetting_CameraMode;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
-	int VideoSetting_Resolution;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
-	UTexture* VideoSetting_PPVColorGradingLUT;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
-	int VideoSetting_ScreenMode;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Control")
-	TArray<FEnhancedActionKeyMapping> ControlSetting_CharacterControl_KeyBoard_Mapping;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Control")
-	TArray<FEnhancedActionKeyMapping> ControlSetting_CharacterControl_GamePad_Mapping;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
+	// int VideoSetting_CameraMode;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
+	// int VideoSetting_Resolution;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
+	// UTexture* VideoSetting_PPVColorGradingLUT;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
+	// int VideoSetting_ScreenMode;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Control")
+	// TArray<FEnhancedActionKeyMapping> ControlSetting_CharacterControl_KeyBoard_Mapping;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Control")
+	// TArray<FEnhancedActionKeyMapping> ControlSetting_CharacterControl_GamePad_Mapping;
 #pragma endregion
 
 #pragma region SoundSetting
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
-	bool SoundSetting_ToggleAll = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
-	float SoundSetting_VolumeValue = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
-	float SoundSetting_MusicValue = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
-	float SoundSetting_UIValue = 1.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
-	float SoundSetting_UIValue_BasicArg = 1.0f;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
+	// bool SoundSetting_ToggleAll = true;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
+	// float SoundSetting_VolumeValue = 1.0f;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
+	// float SoundSetting_MusicValue = 1.0f;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
+	// float SoundSetting_UIValue = 1.0f;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Sound")
+	// float SoundSetting_UIValue_BasicArg = 1.0f;
 	
 #pragma endregion
 
