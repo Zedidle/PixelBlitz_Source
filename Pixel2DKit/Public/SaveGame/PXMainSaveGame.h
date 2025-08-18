@@ -21,7 +21,7 @@ public:
 	FName CurLevelChoiceAbility;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int SupLife;
+	int SupLife = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxLife = 5;
@@ -36,7 +36,7 @@ public:
 	TArray<float> Results;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bTotalMonsterClear;
+	bool bTotalMonsterClear = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool PreLevelClearAllMonster;
@@ -45,7 +45,7 @@ public:
 	int LostLife;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Injured;
+	bool Injured = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RoundGoldNum;

@@ -111,7 +111,8 @@ public:
 protected:
 #pragma region GAS
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
+
+	UPROPERTY()
 	TWeakObjectPtr<class UPXAttributeSet> AttributeSetBase;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

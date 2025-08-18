@@ -19,11 +19,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
 	TArray<FName> ChoicedTalentIndexes;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	int TotalTalentPoint;
 
+	// 当前累计可用天赋点
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	int MaxTalentPoint;
+	int TotalTalentPoint = 10;
+
+	// 天赋点最高上限
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	int MaxTalentPoint = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
 	TArray<FName> UnlockAbilityIndexes;

@@ -164,7 +164,9 @@ bool UPXSaveGameSubsystem::Main_HasChoiceAbility()
 
 void UPXSaveGameSubsystem::Main_TotalInit(TSubclassOf<UPrimaryDataAsset> WeatherType, EStyleType StyleType)
 {
+    UPXMainSaveGame* OldSaveGame = MainSaveGame;
     MainSaveGame = NewObject<UPXMainSaveGame>(this);
+    MainSaveGame->CurCharacterName = OldSaveGame->CurCharacterName;
     MainSaveGame->CurWeatherType = WeatherType;
     MainSaveGame->StyleType = StyleType;
 }

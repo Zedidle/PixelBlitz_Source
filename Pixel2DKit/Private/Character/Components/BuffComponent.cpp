@@ -119,7 +119,11 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 
 	RemoveBuff_Speed(Tag);
 
-	float SlowDownResistancePercent = GetSlowDownResistancePercent();
+	AActor* Owner = GetOwner();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	if (!Owner->Implements<UBuff_Interface>()) return;
+	
+	float SlowDownResistancePercent = IBuff_Interface::Execute_GetSlowDownResistancePercent(Owner);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Speed.Add( Tag, SustainTime + Now);
 
@@ -139,12 +143,8 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	EffectedValue_Speed += Value;
 	Tag2BuffEffect_Speed.Add(Tag, FBuffValueEffect(Percent, Value));
 	
-	AActor* Owner = GetOwner();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-	if (Owner->Implements<UBuff_Interface>())
-	{
-		Execute_BuffUpdate_Speed(Owner);
-	}
+
+	Execute_BuffUpdate_Speed(Owner);
 
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
@@ -200,8 +200,11 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 {
 	IBuff_Interface::BuffEffect_Sight_Implementation(Tag, Percent, Value, SustainTime);
 	RemoveBuff_Speed(Tag);
+	AActor* Owner = GetOwner();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	if (!Owner->Implements<UBuff_Interface>()) return;
 
-	float ShortSightResistancePercent = GetShortSightResistancePercent();
+	float ShortSightResistancePercent = IBuff_Interface::Execute_GetShortSightResistancePercent(Owner);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Sight.Add( Tag, SustainTime + Now);
 
@@ -221,12 +224,7 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	EffectedValue_Sight += Value;
 	Tag2BuffEffect_Sight.Add(Tag, FBuffValueEffect(Percent, Value));
 	
-	AActor* Owner = GetOwner();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-	if (Owner->Implements<UBuff_Interface>())
-	{
-		Execute_BuffUpdate_Sight(Owner);
-	}
+	Execute_BuffUpdate_Sight(Owner);
 
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
