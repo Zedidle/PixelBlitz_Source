@@ -6,6 +6,7 @@
 #include "Character/BasePXCharacter.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Character/Components/BuffComponent.h"
+#include "Core/PXSaveGameSubsystem.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/DataTableFunctionLibrary.h"
@@ -88,7 +89,10 @@ void UAbilityComponent::LoadAbility()
 		TakeEffectAbilityIndexes.AddUnique(Index);
 	}
 
-	UDataTableSubsystem* DataTableManager = PXCharacter->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+	
+	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
 	for (auto Index : TakeEffectAbilityIndexes)
 	{
@@ -180,7 +184,44 @@ void UAbilityComponent::LoadAbility()
 	}
 
 	// 通过GameInstance存档
-	
-	
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem->MainSaveGame)
+	SaveGameSubsystem->MainSaveGame->ChoicedAbilityIndexes = ChoicedAbilityIndexes;
+	SaveGameSubsystem->MainSaveGame->TakeEffectAbilityIndexes = TakeEffectAbilityIndexes;
+
+	SaveGameSubsystem->SaveMainData();
+}
+
+bool UAbilityComponent::HasChoiced(FName AbilityIndex)
+{
+	return ChoicedAbilityIndexes.Contains(AbilityIndex);
+}
+
+bool UAbilityComponent::CanLearnAbiliy(const FName& RowNameIndex, const FAbility& Ability)
+{
+	if (!Ability.Enable) return false;
+
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, false)
+
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, false)
+
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSaveGame, false)
+
+	if (MainSaveGame->CurCharacterName != Ability.CharacterName && Ability.CharacterName != FName()) return false;
+
+	if (ChoicedAbilityIndexes.Contains(RowNameIndex)) return false;
+
+	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->BasicBuildSaveGame;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSaveGame, false)
+
+	if (Ability.DefaultLock && !BasicBuildSaveGame->UnlockAbilityIndexes.Contains(RowNameIndex)) return false;
+
+	if (Ability.PreLevelIndex == FName()) return true;
+
+	return TakeEffectAbilityIndexes.Contains(Ability.PreLevelIndex);
 }
 

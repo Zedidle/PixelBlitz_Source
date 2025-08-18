@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/BasePXCharacter.h"
 #include "Components/ActorComponent.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "AbilityComponent.generated.h"
 
 
@@ -51,5 +52,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadAbility();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool HasChoiced(FName AbilityIndex);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool CanLearnAbiliy(const FName& RowNameIndex, const FAbility& Ability);
 	
 };
