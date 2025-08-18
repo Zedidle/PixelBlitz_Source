@@ -43,7 +43,7 @@ public:
 	UPXMainSaveGame* MainSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Main")
 	void SaveMainData();
-	UPXMainSaveGame* LoadMainData();
+	UPXMainSaveGame* GetMainData();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "SaveGame | Main")
 	bool Main_HasChoiceAbility();
@@ -69,7 +69,7 @@ public:
 	UPXBasicBuildSaveGame* BasicBuildSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | BasicBuild")
 	void SaveBasicBuildData();
-	UPXBasicBuildSaveGame* LoadBasicBuildData();
+	UPXBasicBuildSaveGame* GetBasicBuildData();
 
 
 	
@@ -84,7 +84,7 @@ public:
 	UPXSettingSaveGame* SettingSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Setting")
 	void SaveSettingData();
-	UPXSettingSaveGame* LoadSettingData();
+	UPXSettingSaveGame* GetSettingData();
 
 #pragma endregion 
 
@@ -96,7 +96,7 @@ public:
 	UPXAchievementsSaveGame* AchievementsSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Achievements")
 	void SaveAchievementsData();
-	UPXAchievementsSaveGame* LoadAchievementsData();
+	UPXAchievementsSaveGame* GetAchievementsData();
 
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Achievements")
 	bool CompleteAchievement(FName AchievementRowName);
@@ -111,7 +111,7 @@ public:
 	UPXShopSaveGame* ShopSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Shop")
 	void SaveShopData();
-	UPXShopSaveGame* LoadShopData();
+	UPXShopSaveGame* GetShopData();
 
 #pragma endregion 
 
@@ -123,7 +123,7 @@ public:
 	UPXTalentsSaveGame* TalentsSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Talents")
 	void SaveTalentsData();
-	UPXTalentsSaveGame* LoadTalentsData();
+	UPXTalentsSaveGame* GetTalentsData();
 
 #pragma endregion 
 

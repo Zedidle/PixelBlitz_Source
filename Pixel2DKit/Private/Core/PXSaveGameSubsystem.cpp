@@ -144,7 +144,7 @@ void UPXSaveGameSubsystem::SaveMainData()
     }
 }
 
-UPXMainSaveGame* UPXSaveGameSubsystem::LoadMainData()
+UPXMainSaveGame* UPXSaveGameSubsystem::GetMainData()
 {
     if (UPXMainSaveGame* SaveGame = Cast<UPXMainSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Main, UserIndex)))
     {
@@ -194,7 +194,7 @@ void UPXSaveGameSubsystem::SaveBasicBuildData()
     }
 }
 
-UPXBasicBuildSaveGame* UPXSaveGameSubsystem::LoadBasicBuildData()
+UPXBasicBuildSaveGame* UPXSaveGameSubsystem::GetBasicBuildData()
 {
     if (UPXBasicBuildSaveGame* SaveGame = Cast<UPXBasicBuildSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Main, UserIndex)))
     {
@@ -216,7 +216,7 @@ void UPXSaveGameSubsystem::SaveSettingData()
     }
 }
 
-UPXSettingSaveGame* UPXSaveGameSubsystem::LoadSettingData()
+UPXSettingSaveGame* UPXSaveGameSubsystem::GetSettingData()
 {
     if (UPXSettingSaveGame* SaveGame = Cast<UPXSettingSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
     {
@@ -238,7 +238,7 @@ void UPXSaveGameSubsystem::SaveAchievementsData()
     }
 }
 
-UPXAchievementsSaveGame* UPXSaveGameSubsystem::LoadAchievementsData()
+UPXAchievementsSaveGame* UPXSaveGameSubsystem::GetAchievementsData()
 {
     if (UPXAchievementsSaveGame* SaveGame = Cast<UPXAchievementsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
     {
@@ -271,7 +271,7 @@ void UPXSaveGameSubsystem::SaveShopData()
     }
 }
 
-UPXShopSaveGame* UPXSaveGameSubsystem::LoadShopData()
+UPXShopSaveGame* UPXSaveGameSubsystem::GetShopData()
 {
     if (UPXShopSaveGame* SaveGame = Cast<UPXShopSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Shop, UserIndex)))
     {
@@ -293,7 +293,7 @@ void UPXSaveGameSubsystem::SaveTalentsData()
     }
 }
 
-UPXTalentsSaveGame* UPXSaveGameSubsystem::LoadTalentsData()
+UPXTalentsSaveGame* UPXSaveGameSubsystem::GetTalentsData()
 {
     if (UPXTalentsSaveGame* SaveGame = Cast<UPXTalentsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Talents, UserIndex)))
     {

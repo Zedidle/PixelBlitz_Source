@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystemUtils.h"
 #include "Basic/PXGameInstance.h"
+#include "Core/PXSaveGameSubsystem.h"
 #include "Settings/DataTableSettings.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
@@ -56,10 +57,13 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 	UGameInstance* gameInstance = world->GetGameInstance();
 	if (!gameInstance) return "";
 	
-	UPXGameInstance* GI = Cast<UPXGameInstance>(gameInstance);
-	if (!GI) return "";
+	UPXSaveGameSubsystem* SaveGameSubsystem = gameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	if (!SaveGameSubsystem) return "";
+
+	UPXSettingSaveGame* SettingSaveGame = SaveGameSubsystem->GetSettingData();
+	if (!SettingSaveGame) return "";
 	
-	switch (static_cast<ELanguageEnum>(GI->GeneralSetting_Language))
+	switch (static_cast<ELanguageEnum>(SettingSaveGame->GeneralSetting_Language))
 	{
 		case ELanguageEnum::Chinese: return LocalizedString->Chinese;
 		case ELanguageEnum::English: return LocalizedString->English;

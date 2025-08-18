@@ -3,75 +3,98 @@
 
 #include "Basic/PXGameInstance.h"
 
+#include "Core/PXSaveGameSubsystem.h"
 #include "Kismet/KismetStringLibrary.h"
+#include "Pixel2DKit/Pixel2DKit.h"
+#include "SaveGame/PXSettingSaveGame.h"
 
 FName UPXGameInstance::GetCurLevelName(bool Continue)
 {
+	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
+	if (!SaveGameSubsystem) return FName();
+
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	if (!MainSaveGame) return FName();
+
+	
 	if (Continue)
 	{
-		return Main_CurLevelName;
+		return MainSaveGame->CurLevelName;
 	}
 	else
 	{
-		if (Main_SurLevels.Num() == 0) return "";
+		if (MainSaveGame->SurLevels.Num() == 0) return "";
 		
-		if (Main_SurLevels.Num() == 1)
+		if (MainSaveGame->SurLevels.Num() == 1)
 		{
-			Main_CurLevelName = Main_SurLevels[0];
+			MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
 		}
 		else
 		{
-			const FString s0 = UKismetStringLibrary::GetSubstring(Main_SurLevels[0].ToString(), 1, 1);
+			const FString s0 = UKismetStringLibrary::GetSubstring(MainSaveGame->SurLevels[0].ToString(), 1, 1);
 			float v0 = FCString::Atod(*s0);
 
-			const FString s1 = UKismetStringLibrary::GetSubstring(Main_SurLevels[1].ToString(), 1, 1);
+			const FString s1 = UKismetStringLibrary::GetSubstring(MainSaveGame->SurLevels[1].ToString(), 1, 1);
 			float v1 = FCString::Atod(*s1);
 
 			float r = v0 / (v0 + v1);
 			if (FMath::FRand() > r)
 			{
-				Main_CurLevelName = Main_SurLevels[0];
+				MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
 			}
 			else
 			{
-				Main_CurLevelName = Main_SurLevels[1];
+				MainSaveGame->CurLevelName = MainSaveGame->SurLevels[1];
 			}
 		}
 
-		Main_SurLevels.Remove(Main_CurLevelName);
-		return Main_CurLevelName;
+		MainSaveGame->SurLevels.Remove(MainSaveGame->CurLevelName);
+		return MainSaveGame->CurLevelName;
 	}
 }
 
 FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
 {
-	if (Main_SurLevels.Num() == 0) return "";
+	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
+	if (!SaveGameSubsystem) return FName();
+
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	if (!MainSaveGame) return FName();
+	
+	if (MainSaveGame->SurLevels.Num() == 0) return "";
 	
 	if (Next)
 	{
-		Main_CurLevelName = Main_SurLevels[0];
-		Main_SurLevels.Remove(Main_CurLevelName);
-		return Main_CurLevelName;
+		MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
+		MainSaveGame->SurLevels.Remove(MainSaveGame->CurLevelName);
+		return MainSaveGame->CurLevelName;
 	}
 	
-	if (Main_CurLevelName == FName("None"))
+	if (MainSaveGame->CurLevelName == FName("None"))
 	{
-		Main_CurLevelName = Main_SurLevels[0];
+		MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
 	}
 	
-	return Main_CurLevelName;	
+	return MainSaveGame->CurLevelName;	
 }
 
 void UPXGameInstance::GetTotalUseTime(float& usetime, bool& newrecord)
 {
+	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame)
+	UPXAchievementsSaveGame* AchievementsSaveGame = SaveGameSubsystem->AchievementsSaveGame;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementsSaveGame);
+	
 	float Time = 0;
-	for (float r : Main_Results)
+	for (float r : MainSaveGame->Results)
 	{
 		Time += r;
 	}
-
-	newrecord = Achieve_TotalUseTime > Time;
-	if (Achieve_TotalUseTime > Time)
+	
+	newrecord = AchievementsSaveGame->Achieve_TotalUseTime > Time;
+	if (newrecord)
 	{
 		Achieve_TotalUseTime = Time;
 	}
@@ -80,8 +103,13 @@ void UPXGameInstance::GetTotalUseTime(float& usetime, bool& newrecord)
 
 void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 {
-	Main_LostLife++;
-	Main_SupLife--;
+	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 	
-	End = Main_SupLife == -1;
+	MainSaveGame->LostLife++;
+	MainSaveGame->SupLife--;
+	
+	End = MainSaveGame->SupLife == -1;
 }

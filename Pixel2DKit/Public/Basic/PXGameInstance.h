@@ -29,79 +29,79 @@ public:
 #pragma endregion
 
 #pragma region Main
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_SupLife;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_SupLife;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_MaxLife;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_MaxLife;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// TArray<FName> Main_ChoicedAbilityIndexes;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	TArray<FName> Main_ChoicedAbilityIndexes;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	FName Main_CurLevelChoiceAbility;
-
-	// 前一关是否清空了所有怪物, 不用保存
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	bool Main_bPreLevelClearAllMonster;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	TArray<FName> Main_TakeEffectAbilityIndexes;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// FName Main_CurLevelChoiceAbility;
+	//
+	// // 前一关是否清空了所有怪物, 不用保存
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// bool Main_bPreLevelClearAllMonster;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// TArray<FName> Main_TakeEffectAbilityIndexes;
 
 	// 每一关的过关时间
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	TArray<float> Main_Results;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// TArray<float> Main_Results;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// FString Main_CurLevelSeriesName;
+	//
+	// // 整个过关过程死亡次数
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_LostLife;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	FString Main_CurLevelSeriesName;
-
-	// 整个过关过程死亡次数
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_LostLife;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	bool Main_bPlayerInjured;
-
-	// （非保存）当前游戏流逝时间，同一关内通用
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	float Main_SkyTimeOfDay;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	TEnumAsByte<EStyleType> Main_StyleType;
-	
-	// 这一局内是否仍然保持全部清除怪物
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	bool Main_TotalMonsterClear;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_RoundGoldNum;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_PlayerBehurtedTimes;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	bool Main_PickupAllGolds;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_TotalPerfectDodgeTimes;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	int Main_TotalAttackInDashTimes;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	TSubclassOf<UPrimaryDataAsset> Main_CurWeatherType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
- 	FCharacterAttribute Main_CharacterInheritAttribute;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	FName Main_CurCharacterName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	FName Main_CurLevelName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
-	TArray<FName> Main_SurLevels;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// bool Main_bPlayerInjured;
+	//
+	// // （非保存）当前游戏流逝时间，同一关内通用
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// float Main_SkyTimeOfDay;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// TEnumAsByte<EStyleType> Main_StyleType;
+	//
+	// // 这一局内是否仍然保持全部清除怪物
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// bool Main_TotalMonsterClear;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_RoundGoldNum;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_PlayerBehurtedTimes;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// bool Main_PickupAllGolds;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_TotalPerfectDodgeTimes;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// int Main_TotalAttackInDashTimes;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// TSubclassOf<UPrimaryDataAsset> Main_CurWeatherType;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+ // 	FCharacterAttribute Main_CharacterInheritAttribute;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// FName Main_CurCharacterName;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// FName Main_CurLevelName;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
+	// TArray<FName> Main_SurLevels;
 	
 	
 #pragma endregion

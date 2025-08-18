@@ -24,6 +24,9 @@ public:
 	int SupLife;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MaxLife = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> ChoicedAbilityIndexes;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -49,6 +52,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool PickupAllGolds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SkyTimeOfDay;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int TotalPerfectDodgeTimes;
