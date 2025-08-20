@@ -17,6 +17,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Util/ColorConstants.h"
 #include "Utilitys/PXCustomStruct.h"
 
 // Sets default values for this component's properties
@@ -325,7 +326,10 @@ void UAbilityComponent::CreateQTE()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidgetClass)
 	ArrowLineWidget = CreateWidget<UArrowLineWidget>(GetWorld(), ArrowLineWidgetClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidget)
-
+	ArrowLineWidget->InitializeData(PXCharacter, HurtInstigator, true, 10,
+		600, FLinearColor::White, 1.5, FVector2D(36, 54),
+		FVector2D(64, 64), FVector::Zero());
+	ArrowLineWidget->AddToViewport(100);
 }
 
 void UAbilityComponent::OnKeyPressed(UInputAction* InputAction, bool& Keep)
@@ -383,7 +387,7 @@ void UAbilityComponent::ListHurtInstigatorDead()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtInstigator)
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtInstigator);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
-	Enemy->OnEnemyDeath.AddDynamic(this, UAbilityComponent::OnHurtInstigatorDead);
+	Enemy->OnEnemyDeath.AddDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
 
 }
 

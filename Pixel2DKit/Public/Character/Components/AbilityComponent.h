@@ -99,7 +99,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable)
 	void OnBeAttacked(AActor* Instigator, int DamageAmount, bool& Resist);
 
 
