@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "LocalizationFuncLib.h"
 #include "UObject/NoExportTypes.h"
+#include "Abilities/GameplayAbility.h"
 #include "PXCustomStruct.generated.h"
 
 /**
@@ -127,6 +128,12 @@ struct FAbility: public FTableRowBase
 	// 技能的特殊附加值，以GameplayTag为前缀
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	TSoftClassPtr<UGameplayAbility> AbilityClass;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	FGameplayTag AbilityTag;
 };
 
 

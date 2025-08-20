@@ -99,6 +99,7 @@ public:
 	void Initialize_Implementation(FName Level);
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintNativeEvent)
 	void LoadEnemyData(FName Level);

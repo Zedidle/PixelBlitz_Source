@@ -241,6 +241,13 @@ void ABaseEnemy::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	OnEnemyDeath.RemoveAll(this);
+}
+
 void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
 {
 }

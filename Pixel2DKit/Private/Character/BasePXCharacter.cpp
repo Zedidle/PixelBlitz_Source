@@ -307,6 +307,11 @@ void ABasePXCharacter::Falling()
 	SetFalling(true);
 }
 
+int ABasePXCharacter::GetWeaponInitDamage_Implementation()
+{
+	return BasicAttackValue;
+}
+
 UAbilitySystemComponent* ABasePXCharacter::GetAbilitySystemComponent() const
 {
 	

@@ -28,4 +28,9 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Custom Resource")
 	TSoftObjectPtr<USoundAttenuation> Attenuation_Default;
+
+
+	UPROPERTY(Config, EditAnywhere, Category = "Ability Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_Mobiliarbus;
+	
 };

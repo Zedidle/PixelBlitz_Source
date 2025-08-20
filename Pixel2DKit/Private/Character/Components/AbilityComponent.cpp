@@ -3,6 +3,9 @@
 
 #include "Character/Components/AbilityComponent.h"
 
+#include "AbilitySystemComponent.h"
+#include "InputAction.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Character/Components/BuffComponent.h"
@@ -10,7 +13,9 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/DataTableFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/CustomResourceSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/PXCustomStruct.h"
 
@@ -24,6 +29,21 @@ UAbilityComponent::UAbilityComponent()
 	// ...
 }
 
+
+FGameplayTagContainer UAbilityComponent::GetGameplayTagsWithChildren(FName TagName)
+{
+	FGameplayTagContainer Tags;
+	Tags.AddTag(FGameplayTag::RequestGameplayTag(TagName));
+
+	FGameplayTagContainer AbilityTagsChildren = UGameplayTagsManager::Get().
+		RequestGameplayTagChildren(FGameplayTag::RequestGameplayTag(TagName));
+
+	for (const FGameplayTag& ChildTag : AbilityTagsChildren)
+	{
+		Tags.AddTag(ChildTag);
+	}
+	return Tags;
+}
 
 // Called when the game starts
 void UAbilityComponent::BeginPlay()
@@ -41,6 +61,8 @@ void UAbilityComponent::BeginPlay()
 		PXCharacter->DataAsset->AbilityDataTable.LoadSynchronous();
 		AbilityDataTable = PXCharacter->DataAsset->AbilityDataTable.Get();
 	}
+
+	CachedASC = PXCharacter->GetAbilitySystemComponent();
 }
 
 
@@ -54,13 +76,15 @@ void UAbilityComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UAbilityComponent::LearnAbility(FName AbilityIndex)
 {
-	AActor* Owner = GetOwner();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityDataTable)
-
-	if (!UDataTableFunctionLibrary::DoesDataTableRowExist(AbilityDataTable, AbilityIndex)) return;
 	
-	UDataTableSubsystem* DataTableManager = Owner->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	if (!UDataTableFunctionLibrary::DoesDataTableRowExist(AbilityDataTable, AbilityIndex)) return;
+
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
 
 	ChoicedAbilityIndexes.Add(AbilityIndex);
@@ -70,6 +94,12 @@ void UAbilityComponent::LearnAbility(FName AbilityIndex)
 	if (AbilityData.PreLevelIndex == EName::None)
 	{
 		TakeEffectAbilityIndexes.AddUnique(AbilityIndex);
+		// 由于同一技能的不同等级都使用相同的GA，只是数值不同，就只用在学习第一个技能是GiveAbility
+		UClass* AbilityClass = AbilityData.AbilityClass.LoadSynchronous();
+		if (!AbilityClass) return;
+		
+		FGameplayAbilitySpec Spec(AbilityClass);
+		CachedASC->GiveAbility(Spec);
 	}
 	else if (TakeEffectAbilityIndexes.Contains(AbilityData.PreLevelIndex))
 	{
@@ -83,6 +113,7 @@ void UAbilityComponent::LoadAbility()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityDataTable)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
 
 	for (auto Index : TempTestAbilityIndexes)
 	{
@@ -94,9 +125,18 @@ void UAbilityComponent::LoadAbility()
 	
 	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
+
+	
 	for (auto Index : TakeEffectAbilityIndexes)
 	{
 		FAbility AbilityData = DataTableManager->FindRow<FAbility>(AbilityDataTable, Index);
+		UClass* LoadedClass = AbilityData.AbilityClass.LoadSynchronous();
+		if (!LoadedClass) continue;
+
+		FGameplayAbilitySpec Spec(LoadedClass);
+		CachedASC->GiveAbility(Spec);
+		
+		// 这里只考虑通用技能
 		if (AbilityData.CharacterName == EName::None)
 		{
 			TArray<FGameplayTag> Keys;
@@ -198,7 +238,7 @@ bool UAbilityComponent::HasChoiced(FName AbilityIndex)
 	return ChoicedAbilityIndexes.Contains(AbilityIndex);
 }
 
-bool UAbilityComponent::CanLearnAbiliy(const FName& RowNameIndex, const FAbility& Ability)
+bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability)
 {
 	if (!Ability.Enable) return false;
 
@@ -225,3 +265,144 @@ bool UAbilityComponent::CanLearnAbiliy(const FName& RowNameIndex, const FAbility
 	return TakeEffectAbilityIndexes.Contains(Ability.PreLevelIndex);
 }
 
+void UAbilityComponent::OnBeAttacked(AActor* Instigator, int DamageAmount, bool& Resist)
+{
+	if (!CachedASC || !Instigator->Implements<UFight_Interface>())
+	{
+		Resist = false;
+		return;
+	}
+
+	HurtInstigator = Instigator;
+	AcceptDamage = DamageAmount;
+	
+	bool LocalResist = false;
+	// 触发黑荆棘
+	if (CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.Blackthorn"))))
+	{
+		LocalResist = true;
+	}
+	
+	// 移形换影
+	if (CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.Mobiliarbus"))))
+	{
+		LocalResist = true;
+	}
+
+	// 天手力
+	// if (CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.HeavenlyHand"))))
+	// {
+	// 	LocalResist = true;
+	// }
+
+	// 检查天手力是否有效 且 冷却结束
+	FGameplayAbilitySpecHandle AbilitySpecHandle = GetGameplayAbilityWithTag(FGameplayTag::RequestGameplayTag("AbilitySet.SkyHandPower"));
+	if (const FGameplayAbilitySpec* Spec = CachedASC->FindAbilitySpecFromHandle(AbilitySpecHandle))
+	{
+		UGameplayAbility* AbilityInstance_SkyHandPower = Spec->GetPrimaryInstance();
+		if (AbilityInstance_SkyHandPower->K2_CheckAbilityCooldown())
+		{
+			LocalResist = true;
+			OnHurtInstigatorDead(nullptr);
+			CreateQTE();
+			ListHurtInstigatorDead();
+		}
+	}
+	
+	// 任意一个技能触发成功都可以设置为 true
+	Resist = LocalResist;
+}
+
+void UAbilityComponent::CreateQTE()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountdownWidgetClass)
+	KeyPressCountDownWidget = CreateWidget<UKeyPressCountDownWidget>(GetWorld(), KeyPressCountdownWidgetClass);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountDownWidget)
+	KeyPressCountDownWidget->InitializeData(1.5, 1.2);
+	KeyPressCountDownWidget->AddToViewport(100);
+
+	
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidgetClass)
+	ArrowLineWidget = CreateWidget<UArrowLineWidget>(GetWorld(), ArrowLineWidgetClass);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidget)
+
+}
+
+void UAbilityComponent::OnKeyPressed(UInputAction* InputAction, bool& Keep)
+{
+	if (Action_Jump != InputAction)
+	{
+		Keep = true;
+		return;
+	}
+
+	if (!IsValid(KeyPressCountDownWidget))
+	{
+		Keep = true;
+		return;
+	}
+
+	bool Effect;
+	KeyPressCountDownWidget->OnPressed(Effect);
+
+	if (!Effect)
+	{
+		Keep = true;
+		return;
+	}
+
+
+	if (CachedASC)
+	{
+		CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.SkyHandPower")));
+	}
+
+	if (ArrowLineWidget)
+	{
+		ArrowLineWidget->RemoveFromParent();
+	}
+
+	Keep = false;
+}
+
+void UAbilityComponent::OnHurtInstigatorDead_Implementation(ABaseEnemy* DeadEnemy)
+{
+	if (KeyPressCountDownWidget)
+	{
+		KeyPressCountDownWidget->RemoveFromParent();	
+	}
+	if (ArrowLineWidget)
+	{
+		ArrowLineWidget->RemoveFromParent();
+	}
+	
+}
+
+void UAbilityComponent::ListHurtInstigatorDead()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtInstigator)
+	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtInstigator);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
+	Enemy->OnEnemyDeath.AddDynamic(this, UAbilityComponent::OnHurtInstigatorDead);
+
+}
+
+FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FGameplayTag& Tag)
+{
+	if (!CachedASC)
+	{
+		return FGameplayAbilitySpecHandle();
+	}
+	
+	TArray<FGameplayAbilitySpecHandle> OutAbilityHandles;
+	FGameplayTagContainer TagContainer;
+	TagContainer.AddTag(Tag);
+	CachedASC->FindAllAbilitiesWithTags(OutAbilityHandles, TagContainer);
+
+	if (OutAbilityHandles.IsEmpty())
+	{
+		return FGameplayAbilitySpecHandle();
+	}
+	
+	return OutAbilityHandles[0];
+}

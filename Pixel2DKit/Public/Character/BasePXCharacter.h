@@ -110,6 +110,7 @@ public:
 
 protected:
 #pragma region GAS
+public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UPROPERTY()
@@ -164,12 +165,15 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void Falling() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Fight)
+	int GetWeaponInitDamage();
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicMoveSpeed = 200.f;
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicAirControl = 1.0f;
+
 	
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendPitch = -20.0f;
@@ -250,6 +254,9 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bMoving;
+
+	UPROPERTY(BlueprintReadWrite, Category = Fight)
+	int	BasicAttackValue = 10;
 
 	
 	

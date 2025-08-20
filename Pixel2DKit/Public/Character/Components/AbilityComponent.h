@@ -5,6 +5,10 @@
 #include "CoreMinimal.h"
 #include "Character/BasePXCharacter.h"
 #include "Components/ActorComponent.h"
+#include "Enemy/BaseEnemy.h"
+#include "Pixel2DKit/Pixel2DKit.h"
+#include "UI/QTE/ArrowLineWidget.h"
+#include "UI/QTE/KeyPressCountDownWidget.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "AbilityComponent.generated.h"
 
@@ -19,11 +23,31 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 
 	UPROPERTY()
 	ABasePXCharacter* PXCharacter;
+
+	UPROPERTY()
+	UKeyPressCountDownWidget* KeyPressCountDownWidget;
+
+	UPROPERTY()
+	UArrowLineWidget* ArrowLineWidget;
+	
 	
 public:	
 	// Sets default values for this component's properties
 	UAbilityComponent();
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UKeyPressCountDownWidget> KeyPressCountdownWidgetClass;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UArrowLineWidget> ArrowLineWidgetClass;
+
+	
+	
+	UPROPERTY(BlueprintReadOnly)
+	AActor* HurtInstigator;
+	UPROPERTY(BlueprintReadOnly)
+	int AcceptDamage;
+	
 	// 选择了的技能列表
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FName> ChoicedAbilityIndexes;
@@ -37,11 +61,28 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	TMap<FGameplayTag, float> EffectGameplayTag;
+
+
+	UFUNCTION(BlueprintCallable)
+	FGameplayTagContainer GetGameplayTagsWithChildren(FName TagName);
+
 	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UPROPERTY()
+	UAbilitySystemComponent* CachedASC;
+
+
+#pragma region InputAction
+	UPROPERTY(EditDefaultsOnly)
+	UInputAction* Action_Jump;
+	
+	
+#pragma	endregion
+	
+	
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -56,6 +97,30 @@ public:
 	bool HasChoiced(FName AbilityIndex);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool CanLearnAbiliy(const FName& RowNameIndex, const FAbility& Ability);
+	bool CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	void OnBeAttacked(AActor* Instigator, int DamageAmount, bool& Resist);
+
+
+
+	UFUNCTION(BlueprintCosmetic)
+	void CreateQTE();
 	
+
+	UFUNCTION(BlueprintCallable)
+	void OnKeyPressed(UInputAction* InputAction, bool& Keep);
+
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnHurtInstigatorDead(ABaseEnemy* DeadEnemy);
+
+	UFUNCTION()
+	void ListHurtInstigatorDead();
+
+	UFUNCTION()
+	FGameplayAbilitySpecHandle GetGameplayAbilityWithTag(const FGameplayTag& Tag);
+	
+
 };
+
