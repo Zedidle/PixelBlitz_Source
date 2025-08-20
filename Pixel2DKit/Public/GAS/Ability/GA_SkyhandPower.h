@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Abilities/GameplayAbility.h"
+#include "GAS/PXGameplayAbility.h"
 #include "GA_SkyhandPower.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UGA_SkyhandPower : public UGameplayAbility
+class PIXEL2DKIT_API UGA_SkyhandPower : public UPXGameplayAbility
 {
 	GENERATED_BODY()
 

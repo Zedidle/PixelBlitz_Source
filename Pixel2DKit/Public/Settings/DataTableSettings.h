@@ -19,11 +19,11 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 	mutable TMap<FName, TObjectPtr<UDataTable>> DataTables;
 
 	UPROPERTY(Config, EditAnywhere, Category = "ItemData")
-	FString ItemDataPath = TEXT("/Game/Pixel2D/Blueprints/Items/DT_ItemData.DT_ItemData");
+	TSoftObjectPtr<UDataTable> ItemDataPath;
 
-	UPROPERTY(Config, EditAnywhere, Category = "ItemData")
-	TSoftObjectPtr<UDataTable> ItemDataPath2;
-
+	UPROPERTY(Config, EditAnywhere, Category = "Buff")
+	TSoftObjectPtr<UDataTable> BuffOnWidgetPath;
+	
 public:
 	static const UDataTableSettings& Get()
 	{
@@ -36,7 +36,8 @@ public:
 	UDataTable* GetLocalizedDataTable(const FString& Path) const;
 
 
-	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath2.ToString()); }
+	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath.ToString()); }
+	TObjectPtr<UDataTable> GetBuffOnWidget() const { return GetData(BuffOnWidgetPath.ToString()); }
 	
 
 	

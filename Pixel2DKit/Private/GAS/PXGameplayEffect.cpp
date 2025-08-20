@@ -3,3 +3,7 @@
 
 #include "GAS/PXGameplayEffect.h"
 
+void UPXGameplayEffect::PostLoad()
+{
+	Super::PostLoad();
+}

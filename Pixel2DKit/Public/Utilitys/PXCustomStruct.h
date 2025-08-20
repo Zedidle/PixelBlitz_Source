@@ -195,3 +195,27 @@ struct FCharacterAttribute
 	
 };
 #pragma endregion
+
+
+#pragma region FBuffOnWidget
+USTRUCT(BlueprintType)
+struct FBuffOnWidget
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
+	FName RowName;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
+	FGameplayTag Tag;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
+	FLinearColor Color;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
+	bool Permanent;
+	
+};
+
+
+#pragma endregion

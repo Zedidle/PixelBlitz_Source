@@ -3,8 +3,10 @@
 
 #include "Character/Components/BuffComponent.h"
 
+#include "AbilitySystemComponent.h"
 #include "NiagaraCommon.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/BasePXCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/CommonFuncLib.h"
@@ -35,6 +37,14 @@ void UBuffComponent::BeginPlay()
 		}
 
 	}
+
+	ABasePXCharacter* Owner = Cast<ABasePXCharacter>(GetOwner());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner);
+
+	UAbilitySystemComponent* AbilitySystemComponent = Owner->GetAbilitySystemComponent();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilitySystemComponent);
+	AbilitySystemComponent->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
+	AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
 }
 
 
@@ -111,6 +121,30 @@ void UBuffComponent::SetBuffStateWdigetVisibility(ESlateVisibility InVisibility)
 	{
 		BuffStateWidget->SetVisibility(InVisibility);
 	}
+}
+
+void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
+	const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle Handle)
+{
+	const FGameplayTagContainer GameplayTagContainer = GameplayEffectSpec.GetDynamicAssetTags();
+	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
+	for (const FGameplayTag& Tag : Tags)
+	{
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("AbilityCD")) || 
+			Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		{
+			// 移除面板中的 BuffText
+			if (false)
+			{
+				RemoveBuff(Tag);
+			}
+		}
+	}
+}
+
+void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& GameplayEffect)
+{
+	
 }
 
 void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)

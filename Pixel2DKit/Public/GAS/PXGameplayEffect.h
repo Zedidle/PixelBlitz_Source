@@ -13,5 +13,16 @@ UCLASS()
 class PIXEL2DKIT_API UPXGameplayEffect : public UGameplayEffect
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EffectTags)
+	FGameplayTagContainer AssetTags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EffectTags)
+	FGameplayTagContainer GrantedTags;
+
+
+	virtual void PostLoad() override;
 	
 };
