@@ -20,7 +20,7 @@ void UGA_SkyhandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(GetAvatarActorFromActorInfo());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 
-	UAbilityComponent* PlayerAbilityComponent = PXCharacter->GetAbilityComponent();
+	UAbilityComponent* PlayerAbilityComponent = PXCharacter->AbilityComponent;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PlayerAbilityComponent)
 
 	AActor* HurtInstigator = PlayerAbilityComponent->HurtInstigator;

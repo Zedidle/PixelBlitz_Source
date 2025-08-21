@@ -44,8 +44,12 @@ struct FWeatherEffectData
 class UInputAction;
 class UAbilityComponent;
 class UBuffComponent;
+class UTalentComponent;
+
 class UPXASComponent;
+class UHealthComponent;
 class UEnergyComponent;
+class UFightComponent;
 
 struct FInputActionValue;
 
@@ -135,29 +139,22 @@ public:
 	UPXAttributeSet* GetAttributeSet() const;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	UHealthComponent* HealthComponent;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UHealthComponent* GetHealthComponent() { return HealthComponent; }
+	TObjectPtr<UHealthComponent> HealthComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	UEnergyComponent* EnergyComponent;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UEnergyComponent* GetEnergyComponent() { return EnergyComponent; }
+	TObjectPtr<UEnergyComponent> EnergyComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UFightComponent> FightComponent;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UFightComponent* GetFightComponent() { return FightComponent; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UAbilityComponent> AbilityComponent;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UAbilityComponent* GetAbilityComponent() { return AbilityComponent; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UBuffComponent> BuffComponent;
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
-	UBuffComponent* GetBuffComponent() { return BuffComponent; }
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UTalentComponent> TalentComponent;
 
 	
 	virtual void BeginPlay() override;

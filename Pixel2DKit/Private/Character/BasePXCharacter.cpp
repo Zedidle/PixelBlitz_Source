@@ -18,6 +18,7 @@
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
+#include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "GAS/PXASComponent.h"
 #include "PlayerState/PXCharacterPlayerState.h"
@@ -242,6 +243,8 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
+
 	
 	// ASC 初始化
 }
@@ -510,7 +513,7 @@ FVector ABasePXCharacter::GetDashDirection()
 
 bool ABasePXCharacter::IsAlive_Implementation()
 {
-	return GetHealthComponent()->GetCurrentHP() > 0;
+	return HealthComponent->GetCurrentHP() > 0;
 }
 
 FGameplayTagContainer ABasePXCharacter::GetOwnCamp_Implementation()
