@@ -37,6 +37,11 @@ public:
 	// Sets default values for this component's properties
 	UBuffComponent();
 
+	UFUNCTION()
+	void InitData();
+	
+
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UBuffStateWidget> BuffStateWidgetClass;
 	UPROPERTY()
@@ -83,10 +88,8 @@ public:
 	UFUNCTION()
 	void RemoveBuff_EffectAll(FGameplayTag Tag);
 
-
 	UFUNCTION(BlueprintCallable)
-	void SetBuffStateWdigetVisibility(ESlateVisibility InVisibility);
-
+	void SetBuffStateWidgetVisibility(ESlateVisibility InVisibility);
 
 	UFUNCTION()
 	void OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle Handle);
@@ -110,36 +113,17 @@ public:
 	virtual float GetShortSightResistancePercent_Implementation() override;
 	virtual float GetSlowDownResistancePercent_Implementation() override;
 #pragma endregion
-		
+
+	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
+	void AddBuffByTag(FGameplayTag Tag);
+	
 };
 
 inline FName UBuffComponent::GetBuffRownameByTag(FGameplayTag Tag)
 {
-	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Settings, FName());
-	
-	UDataTable* DataTable = Settings->GetBuffOnWidget();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTable, FName());
-
-	if (!Tag2BuffOnWidgetData.Contains(Tag))
-	{
-		TArray<FBuffOnWidget*> Rows;
-		DataTable->GetAllRows<FBuffOnWidget>(TEXT("GetBuffRownameByTag ALL"), Rows);
-		if (Rows.Num() >= 0)
-		{
-			for (auto* Row : Rows)
-			{
-				if (Row && Row->Tag.IsValid())
-				{
-					Tag2BuffOnWidgetData.Add(Row->Tag, *Row);
-				}
-			}
-		}
-	}
-
 	if (Tag2BuffOnWidgetData.Contains(Tag))
 	{
-		Tag2BuffOnWidgetData[Tag].RowName;
+		return Tag2BuffOnWidgetData[Tag].BuffName_UnLocalized;
 	}
 	
 	return FName();
@@ -151,8 +135,4 @@ inline void UBuffComponent::RemoveBuff_EffectAll(FGameplayTag Tag)
 	RemoveBuff_Sight(Tag);
 	RemoveBuff_Speed(Tag);
 }
-
-
-/** Allow events to be registered for specific gameplay tags being added or removed */
-FOnGameplayEffectTagCountChanged& RegisterGameplayTagEvent(FGameplayTag Tag, EGameplayTagEventType::Type EventType=EGameplayTagEventType::NewOrRemoved);
 

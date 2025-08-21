@@ -40,8 +40,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
 	int32 Buff_CalDamage(int32 InDamage);
-
-
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
 	void AddBuff(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);

@@ -199,12 +199,12 @@ struct FCharacterAttribute
 
 #pragma region FBuffOnWidget
 USTRUCT(BlueprintType)
-struct FBuffOnWidget
+struct FBuffOnWidget : public FTableRowBase
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
-	FName RowName;
+	FName BuffName_UnLocalized;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
 	FGameplayTag Tag;

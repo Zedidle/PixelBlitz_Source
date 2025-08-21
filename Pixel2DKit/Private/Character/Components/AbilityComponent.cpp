@@ -207,13 +207,20 @@ void UAbilityComponent::LoadAbility()
 		HealthComponent->bInRock = EffectGameplayTag.Contains(Tag);
 		if (HealthComponent->bInRock)
 		{
-			FString BuffName = ULocalizationFuncLib::GetBuffText(FName("Buff_Rock"));
-			if (PXCharacter->BuffComponent)
+			if (UBuffComponent* BuffComponent = PXCharacter->GetComponentByClass<UBuffComponent>())
 			{
-				PXCharacter->BuffComponent->AddBuff(Tag, BuffName, FLinearColor(FColor::Purple), false);
+				BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.InRock"));
 			}
 		}
 	}
+
+	// 空击
+		
+
+	// 天手力
+
+
+	// 移形换影
 	
 	
 #pragma endregion 
@@ -289,13 +296,7 @@ void UAbilityComponent::OnBeAttacked(AActor* Instigator, int DamageAmount, bool&
 	{
 		LocalResist = true;
 	}
-
-	// 天手力
-	// if (CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.HeavenlyHand"))))
-	// {
-	// 	LocalResist = true;
-	// }
-
+	
 	// 检查天手力是否有效 且 冷却结束
 	FGameplayAbilitySpecHandle AbilitySpecHandle = GetGameplayAbilityWithTag(FGameplayTag::RequestGameplayTag("AbilitySet.SkyHandPower"));
 	if (const FGameplayAbilitySpec* Spec = CachedASC->FindAbilitySpecFromHandle(AbilitySpecHandle))

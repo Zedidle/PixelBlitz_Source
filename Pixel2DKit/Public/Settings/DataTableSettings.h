@@ -37,7 +37,7 @@ public:
 
 
 	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath.ToString()); }
-	TObjectPtr<UDataTable> GetBuffOnWidget() const { return GetData(BuffOnWidgetPath.ToString()); }
+	TObjectPtr<UDataTable> GetBuffOnWidgetData() const { return GetData(BuffOnWidgetPath.ToString()); }
 	
 
 	

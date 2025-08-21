@@ -22,12 +22,40 @@ UBuffComponent::UBuffComponent()
 	// ...
 }
 
+void UBuffComponent::InitData()
+{
+	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
+	
+	UDataTable* DataTable = Settings->GetBuffOnWidgetData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable);
+
+	TArray<FBuffOnWidget*> Rows;
+	DataTable->GetAllRows<FBuffOnWidget>(TEXT("GetBuffRownameByTag ALL"), Rows);
+	if (Rows.Num() >= 0)
+	{
+		for (auto* Row : Rows)
+		{
+			if (Row && Row->Tag.IsValid())
+			{
+				Tag2BuffOnWidgetData.Add(Row->Tag, *Row);
+			}
+		}
+	}
+
+
+	// 其它 Data 
+	
+}
+
 
 // Called when the game starts
 void UBuffComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	InitData();
+	
 	if (BuffStateWidgetClass)
 	{
 		if (UWorld* World = GetWorld())
@@ -115,7 +143,7 @@ void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
 	
 }
 
-void UBuffComponent::SetBuffStateWdigetVisibility(ESlateVisibility InVisibility)
+void UBuffComponent::SetBuffStateWidgetVisibility(ESlateVisibility InVisibility)
 {
 	if (BuffStateWidget)
 	{
@@ -124,7 +152,7 @@ void UBuffComponent::SetBuffStateWdigetVisibility(ESlateVisibility InVisibility)
 }
 
 void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
-	const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle Handle)
+                                             const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle Handle)
 {
 	const FGameplayTagContainer GameplayTagContainer = GameplayEffectSpec.GetDynamicAssetTags();
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
@@ -133,8 +161,7 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("AbilityCD")) || 
 			Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
 		{
-			// 移除面板中的 BuffText
-			if (false)
+			if(Tag2BuffOnWidgetData.Contains(Tag))
 			{
 				RemoveBuff(Tag);
 			}
@@ -144,7 +171,16 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 
 void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& GameplayEffect)
 {
-	
+	const FGameplayTagContainer GameplayTagContainer = GameplayEffect.Spec.GetDynamicAssetTags();
+	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
+	for (const FGameplayTag& Tag : Tags)
+	{
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("AbilityCD")) || 
+			Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		{
+			AddBuffByTag(Tag);
+		}
+	}
 }
 
 void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
@@ -327,5 +363,15 @@ float UBuffComponent::GetShortSightResistancePercent_Implementation()
 float UBuffComponent::GetSlowDownResistancePercent_Implementation()
 {
 	return IBuff_Interface::GetSlowDownResistancePercent_Implementation();
+}
+
+void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
+{
+	FName BuffName = GetBuffRownameByTag(Tag);
+	if(Tag2BuffOnWidgetData.Contains(Tag))
+	{
+		FBuffOnWidget Data = Tag2BuffOnWidgetData[Tag];
+		AddBuff(Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
+	}
 }
 
