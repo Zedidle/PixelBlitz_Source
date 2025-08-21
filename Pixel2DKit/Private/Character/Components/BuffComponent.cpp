@@ -4,6 +4,7 @@
 #include "Character/Components/BuffComponent.h"
 
 #include "AbilitySystemComponent.h"
+#include "GameplayTagsManager.h"
 #include "NiagaraCommon.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/BasePXCharacter.h"
@@ -269,7 +270,9 @@ void UBuffComponent::BuffUpdate_Attack_Implementation()
 void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
 	IBuff_Interface::BuffEffect_Sight_Implementation(Tag, Percent, Value, SustainTime);
-	RemoveBuff_Speed(Tag);
+	
+	RemoveBuff_Sight(Tag);
+	
 	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (!Owner->Implements<UBuff_Interface>()) return;
@@ -343,17 +346,37 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 	
 }
 
-void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag)
+void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
 {
-	IBuff_Interface::RemoveBuff_Implementation(Tag);
+	IBuff_Interface::RemoveBuff_Implementation(Tag, OnlySelf);
 
-	if (IsValid(BuffStateWidget))
+	if (OnlySelf)
 	{
-		BuffStateWidget->BuffOut(Tag);
-	}
+		if (IsValid(BuffStateWidget))
+		{
+			BuffStateWidget->BuffOut(Tag);
+		}
 
-	RemoveBuff_EffectAll(Tag);
+		RemoveBuff_EffectAll(Tag);
+	}
+	else
+	{
+		FGameplayTagContainer TagContainer = UGameplayTagsManager::Get().RequestGameplayTagChildren(Tag);
+		TArray<FGameplayTag> Tags;
+		TagContainer.GetGameplayTagArray(Tags);
+	
+		for (auto& T : Tags)
+		{
+			if (IsValid(BuffStateWidget))
+			{
+				BuffStateWidget->BuffOut(T);
+			}
+
+			RemoveBuff_EffectAll(T);
+		}
+	}
 }
+
 
 float UBuffComponent::GetShortSightResistancePercent_Implementation()
 {

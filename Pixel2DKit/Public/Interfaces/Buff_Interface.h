@@ -45,7 +45,7 @@ public:
 	void AddBuff(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
-	void RemoveBuff(FGameplayTag Tag);
+	void RemoveBuff(FGameplayTag Tag, bool OnlySelf = true);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffResistance")

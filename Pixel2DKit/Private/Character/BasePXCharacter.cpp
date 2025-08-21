@@ -643,9 +643,10 @@ void ABasePXCharacter::AddBuff_Implementation(FGameplayTag Tag, const FString& B
 	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
 }
 
-void ABasePXCharacter::RemoveBuff_Implementation(FGameplayTag Tag)
+void ABasePXCharacter::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
 {
-	IBuff_Interface::RemoveBuff_Implementation(Tag);
+	IBuff_Interface::RemoveBuff_Implementation(Tag, OnlySelf);
+
 }
 
 float ABasePXCharacter::GetShortSightResistancePercent_Implementation()

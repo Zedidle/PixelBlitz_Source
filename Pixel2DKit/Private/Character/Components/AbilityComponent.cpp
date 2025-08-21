@@ -160,6 +160,12 @@ void UAbilityComponent::LoadAbility()
 	}
 
 
+	UHealthComponent* HealthComponent = PXCharacter->GetComponentByClass<UHealthComponent>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	UBuffComponent* BuffComponent = PXCharacter->GetComponentByClass<UBuffComponent>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent)
+
+
 # pragma region 通用技能加载部分，专属技能在 PXCharacter 子类中的LoadAbility自定义
 
 	// 空中移动的控制（暂且无用）
@@ -199,29 +205,36 @@ void UAbilityComponent::LoadAbility()
 		PXCharacter->CurMaxJumpCount = PXCharacter->BasicMaxJumpCount;
 	}
 
-
 	// 霸体
-	if (UHealthComponent* HealthComponent = PXCharacter->GetComponentByClass<UHealthComponent>())
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InRock");
+	HealthComponent->bInRock = EffectGameplayTag.Contains(Tag);
+	if (HealthComponent->bInRock)
 	{
-		Tag = FGameplayTag::RequestGameplayTag("AbilitySet.Stoic");
-		HealthComponent->bInRock = EffectGameplayTag.Contains(Tag);
-		if (HealthComponent->bInRock)
-		{
-			if (UBuffComponent* BuffComponent = PXCharacter->GetComponentByClass<UBuffComponent>())
-			{
-				BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.InRock"));
-			}
-		}
+		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.InRock"));
 	}
 
 	// 空击
-		
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InAir.DamagePlus");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.AirFight"));
+	}
+	
 
 	// 天手力
-
-
-	// 移形换影
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.SkyHandPower.Cooldown");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.SkyHandPower"));
+	}
 	
+	// 移形换影
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.Mobiliarbus.Cooldown");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.Mobiliarbus"));
+	}
+
 	
 #pragma endregion 
 	
