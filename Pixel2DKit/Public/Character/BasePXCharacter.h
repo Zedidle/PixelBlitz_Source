@@ -13,6 +13,9 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 
+// 发起攻击的监听事件
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerAttackStart);
+
 
 USTRUCT(BlueprintType)
 struct FWeatherEffectData
@@ -74,6 +77,9 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnPlayerDie OnPlayerDie;
 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FOnPlayerAttackStart OnPlayerAttackStart;
+	
 	UPROPERTY(BlueprintReadWrite)
 	FWeatherEffectData WeatherEffect;
 	

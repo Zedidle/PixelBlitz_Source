@@ -88,7 +88,7 @@ void UCommonFuncLib::SpawnFloatingText(FText Text, FVector WorldLocation, FLinea
 void UCommonFuncLib::SpawnFloatingTextDefault(const FString InTableName, const FName InRowName, FVector WorldLocation,
 	FLinearColor TextColor, FVector2D RenderScale, UPaperSprite* Icon)
 {
-	const FLocationTableData D = FLocationTableData(InTableName, InRowName);
+	const FLocalizedTableData D = FLocalizedTableData(InTableName, InRowName);
 	FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(D));
 	SpawnFloatingText(Text, WorldLocation, TextColor, RenderScale, Icon);
 }

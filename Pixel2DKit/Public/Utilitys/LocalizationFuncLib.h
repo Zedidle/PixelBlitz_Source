@@ -63,11 +63,11 @@ struct FLocalizedStringData: public FTableRowBase
 
 
 USTRUCT(BlueprintType)
-struct FLocationTableData
+struct FLocalizedTableData
 {
 	GENERATED_BODY()
-	FLocationTableData(){}
-	FLocationTableData(const FString& InTableName, const FName& InRowName): TableName(InTableName), RowName(InRowName){}
+	FLocalizedTableData(){}
+	FLocalizedTableData(const FString& InTableName, const FName& InRowName): TableName(InTableName), RowName(InRowName){}
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString TableName;
@@ -86,7 +86,7 @@ class ULocalizationFuncLib : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LocalizationFuncLib")
-	static FString GetLocalizedString(const FLocationTableData& Data);
+	static FString GetLocalizedString(const FLocalizedTableData& Data);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LocalizationFuncLib")
 	static FString GetBuffText(FName BuffName);

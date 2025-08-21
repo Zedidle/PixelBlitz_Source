@@ -301,7 +301,9 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		World->GetTimerManager().ClearTimer(ScaleTimerHandle);
 	}
-	
+
+	OnPlayerAttackStart.RemoveAll(this);
+	OnPlayerDie.RemoveAll(this);
 }
 
 void ABasePXCharacter::Falling()

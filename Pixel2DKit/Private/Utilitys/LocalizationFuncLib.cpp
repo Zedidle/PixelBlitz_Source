@@ -8,7 +8,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Settings/DataTableSettings.h"
 
-FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
+FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data)
 {
 	UWorld* world = GEngine->GetCurrentPlayWorld();
 	if (!IsValid(world)) return "";
@@ -82,7 +82,7 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocationTableData& Data)
 
 FString ULocalizationFuncLib::GetBuffText(FName BuffName)
 {
-	const FLocationTableData D = FLocationTableData("Buff/BuffText", BuffName);
+	const FLocalizedTableData D = FLocalizedTableData("Buff/BuffText", BuffName);
 	return GetLocalizedString(D);
 }
 

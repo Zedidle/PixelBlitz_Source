@@ -99,11 +99,11 @@ struct FAbility: public FTableRowBase
 
 	// 技能名称本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FLocationTableData AbilityName_Localized;
+	FLocalizedTableData AbilityName_Localized;
 
 	// 技能描述本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FLocationTableData AbilityDesc_Localized;
+	FLocalizedTableData AbilityDesc_Localized;
 
 	// 技能品阶
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
@@ -217,5 +217,35 @@ struct FBuffOnWidget : public FTableRowBase
 	
 };
 
+#pragma endregion
 
+
+#pragma region FTalent
+USTRUCT(BlueprintType)
+struct FTalent: public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	bool DefaultLock;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	FLocalizedTableData TalentName_Localized;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	FLocalizedTableData Desc_Localized;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	TSoftObjectPtr<UTexture2D> Icon;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	int Price;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	TMap<FGameplayTag, float> Effect_GameplayTag;
+
+	
+	
+	
+};
 #pragma endregion
