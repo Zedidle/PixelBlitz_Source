@@ -7,6 +7,7 @@
 #include "LocalizationFuncLib.h"
 #include "UObject/NoExportTypes.h"
 #include "Abilities/GameplayAbility.h"
+#include "Engine/DataAsset.h"
 #include "PXCustomStruct.generated.h"
 
 /**
@@ -18,6 +19,24 @@ class PIXEL2DKIT_API UPXCustomStruct : public UObject
 	GENERATED_BODY()
 	
 };
+
+
+#pragma region UConfigDataAsset
+
+UCLASS(Blueprintable)
+class PIXEL2DKIT_API UConfigDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Version = "0.001";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsDemo = true;	
+	
+};
+
+#pragma endregion
 
 
 #pragma region EWeather
