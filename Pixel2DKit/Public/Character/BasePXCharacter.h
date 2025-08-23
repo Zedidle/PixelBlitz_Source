@@ -176,7 +176,13 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicAirControl = 1.0f;
+	
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	float BasicJumpZ_Velocity = 250.0f;
 
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	float BasicDashSpeed = 400.0f;
+	
 	
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendPitch = -20.0f;
@@ -206,6 +212,12 @@ public:
 	UPROPERTY(BlueprintReadonly, Category = Movement)
 	float BasicJumpMaxHoldTime = 0.3f;
 
+
+#pragma region Talent
+
+	int ReviveTimes = 0;
+	
+#pragma endregion
 	
 	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)

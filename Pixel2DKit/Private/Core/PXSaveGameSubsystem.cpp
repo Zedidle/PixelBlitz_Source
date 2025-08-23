@@ -146,6 +146,8 @@ void UPXSaveGameSubsystem::SaveMainData()
 
 UPXMainSaveGame* UPXSaveGameSubsystem::GetMainData()
 {
+    if (IsValid(MainSaveGame)) return MainSaveGame;
+
     if (UPXMainSaveGame* SaveGame = Cast<UPXMainSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Main, UserIndex)))
     {
         MainSaveGame = SaveGame;
@@ -198,6 +200,8 @@ void UPXSaveGameSubsystem::SaveBasicBuildData()
 
 UPXBasicBuildSaveGame* UPXSaveGameSubsystem::GetBasicBuildData()
 {
+    if (IsValid(BasicBuildSaveGame)) return BasicBuildSaveGame;
+    
     if (UPXBasicBuildSaveGame* SaveGame = Cast<UPXBasicBuildSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Main, UserIndex)))
     {
         BasicBuildSaveGame = SaveGame;
@@ -220,6 +224,8 @@ void UPXSaveGameSubsystem::SaveSettingData()
 
 UPXSettingSaveGame* UPXSaveGameSubsystem::GetSettingData()
 {
+    if (IsValid(SettingSaveGame)) return SettingSaveGame;
+
     if (UPXSettingSaveGame* SaveGame = Cast<UPXSettingSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
     {
         SettingSaveGame = SaveGame;
@@ -242,6 +248,8 @@ void UPXSaveGameSubsystem::SaveAchievementsData()
 
 UPXAchievementsSaveGame* UPXSaveGameSubsystem::GetAchievementsData()
 {
+    if (IsValid(AchievementsSaveGame)) return AchievementsSaveGame;
+    
     if (UPXAchievementsSaveGame* SaveGame = Cast<UPXAchievementsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
     {
         AchievementsSaveGame = SaveGame;
@@ -275,6 +283,8 @@ void UPXSaveGameSubsystem::SaveShopData()
 
 UPXShopSaveGame* UPXSaveGameSubsystem::GetShopData()
 {
+    if (IsValid(ShopSaveGame)) return ShopSaveGame;
+    
     if (UPXShopSaveGame* SaveGame = Cast<UPXShopSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Shop, UserIndex)))
     {
         ShopSaveGame = SaveGame;
@@ -297,6 +307,8 @@ void UPXSaveGameSubsystem::SaveTalentsData()
 
 UPXTalentsSaveGame* UPXSaveGameSubsystem::GetTalentsData()
 {
+    if (IsValid(TalentsSaveGame)) return TalentsSaveGame;
+
     if (UPXTalentsSaveGame* SaveGame = Cast<UPXTalentsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Talents, UserIndex)))
     {
         TalentsSaveGame = SaveGame;

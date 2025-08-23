@@ -394,7 +394,7 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 	if(Tag2BuffOnWidgetData.Contains(Tag))
 	{
 		FBuffOnWidget Data = Tag2BuffOnWidgetData[Tag];
-		AddBuff(Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
+		IBuff_Interface::Execute_AddBuff(this, Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
 	}
 }
 

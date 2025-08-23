@@ -23,7 +23,7 @@ void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, flo
 	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->SettingSaveGame;
+	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGame)
 
 	if (!SaveGame->SoundSetting_ToggleAll) return;
@@ -60,7 +60,7 @@ void USoundFuncLib::PlaySound2D(USoundBase* Sound, float Volume)
 	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->SettingSaveGame;
+	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGame)
 
 	if (!SaveGame->SoundSetting_ToggleAll) return;
@@ -85,7 +85,7 @@ void USoundFuncLib::PlayUISound(USoundBase* Sound, float Volume)
 	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->SettingSaveGame;
+	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGame)
 
 	if (!SaveGame->SoundSetting_ToggleAll) return;
@@ -107,7 +107,7 @@ float USoundFuncLib::GetCurVolumeValue()
 	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, 0.0f)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->SettingSaveGame;
+	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGame, 0.0f)
 
 	if (!SaveGame->SoundSetting_ToggleAll) return 0.0f;

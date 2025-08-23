@@ -247,9 +247,10 @@ void UAbilityComponent::LoadAbility()
 	// 通过GameInstance存档
 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem->MainSaveGame)
-	SaveGameSubsystem->MainSaveGame->ChoicedAbilityIndexes = ChoicedAbilityIndexes;
-	SaveGameSubsystem->MainSaveGame->TakeEffectAbilityIndexes = TakeEffectAbilityIndexes;
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame)
+	MainSaveGame->ChoicedAbilityIndexes = ChoicedAbilityIndexes;
+	MainSaveGame->TakeEffectAbilityIndexes = TakeEffectAbilityIndexes;
 
 	SaveGameSubsystem->SaveMainData();
 }
@@ -269,14 +270,14 @@ bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbilit
 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, false)
 
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSaveGame, false)
 
 	if (MainSaveGame->CurCharacterName != Ability.CharacterName && Ability.CharacterName != FName()) return false;
 
 	if (ChoicedAbilityIndexes.Contains(RowNameIndex)) return false;
 
-	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->BasicBuildSaveGame;
+	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->GetBasicBuildData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSaveGame, false)
 
 	if (Ability.DefaultLock && !BasicBuildSaveGame->UnlockAbilityIndexes.Contains(RowNameIndex)) return false;

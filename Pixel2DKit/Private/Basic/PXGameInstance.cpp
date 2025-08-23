@@ -13,7 +13,7 @@ FName UPXGameInstance::GetCurLevelName(bool Continue)
 	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
 	if (!SaveGameSubsystem) return FName();
 
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	if (!MainSaveGame) return FName();
 
 	
@@ -58,7 +58,7 @@ FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
 	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
 	if (!SaveGameSubsystem) return FName();
 
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	if (!MainSaveGame) return FName();
 	
 	if (MainSaveGame->SurLevels.Num() == 0) return "";
@@ -82,9 +82,9 @@ void UPXGameInstance::GetTotalUseTime(float& usetime, bool& newrecord)
 {
 	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame)
-	UPXAchievementsSaveGame* AchievementsSaveGame = SaveGameSubsystem->AchievementsSaveGame;
+	UPXAchievementsSaveGame* AchievementsSaveGame = SaveGameSubsystem->GetAchievementsData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementsSaveGame);
 	
 	float Time = 0;
@@ -105,7 +105,7 @@ void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 {
 	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->MainSaveGame;
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 	
 	MainSaveGame->LostLife++;

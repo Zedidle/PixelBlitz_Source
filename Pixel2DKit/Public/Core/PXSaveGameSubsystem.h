@@ -26,8 +26,24 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 	void InitData_Achievements();
 	void InitData_Shop();
 	void InitData_Talents();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Main", meta = (AllowPrivateAccess = "true"))
+	UPXMainSaveGame* MainSaveGame;
 	
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | BasicBuild", meta = (AllowPrivateAccess = "true"))
+	UPXBasicBuildSaveGame* BasicBuildSaveGame;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Setting", meta = (AllowPrivateAccess = "true"))
+	UPXSettingSaveGame* SettingSaveGame;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Achievements", meta = (AllowPrivateAccess = "true"))
+	UPXAchievementsSaveGame* AchievementsSaveGame;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Shop", meta = (AllowPrivateAccess = "true"))
+	UPXShopSaveGame* ShopSaveGame;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Talents", meta = (AllowPrivateAccess = "true"))
+	UPXTalentsSaveGame* TalentsSaveGame;
 	
 public:
 
@@ -39,8 +55,6 @@ public:
 #pragma region Main
 	
 	const FString SlotName_Main = "Main";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveGame | Main")
-	UPXMainSaveGame* MainSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Main")
 	void SaveMainData();
 	UPXMainSaveGame* GetMainData();
@@ -65,13 +79,9 @@ public:
 
 #pragma region BasicBuild
 	const FString SlotName_BasicBuild = "BasicBuild";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveGame | BasicBuild")
-	UPXBasicBuildSaveGame* BasicBuildSaveGame;
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | BasicBuild")
 	void SaveBasicBuildData();
 	UPXBasicBuildSaveGame* GetBasicBuildData();
-
-
 	
 #pragma endregion
 
@@ -80,8 +90,7 @@ public:
 #pragma region Settings
 
 	const FString SlotName_Setting = "Setting";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveGame | Setting")
-	UPXSettingSaveGame* SettingSaveGame;
+
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Setting")
 	void SaveSettingData();
 	UPXSettingSaveGame* GetSettingData();
@@ -92,8 +101,7 @@ public:
 #pragma region Achievements
 
 	const FString SlotName_Achievements = "Achievements";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveGame | Achievements")
-	UPXAchievementsSaveGame* AchievementsSaveGame;
+
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Achievements")
 	void SaveAchievementsData();
 	UPXAchievementsSaveGame* GetAchievementsData();
@@ -107,8 +115,7 @@ public:
 #pragma region Shop
 
 	const FString SlotName_Shop = "Shop";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveGame | Shop")
-	UPXShopSaveGame* ShopSaveGame;
+
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Shop")
 	void SaveShopData();
 	UPXShopSaveGame* GetShopData();
@@ -119,8 +126,7 @@ public:
 #pragma region Talents
 	
 	const FString SlotName_Talents = "Talents";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SaveGame | Talents")
-	UPXTalentsSaveGame* TalentsSaveGame;
+
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Talents")
 	void SaveTalentsData();
 	UPXTalentsSaveGame* GetTalentsData();

@@ -21,7 +21,6 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 
 
 
-	
 	UPROPERTY(Config, EditAnywhere, Category = "ItemData")
 	TSoftObjectPtr<UDataTable> ItemDataPath;
 

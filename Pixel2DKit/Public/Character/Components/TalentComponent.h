@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/BasePXCharacter.h"
 #include "Components/ActorComponent.h"
+#include "Fight/Skills/BaseDefenseSkill.h"
 #include "TalentComponent.generated.h"
 
 
@@ -13,13 +14,36 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	bool UnLoaded = true;
 
+	
 	UPROPERTY()
 	ABasePXCharacter* PXCharacter;
 
 	FVector OwnerPreLocation;
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	TMap<FGameplayTag, float> Effect_GameplayTag;
+
+	UPROPERTY()
+	TArray<ABaseDefenseSkill*> DefenseSkills;
+
+#pragma region TalentSet
+
+	// 摇摆拳
+	bool SwingFistPower = false;
+
+	// 热身
+	int WarmUP_Power = 0;
+	int WarmUP_MoveDistance = 0;
+
+	FTimerHandle MiracleWalker_TimerHandle;
+	FTimerHandle WarmUP_TimerHandle;
+	FTimerHandle ImmortalPower_TimerHandle;
+	
+#pragma endregion
+
+
 	
 public:	
 	// Sets default values for this component's properties
@@ -38,4 +62,48 @@ public:
 
 	UFUNCTION()
 	void Event_OnPlayerAttackStart();
+
+	UFUNCTION()
+	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);
+
+	UFUNCTION()
+	void RemoveDefenseSkill(FGameplayTag Tag);
+	
+	UFUNCTION()
+	void OnBeAttacked(AActor* DamageMaker, int InDamage, int& OutDamage);
+
+
+	UFUNCTION(BlueprintCallable)
+	void LoadTalents();
+
+	UFUNCTION()
+	ABaseSkill* SpawnSkill(TSubclassOf<ABaseSkill> Skill_Class, const FTransform& SpawnTransform = FTransform());
+
+	// 成功造成伤害时……
+	UFUNCTION(BlueprintCallable)
+	void OnBuffCalDamage();
+
+	UFUNCTION(BlueprintCallable)
+	void OnPlayerDash();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetAttackDamagePlus();
+
+	
+#pragma region Talents
+	
+	UFUNCTION()
+	void MoveWarmingUP();
+
+	UFUNCTION()
+	void MakeSwingFistPower();
+
+	UFUNCTION()
+	void MakeMiracleWalker();
+
+	UFUNCTION()
+	void MakeImmortalPower(bool First);
+	
+#pragma endregion
+
 };
