@@ -263,9 +263,9 @@ UPXAchievementsSaveGame* UPXSaveGameSubsystem::GetAchievementsData()
 
 bool UPXSaveGameSubsystem::CompleteAchievement(FName AchievementRowName)
 {
-    if (AchievementsSaveGame->Achieve_CompletedAchievements.Contains(AchievementRowName)) return false;
+    if (AchievementsSaveGame->CompletedAchievements.Contains(AchievementRowName)) return false;
 
-    AchievementsSaveGame->Achieve_CompletedAchievements.Add(AchievementRowName);
+    AchievementsSaveGame->CompletedAchievements.Add(AchievementRowName);
 
     SaveAchievementsData();
 

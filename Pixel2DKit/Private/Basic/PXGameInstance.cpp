@@ -93,10 +93,10 @@ void UPXGameInstance::GetTotalUseTime(float& usetime, bool& newrecord)
 		Time += r;
 	}
 	
-	newrecord = AchievementsSaveGame->Achieve_TotalUseTime > Time;
+	newrecord = AchievementsSaveGame->TotalUseTime > Time;
 	if (newrecord)
 	{
-		Achieve_TotalUseTime = Time;
+		AchievementsSaveGame->TotalUseTime = Time;
 	}
 	usetime = Time;
 }

@@ -16,6 +16,6 @@ class PIXEL2DKIT_API UPXShopSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
-	TMap<FName, int> Shop_ItemRemainNum;
+	TMap<FName, int> ItemRemainNum;
 
 };

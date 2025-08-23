@@ -24,8 +24,8 @@ public:
 
 
 #pragma region GeneralSetting
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | General")
-	uint8 GeneralSetting_Language;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | General")
+	// uint8 GeneralSetting_Language;
 #pragma endregion
 
 #pragma region Main
@@ -166,53 +166,53 @@ public:
 #pragma endregion
 
 #pragma region InGameSetting
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	TSubclassOf<UPrimaryDataAsset> GameSetting_WeatherType;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	float GameSetting_ViewPitch;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowDamageFloatText;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowRecoverFloatText;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowGoldsFloatText;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowBlood;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
+	// TSubclassOf<UPrimaryDataAsset> GameSetting_WeatherType;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
+	// float GameSetting_ViewPitch;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
+	// bool GameSetting_ShowDamageFloatText;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
+	// bool GameSetting_ShowRecoverFloatText;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
+	// bool GameSetting_ShowGoldsFloatText;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
+	// bool GameSetting_ShowBlood;
 #pragma endregion
 
 #pragma region Achievements
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	TArray<FName> Achieve_CompletedAchievements;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	float Achieve_TotalUseTime;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	int Achieve_KilledBossNum;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
+	// TArray<FName> Achieve_CompletedAchievements;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
+	// float Achieve_TotalUseTime;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
+	// int Achieve_KilledBossNum;
 #pragma endregion
 
 
 #pragma region Talents
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
-	TMap<TEnumAsByte<EWeather>, int> Talent_KillBOSSNum_InWeatherType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
-	int Talent_TotalPickupGolds;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
-	int Talent_TotalDeathNum;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
-	int Talent_TotalPerfectDodgeTimes;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	// TMap<TEnumAsByte<EWeather>, int> Talent_KillBOSSNum_InWeatherType;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	// int Talent_TotalPickupGolds;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	// int Talent_TotalDeathNum;
+	//
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talents")
+	// int Talent_TotalPerfectDodgeTimes;
 #pragma endregion
 
 
 #pragma region Shop
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
-	TMap<FName, int> Shop_ItemRemainNum;
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop")
+	// TMap<FName, int> Shop_ItemRemainNum;
 
 #pragma endregion
 

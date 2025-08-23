@@ -16,9 +16,9 @@ class PIXEL2DKIT_API UPXAchievementsSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	TArray<FName> Achieve_CompletedAchievements;
+	TArray<FName> CompletedAchievements;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	float Achieve_TotalUseTime;
+	float TotalUseTime;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	int Achieve_KilledBossNum;
+	int KilledBossNum;
 };
