@@ -12,7 +12,11 @@ void UBuffPermanentFloatingTextWidget::NativeConstruct()
 	PlayAnimationForward(FloatIn, PlaySpeed);
 
 	SetRenderTranslation(Translation);
-	TextBlock->SetRenderScale(RenderScale);
+
+	if (TextBlock)
+	{
+		TextBlock->SetRenderScale(RenderScale);
+	}
 	
 }
 

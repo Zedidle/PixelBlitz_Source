@@ -17,6 +17,14 @@ void UBuffFloatingTextWidget::InitializeData(FText _Text, FLinearColor _TextColo
 	In = _In;
 }
 
+void UBuffFloatingTextWidget::PlayOut()
+{
+	if (FloatOut)
+	{
+		PlayAnimationForward(FloatOut, PlaySpeed);
+	}
+}
+
 
 void UBuffFloatingTextWidget::NativeConstruct()
 {
@@ -38,6 +46,9 @@ void UBuffFloatingTextWidget::NativeConstruct()
 	}
 
 	SetRenderTranslation(Translation);
-	TextBlock->SetRenderScale(RenderScale);
+	if (TextBlock)
+	{
+		TextBlock->SetRenderScale(RenderScale);
+	}
 	
 }

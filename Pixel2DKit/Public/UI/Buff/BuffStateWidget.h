@@ -13,7 +13,7 @@ class UUserWidget;
 class UBuffPermanentFloatingTextWidget;
 
 
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class PIXEL2DKIT_API UBuffStateWidget : public UUserWidget
 {
 	GENERATED_BODY()

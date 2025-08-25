@@ -10,7 +10,7 @@ class UWidgetAnimation;
 class UTextBlock;
 
 
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class PIXEL2DKIT_API UBuffFloatingTextWidget : public UUserWidget
 {
 	GENERATED_BODY()
@@ -35,23 +35,25 @@ public:
 	FText Text;
 
 	UPROPERTY(BlueprintReadOnly)
-	FLinearColor TextColor;
+	FLinearColor TextColor = FLinearColor::White;
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector2D Translation;
+	FVector2D Translation = FVector2D::ZeroVector;
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector2D RenderScale;
+	FVector2D RenderScale = FVector2D(1.0f, 1.0f);
 
 	UPROPERTY(BlueprintReadOnly)
-	float PlaySpeed;
+	float PlaySpeed = 1.0f;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool In;
+	bool In = false;
 	
 	
 	UFUNCTION()
 	void InitializeData(FText _Text, FLinearColor _TextColor, FVector2D _Translation, FVector2D _RenderScale, float _PlaySpeed, bool _In);
 
+	UFUNCTION()
+	void PlayOut();
 	
 };

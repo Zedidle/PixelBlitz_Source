@@ -14,8 +14,7 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	bool UnLoaded = true;
-
+	bool Loaded = false;
 	
 	UPROPERTY()
 	ABasePXCharacter* PXCharacter;

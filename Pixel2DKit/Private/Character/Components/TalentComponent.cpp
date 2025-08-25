@@ -175,8 +175,8 @@ void UTalentComponent::LoadTalents()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
 	
-	if (UnLoaded) return;
-	UnLoaded = false;
+	if (Loaded) return;
+	Loaded = true;
 
 	FGameplayTag TalentTag;
 

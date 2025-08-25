@@ -8,6 +8,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Components/VerticalBox.h"
 #include "UI/Buff/BuffPermanentFloatingTextWidget.h"
 
 
@@ -22,22 +23,24 @@ void UBuffStateWidget::BuffIn_Implementation(FGameplayTag Tag, const FString& Bu
 	// BuffFloatingText 相关
 	if (BuffFloatingText_WidgetClass)
 	{
-		if (UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(
-			CreateWidget(GetWorld(), BuffFloatingText_WidgetClass)))
-		{
-			BuffFloatingTextWidget->InitializeData(
-			FText::FromString(UKismetStringLibrary::Concat_StrStr(">", BuffName)),
-				TextColor,
-				FVector2D::ZeroVector,
-				FVector2D(1.0f, 1.0f),
-				1.0f,
-				true
-			);
-			Tag2Widget.Add(Tag, BuffFloatingTextWidget);
+		UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(CreateWidget(GetWorld(), BuffFloatingText_WidgetClass));
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
+		
+		BuffFloatingTextWidget->InitializeData(
+		FText::FromString(UKismetStringLibrary::Concat_StrStr(">", BuffName)),
+			TextColor,
+			FVector2D::ZeroVector,
+			FVector2D(1.0f, 1.0f),
+			1.0f,
+			true
+		);
+		Tag2Widget.Add(Tag, BuffFloatingTextWidget);
 
-			if (VerticalBox_BuffIn)
+		if (VerticalBox_BuffIn)
+		{
+			if (UVerticalBoxSlot* VerticalBoxSlot = VerticalBox_BuffIn->AddChildToVerticalBox(BuffFloatingTextWidget))
 			{
-				VerticalBox_BuffIn->AddChildToVerticalBox(BuffFloatingTextWidget)->SetHorizontalAlignment(HAlign_Right);
+				VerticalBoxSlot->SetHorizontalAlignment(HAlign_Right);
 			}
 		}
 	}
@@ -49,25 +52,18 @@ void UBuffStateWidget::BuffOut_Implementation(FGameplayTag Tag)
 
 	UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(Tag2Widget[Tag]);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
-	
-	FString LocalBuffName = BuffFloatingTextWidget->Text.ToString();
-	FLinearColor LocalTextColor = BuffFloatingTextWidget->TextColor;
 
 	BuffFloatingTextWidget->RemoveFromParent();
 	Tag2Widget.Remove(Tag);
 
-	UBuffFloatingTextWidget* OutBuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(CreateWidget(GetWorld(), BuffFloatingText_WidgetClass));
-	OutBuffFloatingTextWidget->InitializeData(
-	FText::FromString(UKismetStringLibrary::Concat_StrStr(">", LocalBuffName)),
-		LocalTextColor,
-		FVector2D::ZeroVector,
-		FVector2D(1.0f, 1.0f),
-		1.0f,
-		false
-	);
+	BuffFloatingTextWidget->In = false;
+
 	if (VerticalBox_BuffOut)
 	{
-		VerticalBox_BuffOut->AddChildToVerticalBox(BuffFloatingTextWidget)->SetHorizontalAlignment(HAlign_Right);
+		if (UVerticalBoxSlot* VerticalBoxSlot = VerticalBox_BuffOut->AddChildToVerticalBox(BuffFloatingTextWidget))
+		{
+			VerticalBoxSlot->SetHorizontalAlignment(HAlign_Right);
+		}
 	}
 }
 
@@ -90,9 +86,9 @@ void UBuffStateWidget::BuffPermanent_Implementation(FGameplayTag Tag, const FStr
 			);
 			Tag2Widget.Add(Tag, BuffFloatingTextWidget);
 
-			if (VerticalBox_BuffIn)
+			if (VerticalBox_BuffPermanent)
 			{
-				VerticalBox_BuffIn->AddChildToVerticalBox(BuffFloatingTextWidget)->SetHorizontalAlignment(HAlign_Left);
+				VerticalBox_BuffPermanent->AddChildToVerticalBox(BuffFloatingTextWidget)->SetHorizontalAlignment(HAlign_Left);
 			}
 		}
 	}
