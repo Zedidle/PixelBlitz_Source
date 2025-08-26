@@ -58,9 +58,8 @@ void UAbilityComponent::BeginPlay()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
 
-	if (!PXCharacter->DataAsset->AbilityDataTable.IsValid()) {
-		PXCharacter->DataAsset->AbilityDataTable.LoadSynchronous();
-		AbilityDataTable = PXCharacter->DataAsset->AbilityDataTable.Get();
+	if (!AbilityDataTable && PXCharacter->DataAsset->AbilityDataTable) {
+		AbilityDataTable = PXCharacter->DataAsset->AbilityDataTable.LoadSynchronous();
 	}
 
 	CachedASC = PXCharacter->GetAbilitySystemComponent();

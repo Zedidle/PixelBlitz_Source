@@ -30,9 +30,9 @@
 void ABasePXCharacter::LoadData()
 {
 	if (!DataAsset) return;
-	BasicMaxJumpCount = DataAsset->MaxJumpCount;
+	BasicMaxJumpCount = DataAsset->BasicMaxJumpCount;
 	CurMaxJumpCount = BasicMaxJumpCount;
-	BasicMaxJumpCount = DataAsset->BasicJumpMaxHoldTime;
+	BasicJumpMaxHoldTime = DataAsset->BasicJumpMaxHoldTime;
 }
 
 void ABasePXCharacter::Tick_SaveFallingStartTime()
@@ -245,7 +245,6 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
 
-	
 	// ASC 初始化
 }
 
@@ -254,6 +253,9 @@ void ABasePXCharacter::BeginPlay()
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
 	SetFalling(GetCharacterMovement()->IsFalling());
+
+	LoadData();
+
 	
 	// AttributeSet 初始化
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())

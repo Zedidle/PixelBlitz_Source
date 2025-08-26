@@ -20,7 +20,7 @@ public:
 	TSoftObjectPtr<USoundCue> LandedSound;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	int32 MaxJumpCount = 2;
+	int32 BasicMaxJumpCount = 2;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	float BasicJumpMaxHoldTime = 0.3f;
