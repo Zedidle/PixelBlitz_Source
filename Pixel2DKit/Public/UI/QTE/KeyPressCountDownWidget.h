@@ -10,7 +10,7 @@
 class UWidgetAnimation;
 
 
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class PIXEL2DKIT_API UKeyPressCountDownWidget : public UUserWidget
 {
 	GENERATED_BODY()

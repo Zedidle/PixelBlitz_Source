@@ -3,15 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/BasePXCharacter.h"
 #include "Components/ActorComponent.h"
-#include "Enemy/BaseEnemy.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "UI/QTE/ArrowLineWidget.h"
 #include "UI/QTE/KeyPressCountDownWidget.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "AbilityComponent.generated.h"
 
+
+class ABasePXCharacter;
+class ABaseEnemy;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
@@ -56,7 +57,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FName> TakeEffectAbilityIndexes;
 	
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> TempTestAbilityIndexes;
 
 	UPROPERTY(BlueprintReadWrite)
@@ -64,7 +65,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-	FGameplayTagContainer GetGameplayTagsWithChildren(FName TagName);
+	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
 
 	
 protected:

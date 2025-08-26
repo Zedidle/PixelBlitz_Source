@@ -609,6 +609,16 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 	IFight_Interface::OnDashEffectEnd_Implementation();
 }
 
+UAbilityComponent* ABasePXCharacter::GetAbilityComponent_Implementation()
+{
+	return AbilityComponent;
+}
+
+APawn* ABasePXCharacter::GetPawn_Implementation()
+{
+	return this;
+}
+
 void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
 	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);

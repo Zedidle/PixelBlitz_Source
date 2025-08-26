@@ -217,7 +217,8 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
-
+	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
+	
 	// 近战的默认方位，针对不同怪物需要重定义
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.East.Near")));
@@ -385,6 +386,16 @@ void ABaseEnemy::OnAttackEffectBegin_Implementation()
 void ABaseEnemy::OnAttackEffectEnd_Implementation()
 {
 	IFight_Interface::OnAttackEffectEnd_Implementation();
+}
+
+UAbilityComponent* ABaseEnemy::GetAbilityComponent_Implementation()
+{
+	return AbilityComponent;
+}
+
+APawn* ABaseEnemy::GetPawn_Implementation()
+{
+	return this;
 }
 
 void ABaseEnemy::Jump()

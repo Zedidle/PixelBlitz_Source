@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract, Blueprintable)
 class PIXEL2DKIT_API UArrowLineWidget : public UUserWidget
 {
 	GENERATED_BODY()

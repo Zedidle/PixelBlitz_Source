@@ -7,14 +7,16 @@
 #include "PlayerState/PXPlayerState.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "GAS/AttributeSet/PXCharacterAttributeSet.h"
+#include "Interfaces/Fight_Interface.h"
 #include "PXCharacterPlayerState.generated.h"
 
 
 class UPXAttributeSet;
 class URGAbilitySystemComponent;
+class UAbilityComponent;
 
 UCLASS()
-class PIXEL2DKIT_API APXCharacterPlayerState : public APXPlayerState
+class PIXEL2DKIT_API APXCharacterPlayerState : public APXPlayerState, public IFight_Interface
 {
 	GENERATED_BODY()
 	APXCharacterPlayerState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -44,6 +46,14 @@ protected:
 private:
 
 	
+#pragma endregion
+
+	
+#pragma region IFight_Interface
+	virtual bool GetIsAttacking() override;
+	virtual bool GetIsDefending() override;
+	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
+	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 
 };

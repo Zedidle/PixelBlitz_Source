@@ -353,6 +353,8 @@ public:
 	virtual void OnAnimVulnerableEnd_Implementation() override;
 	virtual void OnDashEffectBegin_Implementation() override;
 	virtual void OnDashEffectEnd_Implementation() override;
+	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
+	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 
 	

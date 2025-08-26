@@ -3,6 +3,7 @@
 
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "GAS/PXCharacterASComponent.h"
+#include "Character/BasePXCharacter.h"
 #include "GAS/AttributeSet/PXCharacterAttributeSet.h"
 
 
@@ -23,4 +24,37 @@ UAbilitySystemComponent* APXCharacterPlayerState::GetAbilitySystemComponent() co
 UPXAttributeSet* APXCharacterPlayerState::GetCharacterAttributeSet() const
 {
 	return CharacterAttributeSet;
+}
+
+UAbilityComponent* APXCharacterPlayerState::GetAbilityComponent_Implementation()
+{
+	if (ABasePXCharacter* PXCharacter = GetPawn<ABasePXCharacter>())
+	{
+		return PXCharacter->AbilityComponent;
+	}
+	
+	return nullptr;
+}
+
+APawn* APXCharacterPlayerState::GetPawn_Implementation()
+{
+	return GetPawn<ABasePXCharacter>();
+}
+
+bool APXCharacterPlayerState::GetIsAttacking()
+{
+	if (ABasePXCharacter* PXCharacter = GetPawn<ABasePXCharacter>())
+	{
+		return PXCharacter->GetIsAttacking();
+	}
+	return false;
+}
+
+bool APXCharacterPlayerState::GetIsDefending()
+{
+	if (ABasePXCharacter* PXCharacter = GetPawn<ABasePXCharacter>())
+	{
+		return PXCharacter->GetIsDefending();
+	}
+	return false;
 }

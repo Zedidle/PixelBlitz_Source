@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "PaperZDCharacter.h"
-#include "Character/BasePXCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -75,6 +75,8 @@ class UEnemyAIComponent;
 class UHealthComponent;
 class UFightComponent;
 class UEnemyDataAsset;
+class UAbilityComponent;
+class ABasePXCharacter;
 
 UCLASS()
 class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IAbilitySystemInterface
@@ -94,6 +96,15 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UAbilityComponent> AbilityComponent;
+
+
+
+
+
+
+	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
 	void Initialize_Implementation(FName Level);
@@ -277,6 +288,8 @@ public:
 	virtual void OnDefendEffectEnd_Implementation() override;
 	virtual void OnAttackEffectBegin_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
+	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
+	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 	
 #pragma region ActionFields

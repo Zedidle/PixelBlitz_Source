@@ -31,19 +31,21 @@ UAbilityComponent::UAbilityComponent()
 }
 
 
-FGameplayTagContainer UAbilityComponent::GetGameplayTagsWithChildren(FName TagName)
+FGameplayTagContainer UAbilityComponent::CreateGameplayTagContainer(FName TagName, bool WithChildren)
 {
-	FGameplayTagContainer Tags;
-	Tags.AddTag(FGameplayTag::RequestGameplayTag(TagName));
-
-	FGameplayTagContainer AbilityTagsChildren = UGameplayTagsManager::Get().
-		RequestGameplayTagChildren(FGameplayTag::RequestGameplayTag(TagName));
-
-	for (const FGameplayTag& ChildTag : AbilityTagsChildren)
+	if (WithChildren)
 	{
-		Tags.AddTag(ChildTag);
+		FGameplayTagContainer AbilityTagsChildren = UGameplayTagsManager::Get().
+			RequestGameplayTagChildren(FGameplayTag::RequestGameplayTag(TagName));
+
+		AbilityTagsChildren.AddTag(FGameplayTag::RequestGameplayTag(TagName));
+		return AbilityTagsChildren;
 	}
-	return Tags;
+
+	
+	FGameplayTagContainer GameplayTagContainer;
+	GameplayTagContainer.AddTag(FGameplayTag::RequestGameplayTag(TagName));
+	return GameplayTagContainer;
 }
 
 // Called when the game starts
@@ -299,13 +301,13 @@ void UAbilityComponent::OnBeAttacked(AActor* Instigator, int DamageAmount, bool&
 	
 	bool LocalResist = false;
 	// 触发黑荆棘
-	if (CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.Blackthorn"))))
+	if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn"))))
 	{
 		LocalResist = true;
 	}
 	
 	// 移形换影
-	if (CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.Mobiliarbus"))))
+	if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Mobiliarbus"))))
 	{
 		LocalResist = true;
 	}
@@ -372,7 +374,7 @@ void UAbilityComponent::OnKeyPressed(UInputAction* InputAction, bool& Keep)
 
 	if (CachedASC)
 	{
-		CachedASC->TryActivateAbilitiesByTag(GetGameplayTagsWithChildren(FName("Ability.SkyHandPower")));
+		CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.SkyHandPower")));
 	}
 
 	if (ArrowLineWidget)
