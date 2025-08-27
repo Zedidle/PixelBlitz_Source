@@ -10,9 +10,9 @@
 #include "Engine/DataAsset.h"
 #include "PXCustomStruct.generated.h"
 
-/**
- * 
- */
+
+class ABasePXCharacter;
+
 UCLASS()
 class PIXEL2DKIT_API UPXCustomStruct : public UObject
 {
@@ -180,8 +180,7 @@ struct FBuffValueEffect
 #pragma endregion 
 
 
-
-#pragma region FCharacterAttribute
+#pragma region Character Data
 
 USTRUCT(BlueprintType)
 struct FCharacterAttribute
@@ -211,6 +210,60 @@ struct FCharacterAttribute
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float RepelResistPercent;
+	
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
+	int32 BasicMaxJumpCount = 0;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
+	float BasicJumpMaxHoldTime = 0.0f;
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterEstimate
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterEstimate")
+	int Speed;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterEstimate")
+	int Survival;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterEstimate")
+	int Damage;
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	// 是否可用
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	bool Enable;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	FLocalizedTableData CharacterName_Localized;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	FLocalizedTableData CharacterDesc_Localized;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	TSubclassOf<ABasePXCharacter> Character_Class;
+
+	// 战斗方式示意图
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	TSoftObjectPtr<UTexture2D> Image_FightWay;
+	
+	// 头像
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	TSoftObjectPtr<UTexture2D> Profile;
+
+	// UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	// FCharacterAttribute CharacterAttribute;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
+	FCharacterEstimate CharacterEstimate;
 	
 };
 #pragma endregion
@@ -262,9 +315,6 @@ struct FTalent: public FTableRowBase
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
-
-	
-	
 	
 };
 #pragma endregion

@@ -39,5 +39,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Common | FloatingText")
 	static void SpawnFloatingTextDefault(const FString InTableName, const FName InRowName, FVector WorldLocation,
 		FLinearColor TextColor = FLinearColor::White, FVector2D RenderScale = FVector2D(1,1), UPaperSprite* Icon = nullptr);
+
+	UFUNCTION(BlueprintCallable, Category="Common | FloatingText")
+	static void SpawnFloatingTextLocalized(FLocalizedTableData LocalizedTableData, FVector WorldLocation,
+		FLinearColor TextColor = FLinearColor::White, FVector2D RenderScale = FVector2D(1,1), UPaperSprite* Icon = nullptr);
+
 	
 };

@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "ISourceControlProvider.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
@@ -29,11 +30,75 @@
 
 void ABasePXCharacter::LoadData()
 {
-	if (!DataAsset) return;
-	BasicMaxJumpCount = DataAsset->BasicMaxJumpCount;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset);
+
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+
+	const FCharacterAttribute& Attribute = DataAsset->CharacterAttribute;
+	const FCharacterAttribute& InheritAttribute = MainSaveGame->CharacterInheritAttribute;
+	
+	BasicMaxJumpCount = Attribute.BasicMaxJumpCount;
 	CurMaxJumpCount = BasicMaxJumpCount;
-	BasicJumpMaxHoldTime = DataAsset->BasicJumpMaxHoldTime;
+	BasicJumpMaxHoldTime = DataAsset->CharacterAttribute.BasicJumpMaxHoldTime;
+	
+	BasicSpringArmLength = Attribute.SpringArmLengthSight + InheritAttribute.SpringArmLengthSight;
+	CurSpringArmLength = BasicSpringArmLength;
+	
+	BasicAttackValue = Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue;
+
+	if (EnergyComponent)
+	{
+		EnergyComponent->SetMaxEnergy(Attribute.MaxEnergy + InheritAttribute.MaxEnergy);
+	}
+
+	if (HealthComponent)
+	{
+		HealthComponent->ModifyMaxHP(Attribute.MaxHealth + InheritAttribute.MaxHealth, EStatChange::Reset, true);
+		HealthComponent->RepelResistancePercent = Attribute.RepelResistPercent + InheritAttribute.RepelResistPercent;
+	}
+	
+	BasicMoveSpeed = Attribute.WalkMoveSpeed + InheritAttribute.WalkMoveSpeed;
+	BasicMoveAcceleration = Attribute.WalkMoveAcceleration + InheritAttribute.WalkMoveAcceleration;
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BasicMoveSpeed;
+		GetCharacterMovement()->MaxAcceleration = BasicMoveAcceleration;
+		GetCharacterMovement()->JumpZVelocity = Attribute.JumpHeight + InheritAttribute.JumpHeight;
+	}
+	
 }
+
+// void ABasePXCharacter::LoadCharacterAttribute()
+// {
+// 	UGameInstance* GameInstance = GetGameInstance();
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+//
+// 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+//
+// 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+//
+// 	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
+//
+// 	UDataTable* CharacterDataTable = Settings->GetCharacterData();
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CharacterDataTable);
+//
+// 	FCharacterData* AttributeData = CharacterDataTable->FindRow<FCharacterData>(
+// 		MainSaveGame->CurCharacterName, TEXT("Load CharacterAttribute"));
+//
+// 	if (!AttributeData->Enable) return;
+//
+// 	
+// }
 
 void ABasePXCharacter::Tick_SaveFallingStartTime()
 {
@@ -565,7 +630,21 @@ void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 
 bool ABasePXCharacter::OnBeAttacked_Implementation(AActor* maker, int damage)
 {
-	return IFight_Interface::OnBeAttacked_Implementation(maker, damage);
+	bool Blocked = false;
+	
+	if (AbilityComponent && AbilityComponent->Implements<UFight_Interface>())
+	{
+		Blocked = IFight_Interface::Execute_OnBeAttacked(AbilityComponent, maker, damage);
+	}
+	if (Blocked) return true;
+	
+	if (TalentComponent && TalentComponent->Implements<UFight_Interface>())
+	{
+		Blocked = IFight_Interface::Execute_OnBeAttacked(TalentComponent, maker, damage);
+	}
+	if (Blocked) return true;
+	
+	return false;
 }
 
 
@@ -630,7 +709,12 @@ void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float P
 
 void ABasePXCharacter::BuffUpdate_Speed_Implementation()
 {
-	IBuff_Interface::BuffUpdate_Speed_Implementation();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent);
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MovementComponent);
+
+	MovementComponent->MaxWalkSpeed = BasicMoveSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
+	MovementComponent->MaxAcceleration = BasicMoveAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
 }
 
 void ABasePXCharacter::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)

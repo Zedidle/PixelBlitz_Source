@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "PXCharacterDataAsset.generated.h"
 
 
@@ -13,6 +14,7 @@ class PIXEL2DKIT_API UPXCharacterDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<UDataTable> AbilityDataTable;
 	
@@ -20,9 +22,6 @@ public:
 	TSoftObjectPtr<USoundCue> LandedSound;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	int32 BasicMaxJumpCount = 2;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	float BasicJumpMaxHoldTime = 0.3f;
+	FCharacterAttribute CharacterAttribute;
 	
 };

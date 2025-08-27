@@ -214,23 +214,22 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	EffectedValue_Speed += Value;
 	Tag2BuffEffect_Speed.Add(Tag, FBuffValueEffect(Percent, Value));
 	
-
 	Execute_BuffUpdate_Speed(Owner);
 
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
 	{
 		UCommonFuncLib::SpawnFloatingText(
-		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SpeedUp")),
-			Location + FVector(-30, 0, 20),
-			FLinearColor::White);
+		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SlowDown")),
+				Location + FVector(20, 0, 20),
+				FLinearColor::Gray);
 	}
 	else
 	{
 		UCommonFuncLib::SpawnFloatingText(
-		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SlowDown")),
-			Location + FVector(20, 0, 20),
-			FLinearColor::Gray);
+		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SpeedUp")),
+				Location + FVector(-30, 0, 20),
+				FLinearColor::White);
 	}
 }
 

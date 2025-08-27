@@ -19,7 +19,8 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 	
 	mutable TMap<FName, TObjectPtr<UDataTable>> DataTables;
 
-
+	UPROPERTY(Config, EditAnywhere, Category = "Character")
+	TSoftObjectPtr<UDataTable> CharacterDataPath;
 
 	UPROPERTY(Config, EditAnywhere, Category = "ItemData")
 	TSoftObjectPtr<UDataTable> ItemDataPath;
@@ -43,6 +44,7 @@ public:
 	UDataTable* GetLocalizedDataTable(const FString& Path) const;
 
 
+	TObjectPtr<UDataTable> GetCharacterData() const { return GetData(CharacterDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetBuffOnWidgetData() const { return GetData(BuffOnWidgetDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetTalentData() const { return GetData(TalentDataPath.ToString()); }

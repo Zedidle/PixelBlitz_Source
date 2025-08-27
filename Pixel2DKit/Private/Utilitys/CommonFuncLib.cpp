@@ -92,3 +92,10 @@ void UCommonFuncLib::SpawnFloatingTextDefault(const FString InTableName, const F
 	FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(D));
 	SpawnFloatingText(Text, WorldLocation, TextColor, RenderScale, Icon);
 }
+
+void UCommonFuncLib::SpawnFloatingTextLocalized(FLocalizedTableData LocalizedTableData, FVector WorldLocation,
+	FLinearColor TextColor, FVector2D RenderScale, UPaperSprite* Icon)
+{
+	FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(LocalizedTableData));
+	SpawnFloatingText(Text, WorldLocation, TextColor, RenderScale, Icon);
+}

@@ -64,6 +64,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 
 
 	void LoadData();
+	// void LoadCharacterAttribute();
 	
 	float FallingStartTime;
 	bool PreFrameFalling = false;
@@ -173,6 +174,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicMoveSpeed = 200.f;
+
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	float BasicMoveAcceleration = 400.f;
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicAirControl = 1.0f;
