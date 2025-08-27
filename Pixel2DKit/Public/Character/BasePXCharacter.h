@@ -162,6 +162,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UTalentComponent> TalentComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Fight)
+	TMap<FGameplayTag, float> EffectGameplayTag;
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

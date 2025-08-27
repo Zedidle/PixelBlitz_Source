@@ -16,5 +16,6 @@ class PIXEL2DKIT_API UPXASComponent : public UAbilitySystemComponent
 
 public:
 	
+	virtual FGameplayEffectSpecHandle MakeOutgoingSpec(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level, FGameplayEffectContextHandle Context) const override;
 
 };
