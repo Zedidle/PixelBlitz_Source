@@ -64,7 +64,6 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 
 
 	void LoadData();
-	// void LoadCharacterAttribute();
 	
 	float FallingStartTime;
 	bool PreFrameFalling = false;

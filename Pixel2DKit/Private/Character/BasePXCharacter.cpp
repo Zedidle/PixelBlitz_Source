@@ -75,30 +75,6 @@ void ABasePXCharacter::LoadData()
 	
 }
 
-// void ABasePXCharacter::LoadCharacterAttribute()
-// {
-// 	UGameInstance* GameInstance = GetGameInstance();
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-//
-// 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-//
-// 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
-//
-// 	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
-//
-// 	UDataTable* CharacterDataTable = Settings->GetCharacterData();
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CharacterDataTable);
-//
-// 	FCharacterData* AttributeData = CharacterDataTable->FindRow<FCharacterData>(
-// 		MainSaveGame->CurCharacterName, TEXT("Load CharacterAttribute"));
-//
-// 	if (!AttributeData->Enable) return;
-//
-// 	
-// }
 
 void ABasePXCharacter::Tick_SaveFallingStartTime()
 {
