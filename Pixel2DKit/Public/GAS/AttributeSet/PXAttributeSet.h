@@ -72,22 +72,22 @@ public:
 
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", ReplicatedUsing = OnRep_Energy)
-	FGameplayAttributeData Energy;
-	ATTRIBUTE_ACCESSORS(UPXAttributeSet, Energy);
+	FGameplayAttributeData EP;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, EP);
 
 	UFUNCTION()
 	virtual void OnRep_Energy(const FGameplayAttributeData& OldValue);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", ReplicatedUsing = OnRep_MaxEnergy)
-	FGameplayAttributeData MaxEnergy;
-	ATTRIBUTE_ACCESSORS(UPXAttributeSet, MaxEnergy);
+	FGameplayAttributeData MaxEP;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, MaxEP);
 
 	UFUNCTION()
 	virtual void OnRep_MaxEnergy(const FGameplayAttributeData& OldValue);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", Replicated)
-	FGameplayAttributeData EnergyIncrease;
-	ATTRIBUTE_ACCESSORS(UPXAttributeSet, EnergyIncrease);
+	FGameplayAttributeData EPIncrease;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, EPIncrease);
 
 
 	

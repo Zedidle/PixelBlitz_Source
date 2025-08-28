@@ -25,6 +25,15 @@ void UBuffFloatingTextWidget::PlayOut()
 	}
 }
 
+void UBuffFloatingTextWidget::DispearOut()
+{
+	if (Dispear)
+	{
+		PlayAnimationForward(Dispear, PlaySpeed);
+	}
+}
+
+
 
 void UBuffFloatingTextWidget::NativeConstruct()
 {

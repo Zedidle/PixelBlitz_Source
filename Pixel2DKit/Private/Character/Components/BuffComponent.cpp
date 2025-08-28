@@ -397,3 +397,11 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 	}
 }
 
+void UBuffComponent::DispearBuff(FGameplayTag Tag)
+{
+	if (IsValid(BuffStateWidget))
+	{
+		BuffStateWidget->BuffDispear(Tag);
+	}
+}
+

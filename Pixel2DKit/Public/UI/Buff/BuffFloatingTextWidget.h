@@ -24,7 +24,9 @@ protected:
 	UWidgetAnimation* FloatIn;
 	UPROPERTY(Transient, meta = (BindWidgetAnimOptional))
 	UWidgetAnimation* FloatOut;
-
+	UPROPERTY(Transient, meta = (BindWidgetAnimOptional))
+	UWidgetAnimation* Dispear;
+	
 	UPROPERTY(meta = (BindWidgetOptional))
 	UTextBlock* TextBlock;
 
@@ -55,5 +57,7 @@ public:
 
 	UFUNCTION()
 	void PlayOut();
-	
+
+	UFUNCTION()
+	void DispearOut();
 };

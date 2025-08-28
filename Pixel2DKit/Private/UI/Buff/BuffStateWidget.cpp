@@ -116,3 +116,12 @@ void UBuffStateWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
 }
+
+void UBuffStateWidget::BuffDispear_Implementation(FGameplayTag Tag)
+{
+	if (!Tag2Widget.Contains(Tag)) return;
+
+	UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(Tag2Widget[Tag]);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
+	BuffFloatingTextWidget->DispearOut();
+}

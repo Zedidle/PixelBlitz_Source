@@ -10,6 +10,7 @@
 #include "Character/PXCharacterDataAsset.h"
 #include "Character/Components/BuffComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/DataTableFunctionLibrary.h"

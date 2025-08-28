@@ -2,6 +2,8 @@
 
 
 #include "GAS/AttributeSet/PXAttributeSet.h"
+#include "NiagaraClipboard.h"
+#include "GameplayEffectExtension.h"
 
 void UPXAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -16,6 +18,16 @@ bool UPXAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& D
 void UPXAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
+	if (Data.EvaluatedData.Attribute == GetHPAttribute())
+	{
+		SetHP(FMath::Clamp(GetHP(), 0.f, GetMaxHP()));
+	}
+	
+	if (Data.EvaluatedData.Attribute == GetEPAttribute())
+	{
+		SetEP(FMath::Clamp(GetEP(), 0.f, GetMaxEP()));
+	}
+	
 }
 
 void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
@@ -26,10 +38,9 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHP());
 	}
-
-	if(Attribute == GetEnergyAttribute())
+	if(Attribute == GetEPAttribute())
 	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxEnergy());
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxEP());
 	}
 	
 }
@@ -38,13 +49,18 @@ void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, f
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 
-	OnPXAttributeChange.Broadcast(Attribute, OldValue, NewValue);
 
-	// if (Attribute == GetEnergyAttribute())
+	// if(Attribute == GetHPAttribute())
 	// {
-	// 	GetOwningActor()
+	// 	SetAttrCurrentValueByName("HP", FMath::Clamp(GetHP(), 0.f, GetMaxHP()));
+	// }
+	//
+	// if (Attribute == GetEPAttribute())
+	// {
+	// 	SetAttrCurrentValueByName("EP", FMath::Clamp(GetEP(), 0.f, GetMaxEP()));
 	// }
 	
+	OnPXAttributeChange.Broadcast(Attribute, OldValue, NewValue);
 	
 }
 
@@ -123,10 +139,10 @@ void UPXAttributeSet::OnRep_MaxHP(const FGameplayAttributeData& OldValue)
 
 void UPXAttributeSet::OnRep_Energy(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, Energy, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, EP, OldValue);
 }
 
 void UPXAttributeSet::OnRep_MaxEnergy(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, MaxEnergy, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, MaxEP, OldValue);
 }

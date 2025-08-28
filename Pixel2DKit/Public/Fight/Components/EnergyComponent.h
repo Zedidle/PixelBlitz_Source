@@ -60,23 +60,23 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	UFUNCTION(BlueprintCallable)
-	bool DecreaseEnergy(int32 Amount, AActor* Instigator);
+	bool DecreaseEP(int32 Amount, AActor* Instigator);
 
 	UFUNCTION(BlueprintCallable)
-	void IncreaseEnergy(int32 Amount, AActor* Instigator);
+	void IncreaseEP(int32 Amount, AActor* Instigator);
 
 	UFUNCTION(BlueprintCallable)
-	void SetEnergy(int32 NewValue, AActor* Instigator);
+	void SetEP(int32 NewValue, AActor* Instigator);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	int32 GetCurrentEnergy();
+	int32 GetCurrentEP();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	int32 GetMaxEnergy();
+	int32 GetMaxEP();
 
 	UFUNCTION(BlueprintCallable)
-	void SetMaxEnergy(int32 NewValue);
+	void SetMaxEP(int32 NewValue);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool IsEnergyEnough(int32 Cost);
+	bool IsEPEnough(int32 Cost);
 };

@@ -46,7 +46,7 @@ void UEnergyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-bool UEnergyComponent::DecreaseEnergy(int32 Amount, AActor* Instigator)
+bool UEnergyComponent::DecreaseEP(int32 Amount, AActor* Instigator)
 {
 	int32 Consume = FMath::RoundToInt(Amount * (PlayerCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
 
@@ -56,11 +56,11 @@ bool UEnergyComponent::DecreaseEnergy(int32 Amount, AActor* Instigator)
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				float CurValue = PixelAS->GetEnergy();
+				float CurValue = PixelAS->GetEP();
 				if (CurValue >= Consume)
 				{
 					CurValue -= Consume;
-					TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), CurValue);
+					TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), CurValue);
 					return true;
 				}
 			}
@@ -70,7 +70,7 @@ bool UEnergyComponent::DecreaseEnergy(int32 Amount, AActor* Instigator)
 	return false;
 }
 
-void UEnergyComponent::IncreaseEnergy(int32 Amount, AActor* Instigator)
+void UEnergyComponent::IncreaseEP(int32 Amount, AActor* Instigator)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Instigator)
 	
@@ -83,25 +83,25 @@ void UEnergyComponent::IncreaseEnergy(int32 Amount, AActor* Instigator)
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				float NewValue = FMath::Min(PixelAS->GetEnergy() + Amount, PixelAS->GetMaxEnergy());
-				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), NewValue);
+				float NewValue = FMath::Min(PixelAS->GetEP() + Amount, PixelAS->GetMaxEP());
+				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
 			}
 		}
 	}
 }
 
-void UEnergyComponent::SetEnergy(int32 NewValue, AActor* Instigator)
+void UEnergyComponent::SetEP(int32 NewValue, AActor* Instigator)
 {
 	if (const AActor* TargetActor = GetOwner())
 	{
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
 		{
-			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), NewValue);
+			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
 		}
 	}
 }
 
-int32 UEnergyComponent::GetCurrentEnergy()
+int32 UEnergyComponent::GetCurrentEP()
 {
 	if (const AActor* TargetActor = GetOwner())
 	{
@@ -109,14 +109,14 @@ int32 UEnergyComponent::GetCurrentEnergy()
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				return PixelAS->GetEnergy();
+				return PixelAS->GetEP();
 			}
 		}
 	}
 	return 0;
 }
 
-int32 UEnergyComponent::GetMaxEnergy()
+int32 UEnergyComponent::GetMaxEP()
 {
 	if (const AActor* TargetActor = GetOwner())
 	{
@@ -124,14 +124,14 @@ int32 UEnergyComponent::GetMaxEnergy()
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				return PixelAS->GetMaxEnergy();
+				return PixelAS->GetMaxEP();
 			}
 		}
 	}
 	return 100;
 }
 
-void UEnergyComponent::SetMaxEnergy(int32 NewValue)
+void UEnergyComponent::SetMaxEP(int32 NewValue)
 {
 	AActor* Owner = GetOwner();
 	if (!IsValid(Owner)) return;
@@ -141,11 +141,11 @@ void UEnergyComponent::SetMaxEnergy(int32 NewValue)
 	if (!IsValid(PixelAS)) return;
 
 	NewValue = FMath::Max(NewValue, 0);
-	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxEnergyAttribute(), NewValue);
-	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEnergyAttribute(), NewValue);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxEPAttribute(), NewValue);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
 }
 
-bool UEnergyComponent::IsEnergyEnough(int32 Cost)
+bool UEnergyComponent::IsEPEnough(int32 Cost)
 {
 	if (!PlayerCharacter) return false;
 
@@ -157,7 +157,7 @@ bool UEnergyComponent::IsEnergyEnough(int32 Cost)
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				return PixelAS->GetEnergy() >= Cost;
+				return PixelAS->GetEP() >= Cost;
 			}
 		}
 	}

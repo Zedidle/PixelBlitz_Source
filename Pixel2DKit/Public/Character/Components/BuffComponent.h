@@ -116,6 +116,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
 	void AddBuffByTag(FGameplayTag Tag);
+
+	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
+	void DispearBuff(FGameplayTag Tag);
 	
 };
 

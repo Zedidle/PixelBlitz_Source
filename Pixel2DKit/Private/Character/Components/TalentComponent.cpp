@@ -254,8 +254,8 @@ void UTalentComponent::LoadTalents()
 	{
 		if (UEnergyComponent* EnergyComponent = PXCharacter->EnergyComponent)
 		{
-			EnergyComponent->SetMaxEnergy(Effect_GameplayTag[TalentTag] + EnergyComponent->GetMaxEnergy());
-			EnergyComponent->SetEnergy(EnergyComponent->GetMaxEnergy(), PXCharacter);
+			EnergyComponent->SetMaxEP(Effect_GameplayTag[TalentTag] + EnergyComponent->GetMaxEP());
+			EnergyComponent->SetEP(EnergyComponent->GetMaxEP(), PXCharacter);
 		}
 	}
 

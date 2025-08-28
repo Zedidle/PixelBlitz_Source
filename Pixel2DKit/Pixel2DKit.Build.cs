@@ -21,6 +21,7 @@ public class Pixel2DKit : ModuleRules
 			"Niagara","GameplayTags",
 			"UMG","AIModule","DeveloperSettings",
 			"GameplayAbilities", "GameplayTasks", 
+			"QuicMessagingTransport", "LidarPointCloudRuntime", "PCG",
 			// "SteamLeaderboardSubsystem",
 			"OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils",
 			"EnhancedInput",
@@ -42,7 +43,7 @@ public class Pixel2DKit : ModuleRules
 		PrivateDependencyModuleNames.Add("OnlineSubsystemSteam");
 		PrivateDependencyModuleNames.AddRange( new string[]
 		{
-			
+			"QuicMessagingTransport", "NiagaraEditor", "QuicMessagingTransport", "LidarPointCloudRuntime", "OpenSubdiv"
 		});
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true

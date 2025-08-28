@@ -55,7 +55,7 @@ void ABasePXCharacter::LoadData()
 
 	if (EnergyComponent)
 	{
-		EnergyComponent->SetMaxEnergy(Attribute.MaxEnergy + InheritAttribute.MaxEnergy);
+		EnergyComponent->SetMaxEP(Attribute.MaxEnergy + InheritAttribute.MaxEnergy);
 	}
 
 	if (HealthComponent)
