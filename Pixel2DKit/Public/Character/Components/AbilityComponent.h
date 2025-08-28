@@ -101,7 +101,7 @@ public:
 	bool CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability);
 
 	UFUNCTION(BlueprintCallable)
-	void OnBeAttacked(AActor* Instigator, int DamageAmount, bool& Resist);
+	void OnBeAttacked(AActor* Instigator, int InDamage, int& OutDamage);
 
 
 

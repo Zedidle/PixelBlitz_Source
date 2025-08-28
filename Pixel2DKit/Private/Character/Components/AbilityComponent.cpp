@@ -289,28 +289,25 @@ bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbilit
 	return TakeEffectAbilityIndexes.Contains(Ability.PreLevelIndex);
 }
 
-void UAbilityComponent::OnBeAttacked(AActor* Instigator, int DamageAmount, bool& Resist)
+void UAbilityComponent::OnBeAttacked(AActor* Instigator, int InDamage, int& OutDamage)
 {
 	if (!CachedASC || !Instigator->Implements<UFight_Interface>())
 	{
-		Resist = false;
+		OutDamage = InDamage;
 		return;
 	}
 
-	HurtInstigator = Instigator;
-	AcceptDamage = DamageAmount;
+	int SurDamage = InDamage;
 	
-	bool LocalResist = false;
+	HurtInstigator = Instigator;
+	
 	// 触发黑荆棘
-	if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn"))))
-	{
-		LocalResist = true;
-	}
+	CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn")));
 	
 	// 移形换影
 	if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Mobiliarbus"))))
 	{
-		LocalResist = true;
+		SurDamage = 0;
 	}
 	
 	// 检查天手力是否有效 且 冷却结束
@@ -320,15 +317,13 @@ void UAbilityComponent::OnBeAttacked(AActor* Instigator, int DamageAmount, bool&
 		UGameplayAbility* AbilityInstance_SkyHandPower = Spec->GetPrimaryInstance();
 		if (AbilityInstance_SkyHandPower->K2_CheckAbilityCooldown())
 		{
-			LocalResist = true;
 			OnHurtInstigatorDead(nullptr);
 			CreateQTE();
 			ListHurtInstigatorDead();
 		}
 	}
-	
-	// 任意一个技能触发成功都可以设置为 true
-	Resist = LocalResist;
+
+	OutDamage = SurDamage; 
 }
 
 void UAbilityComponent::CreateQTE()

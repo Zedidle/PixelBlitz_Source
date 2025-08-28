@@ -397,11 +397,11 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 		{
 			if (Owner->Implements<UFight_Interface>())
 			{
-				if (IFight_Interface::Execute_OnBeAttacked(Owner, Instigator, Damage))
-				{
-					KnockBack(KnockbackForce * 0.9, Instigator);
-					return;
-				}
+				int OutDamage;
+				IFight_Interface::Execute_OnBeAttacked(Owner, Instigator, Damage, OutDamage);
+				if (OutDamage <= 0) return;
+				
+				KnockBack(KnockbackForce * 0.9 * (OutDamage / Damage), Instigator);
 			}
 		}
 	}

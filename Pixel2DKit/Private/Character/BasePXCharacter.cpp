@@ -604,24 +604,36 @@ void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
 }
 
-bool ABasePXCharacter::OnBeAttacked_Implementation(AActor* maker, int damage)
+void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage)
 {
-	bool Blocked = false;
+	OutDamage = InDamage;
+	int SurDamage = InDamage;
 	
-	if (AbilityComponent && AbilityComponent->Implements<UFight_Interface>())
+	if (AbilityComponent)
 	{
-		Blocked = IFight_Interface::Execute_OnBeAttacked(AbilityComponent, maker, damage);
+		AbilityComponent->OnBeAttacked(Maker, InDamage, SurDamage);
 	}
-	if (Blocked) return true;
-	
-	if (TalentComponent && TalentComponent->Implements<UFight_Interface>())
+	if (SurDamage <= 0)
 	{
-		Blocked = IFight_Interface::Execute_OnBeAttacked(TalentComponent, maker, damage);
+		OutDamage = 0;
+		return;
 	}
-	if (Blocked) return true;
+
+	InDamage = SurDamage;
 	
-	return false;
+	if (TalentComponent)
+	{
+		TalentComponent->OnBeAttacked(Maker, InDamage, SurDamage);
+	}
+	if (SurDamage <= 0)
+	{
+		OutDamage = 0;
+		return;
+	}
+	
+	return;
 }
+
 
 
 int ABasePXCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage)
