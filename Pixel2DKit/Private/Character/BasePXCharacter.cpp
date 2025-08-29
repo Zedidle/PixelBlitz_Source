@@ -47,6 +47,7 @@ void ABasePXCharacter::LoadData()
 	BasicMaxJumpCount = Attribute.BasicMaxJumpCount;
 	CurMaxJumpCount = BasicMaxJumpCount;
 	BasicJumpMaxHoldTime = DataAsset->CharacterAttribute.BasicJumpMaxHoldTime;
+	BasicAttackInterval = DataAsset->CharacterAttribute.BasicAttackInterval;
 	
 	BasicSpringArmLength = Attribute.SpringArmLengthSight + InheritAttribute.SpringArmLengthSight;
 	CurSpringArmLength = BasicSpringArmLength;
@@ -318,8 +319,7 @@ void ABasePXCharacter::BeginPlay()
 		
 		for (auto Effect : InitEffects)
 		{
-			// AbilitySystem->ApplyGameplayEffectToSelf(Effect.Get());
-			// 创建效果实例
+			if (!Effect) continue;
 			UGameplayEffect* GameplayEffect = Effect->GetDefaultObject<UGameplayEffect>();
 			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
 				Effect, 
@@ -499,6 +499,14 @@ void ABasePXCharacter::SetMoving(bool V)
 {
 	bMoving = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bMoving")), V);
+}
+
+void ABasePXCharacter::EndNormalAttack()
+{
+	bInAttackStatus = false;
+	SetAttackAnimToggle(false);
+	SetAttackFire(false);
+	SetAttackHolding(false);
 }
 
 

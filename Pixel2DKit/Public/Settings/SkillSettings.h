@@ -35,5 +35,6 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Skill", DisplayName = "飞沙走石")
 	TSubclassOf<ABaseSkill> NoSand;
+
 	
 };

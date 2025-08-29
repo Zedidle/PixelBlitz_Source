@@ -216,7 +216,8 @@ public:
 	int32 BasicMaxJumpCount = 2;
 	UPROPERTY(BlueprintReadonly, Category = Movement)
 	float BasicJumpMaxHoldTime = 0.3f;
-
+	UPROPERTY(BlueprintReadonly, Category = Movement)
+	float BasicAttackInterval = 1.0f;
 
 #pragma region Talent
 
@@ -335,6 +336,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = Anim)
 	void SetMoving(const bool V);
+
+	UFUNCTION(BlueprintCallable, Category = Anim)
+	void EndNormalAttack();
 #pragma endregion
 
 	

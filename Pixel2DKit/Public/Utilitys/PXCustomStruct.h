@@ -182,6 +182,7 @@ struct FBuffValueEffect
 
 #pragma region Character Data
 
+// 不能写默认参数，因为和关卡继承角色属性通用
 USTRUCT(BlueprintType)
 struct FCharacterAttribute
 {
@@ -216,6 +217,9 @@ struct FCharacterAttribute
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
 	float BasicJumpMaxHoldTime = 0.0f;
+	
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
+	float BasicAttackInterval = 0.0f;
 };
 
 USTRUCT(BlueprintType)

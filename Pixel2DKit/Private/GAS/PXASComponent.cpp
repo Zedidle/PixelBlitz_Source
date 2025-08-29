@@ -20,6 +20,7 @@ FGameplayEffectSpecHandle UPXASComponent::MakeOutgoingSpec(TSubclassOf<UGameplay
 		FGameplayEffectSpec* NewSpec = new FGameplayEffectSpec(GameplayEffect, Context, Level);
 		if (UPXGameplayEffect* GE = Cast<UPXGameplayEffect>(GameplayEffect))
 		{
+			NewSpec->AppendDynamicAssetTags(GE->AssetTags);
 			NewSpec->DynamicGrantedTags.AppendTags(GE->GrantedTags);
 		}
 		return FGameplayEffectSpecHandle(NewSpec);

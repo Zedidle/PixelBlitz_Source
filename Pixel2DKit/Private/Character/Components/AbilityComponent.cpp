@@ -3,7 +3,11 @@
 
 #include "Character/Components/AbilityComponent.h"
 
+#include <opensubdiv/vtr/level.h>
+
 #include "AbilitySystemComponent.h"
+#include "ActorMode.h"
+#include "CurveEditorTypes.h"
 #include "InputAction.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Character/BasePXCharacter.h"
@@ -17,9 +21,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
+#include "Settings/SkillSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Util/ColorConstants.h"
 #include "Utilitys/PXCustomStruct.h"
+#include "WorldPartition/Cook/WorldPartitionCookPackage.h"
 
 // Sets default values for this component's properties
 UAbilityComponent::UAbilityComponent()
@@ -133,11 +139,11 @@ void UAbilityComponent::LoadAbility()
 	for (auto Index : TakeEffectAbilityIndexes)
 	{
 		FAbility AbilityData = DataTableManager->FindRow<FAbility>(AbilityDataTable, Index);
-		UClass* LoadedClass = AbilityData.AbilityClass.LoadSynchronous();
-		if (!LoadedClass) continue;
-
-		FGameplayAbilitySpec Spec(LoadedClass);
-		CachedASC->GiveAbility(Spec);
+		if (UClass* LoadedClass = AbilityData.AbilityClass.LoadSynchronous())
+		{
+			FGameplayAbilitySpec Spec(LoadedClass);
+			CachedASC->GiveAbility(Spec);
+		}
 		
 		// 这里只考虑通用技能
 		if (AbilityData.CharacterName == EName::None)
@@ -172,6 +178,7 @@ void UAbilityComponent::LoadAbility()
 
 	// 空中移动的控制（暂且无用）
 	FGameplayTag Tag;
+	FGameplayTagContainer Tags;
 
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AirMoveEffectAddPercent");
 	if (EffectGameplayTag.Contains(Tag))
@@ -206,7 +213,19 @@ void UAbilityComponent::LoadAbility()
 	{
 		PXCharacter->CurMaxJumpCount = PXCharacter->BasicMaxJumpCount;
 	}
-
+	
+	// EP恢复加快
+	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.EPRecoverLevel");
+	if (EffectGameplayTag.Contains(Tag))
+	{
+		TArray<FActiveGameplayEffectHandle> Handles = CachedASC->GetActiveEffectsWithAllTags(
+						FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.RecoverEP")));
+		for (auto& Handle : Handles)
+		{
+			CachedASC->SetActiveGameplayEffectLevel(Handle, EffectGameplayTag[Tag]);
+		}
+	}
+	
 	// 霸体
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InRock");
 	HealthComponent->bInRock = EffectGameplayTag.Contains(Tag);
@@ -237,6 +256,8 @@ void UAbilityComponent::LoadAbility()
 		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.Mobiliarbus"));
 	}
 
+
+	
 	
 #pragma endregion 
 	
