@@ -176,10 +176,10 @@ void UAbilityComponent::LoadAbility()
 
 # pragma region 通用技能加载部分，专属技能在 PXCharacter 子类中的LoadAbility自定义
 
-	// 空中移动的控制（暂且无用）
 	FGameplayTag Tag;
 	FGameplayTagContainer Tags;
 
+	// 空中移动的控制（暂且无用）
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AirMoveEffectAddPercent");
 	if (EffectGameplayTag.Contains(Tag))
 	{

@@ -42,30 +42,53 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHP());
 		int ChangedValue = NewValue - GetHP();
-
-		if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
+		if (ChangedValue != 0.f)
 		{
-			AActor* Owner = ASC->GetOwnerActor();
-			if (Owner && Owner->Implements<UFight_Interface>())
+			if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
 			{
-				if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Owner))
+				AActor* Owner = ASC->GetOwnerActor();
+				if (Owner && Owner->Implements<UFight_Interface>())
 				{
-					EFloatingTextType ChangedType = ChangedValue > 0 ? EFloatingTextType::Health : EFloatingTextType::Damage;
-					UCommonFuncLib::SpawnFloatingCombatText(
-						ChangedType,
-					FText::AsNumber(FMath::Abs(ChangedValue)),
-					nullptr,
-						Pawn->GetActorLocation(),
-					FVector2D(0.8f, 0.8f));
+					if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Owner))
+					{
+						EFloatingTextType ChangedType = ChangedValue > 0 ? EFloatingTextType::Health : EFloatingTextType::Damage;
+						UCommonFuncLib::SpawnFloatingCombatText(
+							ChangedType,
+						FText::AsNumber(FMath::Abs(ChangedValue)),
+						nullptr,
+							Pawn->GetActorLocation(),
+						FVector2D(0.8f, 0.8f));
+					}
 				}
 			}
 		}
+
 		// GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16),
 		// 	FString::Printf( TEXT("UPXAttributeSet::PreAttributeChange HP: %f, %f"), NewValue, GetHP() ));
 	}
 	if(Attribute == GetEPAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxEP());
+		int ChangedValue = NewValue - GetEP();
+		if (ChangedValue > 5.f)
+		{
+			if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
+			{
+				AActor* Owner = ASC->GetOwnerActor();
+				if (Owner && Owner->Implements<UFight_Interface>())
+				{
+					if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Owner))
+					{
+						UCommonFuncLib::SpawnFloatingCombatText(
+							EFloatingTextType::Energy,
+						FText::AsNumber(FMath::Abs(ChangedValue)),
+						nullptr,
+							 Pawn->GetActorLocation(),
+						FVector2D(0.8f, 0.8f));
+					}
+				}
+			}
+		}
 	}
 	
 }
