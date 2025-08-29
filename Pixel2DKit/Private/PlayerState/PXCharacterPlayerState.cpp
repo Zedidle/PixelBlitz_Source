@@ -41,6 +41,23 @@ APawn* APXCharacterPlayerState::GetPawn_Implementation()
 	return GetPawn<ABasePXCharacter>();
 }
 
+void APXCharacterPlayerState::RecoverPlayerStateOnMonsterDead()
+{
+	// ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(IFight_Interface::Execute_GetPawn(this));
+	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Super::GetPawn());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
+
+	UAbilitySystemComponent* ASC = PXCharacter->GetAbilitySystemComponent();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);
+
+	ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.GOWRecover")));
+}
+
+void APXCharacterPlayerState::OnMonsterDead()
+{
+	RecoverPlayerStateOnMonsterDead();
+}
+
 bool APXCharacterPlayerState::GetIsAttacking()
 {
 	if (ABasePXCharacter* PXCharacter = GetPawn<ABasePXCharacter>())

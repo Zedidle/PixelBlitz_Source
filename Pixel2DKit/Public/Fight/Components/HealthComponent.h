@@ -105,8 +105,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void SetHP(const int32 value, const bool broadcast = true);
 
-	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void SetEffectBySeconds(const int32 value, const FGameplayTag Tag);
+	// UFUNCTION(BlueprintCallable, Category="Health")
+	// virtual void SetEffectBySeconds(const int32 value, const FGameplayTag Tag);
 	
 protected:
 	// Called when the game starts
@@ -130,8 +130,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void IncreaseHP(int32 value, AActor* Instigator);
 
-	UFUNCTION(BlueprintCallable, Category="Health")
-	void SetActivateHealthEffectBySeconds(const bool activate = true); 
+	// UFUNCTION(BlueprintCallable, Category="Health")
+	// void SetActivateHealthEffectBySeconds(const bool activate = true);
 	
 	UFUNCTION(BlueprintCallable, Category="HealthComponent | Movement")
 	void KnockBack(FVector Repel, AActor* Instigator);

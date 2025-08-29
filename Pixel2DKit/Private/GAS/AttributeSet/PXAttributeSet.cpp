@@ -4,6 +4,10 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "NiagaraClipboard.h"
 #include "GameplayEffectExtension.h"
+#include "Fight/Components/HealthComponent.h"
+#include "Interfaces/Fight_Interface.h"
+#include "Kismet/GameplayStatics.h"
+#include "Utilitys/CommonFuncLib.h"
 
 void UPXAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -37,6 +41,27 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	if(Attribute == GetHPAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHP());
+		int ChangedValue = NewValue - GetHP();
+
+		if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
+		{
+			AActor* Owner = ASC->GetOwnerActor();
+			if (Owner && Owner->Implements<UFight_Interface>())
+			{
+				if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Owner))
+				{
+					EFloatingTextType ChangedType = ChangedValue > 0 ? EFloatingTextType::Health : EFloatingTextType::Damage;
+					UCommonFuncLib::SpawnFloatingCombatText(
+						ChangedType,
+					FText::AsNumber(FMath::Abs(ChangedValue)),
+					nullptr,
+						Pawn->GetActorLocation(),
+					FVector2D(0.8f, 0.8f));
+				}
+			}
+		}
+		// GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16),
+		// 	FString::Printf( TEXT("UPXAttributeSet::PreAttributeChange HP: %f, %f"), NewValue, GetHP() ));
 	}
 	if(Attribute == GetEPAttribute())
 	{

@@ -16,6 +16,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/AttributeSet/PXEnemyAttributeSet.h"
 #include "Perception/PawnSensingComponent.h"
+#include "PlayerState/PXCharacterPlayerState.h"
 #include "PlayerState/PXPlayerState.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/DropSubsystem.h"
@@ -259,9 +260,9 @@ void ABaseEnemy::OnDie_Implementation()
 	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
 	DropSubsystem->SpawnItems(DropData, GetActorLocation(), 0.2f);
 
-	if (APXPlayerState* PS = Cast<APXPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0)))
+	if (APXCharacterPlayerState* PS = Cast<APXCharacterPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0)))
 	{
-		PS->RecoverPlayerState();
+		PS->OnMonsterDead();
 	}
 	
 	OnEnemyDeath.Broadcast(this);

@@ -26,25 +26,15 @@ public:
 	
 #pragma region GAS
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
 		
 	UFUNCTION(BlueprintCallable)
 	UPXAttributeSet* GetCharacterAttributeSet() const;
-
-
-
-
-protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPXCharacterASComponent* AbilitySystem = nullptr;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPXCharacterAttributeSet* CharacterAttributeSet = nullptr;
-	
-
-private:
-
 	
 #pragma endregion
 
@@ -56,4 +46,9 @@ private:
 	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 
+	UFUNCTION()
+	void RecoverPlayerStateOnMonsterDead();
+
+	UFUNCTION()
+	void OnMonsterDead();
 };
