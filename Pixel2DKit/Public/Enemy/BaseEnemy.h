@@ -122,7 +122,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnDie();
-	void OnDie_Implementation();
 
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDeath OnEnemyDeath;

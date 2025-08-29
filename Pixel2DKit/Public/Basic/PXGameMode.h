@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "Utilitys/PXCustomStruct.h"
 
 #include "PXGameMode.generated.h"
@@ -14,7 +14,7 @@
  * 
  */
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API APXGameMode : public AGameModeBase
+class PIXEL2DKIT_API APXGameMode : public AGameMode
 {
 	GENERATED_BODY()
 

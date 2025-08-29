@@ -18,5 +18,8 @@ class PIXEL2DKIT_API APXPlayerState : public APlayerState, public IAbilitySystem
 	public:
 	UFUNCTION(BlueprintCallable)
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { checkf(false, TEXT("%s need implement GetAbilitySystemComponent interface"), *GetName()); return nullptr; }
-	
+
+
+	UFUNCTION()
+	void RecoverPlayerState();
 };
