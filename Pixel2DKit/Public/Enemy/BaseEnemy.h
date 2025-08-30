@@ -279,6 +279,7 @@ public:
 	virtual bool CanMove_Implementation() override;
 	virtual bool CanAttack_Implementation() override;
 	virtual bool Dash_Implementation() override;
+	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage) override;
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;

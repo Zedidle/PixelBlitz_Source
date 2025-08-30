@@ -50,6 +50,7 @@ void APXCharacterPlayerState::RecoverPlayerStateOnMonsterDead()
 	UAbilitySystemComponent* ASC = PXCharacter->GetAbilitySystemComponent();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);
 
+	// GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16), "RecoverPlayerStateOnMonsterDead");
 	ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.GOWRecover")));
 }
 

@@ -337,6 +337,28 @@ bool ABaseEnemy::Dash_Implementation()
 
 }
 
+void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage)
+{
+	OutDamage = InDamage;
+	int SurDamage = InDamage;
+
+	if (IFight_Interface::Execute_GetOwnCamp(this).HasTag(
+				FGameplayTag::RequestGameplayTag("Enemy.BOSS")))
+	{
+		float Result;
+		if (IFight_Interface::Execute_FindEffectGameplayTag(Maker,
+			FGameplayTag::RequestGameplayTag("AbilitySet.ToBossDamagePlusPercent"),
+			Result))
+		{
+			SurDamage = SurDamage * (1 + Result);
+		}
+	}
+	
+	OutDamage = SurDamage;
+}
+
+
+
 
 void ABaseEnemy::OnBeAttacked_Invulnerable_Implementation()
 {

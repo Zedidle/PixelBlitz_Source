@@ -3,3 +3,11 @@
 
 #include "Basic/PXGameState.h"
 
+void APXGameState::LoadWeatherEffect()
+{
+}
+
+void APXGameState::SetWeatherEffect(const FWeatherEffectData& data)
+{
+	WeatherEffectData = data;
+}

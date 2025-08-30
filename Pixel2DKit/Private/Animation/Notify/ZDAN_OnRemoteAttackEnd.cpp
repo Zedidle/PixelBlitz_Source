@@ -16,7 +16,7 @@ void UZDAN_OnRemoteAttackEnd::OnReceiveNotify_Implementation(UPaperZDAnimInstanc
 	{
 		if (PaperZDCharacter->Implements<UFight_Interface>())
 		{
-			IFight_Interface::Execute_OnRemoteAttackEffect(PaperZDCharacter);
+			IFight_Interface::Execute_OnRemoteAttackEnd(PaperZDCharacter);
 		}
 	}
 }

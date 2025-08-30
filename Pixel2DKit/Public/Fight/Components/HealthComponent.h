@@ -71,7 +71,7 @@ public:
 	FTimerHandle TimerHandle_EffectBySeconds;
 
 	
-	int CalAcceptDamage(int initDamage, AActor* instigator);
+	int CalAcceptDamage(int InDamage, AActor* Maker);
 	void OnHurtInvulnerable();
 	
 	
@@ -125,7 +125,7 @@ public:
 	float GetHPPercent();
 	
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce = false, bool bCauseInvul = true, bool bInner = false);
+	virtual void DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce = false, bool bCauseInvul = true, bool bInner = false);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void IncreaseHP(int32 value, AActor* Instigator);

@@ -14,40 +14,33 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemGlobals.h"
+#include "Basic/PXGameState.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 
 class ULegacyCameraShake;
 
-int UHealthComponent::CalAcceptDamage(int initDamage, AActor* instigator)
+int UHealthComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 {
-	AActor* owner = GetOwner();
-	if (!owner) return initDamage;
-	
-	int tmpDamageAdd = 0;
-	if (instigator && instigator->Implements<UFight_Interface>())
-	{
-		tmpDamageAdd = IFight_Interface::Execute_DamagePlus(instigator, initDamage, GetOwner());
-	}
-
-	if (!owner->Implements<UFight_Interface>()) return initDamage;
-
-	FGameplayTagContainer ownerTags = IFight_Interface::Execute_GetOwnCamp(owner);
-	if (ownerTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Player"))))
-	{
-		return tmpDamageAdd + initDamage;
-	}
-
+	AActor* Owner = GetOwner();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Owner, InDamage)
+	if (!Owner->Implements<UFight_Interface>()) return InDamage;
 	if (GetCurrentHP() <= 0) return 0;
 	
-	// 判断是否为BOSS
-	if (ownerTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Enemy.BOSS"))))
+	int DamagePlus = 0;
+	if (Maker && Maker->Implements<UFight_Interface>())
 	{
-		// 技能【巨人杀手】处理，AbilityComponent_CPP
-		float xxx = 1.5;
-		initDamage = FMath::RoundToInt(xxx * initDamage);
+		DamagePlus = IFight_Interface::Execute_DamagePlus(Maker, InDamage, Owner);
 	}
 	
-	return initDamage + tmpDamageAdd;
+	return InDamage + DamagePlus;
+	
+	// // 判断是否为BOSS
+	// if (OwnerTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Enemy.BOSS"))))
+	// {
+	// 	// 技能【巨人杀手】处理，AbilityComponent_CPP
+	// 	float xxx = 1.5;
+	// 	InDamage = FMath::RoundToInt(xxx * InDamage);
+	// }
 }
 
 void UHealthComponent::OnHurtInvulnerable()
@@ -365,7 +358,7 @@ float UHealthComponent::GetHPPercent()
 	return float(GetCurrentHP()) / float(GetMaxHP());
 }
 
-void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Instigator, bool bForce,
+void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce,
                                       bool bCauseInvul, bool bInner)
 {
 	if (Damage <= 0) return;
@@ -378,64 +371,49 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
 	if (!IsValid(PixelAS)) return;
 
-	// 玩家受伤逻辑
-	FGameplayTag PlayerTag = FGameplayTag::RequestGameplayTag(FName("Player"));
-	if (IFight_Interface::Execute_GetOwnCamp(Owner).HasTag(PlayerTag))
+	if (bInvulnerable && !bForce)
 	{
-		// 天气影响的伤害增幅
-		float weatherAddPercent = 0.1;
-		Damage = Damage + Damage * weatherAddPercent;
-		if (bInvulnerable && !bForce)
-		{
-			if (Owner->Implements<UFight_Interface>())
-			{
-				IFight_Interface::Execute_OnBeAttacked_Invulnerable(Owner);
-			}
-			return;
-		}
-		if (!bInner)
-		{
-			if (Owner->Implements<UFight_Interface>())
-			{
-				int OutDamage;
-				IFight_Interface::Execute_OnBeAttacked(Owner, Instigator, Damage, OutDamage);
-				if (OutDamage <= 0) return;
-				
-				KnockBack(KnockbackForce * 0.9 * (OutDamage / Damage), Instigator);
-			}
-		}
+		IFight_Interface::Execute_OnBeAttacked_Invulnerable(Owner);
+		return;
 	}
 
-	// 怪物受伤逻辑
-	FGameplayTag EnemyTag = FGameplayTag::RequestGameplayTag(FName("Enemy"));
-	if (IFight_Interface::Execute_GetOwnCamp(Owner).HasTag(EnemyTag))
+	// 天气影响的伤害增幅, 记录在 GameState的天气数值
+	if (APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(Owner)))
 	{
-		if (bInvulnerable && !bForce)
-		{
-			IFight_Interface::Execute_OnBeAttacked_Invulnerable(Owner);
-		}
+		Damage += Damage * GS->WeatherEffectData.DamageAddPercent;
 	}
 
-	int calDamage = CalAcceptDamage(Damage, Instigator);
+	
+	int OutDamage = Damage;
+	if (!bInner)
+	{
+		IFight_Interface::Execute_OnBeAttacked(Owner, Maker, Damage, OutDamage);
+		KnockBack(KnockbackForce * (OutDamage / Damage), Maker);
+	}
+	
+	if (OutDamage <= 0) return;
+
+	int calDamage = CalAcceptDamage(OutDamage, Maker);
 	calDamage = IFight_Interface::Execute_OnDefendingHit(Owner, calDamage);
 
 	int preHealth = PixelAS->GetHP();
 	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
 	int changedValue = FMath::Abs(preHealth - CurrentHealth);
-	if (changedValue > 0)
-	{
-		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-		OnHPChanged.Broadcast(CurrentHealth, changedValue, EStatChange::Decrease, Instigator, bInner);
-	}
+	if (changedValue <= 0) return;
 
-	if (bCauseInvul)
-	{
-		OnHurtInvulnerable();
-	}
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
+	OnHPChanged.Broadcast(CurrentHealth, changedValue, EStatChange::Decrease, Maker, bInner);
+
+	// 触发受伤闪烁
 	if (!bInner)
 	{
 		FlashForDuration();
-		KnockBack(KnockbackForce, Instigator);
+	}
+
+	// 触发无敌帧
+	if (bCauseInvul)
+	{
+		OnHurtInvulnerable();
 	}
 }
 
