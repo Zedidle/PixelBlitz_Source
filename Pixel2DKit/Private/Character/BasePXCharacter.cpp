@@ -25,8 +25,11 @@
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Sound/SoundCue.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/SoundFuncLib.h"
 
+
+class UDataTableSubsystem;
 
 void ABasePXCharacter::LoadData()
 {
@@ -275,6 +278,20 @@ void ABasePXCharacter::Tick_CalCameraOffset()
 
 void ABasePXCharacter::LoadAbility_Implementation()
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent->AbilityDataTable);
+
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);
+	
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+	
+	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
+
+	// 暂且什么都不用做
+
 }
 
 ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
@@ -288,6 +305,20 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
 
 	// ASC 初始化
+}
+
+bool ABasePXCharacter::HasEffectGameplayTag(const FGameplayTag Tag) const
+{
+	return EffectGameplayTags.Contains(Tag);
+}
+
+float ABasePXCharacter::GetEffectGameplayTag(const FGameplayTag Tag) const
+{
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		return EffectGameplayTags[Tag];
+	}
+	return 0.0f;
 }
 
 void ABasePXCharacter::BeginPlay()
@@ -357,7 +388,14 @@ void ABasePXCharacter::Falling()
 
 int ABasePXCharacter::GetWeaponInitDamage_Implementation()
 {
-	return BasicAttackValue;
+	FGameplayTag AttackDamagePlusTag = FGameplayTag::RequestGameplayTag("AbilitySet.SwordPlay.AttackDamagePlus");
+	int AttackValue = BasicAttackValue;
+	if (EffectGameplayTags.Contains(AttackDamagePlusTag))
+	{
+		 AttackValue += EffectGameplayTags[AttackDamagePlusTag];
+	}
+	
+	return AttackValue;
 }
 
 UAbilitySystemComponent* ABasePXCharacter::GetAbilitySystemComponent() const
@@ -689,10 +727,12 @@ UAbilityComponent* ABasePXCharacter::GetAbilityComponent_Implementation()
 	return AbilityComponent;
 }
 
+
 APawn* ABasePXCharacter::GetPawn_Implementation()
 {
 	return this;
 }
+
 
 void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
@@ -889,11 +929,15 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
 
 	// 还需通过 **AbilityComponent** 补充技能【急转向】逻辑
-	if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
+	if (EffectGameplayTags.Contains(FGameplayTag::RequestGameplayTag("AbilitySet.Brake")))
 	{
-		float speed = GetCharacterMovement()->Velocity.Length();
-		GetCharacterMovement()->Velocity = 0.2 * speed * dir;
+		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
+		{
+			float speed = GetCharacterMovement()->Velocity.Length();
+			GetCharacterMovement()->Velocity = 0.2 * speed * dir;
+		}
 	}
+
 }
 
 void ABasePXCharacter::MoveX(const FInputActionValue& Value)

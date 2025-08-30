@@ -19,8 +19,7 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	UDataTable* AbilityDataTable;
+
 
 	UPROPERTY()
 	ABasePXCharacter* PXCharacter;
@@ -36,6 +35,9 @@ public:
 	// Sets default values for this component's properties
 	UAbilityComponent();
 
+	UPROPERTY()
+	UDataTable* AbilityDataTable;
+	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UKeyPressCountDownWidget> KeyPressCountdownWidgetClass;
 	
@@ -59,10 +61,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> TempTestAbilityIndexes;
-
-	UPROPERTY(BlueprintReadWrite)
-	TMap<FGameplayTag, float> EffectGameplayTag;
-
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);

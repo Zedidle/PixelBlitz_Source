@@ -57,6 +57,56 @@ class UFightComponent;
 struct FInputActionValue;
 
 
+USTRUCT(BlueprintType)
+struct FEffectGameplayTags
+{
+	GENERATED_BODY()
+private:
+	TMap<FGameplayTag, float> Data;
+
+public:
+	bool Contains(const FGameplayTag& Tag) const
+	{
+		return Data.Contains(Tag);
+	}
+
+	float GetData(const FGameplayTag& Tag) const
+	{
+		if ( Data.Contains(Tag))
+		{
+			return Data[Tag];
+		}
+		return 0.0f;
+	}
+	
+	float operator[](const FGameplayTag& Tag) const {
+		if ( Data.Contains(Tag))
+		{
+			return Data[Tag];
+		}
+		return 0.0f;
+	}
+
+	void SetData(const FGameplayTag& Tag, float Value)
+	{
+		Data.Add(Tag, Value);
+	}
+
+	void AddData(const FGameplayTag& Tag, float Value)
+	{
+		if (Data.Contains(Tag))
+		{
+			Data[Tag] += Value;
+		}
+		else
+		{
+			Data.Add(Tag, Value);
+		}
+	}
+};
+
+
+
 UCLASS(BlueprintType, Blueprintable)
 class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IBuff_Interface, public IAbilitySystemInterface
 {
@@ -162,9 +212,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UTalentComponent> TalentComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Fight)
-	TMap<FGameplayTag, float> EffectGameplayTag;
+#pragma region EffectGameplayTags
+	UPROPERTY()
+	FEffectGameplayTags EffectGameplayTags;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	bool HasEffectGameplayTag(const FGameplayTag Tag) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	float GetEffectGameplayTag(const FGameplayTag Tag) const;
+#pragma endregion
 	
+	
+	
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;

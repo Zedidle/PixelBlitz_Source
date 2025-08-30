@@ -92,7 +92,7 @@ public:
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     UAbilityComponent* GetAbilityComponent();
-
+    
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     APawn* GetPawn();
 };

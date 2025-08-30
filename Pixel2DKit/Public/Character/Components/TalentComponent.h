@@ -20,10 +20,7 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 	ABasePXCharacter* PXCharacter;
 
 	FVector OwnerPreLocation;
-
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	TMap<FGameplayTag, float> Effect_GameplayTag;
-
+	
 	UPROPERTY()
 	TArray<ABaseDefenseSkill*> DefenseSkills;
 
