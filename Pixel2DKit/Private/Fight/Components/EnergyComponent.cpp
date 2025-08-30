@@ -74,9 +74,6 @@ void UEnergyComponent::IncreaseEP(int32 Amount, AActor* Instigator)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Instigator)
 	
-	UCommonFuncLib::SpawnFloatingCombatText(EFloatingTextType::Energy, FText::AsNumber(Amount),
-		nullptr, Instigator->GetActorLocation());
-
 	if (const AActor* TargetActor = GetOwner())
 	{
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
