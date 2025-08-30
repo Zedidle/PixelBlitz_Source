@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "PaperZDCharacter.h"
+#include "Character/BasePXCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -99,7 +100,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UAbilityComponent> AbilityComponent;
 
-
+	UPROPERTY()
+	FEffectGameplayTags EffectGameplayTags;
 
 
 
@@ -288,6 +290,7 @@ public:
 	virtual void OnAttackEffectBegin_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
 	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
+	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 	

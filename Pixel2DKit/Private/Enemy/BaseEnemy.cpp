@@ -400,6 +400,18 @@ UAbilityComponent* ABaseEnemy::GetAbilityComponent_Implementation()
 	return AbilityComponent;
 }
 
+bool ABaseEnemy::FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result)
+{
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		Result = EffectGameplayTags[Tag];
+		return true;
+	}
+	Result = 0;
+	return false;
+}
+
+
 APawn* ABaseEnemy::GetPawn_Implementation()
 {
 	return this;
