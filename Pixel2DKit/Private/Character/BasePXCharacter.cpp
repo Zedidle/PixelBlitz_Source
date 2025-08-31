@@ -325,21 +325,16 @@ void ABasePXCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
-	SetFalling(GetCharacterMovement()->IsFalling());
+	if (GetCharacterMovement())
+	{
+		SetFalling(GetCharacterMovement()->IsFalling());
+	}
 
 	LoadData();
 
-	
 	// AttributeSet 初始化
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
 	{
-		// const auto EffectContext = AbilitySystem->MakeEffectContext();
-		// const auto SpecHandle = AbilitySystem->MakeOutgoingSpec(TestGE->GetClass(), 1, EffectContext);
-		// if (SpecHandle.IsValid())
-		// {
-		// 	AbilitySystem->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), AbilitySystem);
-		// }
-		
 		for (auto Ability : InitAbilitiesToGive)
 		{
 			AbilitySystem->K2_GiveAbility(Ability);

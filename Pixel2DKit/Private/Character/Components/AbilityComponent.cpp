@@ -276,6 +276,8 @@ bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbilit
 {
 	if (!Ability.Enable) return false;
 
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, false)
+
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, false)
 
