@@ -544,7 +544,6 @@ void ABasePXCharacter::EndNormalAttack()
 	bInAttackStatus = false;
 	SetAttackAnimToggle(false);
 	SetAttackFire(false);
-	SetAttackHolding(false);
 }
 
 
