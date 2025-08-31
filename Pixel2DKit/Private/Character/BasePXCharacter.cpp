@@ -432,7 +432,7 @@ void ABasePXCharacter::AddCameraOffset(const FVector& V)
 
 bool ABasePXCharacter::GetIsAttacking()
 {
-	return bInAttackEffect;
+	return bInAttackEffect || bAttackHolding;
 }
 
 bool ABasePXCharacter::GetIsDefending()
@@ -682,8 +682,19 @@ void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, 
 
 
 
-int ABasePXCharacter::DamagePlus_Implementation(int inValue, AActor* ActorAcceptDamage)
+int ABasePXCharacter::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 {
+	if (GetCharacterMovement()->IsMovingOnGround())
+	{
+		return 0;
+	}
+
+	float AirFightPlus;
+	if (Execute_FindEffectGameplayTag(this, FGameplayTag::RequestGameplayTag("AbilitySet.InAir.DamagePlus"), AirFightPlus))
+	{
+		return FMath::RoundToInt(AirFightPlus);
+	}
+	
 	return 0;
 }
 

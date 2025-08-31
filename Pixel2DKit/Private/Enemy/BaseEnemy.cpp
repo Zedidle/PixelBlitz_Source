@@ -2,13 +2,20 @@
 
 
 #include "Enemy/BaseEnemy.h"
+
+#include "NiagaraFunctionLibrary.h"
+#include "PaperFlipbookComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/BasePixelAnimInstance.h"
+#include "Basic/PXGameMode.h"
+#include "Basic/PXGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Core/PXSaveGameSubsystem.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/EnemyDataAsset.h"
 #include "Fight/Components/FightComponent.h"
@@ -18,10 +25,12 @@
 #include "Perception/PawnSensingComponent.h"
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "PlayerState/PXPlayerState.h"
+#include "Sound/SoundCue.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/DropSubsystem.h"
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/SoundFuncLib.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
@@ -217,7 +226,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComponent"));
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	FightComp = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
+	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	
@@ -242,13 +251,23 @@ void ABaseEnemy::Initialize_Implementation(FName Level)
 void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (HealthComponent)
+	{
+		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+	}
 }
 
 void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	
-	OnEnemyDeath.RemoveAll(this);
+	OnEnemyDie.RemoveAll(this);
+	
+	if (HealthComponent)
+	{
+		HealthComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+	}
 }
 
 void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
@@ -257,15 +276,35 @@ void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
 
 void ABaseEnemy::OnDie_Implementation()
 {
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+	
 	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
 	DropSubsystem->SpawnItems(DropData, GetActorLocation(), 0.2f);
 
-	if (APXCharacterPlayerState* PS = Cast<APXCharacterPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0)))
+	if (PawnSensingComponent)
 	{
-		PS->OnMonsterDead();
+		PawnSensingComponent->DestroyComponent();
+	}
+
+	if (GetCapsuleComponent())
+	{
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 	}
 	
-	OnEnemyDeath.Broadcast(this);
+	SetInAttackEffect(false);
+	SetInAttackState(false);
+	
+	if (APXCharacterPlayerState* PS = Cast<APXCharacterPlayerState>(UGameplayStatics::GetPlayerState(World, 0)))
+	{
+		PS->OnEnemyDie(this);
+	}
+	if (APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(World)))
+	{
+		GS->OnEnemyDie(this);
+	}
+	
+	OnEnemyDie.Broadcast(this);
 }
 
 
@@ -274,6 +313,81 @@ void LoadLookDeterrence(int32 Level)
 	
 }
 
+
+void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 NewValue, int32 ChangedValue, EStatChange ChangedStat,
+	AActor* Maker, bool bInner)
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+	
+	if (NewValue < 1)
+	{
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->StopMovementImmediately();
+		}
+		if (DataAsset)
+		{
+			if (USoundCue* DieSound = DataAsset->DieSound.LoadSynchronous())
+			{
+				USoundFuncLib::PlaySoundAtLocation(DieSound, GetActorLocation(), 1.0f);
+			}
+			UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+			if (SaveGameSubsystem && SaveGameSubsystem->GetSettingData() &&
+					SaveGameSubsystem->GetSettingData()->GameSetting_ShowBlood)
+			{
+				if (UNiagaraSystem* NS_Die = DataAsset->NS_Die.LoadSynchronous())
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Die, GetActorLocation());
+				}
+			}
+		}
+
+		if (AAIController* AIController = Cast<AAIController>(GetController()))
+		{
+			// 运行一颗空树
+			// AIController->RunBehaviorTree();
+			
+			if (AIController->GetBlackboardComponent())
+			{
+				AIController->GetBlackboardComponent()->SetValueAsBool("bDead", true);
+			}
+		}
+		SetDead(true);
+		OnDie();
+		if (GetSprite())
+		{
+			GetSprite()->SetLooping(false);
+		}
+		if (GetCapsuleComponent())
+		{
+			GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PlayerPawn, ECollisionResponse::ECR_Ignore);
+		}
+	}
+	else
+	{
+		OnHurt(NewValue, Maker);
+		if (HealthComponent)
+		{
+			if (ChangedValue > HealthComponent->GetMaxHP() * 0.1)
+			{
+				SetHurt(true, 0.2f);
+			}
+		}
+	}
+
+}
+
+void ABaseEnemy::OnHurt_Implementation(int RemainHP, AActor* Maker)
+{
+	if (DataAsset && DataAsset->HurtSound)
+	{
+		if (USoundCue* HurtSound = DataAsset->HurtSound.LoadSynchronous())
+		{
+			USoundFuncLib::PlaySoundAtLocation(HurtSound, GetActorLocation(), 1.0f);
+		}
+	}
+}
 
 UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
 {
@@ -365,7 +479,7 @@ void ABaseEnemy::OnBeAttacked_Invulnerable_Implementation()
 	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
 }
 
-int ABaseEnemy::DamagePlus_Implementation(int inValue, AActor* ActorDamaged)
+int ABaseEnemy::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 {
 	return 0;
 }

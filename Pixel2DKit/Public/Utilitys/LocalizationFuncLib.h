@@ -75,7 +75,6 @@ struct FLocalizedTableData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName RowName;
 	
-	
 };
 
 

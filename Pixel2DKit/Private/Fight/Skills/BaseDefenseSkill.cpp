@@ -3,7 +3,7 @@
 
 #include "Fight/Skills/BaseDefenseSkill.h"
 
-void ABaseDefenseSkill::OnBeAttacked_Implementation(AActor* DamageMaker, int InDamage, int& OutDamage, bool& Stop)
+void ABaseDefenseSkill::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool& Stop)
 {
 	
 }

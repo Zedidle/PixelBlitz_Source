@@ -51,7 +51,7 @@ public:
     void OnBeAttacked(AActor* Maker, int Damage, int& OutDamage);
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    int DamagePlus(int inValue, AActor* ActorDamaged);
+    int DamagePlus(int InDamage, AActor* Receiver);
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     int OnDefendingHit(int iniDamage);

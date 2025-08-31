@@ -47,9 +47,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	ABasePXCharacter* PlayerCharacter;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 RecoverLevel;
+
 	
 protected:
 	// Called when the game starts

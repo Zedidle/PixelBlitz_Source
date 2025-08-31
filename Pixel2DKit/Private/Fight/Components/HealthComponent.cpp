@@ -33,14 +33,6 @@ int UHealthComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 	}
 	
 	return InDamage + DamagePlus;
-	
-	// // 判断是否为BOSS
-	// if (OwnerTags.HasTag(FGameplayTag::RequestGameplayTag(FName("Enemy.BOSS"))))
-	// {
-	// 	// 技能【巨人杀手】处理，AbilityComponent_CPP
-	// 	float xxx = 1.5;
-	// 	InDamage = FMath::RoundToInt(xxx * InDamage);
-	// }
 }
 
 void UHealthComponent::OnHurtInvulnerable()
@@ -309,7 +301,7 @@ void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		world->GetTimerManager().ClearTimer(FlashTimerHandle);
 	}
-	
+	OnHPChanged.RemoveAll(this);
 }
 
 
@@ -421,8 +413,8 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 {
 	if (bInRock)
 	{
-		UCommonFuncLib::SpawnFloatingTextDefault(TEXT("Buff/BuffEffectText"), TEXT("Buff_Stoic"),
-			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.9, 0.9));
+		UCommonFuncLib::SpawnFloatingTextDefault(TEXT("Buff/BuffEffectText"), TEXT("Buff_InRock"),
+			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.8, 0.8));
 		return;
 	}
 

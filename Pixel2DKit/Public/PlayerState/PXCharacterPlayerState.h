@@ -47,8 +47,8 @@ public:
 #pragma endregion
 
 	UFUNCTION()
-	void RecoverPlayerStateOnMonsterDead();
+	void RecoverPlayerStateOnEnemyDie();
 
-	UFUNCTION()
-	void OnMonsterDead();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnEnemyDie(ABaseEnemy* Enemy);
 };

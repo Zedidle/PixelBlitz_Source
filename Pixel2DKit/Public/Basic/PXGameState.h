@@ -29,5 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetWeatherEffect(const FWeatherEffectData& data);
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Monster")
+	void OnEnemyDie(ABaseEnemy* Enemy);
 };

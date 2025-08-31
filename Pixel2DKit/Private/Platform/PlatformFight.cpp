@@ -76,7 +76,7 @@ void APlatformFight::RegisterEnemies_Implementation()
 		if (!IsValid(spawner)) continue;
 		if (ABaseEnemy* enemy = spawner->SpawnEnemy())
 		{
-			enemy->OnEnemyDeath.AddDynamic(this, &APlatformFight::OnEnemyDie);
+			enemy->OnEnemyDie.AddDynamic(this, &APlatformFight::OnEnemyDie);
 			Enemies.Add(enemy);
 		}
 	}
@@ -86,7 +86,7 @@ void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(enemy)
 	Enemies.Remove(enemy);
-	enemy->OnEnemyDeath.RemoveAll(this);
+	enemy->OnEnemyDie.RemoveAll(this);
 	if (IsValid(PlatformFightCountWidget))
 	{
 		PlatformFightCountWidget->UpdateCount(Enemies.Num());

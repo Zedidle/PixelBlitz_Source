@@ -63,19 +63,19 @@ public:
 	TSubclassOf<UPrimaryDataAsset> GameSetting_WeatherType;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	float GameSetting_ViewPitch;
+	float GameSetting_ViewPitch = 1.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowDamageFloatText;
+	bool GameSetting_ShowDamageFloatText = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowRecoverFloatText;
+	bool GameSetting_ShowRecoverFloatText = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowGoldsFloatText;
+	bool GameSetting_ShowGoldsFloatText = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
-	bool GameSetting_ShowBlood;
+	bool GameSetting_ShowBlood = true;
 #pragma endregion
 
 	

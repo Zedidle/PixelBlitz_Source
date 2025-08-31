@@ -25,7 +25,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(
 	EStatChange,                    // Change 參數類型
 	Change,                         // Change 參數名稱
 	AActor*,                        // Instigator 參數類型
-	Instigator,                     // Instigator 參數名稱
+	Maker,                     // Instigator 參數名稱
 	bool,                           // bInner 參數類型
 	bInner                          // bInner 參數名稱
 );

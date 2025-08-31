@@ -3,16 +3,18 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "PaperZDCharacter.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "Character/BasePXCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "Engine/DataTable.h"
+#include "Fight/Components/HealthComponent.h"
 #include "GAS/PXEnemyASComponent.h"
 #include "BaseEnemy.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, ABaseEnemy*, Enemy);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDie, ABaseEnemy*, Enemy);
 
 
 class UPXEnemyAttributeSet;
@@ -79,17 +81,21 @@ class UEnemyDataAsset;
 class UAbilityComponent;
 class ABasePXCharacter;
 
+
+
 UCLASS()
 class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TEnumAsByte<ECollisionChannel> ECC_PlayerPawn; 
 	
 	UPROPERTY()
 	ABasePXCharacter* PixelCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	UEnemyDataAsset* DataAsset;
-
 	
 	void SetLanding(const bool V, const float time = 0.1f);
 
@@ -126,9 +132,9 @@ public:
 	void OnDie();
 
 	UPROPERTY(BlueprintAssignable)
-	FOnEnemyDeath OnEnemyDeath;
+	FOnEnemyDie OnEnemyDie;
 	
-	UPROPERTY(BlueprintReadOnly, Category = EnemyAI)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
@@ -137,8 +143,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UHealthComponent> HealthComponent;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UFightComponent> FightComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UFightComponent> FightComponent;
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -250,9 +256,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
 	void TryAttack();
 
+	UFUNCTION(BlueprintNativeEvent, Category="Fight_Interface")
+	void OnEnemyHPChanged(int32 NewValue, int32 ChangedValue, EStatChange ChangedStat, AActor* Maker, bool bInner);
 
-
-
+	UFUNCTION(BlueprintNativeEvent, Category="Fight_Interface")
+	void OnHurt(int RemainHP, AActor* Maker);
+	
 #pragma region GAS
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -281,7 +290,7 @@ public:
 	virtual bool Dash_Implementation() override;
 	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage) override;
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
-	virtual int DamagePlus_Implementation(int inValue, AActor* ActorDamaged) override;
+	virtual int DamagePlus_Implementation(int InDamage, AActor* Receiver) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
 	virtual void OnDieEnd_Implementation() override;
 	virtual void OnRemoteAttackEffect_Implementation() override;

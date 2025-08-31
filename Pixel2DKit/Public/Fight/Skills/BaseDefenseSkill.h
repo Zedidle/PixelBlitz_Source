@@ -27,7 +27,7 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "DefenseSkill")
-	void OnBeAttacked(AActor* DamageMaker, int InDamage, int& OutDamage, bool& Stop);
+	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool& Stop);
 	
 
 };

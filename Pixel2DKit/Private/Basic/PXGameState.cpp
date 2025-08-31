@@ -11,3 +11,7 @@ void APXGameState::SetWeatherEffect(const FWeatherEffectData& data)
 {
 	WeatherEffectData = data;
 }
+
+void APXGameState::OnEnemyDie_Implementation(ABaseEnemy* Enemy)
+{
+}

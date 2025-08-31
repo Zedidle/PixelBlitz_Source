@@ -47,7 +47,7 @@ public:
 	
 	
 	UPROPERTY(BlueprintReadOnly)
-	AActor* HurtInstigator;
+	AActor* HurtMaker;
 	UPROPERTY(BlueprintReadOnly)
 	int AcceptDamage;
 	
@@ -99,7 +99,7 @@ public:
 	bool CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability);
 
 	UFUNCTION(BlueprintCallable)
-	void OnBeAttacked(AActor* Instigator, int InDamage, int& OutDamage);
+	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage);
 
 
 

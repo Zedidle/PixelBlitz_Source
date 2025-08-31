@@ -133,8 +133,14 @@ void UTalentComponent::RemoveDefenseSkill(FGameplayTag Tag)
 	}
 }
 
-void UTalentComponent::OnBeAttacked(AActor* DamageMaker, int InDamage, int& OutDamage)
+void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage)
 {
+	if (!Maker)
+	{
+		OutDamage = InDamage;
+		return;
+	}
+	
 	int PreDamage = InDamage;
 	for (int Index = 0; Index < DefenseSkills.Num(); ++Index)
 	{
@@ -142,7 +148,7 @@ void UTalentComponent::OnBeAttacked(AActor* DamageMaker, int InDamage, int& OutD
 		
 		bool stop;
 		int _OutDamage;
-		DefenseSkills[Index]->OnBeAttacked(DamageMaker, PreDamage, _OutDamage, stop);
+		DefenseSkills[Index]->OnBeAttacked(Maker, PreDamage, _OutDamage, stop);
 		PreDamage = _OutDamage;
 		
 		if (stop) break;

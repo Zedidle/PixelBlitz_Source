@@ -299,9 +299,9 @@ bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbilit
 	return TakeEffectAbilityIndexes.Contains(Ability.PreLevelIndex);
 }
 
-void UAbilityComponent::OnBeAttacked(AActor* Instigator, int InDamage, int& OutDamage)
+void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage)
 {
-	if (!CachedASC || !Instigator->Implements<UFight_Interface>())
+	if (!CachedASC || !Maker || !Maker->Implements<UFight_Interface>())
 	{
 		OutDamage = InDamage;
 		return;
@@ -309,7 +309,7 @@ void UAbilityComponent::OnBeAttacked(AActor* Instigator, int InDamage, int& OutD
 
 	int SurDamage = InDamage;
 	
-	HurtInstigator = Instigator;
+	HurtMaker = Maker;
 	
 	// 触发黑荆棘
 	CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn")));
@@ -348,7 +348,7 @@ void UAbilityComponent::CreateQTE()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidgetClass)
 	ArrowLineWidget = CreateWidget<UArrowLineWidget>(GetWorld(), ArrowLineWidgetClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidget)
-	ArrowLineWidget->InitializeData(PXCharacter, HurtInstigator, true, 10,
+	ArrowLineWidget->InitializeData(PXCharacter, HurtMaker, true, 10,
 		600, FLinearColor::White, 1.5, FVector2D(36, 54),
 		FVector2D(64, 64), FVector::Zero());
 	ArrowLineWidget->AddToViewport(100);
@@ -406,10 +406,10 @@ void UAbilityComponent::OnHurtInstigatorDead_Implementation(ABaseEnemy* DeadEnem
 
 void UAbilityComponent::ListHurtInstigatorDead()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtInstigator)
-	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtInstigator);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtMaker)
+	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtMaker);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
-	Enemy->OnEnemyDeath.AddDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
+	Enemy->OnEnemyDie.AddDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
 
 }
 
