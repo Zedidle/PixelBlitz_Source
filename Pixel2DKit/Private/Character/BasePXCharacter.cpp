@@ -28,6 +28,7 @@
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/CameraShakeSettings.h"
 #include "Sound/SoundCue.h"
+#include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/SoundFuncLib.h"
 
@@ -966,10 +967,11 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	// 舞空术成就
 	if (UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
 	{
-		// CompleteAchievement(10);
+		if (UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>())
+		{
+			AchievementSubsystem->CompleteAchievement("10");
+		}
 	}
-
-	
 }
 
 void ABasePXCharacter::SetScale(const float targetValue)

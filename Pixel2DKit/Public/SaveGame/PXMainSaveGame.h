@@ -42,10 +42,10 @@ public:
 	bool PreLevelClearAllMonster;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int LostLife;
+	int DieTimes = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Injured = false;
+	int HurtTimes = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RoundGoldNum;
@@ -59,9 +59,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int TotalPerfectDodgeTimes;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int PlayerBehurtedTimes;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int TotalAttackInDashTimes;
 

@@ -108,7 +108,7 @@ void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 	
-	MainSaveGame->LostLife++;
+	MainSaveGame->DieTimes++;
 	MainSaveGame->SupLife--;
 	
 	End = MainSaveGame->SupLife == -1;
