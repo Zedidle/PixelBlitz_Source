@@ -31,7 +31,8 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 	UPROPERTY(Config, EditAnywhere, Category = "Talent")
 	TSoftObjectPtr<UDataTable> TalentDataPath;
 
-
+	UPROPERTY(Config, EditAnywhere, Category = "Achievement")
+	TSoftObjectPtr<UDataTable> AchievementDataPath;
 
 	
 public:
@@ -48,6 +49,7 @@ public:
 	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetBuffOnWidgetData() const { return GetData(BuffOnWidgetDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetTalentData() const { return GetData(TalentDataPath.ToString()); }
+	TObjectPtr<UDataTable> GetAchievementData() const { return GetData(AchievementDataPath.ToString()); }
 	
 
 	

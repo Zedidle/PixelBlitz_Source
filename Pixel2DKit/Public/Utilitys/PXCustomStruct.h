@@ -56,7 +56,7 @@ enum EWeather : uint8
 
 #pragma region EStyleType
 UENUM(BlueprintType)
-enum EStyleType : uint8
+enum class EStyleType : uint8
 {
 	Normal UMETA(DisplayName = "正常"),
 	Cartoon UMETA(DisplayName = "卡通"),

@@ -36,5 +36,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "UserWidgetSubsystem")
 	void HideWidget(TSubclassOf<UUserWidget> WidgetClass);
+
+
 	
 };

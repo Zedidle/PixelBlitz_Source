@@ -5,6 +5,7 @@
 
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
@@ -161,7 +162,7 @@ UPXMainSaveGame* UPXSaveGameSubsystem::GetMainData()
 
 bool UPXSaveGameSubsystem::Main_HasChoiceAbility()
 {
-    return MainSaveGame->CurLevelChoiceAbility ==  MainSaveGame->CurCharacterName;
+    return MainSaveGame->CurLevelChoiceAbility ==  MainSaveGame->CurLevelName;
 }
 
 void UPXSaveGameSubsystem::Main_TotalInit(TSubclassOf<UPrimaryDataAsset> WeatherType, EStyleType StyleType)
@@ -263,6 +264,7 @@ UPXAchievementsSaveGame* UPXSaveGameSubsystem::GetAchievementsData()
 
 bool UPXSaveGameSubsystem::CompleteAchievement(FName AchievementRowName)
 {
+    CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AchievementsSaveGame, false);
     if (AchievementsSaveGame->CompletedAchievements.Contains(AchievementRowName)) return false;
 
     AchievementsSaveGame->CompletedAchievements.Add(AchievementRowName);

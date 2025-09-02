@@ -8,6 +8,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Buff_Interface.h"
 #include "BasePXCharacter.generated.h"
 
@@ -53,6 +54,9 @@ class UPXASComponent;
 class UHealthComponent;
 class UEnergyComponent;
 class UFightComponent;
+
+class UCameraComponent;
+class USpringArmComponent;
 
 struct FInputActionValue;
 
@@ -118,6 +122,9 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	float FallingStartTime;
 	bool PreFrameFalling = false;
 	bool PreSpriteLeft = false;
+	FVector CameraOffsetForBulletTime;
+	int CurJumpCount = 0;
+	float JumpStartTime;
 
 public:
 
@@ -168,9 +175,7 @@ public:
 	void OnDie_Implementation();
 
 
-protected:
 #pragma region GAS
-public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UPROPERTY()
@@ -184,11 +189,6 @@ public:
 
 #pragma endregion
 	
-	
-
-
-	
-public:
 	ABasePXCharacter(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GAS)
@@ -212,6 +212,12 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UTalentComponent> TalentComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<USpringArmComponent> SpringArm;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UCameraComponent> Camera;
+	
 #pragma region EffectGameplayTags
 	UPROPERTY()
 	FEffectGameplayTags EffectGameplayTags;
@@ -230,7 +236,11 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void Falling() override;
+	virtual void OnJumped_Implementation() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ReadyToStart();
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Fight)
 	int GetWeaponInitDamage();
 
@@ -370,6 +380,9 @@ public:
 	void LoadAbility();
 
 
+	UFUNCTION(BlueprintCallable)
+	void CameraOffset_BulletTime(FVector CameraOffset, float GlobalTimeRate, float SustainTime);
+
 #pragma region Animation
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetDead(const bool V);
@@ -421,6 +434,9 @@ public:
 	virtual void OnDefendingHitEffect_Implementation() override;
 	virtual void OnAnimVulnerableBegin_Implementation() override;
 	virtual void OnAnimVulnerableEnd_Implementation() override;
+	virtual void OnAttackEffect_Implementation() override;
+	virtual void OnAttackEffectBegin_Implementation() override;
+	virtual void OnAttackEffectEnd_Implementation() override;
 	virtual void OnDashEffectBegin_Implementation() override;
 	virtual void OnDashEffectEnd_Implementation() override;
 	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
@@ -428,6 +444,9 @@ public:
 	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnAttackRelease();
 	
 #pragma region IBuff_Interface
 	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;

@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "ISourceControlProvider.h"
+#include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/HealthComponent.h"
@@ -22,8 +23,10 @@
 #include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "GAS/PXASComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
+#include "Settings/CameraShakeSettings.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/SoundFuncLib.h"
@@ -206,7 +209,7 @@ void ABasePXCharacter::Tick_SpriteRotation()
 void ABasePXCharacter::Tick_SpringArmMotivation()
 {
 	if (!GetCharacterMovement()) return;
-	if (!GetComponentByClass<USpringArmComponent>()) return;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
 
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	float d = FVector::DotProduct(GetFaceToCamera(), Velocity.GetSafeNormal());
@@ -214,7 +217,6 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	// 镜头偏转
 	float pitch = FMath::Clamp(d,-0.3, 0.5) * -15 + CurBlendPitch;
 	float yaw = FVector::DotProduct(GetMoveForwardVector(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
-	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
 	if (UPXSaveGameSubsystem* SettingSaveGame = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>())
@@ -264,8 +266,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 void ABasePXCharacter::Tick_CalCameraOffset()
 {
 	if (SurCameraOffset.Size() < 0.01) return;
-	USpringArmComponent* SpringArm = GetComponentByClass<USpringArmComponent>();
-	if (!IsValid(SpringArm)) return;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
 	
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
@@ -303,7 +304,10 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
-
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm);
+	
 	// ASC 初始化
 }
 
@@ -381,6 +385,30 @@ void ABasePXCharacter::Falling()
 	SetFalling(true);
 }
 
+void ABasePXCharacter::OnJumped_Implementation()
+{
+	if (CurJumpCount == 1)
+	{
+		JumpStartTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+	}
+}
+
+void ABasePXCharacter::ReadyToStart_Implementation()
+{
+	if (TalentComponent)
+	{
+		TalentComponent->LoadTalents();
+	}
+	if (AbilityComponent)
+	{
+		AbilityComponent->LoadAbility();
+	}
+	if (BuffComponent)
+	{
+		BuffComponent->SetBuffStateWidgetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+}
+
 int ABasePXCharacter::GetWeaponInitDamage_Implementation()
 {
 	FGameplayTag AttackDamagePlusTag = FGameplayTag::RequestGameplayTag("AbilitySet.SwordPlay.AttackDamagePlus");
@@ -433,6 +461,38 @@ bool ABasePXCharacter::GetIsAttacking()
 bool ABasePXCharacter::GetIsDefending()
 {
 	return false;
+}
+
+void ABasePXCharacter::CameraOffset_BulletTime(FVector CameraOffset, float GlobalTimeRate, float SustainTime)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Camera);
+	FVector TempOffset;
+	if (CameraOffset.IsZero())
+	{
+		TempOffset = 0.2 * (GetActorLocation() - Camera->GetComponentLocation());
+	}
+	else
+	{
+		TempOffset = CameraOffset;
+	}
+	AddCameraOffset(TempOffset);
+	CameraOffsetForBulletTime += TempOffset;
+	
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		  TimerHandle,
+		  [this, TempOffset]
+		  {
+		  	if (this)
+		  	{
+		  		AddCameraOffset(-TempOffset);
+		  		CameraOffsetForBulletTime -= TempOffset;
+		  	}
+		  },
+		  SustainTime, // 延迟2秒
+		  false // 不循环
+	  );
 }
 
 void ABasePXCharacter::SetDead(bool V)
@@ -709,12 +769,35 @@ void ABasePXCharacter::OnDefendingHitEffect_Implementation()
 
 void ABasePXCharacter::OnAnimVulnerableBegin_Implementation()
 {
-	IFight_Interface::OnAnimVulnerableBegin_Implementation();
+	if (HealthComponent)
+	{
+		HealthComponent->SetInvulnerable(true);
+	}
 }
 
 void ABasePXCharacter::OnAnimVulnerableEnd_Implementation()
 {
-	IFight_Interface::OnAnimVulnerableEnd_Implementation();
+	if (HealthComponent)
+	{
+		HealthComponent->SetInvulnerable(false);
+	}
+}
+
+void ABasePXCharacter::OnAttackEffect_Implementation()
+{
+	IFight_Interface::OnAttackEffect_Implementation();
+}
+
+void ABasePXCharacter::OnAttackEffectBegin_Implementation()
+{
+	bInAttackEffect = true;
+	bAttackStartup = false;
+	Execute_OnAttackEffect(this);
+}
+
+void ABasePXCharacter::OnAttackEffectEnd_Implementation()
+{
+	bInAttackEffect = false;
 }
 
 void ABasePXCharacter::OnDashEffectBegin_Implementation()
@@ -747,6 +830,11 @@ bool ABasePXCharacter::FindEffectGameplayTag_Implementation(const FGameplayTag T
 APawn* ABasePXCharacter::GetPawn_Implementation()
 {
 	return this;
+}
+
+void ABasePXCharacter::OnAttackRelease_Implementation()
+{
+	SetAttackHolding(false);
 }
 
 
@@ -862,6 +950,26 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	SetLanding(true);
 	SetJumping(false);
 	SetFalling(false);
+	CurJumpCount = 0;
+	if (const UCameraShakeSettings* CameraShakeSettings = GetDefault<UCameraShakeSettings>())
+	{
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
+	}
+	if (bDead)
+	{
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->DisableMovement();
+		}
+	}
+
+	// 舞空术成就
+	if (UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
+	{
+		// CompleteAchievement(10);
+	}
+
+	
 }
 
 void ABasePXCharacter::SetScale(const float targetValue)

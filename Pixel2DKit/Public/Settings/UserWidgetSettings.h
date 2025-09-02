@@ -7,9 +7,8 @@
 #include "UserWidget/UWBaseFloatingText.h"
 #include "UserWidgetSettings.generated.h"
 
-/**
- * 
- */
+class UAchievementCompleteWidget;
+
 UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "UserWidget Settings"))
 class PIXEL2DKIT_API UUserWidgetSettings : public UDeveloperSettings
 {
@@ -24,5 +23,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
 	TSubclassOf<UUserWidget> CenterWordTip;
 	
-	
+	UPROPERTY(Config, EditAnywhere, Category = "Achievement | UserWidget")
+	TSubclassOf<UAchievementCompleteWidget> AchievementCompleteWidgetClass;
 };

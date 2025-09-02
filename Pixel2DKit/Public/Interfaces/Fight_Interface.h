@@ -86,6 +86,8 @@ public:
     void OnDefendEffectEnd();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAttackEffect();
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnAttackEffectBegin();
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnAttackEffectEnd();
