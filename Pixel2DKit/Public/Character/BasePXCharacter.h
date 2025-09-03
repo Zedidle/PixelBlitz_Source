@@ -127,6 +127,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	float JumpStartTime;
 
 	FTimerHandle TimerHandle_OutOfControl;
+	int PerfectDodgeTimes = 0;
 
 public:
 
@@ -388,7 +389,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-	void CameraOffset_BulletTime(FVector CameraOffset, float GlobalTimeRate, float SustainTime);
+	void CameraOffset_BulletTime(float SustainTime, FVector CameraOffset = FVector(0), float GlobalTimeRate = 0.0f);
 
 	UFUNCTION(BlueprintCallable)
 	void OutOfControl(float SustainTime);

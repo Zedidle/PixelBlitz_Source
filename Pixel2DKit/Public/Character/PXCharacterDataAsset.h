@@ -22,6 +22,13 @@ public:
 	TSoftObjectPtr<USoundCue> LandedSound;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSoftObjectPtr<USoundCue> JumpSoundOnGround;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSoftObjectPtr<USoundCue> JumpSoundInAir;
+
+	
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FCharacterAttribute CharacterAttribute;
 	
 };

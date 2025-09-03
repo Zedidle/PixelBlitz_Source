@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "ISourceControlProvider.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
@@ -27,9 +28,11 @@
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/CameraShakeSettings.h"
+#include "Settings/CustomResourceSettings.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/SoundFuncLib.h"
 
 
@@ -392,6 +395,24 @@ void ABasePXCharacter::OnJumped_Implementation()
 	{
 		JumpStartTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	}
+	if (GetCharacterMovement())
+	{
+		
+		if (GetCharacterMovement()->IsWalking())
+		{
+			if (USoundCue* SC = DataAsset->JumpSoundOnGround.LoadSynchronous())
+			{
+				USoundFuncLib::PlaySoundAtLocation(SC, GetActorLocation());
+			}
+		}
+		else
+		{
+			if (USoundCue* SC = DataAsset->JumpSoundInAir.LoadSynchronous())
+			{
+				USoundFuncLib::PlaySoundAtLocation(SC, GetActorLocation());
+			}
+		}
+	}
 }
 
 void ABasePXCharacter::ReadyToStart_Implementation()
@@ -464,7 +485,8 @@ bool ABasePXCharacter::GetIsDefending()
 	return false;
 }
 
-void ABasePXCharacter::CameraOffset_BulletTime(FVector CameraOffset, float GlobalTimeRate, float SustainTime)
+
+void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector CameraOffset, float GlobalTimeRate)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Camera);
 	FVector TempOffset;
@@ -485,11 +507,11 @@ void ABasePXCharacter::CameraOffset_BulletTime(FVector CameraOffset, float Globa
 		  TimerHandle,
 		  [this, TempOffset]
 		  {
-		  	if (this)
-		  	{
-		  		AddCameraOffset(-TempOffset);
-		  		CameraOffsetForBulletTime -= TempOffset;
-		  	}
+			  if (this)
+			  {
+				  AddCameraOffset(-TempOffset);
+				  CameraOffsetForBulletTime -= TempOffset;
+			  }
 		  },
 		  SustainTime, // 延迟2秒
 		  false // 不循环
@@ -721,13 +743,60 @@ void ABasePXCharacter::OnAttackHiting_Implementation()
 
 void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
-	
-	
+	const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
+	if (ResourceSettings && ResourceSettings->NS_HitSmoke)
+	{
+		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			ResourceSettings->NS_SpeedUP.LoadSynchronous(),
+			GetRootComponent(),
+			FName(""),
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::Type::KeepRelativeOffset,
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+		NiagaraComponent->SetVariableFloat(FName("Power"), Power);
+		bRepulsion = true;
+		OutOfControl(Power/1000);
+		
+		if (GetWorld())
+		{
+			TWeakObjectPtr<ABasePXCharacter> WeakThis = this;
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [WeakThis]
+			{
+				if (WeakThis.IsValid())
+				{
+					ABasePXCharacter* PxCharacter = WeakThis.Get();
+					PxCharacter->bRepulsion = false;
+					UCommonFuncLib::SpawnFloatingTextDefault("Buff/BuffEffectText", "Buff_DeStun",
+					PxCharacter->GetActorLocation(),
+					FLinearColor(0.68, 0.35, 1.0f, 1.0f),
+						FVector2D(0.8,0.8)
+					);
+				}
+				
+			}, Power/1000, false);
+		}
+	}
 }
 
 void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 {
-	IFight_Interface::OnBeAttacked_Invulnerable_Implementation();
+	if (bDashing)
+	{
+		PerfectDodgeTimes++;
+		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+		{
+			ASC->TryActivateAbilitiesByTag(
+				FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.PerfectDodge"))
+			);			
+		}
+		CameraOffset_BulletTime(0.03f);
+	}
 }
 
 void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage)
@@ -955,7 +1024,11 @@ void ABasePXCharacter::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf
 
 float ABasePXCharacter::GetShortSightResistancePercent_Implementation()
 {
-	return IBuff_Interface::GetShortSightResistancePercent_Implementation();
+	float Result = 0.0f;
+
+	// 近视抵抗天赋
+	
+	return Result;
 }
 
 float ABasePXCharacter::GetSlowDownResistancePercent_Implementation()
