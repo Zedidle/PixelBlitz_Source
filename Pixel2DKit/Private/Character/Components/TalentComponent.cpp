@@ -423,7 +423,7 @@ void UTalentComponent::OnBuffCalDamage()
 	
 }
 
-void UTalentComponent::OnPlayerDash()
+void UTalentComponent::OnDashEnd()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;

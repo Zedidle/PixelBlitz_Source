@@ -30,10 +30,21 @@ public:
 	TSoftObjectPtr<USoundAttenuation> Attenuation_Default;
 
 
-	UPROPERTY(Config, EditAnywhere, Category = "Ability Niagara")
+	UPROPERTY(Config, EditAnywhere, Category = "Ability | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_Mobiliarbus;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Common Niagara")
+	UPROPERTY(Config, EditAnywhere, Category = "Common | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_HitSmoke;
 
+
+
+
+
+	UPROPERTY(Config, EditAnywhere, Category = "Buff | Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_SpeedUP;
+
+
+
+
+	
 };

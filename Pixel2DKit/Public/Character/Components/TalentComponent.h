@@ -80,7 +80,7 @@ public:
 	void OnBuffCalDamage();
 
 	UFUNCTION(BlueprintCallable)
-	void OnPlayerDash();
+	void OnDashEnd();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetAttackDamagePlus();

@@ -496,6 +496,30 @@ void ABasePXCharacter::CameraOffset_BulletTime(FVector CameraOffset, float Globa
 	  );
 }
 
+void ABasePXCharacter::OutOfControl(float SustainTime)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = 0;
+	}
+
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	if (TimerHandle_OutOfControl.IsValid())
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle_OutOfControl);
+	}
+	TWeakObjectPtr<ABasePXCharacter> WeakThis(this); // 创建弱引用
+	World->GetTimerManager().SetTimer(TimerHandle_OutOfControl,[WeakThis]
+	{
+		if (AActor* Actor = WeakThis.Get())
+		{
+			IBuff_Interface::Execute_BuffUpdate_Speed(Actor);
+		}
+	}, SustainTime, false);
+}
+
 void ABasePXCharacter::SetDead(bool V)
 {
 	bDead = V;
@@ -804,12 +828,19 @@ void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 
 void ABasePXCharacter::OnDashEffectBegin_Implementation()
 {
-	IFight_Interface::OnDashEffectBegin_Implementation();
+	InDashEffect = true;
 }
 
 void ABasePXCharacter::OnDashEffectEnd_Implementation()
 {
-	IFight_Interface::OnDashEffectEnd_Implementation();
+	InDashEffect = false;
+	bInAttackStatus = false;
+	bInAttackEffect = false;
+
+	if (TalentComponent)
+	{
+		TalentComponent->OnDashEnd();
+	}
 }
 
 UAbilityComponent* ABasePXCharacter::GetAbilityComponent_Implementation()
@@ -889,7 +920,18 @@ void ABasePXCharacter::BuffUpdate_Sight_Implementation()
 
 int32 ABasePXCharacter::Buff_CalDamage_Implementation(int32 InDamage)
 {
-	return IBuff_Interface::Buff_CalDamage_Implementation(InDamage);
+	int LocalDamage = 0;
+	if (TalentComponent)
+	{
+		TalentComponent->OnBuffCalDamage();
+		LocalDamage += TalentComponent->GetAttackDamagePlus();
+	}
+	if (BuffComponent)
+	{
+		LocalDamage += InDamage * (BuffComponent->EffectedPercent_Attack + 1);
+		LocalDamage += BuffComponent->EffectedValue_Attack;
+	}
+	return LocalDamage;
 }
 
 void ABasePXCharacter::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,

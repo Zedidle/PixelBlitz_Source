@@ -8,6 +8,7 @@
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "GameplayEffect.h"
+#include "NiagaraComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
 #include "BuffComponent.generated.h"
@@ -32,6 +33,8 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent, public IBuff_Inter
 	UPROPERTY()
 	TMap<FGameplayTag, FBuffOnWidget> Tag2BuffOnWidgetData;
 
+	UPROPERTY()
+	TMap<FGameplayTag, UNiagaraComponent*> Tag2Niagara;
 	
 public:	
 	// Sets default values for this component's properties
@@ -62,7 +65,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float EffectedPercent_Sight;
 
-	
+	FTimerHandle TimerHandle_CheckBuffEnd;
+	UFUNCTION()
+	void CheckBuffEnd();
 	
 	
 	
@@ -70,10 +75,14 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay();
+	
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool BuffExist(FGameplayTag Tag) const;
 
@@ -137,5 +146,11 @@ inline void UBuffComponent::RemoveBuff_EffectAll(FGameplayTag Tag)
 	RemoveBuff_Attack(Tag);
 	RemoveBuff_Sight(Tag);
 	RemoveBuff_Speed(Tag);
+	
+	if (Tag2Niagara.Contains(Tag))
+	{
+		Tag2Niagara[Tag]->DestroyComponent();
+		Tag2Niagara.Remove(Tag);
+	}
 }
 

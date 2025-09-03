@@ -126,6 +126,8 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	int CurJumpCount = 0;
 	float JumpStartTime;
 
+	FTimerHandle TimerHandle_OutOfControl;
+
 public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
@@ -256,7 +258,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicJumpZ_Velocity = 250.0f;
 
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float BasicDashSpeed = 400.0f;
 	
 	
@@ -319,6 +321,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDashing;
 
+	// 冲刺生效期间
+	UPROPERTY(BlueprintReadWrite, Category = Animation)
+	bool InDashEffect;
 	
 	// 用于管理攻击冷却, 目前暂无用于动画控制
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
@@ -332,6 +337,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackEffect;
 
+
+	
 	// 仅仅用于控制攻击动画开关
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackAnimToggle;  
@@ -383,6 +390,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CameraOffset_BulletTime(FVector CameraOffset, float GlobalTimeRate, float SustainTime);
 
+	UFUNCTION(BlueprintCallable)
+	void OutOfControl(float SustainTime);
+
+	
 #pragma region Animation
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetDead(const bool V);

@@ -6,10 +6,13 @@
 #include "AbilitySystemComponent.h"
 #include "GameplayTagsManager.h"
 #include "NiagaraCommon.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/BasePXCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/CustomResourceSettings.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 
@@ -50,6 +53,36 @@ void UBuffComponent::InitData()
 }
 
 
+void UBuffComponent::CheckBuffEnd()
+{
+	float CurTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+	for (auto& ele : Tag2BuffEndTime_Attack)
+	{
+		if (CurTime > ele.Value)
+		{
+			RemoveBuff_EffectAll(ele.Key);
+			BuffUpdate_Attack();
+		}
+	}
+	for (auto& ele : Tag2BuffEndTime_Speed)
+	{
+		if (CurTime > ele.Value)
+		{
+			RemoveBuff_EffectAll(ele.Key);
+			BuffUpdate_Speed();
+		}
+	}
+	for (auto& ele : Tag2BuffEndTime_Sight)
+	{
+		if (CurTime > ele.Value)
+		{
+			RemoveBuff_EffectAll(ele.Key);
+			BuffUpdate_Sight();
+		}
+	}
+
+}
+
 // Called when the game starts
 void UBuffComponent::BeginPlay()
 {
@@ -74,6 +107,26 @@ void UBuffComponent::BeginPlay()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilitySystemComponent);
 	AbilitySystemComponent->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
 	AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
+
+
+	
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle_CheckBuffEnd,
+		this, &UBuffComponent::CheckBuffEnd,0.1, true);
+	}
+
+}
+
+void UBuffComponent::EndPlay()
+{
+	if (TimerHandle_CheckBuffEnd.IsValid())
+	{
+		if (GetWorld())
+		{
+			GetWorld()->GetTimerManager().ClearTimer(TimerHandle_CheckBuffEnd);
+		}
+	}
 }
 
 
@@ -107,6 +160,8 @@ void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
 	{
 		Execute_BuffUpdate_Speed(Owner);
 	}
+
+
 }
 
 void UBuffComponent::RemoveBuff_Sight(FGameplayTag Tag)
@@ -189,7 +244,7 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);
 
 	RemoveBuff_Speed(Tag);
-
+	
 	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (!Owner->Implements<UBuff_Interface>()) return;
@@ -215,7 +270,7 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	Tag2BuffEffect_Speed.Add(Tag, FBuffValueEffect(Percent, Value));
 	
 	Execute_BuffUpdate_Speed(Owner);
-
+	
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
 	{
@@ -230,6 +285,34 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SpeedUp")),
 				Location + FVector(-30, 0, 20),
 				FLinearColor::White);
+	}
+
+
+	if (Tag2Niagara.Contains(Tag))
+	{
+		Tag2Niagara[Tag]->DestroyComponent();
+		Tag2Niagara.Remove(Tag);
+	}
+	
+	if (Percent > 0 && Value > 0)
+	{
+		const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
+		if (ResourceSettings && ResourceSettings->NS_SpeedUP.LoadSynchronous())
+		{
+			UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+				ResourceSettings->NS_SpeedUP.LoadSynchronous(),
+				Owner->GetRootComponent(),
+				FName(""),
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::Type::KeepRelativeOffset,
+				false,
+				true,
+				ENCPoolMethod::None,
+				true
+			);
+			Tag2Niagara.Add(Tag, NiagaraComponent);
+		}
 	}
 }
 
@@ -357,6 +440,7 @@ void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
 		}
 
 		RemoveBuff_EffectAll(Tag);
+		
 	}
 	else
 	{
