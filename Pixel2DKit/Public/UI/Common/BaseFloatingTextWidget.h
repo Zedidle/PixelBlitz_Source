@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "PaperSprite.h"
-#include "UWBaseFloatingText.generated.h"
+#include "BaseFloatingTextWidget.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable, BlueprintType)
-class PIXEL2DKIT_API UUWBaseFloatingText : public UUserWidget
+class PIXEL2DKIT_API UBaseFloatingTextWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -36,5 +36,4 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "FloatingText")
 	void Init(const FText& InText, FLinearColor Color, UPaperSprite* InSpriteToDisplay, FVector InitLocation = FVector::ZeroVector);
-	virtual void Init_Implementation(const FText& InText, FLinearColor Color, UPaperSprite* InSpriteToDisplay, FVector InitLocation = FVector::ZeroVector);
 };

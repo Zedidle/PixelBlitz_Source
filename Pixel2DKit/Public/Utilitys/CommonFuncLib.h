@@ -7,6 +7,8 @@
 #include "CommonFuncLib.generated.h"
 
 
+struct FLocalizedTableData;
+
 UENUM(BlueprintType)
 enum class EFloatingTextType : uint8
 {
@@ -18,9 +20,13 @@ enum class EFloatingTextType : uint8
 	Experience
 };
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EFloatingTextAnimType : uint8
+{
+	Shaking UMETA(DisplayName = "抖动"),
+	Floatup UMETA(DisplayName = "浮动"),
+};
+
 UCLASS(Abstract, MinimalAPI)
 class UCommonFuncLib : public UObject
 {
@@ -44,5 +50,21 @@ public:
 	static void SpawnFloatingTextLocalized(FLocalizedTableData LocalizedTableData, FVector WorldLocation,
 		FLinearColor TextColor = FLinearColor::White, FVector2D RenderScale = FVector2D(1,1), UPaperSprite* Icon = nullptr);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Time")
+	static float DealDeltaTime(float Seconds);
+
+	UFUNCTION(BlueprintCallable, Category="Common | UserWidget")
+	static void SpawnCenterTip(FText Tip, FLinearColor Color, FVector2D Translation = FVector2D(0,0),
+		FVector2D Scale = FVector2D(1.0f, 1.0f), float PlaybackSpeed = 1.0f, EFloatingTextAnimType AnimType = EFloatingTextAnimType::Shaking);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")
+	static FKey GetActionKey(UInputAction* IA);
+
+
 	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")
+	static bool IsGamePadControlling();
+
+	UFUNCTION(BlueprintCallable, Category="Common | Input")
+	static void SetGamePadControlling(bool On);
 };

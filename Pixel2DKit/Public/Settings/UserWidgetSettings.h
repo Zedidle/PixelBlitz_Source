@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "UserWidget/UWBaseFloatingText.h"
+#include "UI/Common/BaseFloatingTextWidget.h"
 #include "UserWidgetSettings.generated.h"
 
 class UAchievementCompleteWidget;
@@ -18,10 +18,10 @@ class PIXEL2DKIT_API UUserWidgetSettings : public UDeveloperSettings
 public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
-	TSubclassOf<UUWBaseFloatingText> FloatingText_Default;
+	TSubclassOf<UBaseFloatingTextWidget> FloatingTextDefaultClass;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
-	TSubclassOf<UUserWidget> CenterWordTip;
+	TSubclassOf<UUserWidget> CenterWordTipClass;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Achievement | UserWidget")
 	TSubclassOf<UAchievementCompleteWidget> AchievementCompleteWidgetClass;

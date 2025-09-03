@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UserWidget/UWBaseFloatingText.h"
+#include "UI/Common/BaseFloatingTextWidget.h"
 #include "PaperSprite.h"
 
 
 
 
-void UUWBaseFloatingText::Init_Implementation(const FText& InText, FLinearColor Color, UPaperSprite* InSpriteToDisplay,
+void UBaseFloatingTextWidget::Init_Implementation(const FText& InText, FLinearColor Color, UPaperSprite* InSpriteToDisplay,
 	FVector InitLocation)
 {
 	Text = InText;

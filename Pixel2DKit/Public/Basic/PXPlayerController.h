@@ -7,9 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "PXPlayerController.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class PIXEL2DKIT_API APXPlayerController : public APlayerController
 {
@@ -22,9 +20,14 @@ class PIXEL2DKIT_API APXPlayerController : public APlayerController
 	bool Pausing = false;
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess))
 	bool PausingToStartCounting = false;
+
+
 	
 public:
-
+	// 是否处于手柄控制
+	UPROPERTY(BlueprintReadOnly)
+	bool GamePadControlling = false;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Input)
 	TSoftObjectPtr<UInputMappingContext> IMC_GamePad;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Input)
@@ -35,4 +38,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Game)
 	void OnCharacterControl(bool On);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Game)
+	UInputMappingContext* GetCurrentIMC();
 };

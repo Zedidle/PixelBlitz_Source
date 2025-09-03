@@ -36,3 +36,15 @@ void APXPlayerController::OnCharacterControl(bool On)
 		Subsystem->RemoveMappingContext(IMC_KeyBoard.LoadSynchronous());
 	}
 }
+
+UInputMappingContext* APXPlayerController::GetCurrentIMC()
+{
+	if (GamePadControlling)
+	{
+		return IMC_GamePad.LoadSynchronous();
+	}
+	else
+	{
+		return IMC_KeyBoard.LoadSynchronous();
+	}
+}

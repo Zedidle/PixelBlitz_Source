@@ -32,5 +32,8 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Ability Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_Mobiliarbus;
-	
+
+	UPROPERTY(Config, EditAnywhere, Category = "Common Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_HitSmoke;
+
 };

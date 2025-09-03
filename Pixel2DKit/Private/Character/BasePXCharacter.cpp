@@ -697,7 +697,8 @@ void ABasePXCharacter::OnAttackHiting_Implementation()
 
 void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
-	IFight_Interface::PowerRepulsion_Implementation(Power);
+	
+	
 }
 
 void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
