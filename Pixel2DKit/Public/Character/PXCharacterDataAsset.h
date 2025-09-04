@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "UI/Player/BasePlayerStatusWidget.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "PXCharacterDataAsset.generated.h"
 
@@ -26,9 +27,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<USoundCue> JumpSoundInAir;
-
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FCharacterAttribute CharacterAttribute;
-	
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSubclassOf<UBasePlayerStatusWidget> PlayerStatusWidgetClass;
 };

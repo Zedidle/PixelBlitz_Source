@@ -50,8 +50,8 @@ private:
 	
 public:
 	UPROPERTY(BlueprintAssignable, Category = "AttributeSet|Prop")
-	FOnPixelAttributeChangeDelegate OnPXAttributeChange;
-
+	mutable FOnPixelAttributeChangeDelegate OnPXAttributeChange;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", ReplicatedUsing = OnRep_HP)
 	FGameplayAttributeData HP;
 	ATTRIBUTE_ACCESSORS(UPXAttributeSet, HP);

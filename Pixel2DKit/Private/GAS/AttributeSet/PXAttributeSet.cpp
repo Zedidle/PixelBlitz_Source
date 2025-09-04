@@ -109,7 +109,6 @@ void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, f
 	// }
 	
 	OnPXAttributeChange.Broadcast(Attribute, OldValue, NewValue);
-	
 }
 
 bool UPXAttributeSet::GetAttrCurrentValueByName(FName AttrName, float& OutValue)

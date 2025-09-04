@@ -10,6 +10,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Buff_Interface.h"
+#include "UI/Player/BasePlayerStatusWidget.h"
 #include "BasePXCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
@@ -125,10 +126,13 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	FVector CameraOffsetForBulletTime;
 	int CurJumpCount = 0;
 	float JumpStartTime;
-
-	FTimerHandle TimerHandle_OutOfControl;
+	
 	int PerfectDodgeTimes = 0;
+	bool bViewYawChangingByPlayerControl = false;
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UBasePlayerStatusWidget* PlayerStatusWidget;
+	
 public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
@@ -366,8 +370,13 @@ public:
 	void SetBlendYaw(float V);
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddBlendYaw(float V);
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = View)
+	UFUNCTION(BlueprintCallable, Category = View)
 	void AddViewYaw(float V, bool bPlayerControl);
+	UFUNCTION(BlueprintCallable, Category = View)
+	void SetViewPitch(float V);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Game)
+	void PreReadyToStart();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Movement)
 	float GetFallingTime();

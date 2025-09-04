@@ -7,6 +7,8 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "CenterWordTipWidget.generated.h"
 
+class UTextBlock;
+class UWidgetAnimation;
 
 UCLASS(Blueprintable, BlueprintType)
 class PIXEL2DKIT_API UCenterWordTipWidget : public UUserWidget

@@ -26,6 +26,24 @@ void UTimerSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+void UTimerSubsystem::SetDelay(TFunction<void()>&& Callback, float DelayDuration)
+{
+	UWorld* World = GetWorld();
+	if (!World) return;
+	
+	FTimerDelegate Delegate;
+	Delegate.BindLambda(
+		[this, Callback = MoveTemp(Callback)]() mutable
+		{
+			// 先移除记录
+			Callback();
+		}
+	);
+	FTimerHandle Handle;
+	World->GetTimerManager().SetTimer(Handle, Delegate, DelayDuration, false);
+}
+
+
 void UTimerSubsystem::SetRetriggerableDelay(FName TimerName, TFunction<void()>&& Callback, float DelayDuration)
 {
 	UWorld* World = GetWorld();
@@ -75,4 +93,17 @@ bool UTimerSubsystem::IsDelayActive(FName TimerName) const
 		return World && World->GetTimerManager().IsTimerActive(*Handle);
 	}
 	return false;
+}
+
+float UTimerSubsystem::GetRemainingTime(FName TimerName) const
+{
+	if (const FTimerHandle* Handle = ActiveTimers.Find(TimerName))
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			return World->GetTimerManager().GetTimerRemaining(*Handle);
+		}
+	}
+	return -1.0f;
 }

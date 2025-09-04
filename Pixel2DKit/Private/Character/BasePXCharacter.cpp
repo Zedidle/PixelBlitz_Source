@@ -32,6 +32,7 @@
 #include "Sound/SoundCue.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/SoundFuncLib.h"
 
@@ -502,20 +503,16 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	CameraOffsetForBulletTime += TempOffset;
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(
-		  TimerHandle,
-		  [this, TempOffset]
-		  {
-			  if (this)
-			  {
-				  AddCameraOffset(-TempOffset);
-				  CameraOffsetForBulletTime -= TempOffset;
-			  }
-		  },
-		  SustainTime, // 延迟2秒
-		  false // 不循环
-	  );
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), 
+	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this), TempOffset]
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->AddCameraOffset(-TempOffset);
+				WeakThis->CameraOffsetForBulletTime -= TempOffset;
+			}
+		}, SustainTime
+	);
 }
 
 void ABasePXCharacter::OutOfControl(float SustainTime)
@@ -528,18 +525,14 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
-	if (TimerHandle_OutOfControl.IsValid())
-	{
-		World->GetTimerManager().ClearTimer(TimerHandle_OutOfControl);
-	}
-	TWeakObjectPtr<ABasePXCharacter> WeakThis(this); // 创建弱引用
-	World->GetTimerManager().SetTimer(TimerHandle_OutOfControl,[WeakThis]
-	{
-		if (AActor* Actor = WeakThis.Get())
-		{
-			IBuff_Interface::Execute_BuffUpdate_Speed(Actor);
-		}
-	}, SustainTime, false);
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "OutOfControl",
+		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]{
+			if (WeakThis.IsValid())
+			{
+				IBuff_Interface::Execute_BuffUpdate_Speed(WeakThis.Get());
+			}
+		}, SustainTime
+	);
 }
 
 void ABasePXCharacter::SetDead(bool V)
@@ -554,13 +547,15 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
 	
 	if (!bHurt) return;
-	
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-[this]{
-			SetHurt(false,0);
-	});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, duration, false);
+
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->SetHurt(false, 0);
+			}
+		}, duration);
 }
 
 void ABasePXCharacter::SetJumping(bool V, const float time)
@@ -649,8 +644,70 @@ void ABasePXCharacter::EndNormalAttack()
 }
 
 
-void ABasePXCharacter::AddViewYaw_Implementation(float V, bool bPlayerControl)
+void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 {
+	if (bPlayerControl)
+	{
+		bViewYawChangingByPlayerControl = true;
+		AddBlendYaw(UCommonFuncLib::DealDeltaTime(V) * 1.6);	
+		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "AddViewYaw",
+			[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+			{
+				if (WeakThis.IsValid())
+				{
+					WeakThis->bViewYawChangingByPlayerControl = false;
+				}
+			}, 0.5);
+	}
+	else
+	{
+		if (!bViewYawChangingByPlayerControl)
+		{
+			AddBlendYaw(UCommonFuncLib::DealDeltaTime(V) * 1.6);	
+		}
+	}
+}
+
+void ABasePXCharacter::SetViewPitch(float V)
+{
+	float Pitch = FMath::Clamp(UCommonFuncLib::DealDeltaTime(V) * 1.6 + CurBlendPitch, -50, 20);
+	SetBlendPitch(Pitch);
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "SetViewPitch",
+	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this), Pitch]
+	{
+		if (WeakThis.IsValid())
+		{
+			UPXSaveGameSubsystem* SaveGameSubsystem = WeakThis->GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+
+			UPXSettingSaveGame* SettingSaveGame = SaveGameSubsystem->GetSettingData();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingSaveGame);
+
+			SettingSaveGame->GameSetting_ViewPitch = Pitch;
+			SaveGameSubsystem->SaveSettingData();
+		}
+	}, 0.5);
+}
+
+void ABasePXCharacter::PreReadyToStart_Implementation()
+{
+	if (PlayerStatusWidget)
+	{
+		PlayerStatusWidget->RefreshLife();
+	}
+	else
+	{
+		UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);
+		
+		const UPXAttributeSet* PXAttributeSet = ASC->GetSet<UPXAttributeSet>();
+		PlayerStatusWidget = CreateWidget<UBasePlayerStatusWidget>(GetWorld(), DataAsset->PlayerStatusWidgetClass);
+		if (PlayerStatusWidget)
+		{
+			PlayerStatusWidget->Init(PXAttributeSet);
+			PlayerStatusWidget->AddToViewport();
+		}
+	}
 }
 
 float ABasePXCharacter::GetFallingTime()
@@ -984,7 +1041,14 @@ void ABasePXCharacter::BuffEffect_Sight_Implementation(FGameplayTag Tag, float P
 
 void ABasePXCharacter::BuffUpdate_Sight_Implementation()
 {
-	IBuff_Interface::BuffUpdate_Sight_Implementation();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent)
+	CurSpringArmLength = BasicSpringArmLength * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight;
+
+	if (PlayerStatusWidget)
+	{
+		PlayerStatusWidget->UpdateDark(CurSpringArmLength / BasicSpringArmLength);
+	}
+
 }
 
 int32 ABasePXCharacter::Buff_CalDamage_Implementation(int32 InDamage)

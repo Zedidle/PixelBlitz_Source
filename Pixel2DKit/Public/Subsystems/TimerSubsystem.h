@@ -42,6 +42,20 @@ public:
 	virtual void Deinitialize() override;
 
 
+	void SetDelay(TFunction<void()>&& Callback, float DelayDuration);
+	
+	template<typename T>
+	void SetDelay(T* Object, FTimerDelegate::TMethodPtr<T> Function, float DelayDuration)
+	{
+		TWeakObjectPtr<T> WeakObject(Object);
+		SetDelay([WeakObject, Function = MoveTemp(Function)]() mutable
+		{
+			if (T* Obj = WeakObject.Get())
+			{
+				(Obj->*Function)();
+			}
+		}, DelayDuration);
+	}
 
 
 
@@ -51,20 +65,11 @@ public:
 	 * @param Callback 延迟结束后调用的函数
 	 * @param DelayDuration 延迟时间（秒）
 	 */
-	void SetRetriggerableDelay(
-		FName TimerName,
-		TFunction<void()>&& Callback,
-		float DelayDuration
-	);
+	void SetRetriggerableDelay(FName TimerName, TFunction<void()>&& Callback, float DelayDuration);
 
 	
 	template<typename T>
-	void SetRetriggerableDelay(
-		FName TimerName,
-		T* Object,
-		void (T::*Function)(),
-		float DelayDuration
-	)
+	void SetRetriggerableDelay(FName TimerName,T* Object, FTimerDelegate::TMethodPtr<T> Function, float DelayDuration)
 	{
 		TWeakObjectPtr<T> WeakObject(Object);
 		SetRetriggerableDelay( TimerName,
@@ -112,5 +117,8 @@ public:
 	 */
 	bool IsDelayActive(FName TimerName) const;
 
-
+	float GetRemainingTime(FName TimerName) const;
 };
+
+
+
