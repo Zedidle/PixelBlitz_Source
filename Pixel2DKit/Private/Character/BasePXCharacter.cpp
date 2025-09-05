@@ -24,6 +24,7 @@
 #include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "GAS/PXASComponent.h"
+#include "Input/PXInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PlayerState/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
@@ -37,6 +38,7 @@
 #include "Utilitys/SoundFuncLib.h"
 
 
+class UPXInputComponent;
 class UDataTableSubsystem;
 
 void ABasePXCharacter::LoadData()
@@ -310,6 +312,7 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->bDoCollisionTest = false;
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 	
@@ -510,6 +513,7 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 			{
 				WeakThis->AddCameraOffset(-TempOffset);
 				WeakThis->CameraOffsetForBulletTime -= TempOffset;
+				UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
 			}
 		}, SustainTime
 	);
@@ -1175,56 +1179,29 @@ void ABasePXCharacter::SetScale(const float targetValue)
 void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	UPXInputComponent* EnhancedInput = Cast<UPXInputComponent>(PlayerInputComponent);
 	if (!EnhancedInput) return;
-	if (Action_MoveBack)
+	if (DataAsset)
 	{
-		EnhancedInput->BindAction(
-			Action_MoveBack,
-			ETriggerEvent::Triggered,
-			this,
-			&ABasePXCharacter::MoveY
-		);
-	}
-	
-	if (Action_MoveFront)
-	{
-		EnhancedInput->BindAction(
-			Action_MoveFront,
-			ETriggerEvent::Triggered,
-			this,
-			&ABasePXCharacter::MoveY
-		);
-	}
+		EnhancedInput->SetInputConfig(DataAsset->InputConfig.LoadSynchronous());
+		EnhancedInput->BindAction(Action_MoveBack, ETriggerEvent::Triggered, this,&ABasePXCharacter::MoveY);
 
-	if (Action_MoveLeft)
-	{
-		EnhancedInput->BindAction(
-			Action_MoveLeft,
-			ETriggerEvent::Triggered,
-			this,
-			&ABasePXCharacter::MoveX
-		);
-	}
-
-	if (Action_MoveRight)
-	{
-		EnhancedInput->BindAction(
-			Action_MoveRight,
-			ETriggerEvent::Triggered,
-			this,
-			&ABasePXCharacter::MoveX
-		);
-	}
-
-	if (Action_MoveGP)
-	{
-		EnhancedInput->BindAction(
-			Action_MoveGP,
-			ETriggerEvent::Triggered,
-			this,
-			&ABasePXCharacter::Move2D
-		);
+		// 直接用 TEXT的写法失效了
+		// EnhancedInput->BindActionByTagName("InputAction.MoveBack", ETriggerEvent::Triggered, this,TEXT("MoveY"));
+		// EnhancedInput->BindActionByTagName("InputAction.MoveFront", ETriggerEvent::Triggered, this, TEXT("MoveY"));
+		// EnhancedInput->BindActionByTagName("InputAction.MoveLeft", ETriggerEvent::Triggered,this, TEXT("MoveX"));
+		// EnhancedInput->BindActionByTagName("InputAction.MoveRight", ETriggerEvent::Triggered,this, TEXT("MoveX"));
+		// EnhancedInput->BindActionByTagName("InputAction.MoveGP", ETriggerEvent::Triggered,this, TEXT("Move2D"));
+		// EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, TEXT("TryToAttack"));
+		// EnhancedInput->BindActionByTagName("InputAction.NormalAttack",ETriggerEvent::Completed,this, TEXT("AttackRelease"));
+		
+		EnhancedInput->BindActionByTagName("InputAction.MoveBack", ETriggerEvent::Triggered, this, &ABasePXCharacter::MoveY);
+		EnhancedInput->BindActionByTagName("InputAction.MoveFront", ETriggerEvent::Triggered, this, &ABasePXCharacter::MoveY);
+		EnhancedInput->BindActionByTagName("InputAction.MoveLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::MoveX);
+		EnhancedInput->BindActionByTagName("InputAction.MoveRight", ETriggerEvent::Triggered,this, &ABasePXCharacter::MoveX);
+		EnhancedInput->BindActionByTagName("InputAction.MoveGP", ETriggerEvent::Triggered,this, &ABasePXCharacter::Move2D);
+		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
+		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 	}
 }
 
@@ -1233,8 +1210,7 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
-
-	// 还需通过 **AbilityComponent** 补充技能【急转向】逻辑
+	
 	if (EffectGameplayTags.Contains(FGameplayTag::RequestGameplayTag("AbilitySet.Brake")))
 	{
 		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
@@ -1270,3 +1246,30 @@ void ABasePXCharacter::Move2D(const FInputActionValue& Value)
 	MoveY(AxisValue.Y);
 }
 
+void ABasePXCharacter::TryToAttack()
+{
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16), "ABasePXCharacter::TryToAttack");
+	if (IFight_Interface::Execute_CanAttack(this))
+	{
+		UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
+
+		bool ActivateSuccess = ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.NormalAttack")), true);
+		if (ActivateSuccess)
+		{
+			bInAttackStatus = true;
+			bAttackStartup = true;
+			SetAttackAnimToggle(true);
+			OnPlayerAttackStart.Broadcast();
+		}
+	}
+	
+}
+
+void ABasePXCharacter::AttackRelease()
+{
+	if (bInAttackStatus)
+	{
+		OnAttackRelease();
+	}
+}

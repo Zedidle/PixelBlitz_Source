@@ -6,7 +6,6 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Core/PXSaveGameSubsystem.h"
-#include "Net/Core/Connection/NetConnectionFaultRecoveryBase.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 
 void UBasePlayerStatusWidget::NativeConstruct()

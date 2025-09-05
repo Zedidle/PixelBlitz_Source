@@ -398,7 +398,7 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-	void CameraOffset_BulletTime(float SustainTime, FVector CameraOffset = FVector(0), float GlobalTimeRate = 0.0f);
+	void CameraOffset_BulletTime(float SustainTime, FVector CameraOffset = FVector(0), float GlobalTimeRate = 0.1f);
 
 	UFUNCTION(BlueprintCallable)
 	void OutOfControl(float SustainTime);
@@ -485,23 +485,35 @@ public:
 	
 	
 
-#pragma region Input 
+#pragma region Input
+	// 朝向摄像机移动
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveFront; // 朝向摄像机移动
+	UInputAction* Action_MoveFront;
+	// 远离摄像机移动
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveBack;  // 远离摄像机移动
+	UInputAction* Action_MoveBack;  
+
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
 	UInputAction* Action_MoveLeft;
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
 	UInputAction* Action_MoveRight;
+
+	// 手柄左摇杆
 	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveGP; // 手柄左摇杆
+	UInputAction* Action_MoveGP; 
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
+	UInputAction* Action_NormalAttack; 
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
 	void MoveX(const FInputActionValue& Value);
 	void MoveY(const FInputActionValue& Value);
 	void Move2D(const FInputActionValue& Value);
+	void TryToAttack();
+	void AttackRelease();
+	
+	
 #pragma endregion
 	
 };

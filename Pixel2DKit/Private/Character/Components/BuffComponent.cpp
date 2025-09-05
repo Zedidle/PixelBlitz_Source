@@ -61,7 +61,7 @@ void UBuffComponent::CheckBuffEnd()
 		if (CurTime > ele.Value)
 		{
 			RemoveBuff_EffectAll(ele.Key);
-			BuffUpdate_Attack();
+			Execute_BuffUpdate_Attack(this);
 		}
 	}
 	for (auto& ele : Tag2BuffEndTime_Speed)
@@ -69,7 +69,7 @@ void UBuffComponent::CheckBuffEnd()
 		if (CurTime > ele.Value)
 		{
 			RemoveBuff_EffectAll(ele.Key);
-			BuffUpdate_Speed();
+			Execute_BuffUpdate_Speed(this);
 		}
 	}
 	for (auto& ele : Tag2BuffEndTime_Sight)
@@ -77,7 +77,7 @@ void UBuffComponent::CheckBuffEnd()
 		if (CurTime > ele.Value)
 		{
 			RemoveBuff_EffectAll(ele.Key);
-			BuffUpdate_Sight();
+			Execute_BuffUpdate_Sight(this);
 		}
 	}
 

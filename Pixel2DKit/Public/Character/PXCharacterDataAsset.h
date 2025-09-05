@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PXCharacterInputConfig.h"
 #include "Engine/DataAsset.h"
 #include "UI/Player/BasePlayerStatusWidget.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -18,6 +19,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<UDataTable> AbilityDataTable;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSoftObjectPtr<UPXCharacterInputConfig> InputConfig;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<USoundCue> LandedSound;
