@@ -387,10 +387,12 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OnPlayerDie.RemoveAll(this);
 }
 
-void ABasePXCharacter::Falling()
+
+
+void ABasePXCharacter::Jump()
 {
-	Super::Falling();
-	SetFalling(true);
+	Super::Jump();
+	SetJumping(true);
 }
 
 void ABasePXCharacter::OnJumped_Implementation()
@@ -418,6 +420,50 @@ void ABasePXCharacter::OnJumped_Implementation()
 		}
 	}
 }
+
+void ABasePXCharacter::Falling()
+{
+	Super::Falling();
+	SetFalling(true);
+	CurJumpCount++;
+}
+
+
+void ABasePXCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (DataAsset && DataAsset->LandedSound)
+	{
+		USoundFuncLib::PlaySoundAtLocation(DataAsset->LandedSound.Get(), GetActorLocation(), 1.0f);
+	}
+	
+	SetLanding(true);
+	SetJumping(false);
+	SetFalling(false);
+	CurJumpCount = 0;
+	if (const UCameraShakeSettings* CameraShakeSettings = GetDefault<UCameraShakeSettings>())
+	{
+		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
+	}
+	if (bDead)
+	{
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->DisableMovement();
+		}
+	}
+
+	// 舞空术成就
+	if (UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
+	{
+		if (UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>())
+		{
+			AchievementSubsystem->CompleteAchievement("10");
+		}
+	}
+}
+
 
 void ABasePXCharacter::ReadyToStart_Implementation()
 {
@@ -1115,48 +1161,8 @@ void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousF
 	GetCharacterMovement()->MaxWalkSpeed = BasicMoveSpeed;
 }
 
-void ABasePXCharacter::Jump()
-{
-	Super::Jump();
-	SetJumping(true);
-	// SetFalling(true); // 取决于落地翻滚时间从起跳还是下落的开始算
-}
 
 
-void ABasePXCharacter::Landed(const FHitResult& Hit)
-{
-	Super::Landed(Hit);
-
-	if (DataAsset && DataAsset->LandedSound)
-	{
-		USoundFuncLib::PlaySoundAtLocation(DataAsset->LandedSound.Get(), GetActorLocation(), 1.0f);
-	}
-	
-	SetLanding(true);
-	SetJumping(false);
-	SetFalling(false);
-	CurJumpCount = 0;
-	if (const UCameraShakeSettings* CameraShakeSettings = GetDefault<UCameraShakeSettings>())
-	{
-		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
-	}
-	if (bDead)
-	{
-		if (GetCharacterMovement())
-		{
-			GetCharacterMovement()->DisableMovement();
-		}
-	}
-
-	// 舞空术成就
-	if (UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
-	{
-		if (UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>())
-		{
-			AchievementSubsystem->CompleteAchievement("10");
-		}
-	}
-}
 
 void ABasePXCharacter::SetScale(const float targetValue)
 {

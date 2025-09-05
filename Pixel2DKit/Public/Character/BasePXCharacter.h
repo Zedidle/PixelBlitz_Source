@@ -242,9 +242,12 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void Falling() override;
-	virtual void OnJumped_Implementation() override;
 
+	virtual void Jump() override;
+	virtual void OnJumped_Implementation() override;
+	virtual void Falling() override;
+	virtual void Landed(const FHitResult& Hit) override;
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ReadyToStart();
 	
@@ -386,8 +389,7 @@ public:
 
 	virtual void OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal, const FVector& PreviousFloorContactNormal,
 													const FVector& PreviousLocation, float TimeDelta) override;
-	virtual void Jump() override;
-	virtual void Landed(const FHitResult& Hit) override;
+
 	
 	// 外形缩放部分
 	UFUNCTION(BlueprintCallable, Category="Character | Outlook")
