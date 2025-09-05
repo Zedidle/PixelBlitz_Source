@@ -124,7 +124,6 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	bool PreFrameFalling = false;
 	bool PreSpriteLeft = false;
 	FVector CameraOffsetForBulletTime;
-	int CurJumpCount = 0;
 	float JumpStartTime;
 	
 	int PerfectDodgeTimes = 0;
@@ -243,6 +242,8 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Movement)
+	bool SelfCanJump();
 	virtual void Jump() override;
 	virtual void OnJumped_Implementation() override;
 	virtual void Falling() override;
@@ -291,6 +292,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddCameraOffset(const FVector& V);
 
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	int CurJumpCount = 0;
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	int32 CurMaxJumpCount = 2;
 	UPROPERTY(BlueprintReadonly, Category = Movement)

@@ -66,15 +66,16 @@ void UBasePlayerStatusWidget::UpdateEP()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ProgressBar_EP)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TextBlock_EP)
 
-	float EP = PXAttributeSet->GetHP();
-	float MaxEP = PXAttributeSet->GetMaxHP();
+	float EP = PXAttributeSet->GetEP();
+	float MaxEP = PXAttributeSet->GetMaxEP();
 	ProgressBar_EP->SetPercent(EP / MaxEP);
-
+	
 	TextBlock_EP->SetText(FText::FromString(FString::Printf( TEXT("%d / %d"), FMath::RoundToInt(EP), FMath::RoundToInt(MaxEP))));
 }
 
 void UBasePlayerStatusWidget::OnAttributeChanged(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
+
 	if (Attribute == UPXAttributeSet::GetHPAttribute() || Attribute == UPXAttributeSet::GetMaxHPAttribute())
 	{
 		UpdateHP();

@@ -41,6 +41,7 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	if(Attribute == GetHPAttribute())
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHP());
+		
 		int ChangedValue = NewValue - GetHP();
 		if (ChangedValue != 0.f)
 		{
@@ -70,6 +71,7 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	{
 		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxEP());
 		int ChangedValue = NewValue - GetEP();
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16), FString::Printf( TEXT("UPXAttributeSet::PreAttributeChange EP ChangedValue: %d"), ChangedValue ));
 		if (ChangedValue > 5.f)
 		{
 			if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
@@ -96,17 +98,6 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
-
-
-	// if(Attribute == GetHPAttribute())
-	// {
-	// 	SetAttrCurrentValueByName("HP", FMath::Clamp(GetHP(), 0.f, GetMaxHP()));
-	// }
-	//
-	// if (Attribute == GetEPAttribute())
-	// {
-	// 	SetAttrCurrentValueByName("EP", FMath::Clamp(GetEP(), 0.f, GetMaxEP()));
-	// }
 	
 	OnPXAttributeChange.Broadcast(Attribute, OldValue, NewValue);
 }

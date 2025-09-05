@@ -387,7 +387,22 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OnPlayerDie.RemoveAll(this);
 }
 
-
+bool ABasePXCharacter::SelfCanJump_Implementation()
+{
+	if (bDashing)
+	{
+		return false;
+	}
+	if (bJumping)
+	{
+		return false;
+	}
+	if (CurJumpCount >= CurMaxJumpCount)
+	{
+		return false;
+	}
+	return true;
+}
 
 void ABasePXCharacter::Jump()
 {
@@ -397,6 +412,7 @@ void ABasePXCharacter::Jump()
 
 void ABasePXCharacter::OnJumped_Implementation()
 {
+	CurJumpCount++;
 	if (CurJumpCount == 1)
 	{
 		JumpStartTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
@@ -425,7 +441,6 @@ void ABasePXCharacter::Falling()
 {
 	Super::Falling();
 	SetFalling(true);
-	CurJumpCount++;
 }
 
 
