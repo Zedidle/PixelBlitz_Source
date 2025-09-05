@@ -125,7 +125,8 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	bool PreSpriteLeft = false;
 	FVector CameraOffsetForBulletTime;
 	float JumpStartTime;
-	
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	int PerfectDodgeTimes = 0;
 	bool bViewYawChangingByPlayerControl = false;
 
