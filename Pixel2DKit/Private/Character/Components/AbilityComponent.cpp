@@ -356,9 +356,23 @@ void UAbilityComponent::CreateQTE()
 	ArrowLineWidget->AddToViewport(100);
 }
 
-void UAbilityComponent::OnKeyPressed(UInputAction* InputAction, bool& Keep)
+void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 {
-	if (Action_Jump != InputAction)
+	Keep = true;
+	
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset->InputConfig)
+
+	const auto& ActionMap = PXCharacter->DataAsset->InputConfig->ActionMap;
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName);
+	if (!ActionMap.Contains(Tag))
+	{
+		Keep = true;
+		return;
+	}
+	
+	if (Action_Jump != ActionMap[Tag])
 	{
 		Keep = true;
 		return;
@@ -380,17 +394,16 @@ void UAbilityComponent::OnKeyPressed(UInputAction* InputAction, bool& Keep)
 	}
 
 
-	if (CachedASC)
+	
+	if (CachedASC && ArrowLineWidget)
 	{
-		CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.SkyHandPower")));
+		if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.SkyHandPower"))))
+		{
+			ArrowLineWidget->RemoveFromParent();
+			Keep = false;
+		}
 	}
-
-	if (ArrowLineWidget)
-	{
-		ArrowLineWidget->RemoveFromParent();
-	}
-
-	Keep = false;
+	
 }
 
 void UAbilityComponent::OnHurtInstigatorDead_Implementation(ABaseEnemy* DeadEnemy)

@@ -235,15 +235,20 @@ public:
 	float GetEffectGameplayTag(const FGameplayTag Tag) const;
 #pragma endregion
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
+	FVector FrontViewFactor = {0.1, 0.1, 0.05};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
+	FVector SpringArmMotivationVelocityPowFactor = {1.0f, 1.0f, 1.0f};
 	
 	
-
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Movement)
 	bool SelfCanJump();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Movement)
+	void JumpStart();
 	virtual void Jump() override;
 	virtual void OnJumped_Implementation() override;
 	virtual void Falling() override;
@@ -491,24 +496,6 @@ public:
 	
 
 #pragma region Input
-	// 朝向摄像机移动
-	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveFront;
-	// 远离摄像机移动
-	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveBack;  
-
-	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveLeft;
-	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveRight;
-
-	// 手柄左摇杆
-	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_MoveGP; 
-
-	UPROPERTY(EditDefaultsOnly, Category = "Character | InputAction")
-	UInputAction* Action_NormalAttack; 
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
@@ -517,6 +504,8 @@ public:
 	void Move2D(const FInputActionValue& Value);
 	void TryToAttack();
 	void AttackRelease();
+	void TryToJump();
+	void JumpRelease();
 	
 	
 #pragma endregion

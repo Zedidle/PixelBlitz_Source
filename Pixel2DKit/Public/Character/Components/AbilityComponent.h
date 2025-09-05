@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Pixel2DKit/Pixel2DKit.h"
 #include "UI/QTE/ArrowLineWidget.h"
 #include "UI/QTE/KeyPressCountDownWidget.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -13,6 +12,7 @@
 
 class ABasePXCharacter;
 class ABaseEnemy;
+class UInputAction;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
@@ -108,7 +108,7 @@ public:
 	
 
 	UFUNCTION(BlueprintCallable)
-	void OnKeyPressed(UInputAction* InputAction, bool& Keep);
+	void OnKeyPressed(const FName& TagName, bool& Keep);
 
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)

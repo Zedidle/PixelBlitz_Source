@@ -219,6 +219,12 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
 
 	FVector Velocity = GetCharacterMovement()->Velocity;
+	FVector PowFactor = SpringArmMotivationVelocityPowFactor;
+	Velocity = {
+		FMath::Pow(Velocity.X, PowFactor.X),
+		FMath::Pow(Velocity.Y, PowFactor.Y),
+		FMath::Pow(Velocity.Z, PowFactor.Z) };
+	
 	float d = FVector::DotProduct(GetFaceToCamera(), Velocity.GetSafeNormal());
 	
 	// 镜头偏转
@@ -234,9 +240,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 			{
 			case 0: // 镜头前瞻
 				{
-					Velocity.X *= 0.35;
-					Velocity.Y *= 0.35;
-					Velocity.Z *= 0.2;
+					Velocity *= FrontViewFactor;
 					FVector Location = GetActorLocation() + Velocity;
 					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
 							(d > 0 ? 1 : FMath::GetMappedRangeValueClamped(FVector2D(-1, 0), FVector2D(0.2, 1), d));
@@ -404,10 +408,22 @@ bool ABasePXCharacter::SelfCanJump_Implementation()
 	return true;
 }
 
+void ABasePXCharacter::JumpStart_Implementation()
+{
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.Jump")));
+	}
+}
+
 void ABasePXCharacter::Jump()
 {
 	Super::Jump();
 	SetJumping(true);
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.StepOnHead")));
+	}
 }
 
 void ABasePXCharacter::OnJumped_Implementation()
@@ -1205,17 +1221,6 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	if (DataAsset)
 	{
 		EnhancedInput->SetInputConfig(DataAsset->InputConfig.LoadSynchronous());
-		EnhancedInput->BindAction(Action_MoveBack, ETriggerEvent::Triggered, this,&ABasePXCharacter::MoveY);
-
-		// 直接用 TEXT的写法失效了
-		// EnhancedInput->BindActionByTagName("InputAction.MoveBack", ETriggerEvent::Triggered, this,TEXT("MoveY"));
-		// EnhancedInput->BindActionByTagName("InputAction.MoveFront", ETriggerEvent::Triggered, this, TEXT("MoveY"));
-		// EnhancedInput->BindActionByTagName("InputAction.MoveLeft", ETriggerEvent::Triggered,this, TEXT("MoveX"));
-		// EnhancedInput->BindActionByTagName("InputAction.MoveRight", ETriggerEvent::Triggered,this, TEXT("MoveX"));
-		// EnhancedInput->BindActionByTagName("InputAction.MoveGP", ETriggerEvent::Triggered,this, TEXT("Move2D"));
-		// EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, TEXT("TryToAttack"));
-		// EnhancedInput->BindActionByTagName("InputAction.NormalAttack",ETriggerEvent::Completed,this, TEXT("AttackRelease"));
-		
 		EnhancedInput->BindActionByTagName("InputAction.MoveBack", ETriggerEvent::Triggered, this, &ABasePXCharacter::MoveY);
 		EnhancedInput->BindActionByTagName("InputAction.MoveFront", ETriggerEvent::Triggered, this, &ABasePXCharacter::MoveY);
 		EnhancedInput->BindActionByTagName("InputAction.MoveLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::MoveX);
@@ -1223,6 +1228,8 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		EnhancedInput->BindActionByTagName("InputAction.MoveGP", ETriggerEvent::Triggered,this, &ABasePXCharacter::Move2D);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
+		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
+		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Completed,this, &ABasePXCharacter::JumpRelease);
 	}
 }
 
@@ -1269,7 +1276,6 @@ void ABasePXCharacter::Move2D(const FInputActionValue& Value)
 
 void ABasePXCharacter::TryToAttack()
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16), "ABasePXCharacter::TryToAttack");
 	if (IFight_Interface::Execute_CanAttack(this))
 	{
 		UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
@@ -1293,4 +1299,38 @@ void ABasePXCharacter::AttackRelease()
 	{
 		OnAttackRelease();
 	}
+}
+
+void ABasePXCharacter::TryToJump()
+{
+	bool CanTry = false;
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnKeyPressed("InputAction.Jump", CanTry);
+	}
+	if (!CanTry) return;
+
+	if (SelfCanJump())
+	{
+		JumpStart();
+	}
+	else
+	{
+		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(),"TryToJump",
+		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]{
+				if (WeakThis.IsValid())
+				{
+					if (WeakThis->SelfCanJump())
+					{
+						WeakThis->JumpStart();
+						UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
+					}
+				}
+		}, 0.016f, 0.2f);
+	}
+}
+
+void ABasePXCharacter::JumpRelease()
+{
+	StopJumping();
 }

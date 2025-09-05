@@ -28,7 +28,17 @@ public:
             Subsystem->SetDelay(MoveTemp(Callback),Delay);
         }
     }
+    
+    template<typename Callable>
+    static void SetDelayLoop(UObject* WorldContext, const FName& TimerName, Callable&& Callback, float InRate, float SustainTime = 0.f)
+    {
+        if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+        {
+            Subsystem->SetDelayLoop(TimerName, MoveTemp(Callback), InRate, SustainTime);
+        }
+    }
 
+    
     template<typename T, typename Callable>
     static void SetDelaySafe(UObject* WorldContext,T* Object, Callable&& Callback,float Delay)
     {
@@ -51,7 +61,7 @@ public:
     /* 设置可重触发延迟
      */
     template<typename Callable>
-    static void SetRetriggerableDelay(UObject* WorldContext,FName TimerName, Callable&& Callback,float Delay)
+    static void SetRetriggerableDelay(UObject* WorldContext, const FName& TimerName, Callable&& Callback,float Delay)
     {
         if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
         {

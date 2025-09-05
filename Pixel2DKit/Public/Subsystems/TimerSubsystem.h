@@ -43,6 +43,8 @@ public:
 
 
 	void SetDelay(TFunction<void()>&& Callback, float DelayDuration);
+
+	void SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime = 0.f);
 	
 	template<typename T>
 	void SetDelay(T* Object, FTimerDelegate::TMethodPtr<T> Function, float DelayDuration)
@@ -65,11 +67,11 @@ public:
 	 * @param Callback 延迟结束后调用的函数
 	 * @param DelayDuration 延迟时间（秒）
 	 */
-	void SetRetriggerableDelay(FName TimerName, TFunction<void()>&& Callback, float DelayDuration);
+	void SetRetriggerableDelay(const FName& TimerName, TFunction<void()>&& Callback, float DelayDuration);
 
 	
 	template<typename T>
-	void SetRetriggerableDelay(FName TimerName,T* Object, FTimerDelegate::TMethodPtr<T> Function, float DelayDuration)
+	void SetRetriggerableDelay(const FName& TimerName, T* Object, FTimerDelegate::TMethodPtr<T> Function, float DelayDuration)
 	{
 		TWeakObjectPtr<T> WeakObject(Object);
 		SetRetriggerableDelay( TimerName,
