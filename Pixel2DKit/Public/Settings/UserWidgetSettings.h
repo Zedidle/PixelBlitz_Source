@@ -17,12 +17,20 @@ class PIXEL2DKIT_API UUserWidgetSettings : public UDeveloperSettings
 
 public:
 
-	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
+	UPROPERTY(Config, EditAnywhere, Category = "Common")
 	TSubclassOf<UBaseFloatingTextWidget> FloatingTextDefaultClass;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Common | UserWidget")
+	UPROPERTY(Config, EditAnywhere, Category = "Common")
 	TSubclassOf<UUserWidget> CenterWordTipClass;
 	
-	UPROPERTY(Config, EditAnywhere, Category = "Achievement | UserWidget")
+	UPROPERTY(Config, EditAnywhere, Category = "Achievement")
 	TSubclassOf<UAchievementCompleteWidget> AchievementCompleteWidgetClass;
+
+
+	UPROPERTY(Config, EditAnywhere, Category = "Player")
+	TSubclassOf<UUserWidget> NearDeathWidgetClass;
+
+	UPROPERTY(Config, EditAnywhere, Category = "GameplayFlow")
+	TSubclassOf<UUserWidget> DeathEndWidgetClass;
+
 };

@@ -8,6 +8,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
+#include "Fight/Components/HealthComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Buff_Interface.h"
 #include "UI/Player/BasePlayerStatusWidget.h"
@@ -169,6 +170,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	TSubclassOf<class UGameplayEffect> TestGE;
 
+
+#pragma region 临时存储数据
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Talent)
+	int ReviveTimes = 0;
+	
+	UPROPERTY(BlueprintReadWrite, Category = Achievement)
+	bool HasOneHealthPoint = false;
+
+	UPROPERTY(BlueprintReadWrite, Category = Achievement)
+	int AirDashTimes = 0;
+
+	UPROPERTY(BlueprintReadWrite, Category = Shop)
+	int GotGolds = 0;
+	
+#pragma endregion 
+	
+
+
 	
 	virtual void Tick_SaveFallingStartTime();
 	virtual void Tick_SpriteRotation(); // 漂移式偏转
@@ -177,10 +197,15 @@ public:
 
 	void SetLanding(const bool V, const float time = 0.1f);
 
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnHPChanged(int32 NewValue, int32 ChangedValue, EStatChange ChangeStat, AActor* Maker, bool bInner);
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void CheckNearDeath();
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void OnDie();
-	void OnDie_Implementation();
-
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Revive();
 
 #pragma region GAS
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -312,13 +337,6 @@ public:
 	float BasicJumpMaxHoldTime = 0.3f;
 	UPROPERTY(BlueprintReadonly, Category = Movement)
 	float BasicAttackInterval = 1.0f;
-
-#pragma region Talent
-
-	int ReviveTimes = 0;
-	
-#pragma endregion
-	
 	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bDead;
@@ -424,7 +442,7 @@ public:
 	void SetDead(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Movement)
-	void SetHurt(const bool V, const float duration);
+	void SetHurt(const bool V, const float duration = 0.1f);
 	
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetJumping(const bool V, const float time = 0.2f);

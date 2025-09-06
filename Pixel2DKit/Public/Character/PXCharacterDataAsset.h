@@ -31,6 +31,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<USoundCue> JumpSoundInAir;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSoftObjectPtr<USoundCue> HurtSound;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FCharacterAttribute CharacterAttribute;

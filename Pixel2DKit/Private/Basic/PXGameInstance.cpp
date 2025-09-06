@@ -7,6 +7,11 @@
 #include "Kismet/KismetStringLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "SaveGame/PXSettingSaveGame.h"
+#include "Settings/CustomResourceSettings.h"
+#include "Sound/SoundCue.h"
+#include "Utilitys/SoundFuncLib.h"
+
+class UCustomResourceSettings;
 
 FName UPXGameInstance::GetCurLevelName(bool Continue)
 {
@@ -107,6 +112,14 @@ void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+
+	if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+	{
+		if (USoundCue* SC_OnDie = ResourceSettings->SC_OnDie.LoadSynchronous())
+		{
+			USoundFuncLib::PlaySound2D(SC_OnDie, 1.f);
+		}
+	}
 	
 	MainSaveGame->DieTimes++;
 	MainSaveGame->SupLife--;

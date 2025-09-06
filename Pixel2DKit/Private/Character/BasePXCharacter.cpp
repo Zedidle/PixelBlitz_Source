@@ -14,6 +14,8 @@
 #include "ISourceControlProvider.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Basic/PXGameMode.h"
+#include "Basic/PXPlayerController.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
@@ -24,6 +26,7 @@
 #include "Character/Components/BuffComponent.h"
 #include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "GameFramework/PlayerStart.h"
 #include "GAS/PXASComponent.h"
 #include "Input/PXInputComponent.h"
@@ -32,6 +35,7 @@
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/CameraShakeSettings.h"
 #include "Settings/CustomResourceSettings.h"
+#include "Settings/UserWidgetSettings.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
@@ -39,6 +43,7 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
+#include "Utilitys/UserWidgetFuncLib.h"
 
 
 class UPXInputComponent;
@@ -379,6 +384,11 @@ void ABasePXCharacter::BeginPlay()
 			}
 		}	
 	}
+
+	if (HealthComponent)
+	{
+		HealthComponent->OnHPChanged.AddDynamic(this, &ThisClass::OnHPChanged);
+	}
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -392,6 +402,10 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	OnPlayerAttackStart.RemoveAll(this);
 	OnPlayerDie.RemoveAll(this);
+	if (HealthComponent)
+	{
+		HealthComponent->OnHPChanged.RemoveAll(this);
+	}
 }
 
 bool ABasePXCharacter::SelfCanJump_Implementation()
@@ -527,6 +541,30 @@ int ABasePXCharacter::GetWeaponInitDamage_Implementation()
 	return AttackValue;
 }
 
+void ABasePXCharacter::Revive_Implementation()
+{
+	if (HealthComponent)
+	{
+		HealthComponent->SetHP(HealthComponent->GetMaxHP());
+	}
+	if (EnergyComponent)
+	{
+		EnergyComponent->SetEP(EnergyComponent->GetMaxEP() * 0.5, this);
+	}
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	}
+	SetDead(false);
+	SetDashing(false);
+	SetFalling(false);
+	bInAttackStatus = false;
+	if (APXPlayerController* PC = GetController<APXPlayerController>())
+	{
+		PC->OnCharacterControl(true);
+	}
+}
+
 UAbilitySystemComponent* ABasePXCharacter::GetAbilitySystemComponent() const
 {
 	
@@ -631,15 +669,17 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
 	
 	if (!bHurt) return;
-
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(),
-		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+	if (duration > 0)
+	{
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
 		{
 			if (WeakThis.IsValid())
 			{
 				WeakThis->SetHurt(false, 0);
 			}
 		}, duration);
+	}
 }
 
 void ABasePXCharacter::SetJumping(bool V, const float time)
@@ -679,11 +719,169 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
 }
 
+void ABasePXCharacter::CheckNearDeath_Implementation()
+{
+	if (HealthComponent)
+	{
+		const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
+		if (Settings && Settings->NearDeathWidgetClass)
+		{
+			if (HealthComponent->GetHPPercent() > 0.3)
+			{
+				UUserWidgetFuncLib::AddWidget(Settings->NearDeathWidgetClass, ESlateVisibility::HitTestInvisible, false);
+			}
+			else
+			{
+				UUserWidgetFuncLib::HideWidget(Settings->NearDeathWidgetClass);
+			}
+		}
+	}
+}
+
+void ABasePXCharacter::OnHPChanged_Implementation(int32 NewValue, int32 ChangedValue, EStatChange ChangeStat,
+                                                  AActor* Maker, bool bInner)
+{
+	if (bDead) return;
+
+	if(NewValue <= 0)
+	{
+		SetDead(true);
+
+		bool MakerImplementsFight = Maker->Implements<UFight_Interface>(); 
+		if (!MakerImplementsFight || ReviveTimes <= 0)
+		{
+			if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
+			{
+				bool GameEnd = false;
+				GameInstance->OnPlayerDead(GameEnd);
+				if (GameEnd)
+				{
+					UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
+					const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
+					if (Settings && Settings->NearDeathWidgetClass)
+					{
+						UUserWidgetFuncLib::AddWidget(Settings->NearDeathWidgetClass, ESlateVisibility::Visible, false);
+					}
+					if (APXPlayerController* PC = GetController<APXPlayerController>())
+					{
+						PC->OnCharacterControl(false);
+					}
+					if (HealthComponent)
+					{
+						HealthComponent->DestroyComponent();
+					}
+					UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+					{
+						if (WeakThis.IsValid())
+						{
+							if (WeakThis->GetCharacterMovement() && !WeakThis->GetCharacterMovement()->IsFalling())
+							{
+								WeakThis->GetCharacterMovement()->DisableMovement();
+							}
+						}
+					},1);
+				}
+				else
+				{
+					OnDie();
+				}
+			}
+		}
+		
+		if (MakerImplementsFight)
+		{
+			if (ReviveTimes > 0)
+			{
+				ReviveTimes --;
+				if (ReviveTimes == 0)
+				{
+					Execute_RemoveBuff(this, FGameplayTag::RequestGameplayTag("Buff.Talent.Revive"), true);
+				}
+				if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+				{
+					if (UNiagaraSystem* NS_Revive = ResourceSettings->NS_Revive.LoadSynchronous())
+					{
+						UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Revive, GetActorLocation());
+						
+						// UNiagaraFunctionLibrary::SpawnSystemAttached(NS_Revive, GetRootComponent(), FName(),
+						// 	FVector(0), FRotator(0), EAttachLocation::Type::KeepWorldPosition, true);
+					}
+					if (USoundCue* SC_Revive = ResourceSettings->SC_Revive.LoadSynchronous())
+					{
+						USoundFuncLib::PlaySound2D(SC_Revive, 1.f);
+					}
+				}
+				if (APXPlayerController* PC = GetController<APXPlayerController>())
+				{
+					PC->OnCharacterControl(false);
+				}
+				if (HealthComponent)
+				{
+					HealthComponent->InvulnerableForDuration(2.5);
+				}
+				UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+					[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+				{
+					if (WeakThis.IsValid())
+					{
+						WeakThis->Revive();
+					}
+				}, 2);
+			}
+		}
+	}
+	else
+	{
+		CheckNearDeath();
+		if (NewValue == 1)
+		{
+			HasOneHealthPoint = true;
+		}
+		if (ChangeStat == EStatChange::Decrease)
+		{
+			USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation(), 3.f);
+		}
+		if (!bInner)
+		{
+			if (UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld()))
+			{
+				MainSaveGame->HurtTimes ++;
+			}
+			CameraOffset_BulletTime(0.03, FVector(0), 0.1f);
+			OutOfControl(UCommonFuncLib::DealDeltaTime(0.2));
+			SetHurt(true);
+		}
+	}
+}
+
 void ABasePXCharacter::OnDie_Implementation()
 {
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->Velocity = FVector(0, 0, 0);
+	}
+
+	if (PlayerStatusWidget)
+	{
+		PlayerStatusWidget->RefreshLife();
+	}
+
+	if (APXPlayerController* PC = GetController<APXPlayerController>())
+	{
+		PC->OnCharacterControl(false);
+	}
+
+	if (AActor* RespawnPoint = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerRespawnPoint::StaticClass()))
+	{
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+			[WeakThis = TWeakObjectPtr<ThisClass>(this), RespawnPoint]
+			{
+				if (WeakThis.IsValid() && IsValid(RespawnPoint))
+				{
+					WeakThis->SetActorLocation(RespawnPoint->GetActorLocation());
+					WeakThis->Revive();
+				}
+			}, 1.0f);
 	}
 	
 	OnPlayerDie.Broadcast();

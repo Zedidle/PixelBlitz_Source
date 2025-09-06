@@ -20,31 +20,35 @@ class PIXEL2DKIT_API UCustomResourceSettings : public UDeveloperSettings
 
 
 public:
-	UPROPERTY(Config, EditAnywhere, Category = "Custom Resource")
+	UPROPERTY(Config, EditAnywhere, Category = "Custom")
 	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<UNiagaraSystem>> WeatherTypeToNiagara;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Custom Resource")
+	UPROPERTY(Config, EditAnywhere, Category = "Custom")
 	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<USoundBase>> WeatherTypeToSound;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Custom Resource")
+	UPROPERTY(Config, EditAnywhere, Category = "Custom")
 	TSoftObjectPtr<USoundAttenuation> Attenuation_Default;
 
 
 	UPROPERTY(Config, EditAnywhere, Category = "Ability | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_Mobiliarbus;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Ability | Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_Revive;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Ability | SoundCue")
+	TSoftObjectPtr<USoundCue> SC_Revive;
+
+	
 	UPROPERTY(Config, EditAnywhere, Category = "Common | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_HitSmoke;
-
-
-
-
-
+	
 	UPROPERTY(Config, EditAnywhere, Category = "Buff | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_SpeedUP;
 
-
-
+	
+	UPROPERTY(Config, EditAnywhere, Category = "GameplayFlow | SoundCue")
+	TSoftObjectPtr<USoundCue> SC_OnDie;
 
 	
 };
