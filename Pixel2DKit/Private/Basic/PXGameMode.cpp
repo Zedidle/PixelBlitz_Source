@@ -3,11 +3,34 @@
 
 #include "Basic/PXGameMode.h"
 #include "NavigationSystem.h"
+#include "Basic/PXGameInstance.h"
+#include "Basic/PXPlayerController.h"
+#include "Components/CapsuleComponent.h"
+#include "Enemy/BaseEnemy.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 
+
+void APXGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
+	{
+		if (UCapsuleComponent* CapsuleComponent = PlayerStart->GetComponentByClass<UCapsuleComponent>())
+		{
+			CapsuleComponent->SetMobility(EComponentMobility::Movable);
+		}
+	}
+
+	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
+	{
+		LoadLevel(GameInstance->GetCurLevelName_Simple(true).ToString());
+		StartCurLevel();
+	}
+}
 
 void APXGameMode::LoadLevel(FString LevelName, FVector Location)
 {
@@ -24,11 +47,71 @@ void APXGameMode::LoadLevel(FString LevelName, FVector Location)
 	PreLevelName = CurLevelName;
 	CurLevelName = LevelName;
 
-	FTransform LevelTransform;
-	LevelTransform.SetLocation(Location);
-	ULevelStreamingDynamic::FLoadLevelInstanceParams Params(GetWorld(), CurLevelName, LevelTransform);
+	
 	bool LoadLevelSuccess;
-	CurLevelInstance = ULevelStreamingDynamic::LoadLevelInstance(Params, LoadLevelSuccess);
+	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(),  LevelName, FVector(0), FRotator(0),
+		LoadLevelSuccess);
+	if (LoadLevelSuccess && LoadedLevel)
+	{
+		CurLevelInstance = LoadedLevel;
+	}
+}
+
+void APXGameMode::StartCurLevel()
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+	UGameplayStatics::SetGlobalTimeDilation(World, 0.15);
+	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
+	{
+		PC->OnCharacterControl(false);
+	}
+	
+	TArray<AActor*> Actors;
+	UGameplayStatics::GetAllActorsOfClassWithTag(World, AActor::StaticClass(), FName(*PreLevelName), Actors);
+	for (AActor* Actor : Actors)
+	{
+		Actor->SetActorEnableCollision(false);
+	}
+
+	UGameplayStatics::GetAllActorsOfClassWithTag(World, ABaseEnemy::StaticClass(), FName(*PreLevelName), Actors);
+	for (AActor* Actor : Actors)
+	{
+		Actor->Destroy();
+	}
+
+	if (CurLevelInstance)
+	{
+		OnStartLevelSuccess();
+		UGameplayStatics::SetGlobalTimeDilation(World, 1.0f);
+	}
+}
+
+void APXGameMode::OnStartLevelSuccess_Implementation()
+{
+	
+}
+
+void APXGameMode::UnloadCurLevel()
+{
+	if (CurLevelInstance)
+	{
+		// 设置卸载参数
+		CurLevelInstance->SetShouldBeLoaded(false);
+		CurLevelInstance->SetShouldBeVisible(false);
+    
+		// 可选：设置卸载完成回调
+		CurLevelInstance->OnLevelUnloaded.AddDynamic(this, &ThisClass::HandleLevelUnloaded);
+    
+		// 强制立即卸载
+		GetWorld()->FlushLevelStreaming();
+	}
+}
+
+void APXGameMode::HandleLevelUnloaded()
+{
+	UE_LOG(LogTemp, Log, TEXT("Dynamic level unloaded successfully"));
+	CurLevelInstance = nullptr;
 }
 
 void APXGameMode::NavRebuild()
