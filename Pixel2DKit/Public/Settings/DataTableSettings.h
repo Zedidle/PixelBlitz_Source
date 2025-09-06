@@ -34,6 +34,11 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 	UPROPERTY(Config, EditAnywhere, Category = "Achievement")
 	TSoftObjectPtr<UDataTable> AchievementDataPath;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Weather")
+	TSoftObjectPtr<UDataTable> LevelWeatherRateData;
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Weather")
+	TSoftObjectPtr<UDataTable> WeatherData;
 	
 public:
 	static const UDataTableSettings& Get()
@@ -50,6 +55,8 @@ public:
 	TObjectPtr<UDataTable> GetBuffOnWidgetData() const { return GetData(BuffOnWidgetDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetTalentData() const { return GetData(TalentDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetAchievementData() const { return GetData(AchievementDataPath.ToString()); }
+	TObjectPtr<UDataTable> GetLevelWeatherRateData() const { return GetData(LevelWeatherRateData.ToString()); }
+	TObjectPtr<UDataTable> GetWeatherData() const { return GetData(WeatherData.ToString()); }
 	
 
 	

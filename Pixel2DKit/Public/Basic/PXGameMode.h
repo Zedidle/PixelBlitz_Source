@@ -4,25 +4,44 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
+#include "PlayerState/PlayerRespawnPoint.h"
 #include "Utilitys/PXCustomStruct.h"
 
 #include "PXGameMode.generated.h"
 
 
 
-/**
- * 
- */
+class APlayerRespawnPoint;
+class ULevelStreamingDynamic;
+
+
 UCLASS(BlueprintType, Blueprintable)
 class PIXEL2DKIT_API APXGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+	FString PreLevelName;
+	FString CurLevelName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	ULevelStreamingDynamic* CurLevelInstance;
+	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<EWeather> WeatherType;
+
+#pragma region GameplayFlow
+	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
+	APlayerRespawnPoint* PlayerRespawnPoint;
+
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void LoadLevel(FString LevelName, FVector Location);
 
 
+	
+#pragma endregion 
+
+
+
+	
 
 	
 #pragma region Sound Setting
@@ -33,10 +52,6 @@ public:
 	float SoundSetting_Arg_VolumeBasicMulti = 1.0f;
 	
 #pragma endregion
-
-
-
-
 
 	
 #pragma region Nav

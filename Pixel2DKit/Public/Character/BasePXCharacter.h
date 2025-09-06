@@ -246,6 +246,10 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = GameplayFlow)
+	void ToStartPoint();
+
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Movement)
 	bool SelfCanJump();
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Movement)

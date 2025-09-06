@@ -13,6 +13,7 @@
 #include "EnhancedInputComponent.h"
 #include "ISourceControlProvider.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Basic/PXGameMode.h"
 #include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
@@ -23,6 +24,7 @@
 #include "Character/Components/BuffComponent.h"
 #include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "GameFramework/PlayerStart.h"
 #include "GAS/PXASComponent.h"
 #include "Input/PXInputComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -35,6 +37,7 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 
 
@@ -813,6 +816,35 @@ void ABasePXCharacter::Tick(float DeltaSeconds)
 	if (IsValid(GetCharacterMovement()))
 	{
 		SetMoving(GetCharacterMovement()->Velocity.Size() > 1.0f);
+	}
+}
+
+void ABasePXCharacter::ToStartPoint_Implementation()
+{
+	CustomTimeDilation = 0.5;
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->SetMovementMode(MOVE_Falling, 0);
+
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->CustomTimeDilation = 1.0f;
+			}
+		}, 1.0f);
+	}
+
+	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
+	{
+		if (APXGameMode* GameMode = UPXGameplayStatics::GetGameMode(GetWorld()))
+		{
+			if (GameMode->PlayerRespawnPoint)
+			{
+				GameMode->PlayerRespawnPoint->SetActorLocation(PlayerStart->GetActorLocation());
+			}
+		}
 	}
 }
 

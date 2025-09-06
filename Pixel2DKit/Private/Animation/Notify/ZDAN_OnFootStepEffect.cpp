@@ -10,6 +10,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
 #include "NiagaraComponent.h"
+#include "Basic/PXGameState.h"
 #include "Utilitys/SoundFuncLib.h"
 
 class UNiagaraComponent;
@@ -33,10 +34,10 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 
 
 	// 粒子特效
-	APXGameMode* GM = Cast<APXGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GM)
+	APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GS)
 	
-	TSoftObjectPtr<UNiagaraSystem> NS = ResourceSettings->WeatherTypeToNiagara.FindRef(GM->WeatherType);
+	TSoftObjectPtr<UNiagaraSystem> NS = ResourceSettings->WeatherTypeToNiagara.FindRef(GS->WeatherType);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(NS)
 
 	UNiagaraSystem* LoadedNS = NS.LoadSynchronous();
@@ -47,7 +48,7 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 	NiagaraComponent->SetVariableFloat(TEXT("Speed"), Velocity.Size());
 
 	// 音效
-	TSoftObjectPtr<USoundBase> Sound = ResourceSettings->WeatherTypeToSound.FindRef(GM->WeatherType);
+	TSoftObjectPtr<USoundBase> Sound = ResourceSettings->WeatherTypeToSound.FindRef(GS->WeatherType);
 	USoundBase* LoadedSound = Sound.LoadSynchronous();
 	USoundFuncLib::PlaySoundAtLocation(LoadedSound, TargetLocation);
 	

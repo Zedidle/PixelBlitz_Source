@@ -67,4 +67,37 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Common | Input")
 	static void SetGamePadControlling(bool On);
+
+	template<typename T>
+	static void CalRandomMap(TMap<T, int> M, T& Result);
+
 };
+
+template <typename T>
+void UCommonFuncLib::CalRandomMap(TMap<T, int> M, T& Result)
+{
+	int Total = 0;
+	TArray<FName> Keys;
+	M.GetKeys(Keys);
+	for (auto& Key : Keys)
+	{
+		if(M.Contains(Key))
+		{
+			Total += M[Key];
+		}
+	}
+
+	int R = FMath::RandHelper(Total);
+	int v = 0;
+	for (auto& Key : Keys)
+	{
+		if(M.Contains(Key))
+		{
+			v += M[Key];
+			if (v>=R)
+			{
+				Result = Key;
+			}
+		}
+	}
+}

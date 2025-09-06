@@ -1,0 +1,38 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Utilitys/PXGameplayStatics.h"
+
+#include "Basic/PXGameMode.h"
+#include "Basic/PXGameState.h"
+#include "Kismet/GameplayStatics.h"
+
+UPXGameInstance* UPXGameplayStatics::GetGameInstance(const UObject* WorldContextObject)
+{
+	if (UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject))
+	{
+		return Cast<UPXGameInstance>(GameInstance);
+	}
+
+	return nullptr;
+}
+
+APXGameMode* UPXGameplayStatics::GetGameMode(const UObject* WorldContextObject)
+{
+	if (AGameModeBase* GameMode = UGameplayStatics::GetGameMode(WorldContextObject))
+	{
+		return Cast<APXGameMode>(GameMode);
+	}
+
+	return nullptr;
+}
+
+APXGameState* UPXGameplayStatics::GetGameState(const UObject* WorldContextObject)
+{
+	if (AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject))
+	{
+		return Cast<APXGameState>(GameState);
+	}
+
+	return nullptr;
+}
