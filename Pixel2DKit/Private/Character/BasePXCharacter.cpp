@@ -726,7 +726,7 @@ void ABasePXCharacter::CheckNearDeath_Implementation()
 		const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
 		if (Settings && Settings->NearDeathWidgetClass)
 		{
-			if (HealthComponent->GetHPPercent() > 0.3)
+			if (HealthComponent->GetHPPercent() < 0.3)
 			{
 				UUserWidgetFuncLib::AddWidget(Settings->NearDeathWidgetClass, ESlateVisibility::HitTestInvisible, false);
 			}

@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/CustomResourceSettings.h"
 
 
 void APXGameMode::BeginPlay()
@@ -39,9 +40,18 @@ void APXGameMode::LoadLevel(FString LevelName, FVector Location)
 		PlayerStart->SetActorLocation(Location + FVector(0,0,200));
 		if (!PlayerRespawnPoint)
 		{
-			PlayerRespawnPoint = GetWorld()->SpawnActor<APlayerRespawnPoint>();
+			if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+			{
+				if (ResourceSettings->PlayerRespawnPointClass)
+				{
+					PlayerRespawnPoint = Cast<APlayerRespawnPoint>(GetWorld()->SpawnActor(ResourceSettings->PlayerRespawnPointClass));
+				}
+			}
 		}
-		PlayerRespawnPoint->SetActorLocation(Location + FVector(0,0,200));
+		if (PlayerRespawnPoint)
+		{
+			PlayerRespawnPoint->SetActorLocation(Location + FVector(0,0,200));
+		}
 	}
 
 	PreLevelName = CurLevelName;

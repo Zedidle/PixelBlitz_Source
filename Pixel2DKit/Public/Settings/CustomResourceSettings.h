@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
+#include "PlayerState/PlayerRespawnPoint.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "CustomResourceSettings.generated.h"
 
@@ -49,6 +50,10 @@ public:
 	
 	UPROPERTY(Config, EditAnywhere, Category = "GameplayFlow | SoundCue")
 	TSoftObjectPtr<USoundCue> SC_OnDie;
+	
+	UPROPERTY(Config, EditAnywhere, Category = "GameplayFlow | Actor")
+	TSubclassOf<APlayerRespawnPoint> PlayerRespawnPointClass;
 
+	
 	
 };
