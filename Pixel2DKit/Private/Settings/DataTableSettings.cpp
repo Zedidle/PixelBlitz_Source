@@ -3,6 +3,9 @@
 
 #include "Settings/DataTableSettings.h"
 
+#include "Item/Weapon/BaseWeapon.h"
+#include "Pixel2DKit/Pixel2DKit.h"
+
 TObjectPtr<UDataTable> UDataTableSettings::GetData(const FString& Path) const
 {
 	if (DataTables.Contains(*Path))
@@ -20,6 +23,13 @@ TObjectPtr<UDataTable> UDataTableSettings::GetData(const FString& Path) const
 	return nullptr;
 }
 
+void UDataTableSettings::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	LoadWeaponData();
+}
+
 UDataTable* UDataTableSettings::GetLocalizedDataTable(const FString& Path) const
 {
 	if (LocalizedDataTables.Contains(*Path))
@@ -34,5 +44,28 @@ UDataTable* UDataTableSettings::GetLocalizedDataTable(const FString& Path) const
 		return LocalizedDataTables[*Path];
 	}
 	
+	return nullptr;
+}
+
+void UDataTableSettings::LoadWeaponData() const
+{
+	UDataTable* DataTable = GetWeaponData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	TArray<FName> Rownames = DataTable->GetRowNames();
+	for (auto& Row : Rownames)
+	{
+		FWeaponData* Data = DataTable->FindRow<FWeaponData>(Row, "UDataTableSettings::LoadWeaponData");
+		WeaponData.Add(Data->WeaponTag, *Data);
+	}
+}
+
+const FWeaponData* UDataTableSettings::GetWeaponDataByTag(FGameplayTag WeaponTag) const
+{
+	LoadWeaponData();
+	if (WeaponData.Contains(WeaponTag))
+	{
+		return &WeaponData[WeaponTag];
+	}
 	return nullptr;
 }

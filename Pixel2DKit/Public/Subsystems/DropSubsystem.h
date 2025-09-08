@@ -20,6 +20,8 @@ struct FItemData: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	TSubclassOf<ABaseItem> SpawnItemClass;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSoftObjectPtr<USoundCue> UseSound;
 };
 
 

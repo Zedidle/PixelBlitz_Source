@@ -9,6 +9,7 @@
 #include "Utilitys/PXCustomStruct.h"
 #include "PXCharacterDataAsset.generated.h"
 
+class ABaseWeapon;
 
 UCLASS()
 class PIXEL2DKIT_API UPXCharacterDataAsset : public UDataAsset
@@ -40,4 +41,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSubclassOf<UBasePlayerStatusWidget> PlayerStatusWidgetClass;
+
+	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	TSubclassOf<ABaseWeapon> WeaponClass;
 };

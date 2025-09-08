@@ -4,11 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
+#include "Item/Weapon/BaseWeapon.h"
 #include "DataTableSettings.generated.h"
 
-/**
- * 
- */
+
 UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "DataTable Settings"))
 class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 {
@@ -35,12 +34,20 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 	TSoftObjectPtr<UDataTable> AchievementDataPath;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Weather")
-	TSoftObjectPtr<UDataTable> LevelWeatherRateData;
+	TSoftObjectPtr<UDataTable> LevelWeatherRateDataPath;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Weather")
-	TSoftObjectPtr<UDataTable> WeatherData;
+	TSoftObjectPtr<UDataTable> WeatherDataPath;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Weather")
+	TSoftObjectPtr<UDataTable> WeaponDataPath;
+	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
 	
 public:
+
+	virtual void PostInitProperties() override;
+
+	
 	static const UDataTableSettings& Get()
 	{
 		return *GetDefault<UDataTableSettings>();
@@ -55,10 +62,22 @@ public:
 	TObjectPtr<UDataTable> GetBuffOnWidgetData() const { return GetData(BuffOnWidgetDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetTalentData() const { return GetData(TalentDataPath.ToString()); }
 	TObjectPtr<UDataTable> GetAchievementData() const { return GetData(AchievementDataPath.ToString()); }
-	TObjectPtr<UDataTable> GetLevelWeatherRateData() const { return GetData(LevelWeatherRateData.ToString()); }
-	TObjectPtr<UDataTable> GetWeatherData() const { return GetData(WeatherData.ToString()); }
+	TObjectPtr<UDataTable> GetLevelWeatherRateData() const { return GetData(LevelWeatherRateDataPath.ToString()); }
+	TObjectPtr<UDataTable> GetWeatherData() const { return GetData(WeatherDataPath.ToString()); }
+	
+	TObjectPtr<UDataTable> GetWeaponData() const { return GetData(WeaponDataPath.ToString()); }
+	void LoadWeaponData() const;
+	const FWeaponData* GetWeaponDataByTag(FGameplayTag WeaponTag) const;
 	
 
+
+
+
+
+
+
+
+	
 	
 
 

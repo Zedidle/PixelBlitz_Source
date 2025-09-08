@@ -16,7 +16,7 @@ struct FLevelWeatherRate: public FTableRowBase
 	TMap<FName, int> WeatherRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	TMap<float, float> TimeOfDayRate;
+	TMap<float, int> TimeOfDayRate;
 };
 
 USTRUCT(BlueprintType)

@@ -11,6 +11,7 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Buff_Interface.h"
+#include "Item/Weapon/BaseWeapon.h"
 #include "UI/Player/BasePlayerStatusWidget.h"
 #include "BasePXCharacter.generated.h"
 
@@ -286,9 +287,15 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ReadyToStart();
+
+	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	ABaseWeapon* Weapon;
+	
+	UFUNCTION(BlueprintCallable, Category = Fight)
+	void LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass = nullptr);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Fight)
-	int GetWeaponInitDamage();
+	int GetAttackDamage();
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicMoveSpeed = 200.f;

@@ -3,6 +3,9 @@
 
 #include "Item/BaseItem.h"
 
+#include "Sound/SoundCue.h"
+#include "Utilitys/SoundFuncLib.h"
+
 // Sets default values
 ABaseItem::ABaseItem()
 {
@@ -23,5 +26,18 @@ void ABaseItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABaseItem::SetData(const FItemData& ItemData)
+{
+	Data = ItemData;
+}
+
+void ABaseItem::Use_Implementation()
+{
+	if (USoundCue* SoundCue = Data.UseSound.LoadSynchronous())
+	{
+		USoundFuncLib::PlaySoundAtLocation(SoundCue, GetActorLocation(), 1.0f);
+	}
 }
 

@@ -11,7 +11,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
-#include "ISourceControlProvider.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Basic/PXGameMode.h"
 #include "Basic/PXPlayerController.h"
@@ -355,6 +354,7 @@ void ABasePXCharacter::BeginPlay()
 	}
 
 	LoadData();
+	LoadWeapon();
 
 	// AttributeSet 初始化
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
@@ -512,6 +512,29 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	}
 }
 
+void ABasePXCharacter::LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass)
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+	if (WeaponClass)
+	{
+		Weapon = World->SpawnActor<ABaseWeapon>(WeaponClass);
+	}
+	else
+	{
+		if (DataAsset->WeaponClass)
+		{
+			Weapon = World->SpawnActor<ABaseWeapon>(DataAsset->WeaponClass);
+		}
+	}
+	if (Weapon)
+	{
+		FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, false);
+		Weapon->AttachToActor(this, Rules);
+		Weapon->SetOwner(this);
+	}
+}
+
 
 void ABasePXCharacter::ReadyToStart_Implementation()
 {
@@ -529,10 +552,14 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 	}
 }
 
-int ABasePXCharacter::GetWeaponInitDamage_Implementation()
+int ABasePXCharacter::GetAttackDamage_Implementation()
 {
 	FGameplayTag AttackDamagePlusTag = FGameplayTag::RequestGameplayTag("AbilitySet.SwordPlay.AttackDamagePlus");
 	int AttackValue = BasicAttackValue;
+	if (Weapon)
+	{
+		AttackValue += Weapon->GetWeaponDamage();
+	}
 	if (EffectGameplayTags.Contains(AttackDamagePlusTag))
 	{
 		 AttackValue += EffectGameplayTags[AttackDamagePlusTag];
@@ -1249,6 +1276,10 @@ void ABasePXCharacter::OnAnimVulnerableEnd_Implementation()
 void ABasePXCharacter::OnAttackEffect_Implementation()
 {
 	IFight_Interface::OnAttackEffect_Implementation();
+	if (Weapon)
+	{
+		Weapon->Use();
+	}
 }
 
 void ABasePXCharacter::OnAttackEffectBegin_Implementation()

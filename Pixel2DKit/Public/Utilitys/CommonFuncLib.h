@@ -69,35 +69,37 @@ public:
 	static void SetGamePadControlling(bool On);
 
 	template<typename T>
-	static void CalRandomMap(TMap<T, int> M, T& Result);
+	static bool CalRandomMap(const TMap<T, int32>& M, T& Result);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Math")
+	static bool CalRandMap_Float(const TMap<float, int32>& M, float& Result);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Math")
+	static bool CalRandMap_Int(const TMap<int, int32>& M, int& Result);
 
 };
 
 template <typename T>
-void UCommonFuncLib::CalRandomMap(TMap<T, int> M, T& Result)
+bool UCommonFuncLib::CalRandomMap(const TMap<T, int32>& M, T& Result)
 {
+	if (M.IsEmpty()) return false;
+	
 	int Total = 0;
-	TArray<FName> Keys;
-	M.GetKeys(Keys);
-	for (auto& Key : Keys)
+	for (const auto& Pair : M)
 	{
-		if(M.Contains(Key))
-		{
-			Total += M[Key];
-		}
+		Total += Pair.Value;
 	}
+	if (Total <= 0) return false;
 
-	int R = FMath::RandHelper(Total);
-	int v = 0;
-	for (auto& Key : Keys)
+	const int32 R = FMath::RandHelper(Total);
+	int V = 0;
+	for (const auto& Pair : M)
 	{
-		if(M.Contains(Key))
+		V += Pair.Value;
+		if (V>R)
 		{
-			v += M[Key];
-			if (v>=R)
-			{
-				Result = Key;
-			}
+			Result = Pair.Key;
+			return true;
 		}
 	}
+	return false;
 }

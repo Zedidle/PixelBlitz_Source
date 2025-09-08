@@ -173,3 +173,13 @@ void UCommonFuncLib::SetGamePadControlling(bool On)
 
 	Controller->GamePadControlling = On;
 }
+
+bool UCommonFuncLib::CalRandMap_Float(const TMap<float, int32>& M, float& Result)
+{
+	return CalRandomMap(M, Result);
+}
+
+bool UCommonFuncLib::CalRandMap_Int(const TMap<int, int32>& M, int& Result)
+{
+	return CalRandomMap(M, Result);
+}
