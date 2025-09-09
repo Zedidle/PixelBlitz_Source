@@ -3,7 +3,7 @@
 
 #include "Enemy/AI/BTTask_EnemyAction.h"
 #include "AIController.h"
-#include "Animation/BasePixelAnimInstance.h"
+#include "Animation/BasePXAnimInstance.h"
 #include "PaperZDAnimationComponent.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
@@ -42,7 +42,7 @@ EBTNodeResult::Type UBTTask_EnemyAction::ExecuteTask(UBehaviorTreeComponent& Own
 		// 设置行动区间
 		if (UPaperZDAnimationComponent* AnimInstanceComp = Pawn->GetComponentByClass<UPaperZDAnimationComponent>())
 		{
-			if (UBasePixelAnimInstance* AnimInst = Cast<UBasePixelAnimInstance>(AnimInstanceComp->GetAnimInstance()))
+			if (UBasePXAnimInstance* AnimInst = Cast<UBasePXAnimInstance>(AnimInstanceComp->GetAnimInstance()))
 			AnimInst->SetActionField(ActionField);
 		}
 

@@ -9,7 +9,7 @@
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
-#include "Animation/BasePixelAnimInstance.h"
+#include "Animation/BasePXAnimInstance.h"
 #include "Basic/PXGameMode.h"
 #include "Basic/PXGameState.h"
 #include "Kismet/KismetMathLibrary.h"

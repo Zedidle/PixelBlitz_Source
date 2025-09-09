@@ -6,13 +6,13 @@
 #include "GameplayTagContainer.h"
 #include "PaperZDAnimInstance.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "BasePixelAnimInstance.generated.h"
+#include "BasePXAnimInstance.generated.h"
 
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
-class PIXEL2DKIT_API UBasePixelAnimInstance : public UPaperZDAnimInstance
+UCLASS(Abstract, Blueprintable, BlueprintType)
+class PIXEL2DKIT_API UBasePXAnimInstance : public UPaperZDAnimInstance
 {
 	GENERATED_BODY()
 

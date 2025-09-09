@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Animation/BasePixelAnimInstance.h"
+#include "Animation/BasePXAnimInstance.h"
 #include "PXAnimSubsystem.generated.h"
 
 class UPaperZDAnimInstance;

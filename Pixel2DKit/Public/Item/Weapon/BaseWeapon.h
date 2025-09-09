@@ -7,10 +7,10 @@
 #include "Item/BaseItem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
-#include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "BaseWeapon.generated.h"
 
+class ABasePXCharacter;
 
 USTRUCT(BlueprintType)
 struct FWeaponData : public FTableRowBase
@@ -51,6 +51,9 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTag WeaponTag;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SetCharacterOwner(ABasePXCharacter* PxCharacter);
 	
 	void InitWeaponData();
 	

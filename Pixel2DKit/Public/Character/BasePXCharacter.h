@@ -186,9 +186,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = Achievement)
 	int AirDashTimes = 0;
-
-	UPROPERTY(BlueprintReadWrite, Category = Shop)
-	int GotGolds = 0;
 	
 #pragma endregion 
 	

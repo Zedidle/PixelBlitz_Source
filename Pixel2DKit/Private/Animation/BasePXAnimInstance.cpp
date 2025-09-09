@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Animation/BasePixelAnimInstance.h"
+#include "Animation/BasePXAnimInstance.h"
 #include "AIController.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 
@@ -16,13 +16,13 @@
 // 	}
 // }
 
-void UBasePixelAnimInstance::SetActionField(const FGameplayTag& field)
+void UBasePXAnimInstance::SetActionField(const FGameplayTag& field)
 {
 	CurActionFiled = field;
 }
 
 
-void UBasePixelAnimInstance::Tick(float DeltaTime)
+void UBasePXAnimInstance::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	

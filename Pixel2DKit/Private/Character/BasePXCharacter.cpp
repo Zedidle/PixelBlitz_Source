@@ -4,7 +4,7 @@
 #include "Character/BasePXCharacter.h"
 
 #include "AbilitySystemComponent.h"
-#include "Animation/BasePixelAnimInstance.h"
+#include "Animation/BasePXAnimInstance.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Basic/PXGameInstance.h"
@@ -324,6 +324,11 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->bEnableCameraRotationLag = true;
+	SpringArm->CameraLagSpeed = 10.f;
+	SpringArm->CameraRotationLagSpeed = 10.f;
+	SpringArm->CameraLagMaxDistance = 5.f;
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 	
@@ -531,7 +536,7 @@ void ABasePXCharacter::LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass)
 	{
 		FAttachmentTransformRules Rules(EAttachmentRule::KeepRelative, false);
 		Weapon->AttachToActor(this, Rules);
-		Weapon->SetOwner(this);
+		Weapon->SetCharacterOwner(this);
 	}
 }
 
@@ -867,16 +872,16 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 NewValue, int32 ChangedV
 		if (ChangeStat == EStatChange::Decrease)
 		{
 			USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation(), 3.f);
-		}
-		if (!bInner)
-		{
-			if (UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld()))
+			if (!bInner)
 			{
-				MainSaveGame->HurtTimes ++;
+				if (UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld()))
+				{
+					MainSaveGame->HurtTimes ++;
+				}
+				CameraOffset_BulletTime(0.03, FVector(0), 0.1f);
+				OutOfControl(UCommonFuncLib::DealDeltaTime(0.2));
+				SetHurt(true);
 			}
-			CameraOffset_BulletTime(0.03, FVector(0), 0.1f);
-			OutOfControl(UCommonFuncLib::DealDeltaTime(0.2));
-			SetHurt(true);
 		}
 	}
 }
@@ -947,9 +952,12 @@ void ABasePXCharacter::SetMoving(bool V)
 
 void ABasePXCharacter::EndNormalAttack()
 {
-	bInAttackStatus = false;
-	SetAttackAnimToggle(false);
-	SetAttackFire(false);
+	if (!bAttackHolding)
+	{
+		bInAttackStatus = false;
+		SetAttackAnimToggle(false);
+		SetAttackFire(false);
+	}
 }
 
 
@@ -1336,6 +1344,7 @@ APawn* ABasePXCharacter::GetPawn_Implementation()
 void ABasePXCharacter::OnAttackRelease_Implementation()
 {
 	SetAttackHolding(false);
+	EndNormalAttack();
 }
 
 

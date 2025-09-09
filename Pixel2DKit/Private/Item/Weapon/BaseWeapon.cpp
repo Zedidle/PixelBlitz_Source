@@ -2,7 +2,6 @@
 
 
 #include "Item/Weapon/BaseWeapon.h"
-
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
 
@@ -10,6 +9,11 @@ void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 	InitWeaponData();
+}
+
+void ABaseWeapon::SetCharacterOwner_Implementation(ABasePXCharacter* PxCharacter)
+{
+	SetOwner(PxCharacter);
 }
 
 void ABaseWeapon::InitWeaponData()
