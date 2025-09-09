@@ -13,7 +13,10 @@ void ABaseWeapon::BeginPlay()
 
 void ABaseWeapon::SetCharacterOwner_Implementation(ABasePXCharacter* PxCharacter)
 {
-	SetOwner(PxCharacter);
+	if (AActor* Actor = Cast<AActor>(PxCharacter))
+	{
+		SetOwner(Actor);
+	}
 }
 
 void ABaseWeapon::InitWeaponData()

@@ -332,7 +332,7 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 	
-	// ASC 初始化
+	JumpMaxCount = 9999;
 }
 
 bool ABasePXCharacter::HasEffectGameplayTag(const FGameplayTag Tag) const

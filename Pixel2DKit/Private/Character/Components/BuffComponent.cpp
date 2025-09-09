@@ -56,31 +56,37 @@ void UBuffComponent::InitData()
 void UBuffComponent::CheckBuffEnd()
 {
 	float CurTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+
+	TArray<FGameplayTag> RemovedTags;
+	
 	for (auto& ele : Tag2BuffEndTime_Attack)
 	{
 		if (CurTime > ele.Value)
 		{
-			RemoveBuff_EffectAll(ele.Key);
-			Execute_BuffUpdate_Attack(this);
+			RemovedTags.Add(ele.Key);
 		}
 	}
+
 	for (auto& ele : Tag2BuffEndTime_Speed)
 	{
 		if (CurTime > ele.Value)
 		{
-			RemoveBuff_EffectAll(ele.Key);
-			Execute_BuffUpdate_Speed(this);
+			RemovedTags.Add(ele.Key);
 		}
 	}
+
 	for (auto& ele : Tag2BuffEndTime_Sight)
 	{
 		if (CurTime > ele.Value)
 		{
-			RemoveBuff_EffectAll(ele.Key);
-			Execute_BuffUpdate_Sight(this);
+			RemovedTags.Add(ele.Key);
 		}
 	}
 
+	for (auto& ele : RemovedTags)
+	{
+		RemoveBuff_EffectAll(ele);
+	}
 }
 
 // Called when the game starts
