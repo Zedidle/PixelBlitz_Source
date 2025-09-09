@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GAS/PXASComponent.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "UI/QTE/ArrowLineWidget.h"
 #include "UI/QTE/KeyPressCountDownWidget.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -71,7 +73,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY()
-	UAbilitySystemComponent* CachedASC;
+	UPXASComponent* CachedASC;
 
 
 #pragma region InputAction
@@ -115,11 +117,22 @@ public:
 	void OnHurtInstigatorDead(ABaseEnemy* DeadEnemy);
 
 	UFUNCTION()
-	void ListHurtInstigatorDead();
+	void ListenHurtInstigatorDead();
 
 	UFUNCTION()
 	FGameplayAbilitySpecHandle GetGameplayAbilityWithTag(const FGameplayTag& Tag);
-	
+
+	FGameplayAbilitySpec* GetAbilitySpec(FName TagName);
 
 };
+
+inline FGameplayAbilitySpec* UAbilityComponent::GetAbilitySpec(FName TagName)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, nullptr)
+	
+	const FGameplayAbilitySpecHandle AbilitySpecHandle = GetGameplayAbilityWithTag(FGameplayTag::RequestGameplayTag(TagName));
+	if (!AbilitySpecHandle.IsValid()) return nullptr;
+
+	return CachedASC->FindAbilitySpecFromHandle(AbilitySpecHandle);
+}
 

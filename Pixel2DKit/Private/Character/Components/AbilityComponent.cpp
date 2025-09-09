@@ -50,10 +50,7 @@ FGameplayTagContainer UAbilityComponent::CreateGameplayTagContainer(FName TagNam
 		return AbilityTagsChildren;
 	}
 
-	
-	FGameplayTagContainer GameplayTagContainer;
-	GameplayTagContainer.AddTag(FGameplayTag::RequestGameplayTag(TagName));
-	return GameplayTagContainer;
+	return FGameplayTagContainer(FGameplayTag::RequestGameplayTag(TagName));
 }
 
 // Called when the game starts
@@ -72,7 +69,10 @@ void UAbilityComponent::BeginPlay()
 		AbilityDataTable = PXCharacter->DataAsset->AbilityDataTable.LoadSynchronous();
 	}
 
-	CachedASC = PXCharacter->GetAbilitySystemComponent();
+	if (UPXASComponent* PXASComponent = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent()))
+	{
+		CachedASC = PXASComponent;
+	}
 }
 
 
@@ -309,29 +309,43 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 		return;
 	}
 
+	AcceptDamage = InDamage;
 	int SurDamage = InDamage;
 	
 	HurtMaker = Maker;
 	
 	// 触发黑荆棘
 	CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn")));
-	
+
 	// 移形换影
-	if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Mobiliarbus"))))
+	if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer(FName("Ability.Mobiliarbus")), "AbilityCD.Mobiliarbus"))
 	{
 		SurDamage = 0;
 	}
-	
+
 	// 检查天手力是否有效 且 冷却结束
-	FGameplayAbilitySpecHandle AbilitySpecHandle = GetGameplayAbilityWithTag(FGameplayTag::RequestGameplayTag("AbilitySet.SkyHandPower"));
-	if (const FGameplayAbilitySpec* Spec = CachedASC->FindAbilitySpecFromHandle(AbilitySpecHandle))
+	// if (FGameplayAbilitySpec* Spec = GetAbilitySpec("Ability.SkyHandPower"))
+	// {
+	// 	UGameplayAbility* AbilityInstance_SkyHandPower = Spec->GetPrimaryInstance();
+	// 	if (AbilityInstance_SkyHandPower->K2_CheckAbilityCooldown())
+	// 	{
+	// 		OnHurtInstigatorDead(nullptr);
+	// 		CreateQTE();
+	// 		ListenHurtInstigatorDead();
+	// 	}
+	// }
+	
+	const TWeakObjectPtr<UGameplayAbility> Ability = CachedASC->GetAbilityByTag(FGameplayTag::RequestGameplayTag("Ability.SkyHandPower"));
+	if (Ability.IsValid())
 	{
-		UGameplayAbility* AbilityInstance_SkyHandPower = Spec->GetPrimaryInstance();
-		if (AbilityInstance_SkyHandPower->K2_CheckAbilityCooldown())
+		if (UGameplayAbility* GA = Ability.Get())
 		{
-			OnHurtInstigatorDead(nullptr);
-			CreateQTE();
-			ListHurtInstigatorDead();
+			if (GA->K2_CheckAbilityCooldown())
+			{
+				OnHurtInstigatorDead(nullptr);
+				CreateQTE();
+				ListenHurtInstigatorDead();
+			}
 		}
 	}
 
@@ -397,7 +411,7 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 	
 	if (CachedASC && ArrowLineWidget)
 	{
-		if (CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.SkyHandPower"))))
+		if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer(FName("Ability.SkyHandPower")), "AbilityCD.SkyHandPower"))
 		{
 			ArrowLineWidget->RemoveFromParent();
 			Keep = false;
@@ -419,7 +433,7 @@ void UAbilityComponent::OnHurtInstigatorDead_Implementation(ABaseEnemy* DeadEnem
 	
 }
 
-void UAbilityComponent::ListHurtInstigatorDead()
+void UAbilityComponent::ListenHurtInstigatorDead()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtMaker)
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtMaker);
@@ -436,8 +450,7 @@ FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FG
 	}
 	
 	TArray<FGameplayAbilitySpecHandle> OutAbilityHandles;
-	FGameplayTagContainer TagContainer;
-	TagContainer.AddTag(Tag);
+	FGameplayTagContainer TagContainer(Tag);
 	CachedASC->FindAllAbilitiesWithTags(OutAbilityHandles, TagContainer);
 
 	if (OutAbilityHandles.IsEmpty())

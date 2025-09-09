@@ -18,4 +18,12 @@ public:
 	
 	virtual FGameplayEffectSpecHandle MakeOutgoingSpec(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level, FGameplayEffectContextHandle Context) const override;
 
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	bool TryActivateAbilities(const FGameplayTagContainer& GameplayTagContainer, FName CDTagName);
+
+	// 声明安全的获取函数
+	TWeakObjectPtr<UGameplayAbility> GetAbilityByTag(FGameplayTag AbilityTag);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC")
+	bool HasTag(FName TagName);
 };

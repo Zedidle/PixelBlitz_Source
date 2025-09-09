@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GAS/PXGameplayAbility.h"
-#include "GA_SkyhandPower.generated.h"
+#include "GA_SkyHandPower.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UGA_SkyhandPower : public UPXGameplayAbility
+class PIXEL2DKIT_API UGA_SkyHandPower : public UPXGameplayAbility
 {
 	GENERATED_BODY()
 

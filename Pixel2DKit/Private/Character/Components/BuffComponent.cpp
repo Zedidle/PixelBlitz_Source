@@ -225,7 +225,7 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 		{
 			if(Tag2BuffOnWidgetData.Contains(Tag))
 			{
-				RemoveBuff(Tag);
+				Execute_RemoveBuff(this, Tag, true);
 			}
 		}
 	}

@@ -1,17 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GAS/Ability/GA_SkyhandPower.h"
+#include "GAS/Ability/GA_SkyHandPower.h"
 
 #include "NiagaraFunctionLibrary.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/Components/AbilityComponent.h"
+#include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
 
 
-void UGA_SkyhandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                        const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
                                        const FGameplayEventData* TriggerEventData)
 {

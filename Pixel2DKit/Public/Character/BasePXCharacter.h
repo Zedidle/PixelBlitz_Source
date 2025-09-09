@@ -165,10 +165,6 @@ public:
 	float ScaleLerpValue = 0;
 	float ScaleCurValue = 1.0f;
 	FVector InitScale;
-	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
-	TSubclassOf<class UGameplayEffect> TestGE;
 
 
 #pragma region 临时存储数据，后续看存到哪
