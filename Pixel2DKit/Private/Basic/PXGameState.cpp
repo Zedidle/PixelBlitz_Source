@@ -46,6 +46,38 @@ void APXGameState::UpdateWeather()
 	SetWeather(CurWeatherIndex);
 }
 
+void APXGameState::DealGolds()
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+	UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+
+	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame);
+
+	UPXTalentsSaveGame* TalentSaveGame = UPXSaveGameSubSystemFuncLib::GetTalentsData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSaveGame);
+
+	MainSaveGame->RoundGoldNum += MainSaveGame->JustPickedGolds;
+	BasicBuildSaveGame->RemainGoldNum += MainSaveGame->JustPickedGolds;
+	TalentSaveGame->TotalPickupGolds += MainSaveGame->JustPickedGolds;
+	MainSaveGame->JustPickedGolds = 0;
+	
+}
+
+void APXGameState::ToNextLevel_Implementation()
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	
+	DealGolds();
+	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
+	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
+	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
+}
+
 UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
 {
 	if (const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>())

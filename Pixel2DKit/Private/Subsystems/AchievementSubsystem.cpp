@@ -3,11 +3,13 @@
 
 #include "Subsystems/AchievementSubsystem.h"
 
+#include "Character/BasePXCharacter.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
 #include "Settings/UserWidgetSettings.h"
 #include "UI/Achievement/AchievementCompleteWidget.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 void UAchievementSubsystem::CompleteAchievement(FName AchievementRowName)
 {
@@ -42,9 +44,8 @@ void UAchievementSubsystem::CompleteAchievement(FName AchievementRowName)
 void UAchievementSubsystem::Achievement_KillBoss(int InjuredNum)
 {
 	UPXSaveGameSubsystem* SaveGameSubsystem = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
-	UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementSubsystem)
+
 
 	UPXAchievementsSaveGame* AchievementsData = SaveGameSubsystem->GetAchievementsData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementsData);
@@ -54,17 +55,17 @@ void UAchievementSubsystem::Achievement_KillBoss(int InjuredNum)
 	// 第一次击杀BOSS
 	if (AchievementsData->KilledBossNum == 1)
 	{
-		AchievementSubsystem->CompleteAchievement("2");
+		CompleteAchievement("2");
 	}
 	// 击杀BOSS 100次
 	if (AchievementsData->KilledBossNum == 100)
 	{
-		AchievementSubsystem->CompleteAchievement("14");
+		CompleteAchievement("14");
 	}
 	// 一击必杀
 	if (InjuredNum == 0)
 	{
-		AchievementSubsystem->CompleteAchievement("3");
+		CompleteAchievement("3");
 	}
 
 	SaveGameSubsystem->SaveAchievementsData();
@@ -73,71 +74,73 @@ void UAchievementSubsystem::Achievement_KillBoss(int InjuredNum)
 void UAchievementSubsystem::Achievement_Completion(float UseTime, bool bClearAllEnemy, bool bPickupAllGolds,
 	int DieTimes, int HurtTimes)
 {
-	UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementSubsystem)
-
-	AchievementSubsystem->CompleteAchievement("1");
+	CompleteAchievement("1");
 
 	if (UseTime < 300)
 	{
-		AchievementSubsystem->CompleteAchievement("5");
+		CompleteAchievement("5");
 	}
 
 	if (UseTime < 360 && bClearAllEnemy)
 	{
-		AchievementSubsystem->CompleteAchievement("7");
+		CompleteAchievement("7");
 	}
 
 	if (UseTime < 480)
 	{
-		AchievementSubsystem->CompleteAchievement("4");
+		CompleteAchievement("4");
 	}
 
 	// 击杀所有怪物
 	if (bClearAllEnemy)
 	{
-		AchievementSubsystem->CompleteAchievement("6");
+		CompleteAchievement("6");
 	}
 
 	// 拾取所有金币
 	if (bPickupAllGolds)
 	{
-		AchievementSubsystem->CompleteAchievement("15");
+		CompleteAchievement("15");
 	}
 
 	// 一次不死
 	if (DieTimes == 0)
 	{
-		AchievementSubsystem->CompleteAchievement("12");
+		CompleteAchievement("12");
 	}
 
 	// 无伤通过
 	if (HurtTimes == 0)
 	{
-		AchievementSubsystem->CompleteAchievement("13");
+		CompleteAchievement("13");
 	}
 
 	// 全能的人
 	if (bClearAllEnemy && bPickupAllGolds && HurtTimes == 0)
 	{
-		AchievementSubsystem->CompleteAchievement("20");
+		CompleteAchievement("20");
 	}
 }
 
-void UAchievementSubsystem::Achievement_LevelPass(int PerfectDodgeTimes, int AttackHitInDashTimes)
+void UAchievementSubsystem::Achievement_LevelPass()
 {
-	UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementSubsystem)
+	ABasePXCharacter* PxCharacter = UPXGameplayStatics::GetPlayerCharacter(GetGameInstance()->GetWorld(), 0);
 
-	if (PerfectDodgeTimes >= 20)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PxCharacter)
+	
+	if (PxCharacter->PerfectDodgeTimes >= 20)
 	{
-		AchievementSubsystem->CompleteAchievement("8");
+		CompleteAchievement("8");
 	}
 
-	if (AttackHitInDashTimes >= 20)
+	if (PxCharacter->AttackHitDashing >= 20)
 	{
-		AchievementSubsystem->CompleteAchievement("9");
+		CompleteAchievement("9");
+	}
 
+	if (PxCharacter->HasOneHealthPoint)
+	{
+		CompleteAchievement("18");
 	}
 }
 

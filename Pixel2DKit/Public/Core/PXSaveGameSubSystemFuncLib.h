@@ -12,7 +12,7 @@ class UPXSaveGameSubSystemFuncLib : public UObject
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
 	static UPXSaveGameSubsystem* GetSaveGameSubsystem(UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))

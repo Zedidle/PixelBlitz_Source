@@ -115,7 +115,8 @@ public:
 
 
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IBuff_Interface, public IAbilitySystemInterface
+class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IBuff_Interface,
+										public IAbilitySystemInterface, public IInteract_Interface
 {
 	GENERATED_BODY()
 
@@ -128,8 +129,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	FVector CameraOffsetForBulletTime;
 	float JumpStartTime;
 
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	int PerfectDodgeTimes = 0;
+
 	bool bViewYawChangingByPlayerControl = false;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
@@ -160,8 +160,7 @@ public:
 	FTimerHandle AttackHitTimerHandle;
 	int AttackHitComboNum = 0;
 
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	int AttackHitDashing = 0; // 冲刺中命中
+
 
 	float ScaleLerpValue = 0;
 	float ScaleCurValue = 1.0f;
@@ -172,8 +171,13 @@ public:
 	TSubclassOf<class UGameplayEffect> TestGE;
 
 
-#pragma region 临时存储数据
+#pragma region 临时存储数据，后续看存到哪
 
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	int PerfectDodgeTimes = 0;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	int AttackHitDashing = 0; // 冲刺中命中
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Talent)
 	int ReviveTimes = 0;
 	

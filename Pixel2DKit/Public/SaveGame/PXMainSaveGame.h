@@ -48,6 +48,9 @@ public:
 	int HurtTimes = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int JustPickedGolds;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RoundGoldNum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

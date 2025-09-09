@@ -41,3 +41,14 @@ void ABaseItem::Use_Implementation()
 	}
 }
 
+void ABaseItem::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+	
+}
+
+void ABaseItem::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+}
+

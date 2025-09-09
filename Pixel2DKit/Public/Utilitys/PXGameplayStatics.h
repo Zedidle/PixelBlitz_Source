@@ -8,6 +8,9 @@
 #include "PXGameplayStatics.generated.h"
 
 
+class APXGameState;
+class APXPlayerController;
+
 UCLASS()
 class PIXEL2DKIT_API UPXGameplayStatics : public UBlueprintFunctionLibrary
 {
@@ -23,5 +26,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
 	static APXGameState* GetGameState(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static APXPlayerController* GetPlayerController(const UObject* WorldContextObject, int32 PlayerIndex);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static ABasePXCharacter* GetPlayerCharacter(const UObject* WorldContextObject, int32 PlayerIndex);
 	
 };

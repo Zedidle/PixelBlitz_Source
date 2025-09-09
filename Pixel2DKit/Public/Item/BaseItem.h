@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/Interact_Interface.h"
 #include "Subsystems/DropSubsystem.h"
 #include "BaseItem.generated.h"
 
 
 UCLASS(Abstract, Blueprintable)
-class PIXEL2DKIT_API ABaseItem : public AActor
+class PIXEL2DKIT_API ABaseItem : public AActor, public IInteract_Interface
 {
 	GENERATED_BODY()
 
@@ -33,4 +34,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void Use();
 	virtual void Use_Implementation();
+
+
+
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+
 };

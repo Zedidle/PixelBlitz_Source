@@ -74,4 +74,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Monster")
 	void OnEnemyDie(ABaseEnemy* Enemy);
+
+
+	UFUNCTION(BlueprintCallable, Category = "GameState | Currency")
+	void DealGolds();
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | GameplayFlow")
+	void ToNextLevel();
+	
 };

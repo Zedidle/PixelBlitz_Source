@@ -5,6 +5,7 @@
 
 #include "Basic/PXGameMode.h"
 #include "Basic/PXGameState.h"
+#include "Basic/PXPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 UPXGameInstance* UPXGameplayStatics::GetGameInstance(const UObject* WorldContextObject)
@@ -32,6 +33,32 @@ APXGameState* UPXGameplayStatics::GetGameState(const UObject* WorldContextObject
 	if (AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject))
 	{
 		return Cast<APXGameState>(GameState);
+	}
+
+	return nullptr;
+}
+
+APXPlayerController* UPXGameplayStatics::GetPlayerController(const UObject* WorldContextObject, int32 PlayerIndex)
+{
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, PlayerIndex))
+	{
+		if (APXPlayerController* PxPlayerController = Cast<APXPlayerController>(PC))
+		{
+			return PxPlayerController;
+		}
+	}
+
+	return nullptr;
+}
+
+ABasePXCharacter* UPXGameplayStatics::GetPlayerCharacter(const UObject* WorldContextObject, int32 PlayerIndex)
+{
+	if (ACharacter* Character = UGameplayStatics::GetPlayerCharacter(WorldContextObject, PlayerIndex))
+	{
+		if (ABasePXCharacter* PxCharacter = Cast<ABasePXCharacter>(Character))
+		{
+			return PxCharacter;
+		}
 	}
 
 	return nullptr;
