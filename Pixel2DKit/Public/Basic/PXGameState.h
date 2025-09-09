@@ -7,6 +7,9 @@
 #include "GameFramework/GameState.h"
 #include "PXGameState.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDayTimeTypeChanged);
+
+
 USTRUCT(BlueprintType)
 struct FLevelWeatherRate: public FTableRowBase
 {
@@ -47,9 +50,20 @@ class PIXEL2DKIT_API APXGameState : public AGameState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather", meta = (AllowPrivateAccess))
 	FName ForceWeatherIndex;
 
+protected:
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
 
+	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "GameState | Weather")
+	FOnDayTimeTypeChanged OnDayTimeTypeChanged;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
+	void EventOnDayTimeTypeChanged();
+	
+	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
 	FName CurWeatherIndex;
 	
@@ -67,7 +81,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
 	void UpdateWeather();
-
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
 	UPrimaryDataAsset* SetWeather(FName WeatherRowName);
@@ -83,3 +96,8 @@ public:
 	void ToNextLevel();
 	
 };
+
+inline void APXGameState::EventOnDayTimeTypeChanged_Implementation()
+{
+	UpdateWeather();
+}

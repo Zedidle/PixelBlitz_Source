@@ -11,6 +11,20 @@
 #include "Settings/DataTableSettings.h"
 #include "Utilitys/CommonFuncLib.h"
 
+void APXGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	OnDayTimeTypeChanged.AddDynamic(this, &ThisClass::EventOnDayTimeTypeChanged);
+}
+
+void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	OnDayTimeTypeChanged.RemoveAll(this);
+}
+
 void APXGameState::LoadWeatherEffect()
 {
 }
