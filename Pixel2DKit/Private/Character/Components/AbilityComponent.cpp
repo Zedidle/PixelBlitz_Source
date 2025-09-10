@@ -324,12 +324,12 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 	CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn")));
 
 	// 移形换影
-	if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer(FName("Ability.Mobiliarbus")), "AbilityCD.Mobiliarbus"))
+	if (CachedASC->TryActivateAbilityByTagName("Ability.Mobiliarbus"))
 	{
 		SurDamage = 0;
 	}
 
-	if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer("Ability.SkyHandPower.QTE"), "AbilityCD.SkyHandPower.QTE"))
+	if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower.QTE"))
 	{
 		ListenHurtInstigatorDead();
 	}
@@ -396,7 +396,7 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 	
 	if (CachedASC)
 	{
-		if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer("Ability.SkyHandPower"), "AbilityCD.SkyHandPower"))
+		if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower"))
 		{
 			Keep = false;
 		}

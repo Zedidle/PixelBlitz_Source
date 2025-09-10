@@ -23,9 +23,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PXASC")
 	bool TryActivateAbilities(const FGameplayTagContainer& GameplayTagContainer, FName CDTagName);
 
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	bool TryActivateAbilityByTagName(FName TagName, bool bAllowRemoteActivation = true);
+	
 	// 声明安全的获取函数
 	FGameplayAbilitySpec* GetAbilityByTagName(FName AbilityTagName);
-	
+
+	// 检测是否有某个Tag，一般用于检测冷却标记
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC")
 	bool HasTag(FName TagName);
 };

@@ -3,6 +3,7 @@
 
 #include "GAS/PXASComponent.h"
 #include "AbilitySystemStats.h"
+#include "AudioMixerBlueprintLibrary.h"
 #include "GAS/PXGameplayEffect.h"
 
 FGameplayEffectSpecHandle UPXASComponent::MakeOutgoingSpec(TSubclassOf<UGameplayEffect> GameplayEffectClass,
@@ -38,6 +39,25 @@ bool UPXASComponent::TryActivateAbilities(const FGameplayTagContainer& GameplayT
 
 	TryActivateAbilitiesByTag(GameplayTagContainer);
 	return HasTag(CDTagName);
+}
+
+bool UPXASComponent::TryActivateAbilityByTagName(FName TagName, bool bAllowRemoteActivation)
+{
+	if (TagName.IsNone()) return false;
+	
+	FName CDTagName = FName(TagName.ToString() + ".CD");
+	if (HasTag(CDTagName)) return false;
+
+	bool bSuccess = false;
+	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{		
+		if (Spec.Ability && Spec.Ability->AbilityTags.HasTagExact(FGameplayTag::RequestGameplayTag(TagName)))
+		{
+			bSuccess |= TryActivateAbility(Spec.Handle, bAllowRemoteActivation);
+		}
+	}
+
+	return bSuccess && HasTag(CDTagName);
 }
 
 FGameplayAbilitySpec* UPXASComponent::GetAbilityByTagName(FName AbilityTagName)
