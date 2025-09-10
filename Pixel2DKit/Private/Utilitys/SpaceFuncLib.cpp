@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "GameFramework/Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 bool USpaceFuncLib::ActorAtActorRight(AActor* A, AActor* B, const int PlayerIndex)
 {
@@ -19,6 +20,35 @@ bool USpaceFuncLib::ActorAtActorRight(AActor* A, AActor* B, const int PlayerInde
 	UGameplayStatics::ProjectWorldToScreen(Controller, B->GetActorLocation(), v2, false);
 
 	return v1.X > v2.X;
+}
+
+bool USpaceFuncLib::ActorAtActorRightWithOffset(AActor* A, AActor* B, const int PlayerIndex, FVector OffsetA,
+	FVector OffsetB)
+{
+	if (!A || !B) return false;
+	
+	APlayerController* Controller = UGameplayStatics::GetPlayerController(A->GetWorld(), PlayerIndex);
+	if (!Controller) return false;
+
+	FVector2d v1, v2;
+	UGameplayStatics::ProjectWorldToScreen(Controller, A->GetActorLocation() + OffsetA, v1, false);
+	UGameplayStatics::ProjectWorldToScreen(Controller, B->GetActorLocation() + OffsetB, v2, false);
+
+	return v1.X > v2.X;
+}
+
+FVector2D USpaceFuncLib::GetDistance2D_InScreen(AActor* A, AActor* B, const int PlayerIndex, FVector OffsetA, FVector OffsetB)
+{
+	if (!A || !B) return FVector2D::ZeroVector;
+	
+	APlayerController* Controller = UGameplayStatics::GetPlayerController(A->GetWorld(), PlayerIndex);
+	if (!Controller) return FVector2D::ZeroVector;
+
+	FVector2d v1, v2;
+	UGameplayStatics::ProjectWorldToScreen(Controller, A->GetActorLocation() + OffsetA, v1, false);
+	UGameplayStatics::ProjectWorldToScreen(Controller, B->GetActorLocation() + OffsetB, v2, false);
+
+	return v1 - v2;
 }
 
 bool USpaceFuncLib::ActorAtActorFront(AActor* A, AActor* B, const int PlayerIndex)
@@ -123,4 +153,51 @@ FVector USpaceFuncLib::GetDirection2DFromPlayerViewPoint(const int PlayerIndex)
 
 	
 	return (PlayerCharacterLocation - outLocation).GetSafeNormal2D(0.1);
+}
+
+bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset)
+{
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
+	if (!GameInstance) return false;
+
+	UWorld* World = GameInstance->GetWorld();
+	if (!World) return false;
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
+	if (!PC) return false;
+
+	FVector2D ScreenPosition;
+	UGameplayStatics::ProjectWorldToScreen(PC, Actor->GetActorLocation() + Offset, ScreenPosition, false);
+
+	// 可能后续还要加上屏幕上限
+	return ScreenPosition.X > 0 && ScreenPosition.Y > 0;
+}
+
+FVector2D USpaceFuncLib::GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset)
+{
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
+	if (!GameInstance) return FVector2D::ZeroVector;
+
+	UWorld* World = GameInstance->GetWorld();
+	if (!World) return FVector2D::ZeroVector;
+
+	APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
+	if (!PC) return FVector2D::ZeroVector;
+
+	FVector2D ScreenPosition;
+	UGameplayStatics::ProjectWorldToScreen(PC, Actor->GetActorLocation() + Offset, ScreenPosition, false);
+	
+	return ScreenPosition;
+}
+
+float USpaceFuncLib::CalAngle(FVector A, FVector B)
+{
+	float Angle = UKismetMathLibrary::DegAcos(FVector::DotProduct(A.GetSafeNormal(), B.GetSafeNormal()));
+	return Angle;
+}
+
+float USpaceFuncLib::CalAngle2D(FVector2D A, FVector2D B)
+{
+	float Angle = UKismetMathLibrary::DegAcos(FVector2D::DotProduct(A.GetSafeNormal(), B.GetSafeNormal()));
+	return Angle;
 }

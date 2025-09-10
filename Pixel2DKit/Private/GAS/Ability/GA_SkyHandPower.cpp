@@ -18,38 +18,64 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(GetAvatarActorFromActorInfo());
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	AActor* Actor = GetAvatarActorFromActorInfo();
+	if (!Actor)
+	{
+		K2_EndAbility();
+		return;
+	}
+	
+	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(IFight_Interface::Execute_GetPawn(Actor));
+	if (!PXCharacter || !PXCharacter->Implements<UBuff_Interface>() ||
+		!PXCharacter->Implements<UFight_Interface>() ||
+		!IFight_Interface::Execute_IsAlive(PXCharacter))
+	{
+		K2_EndAbility();
+		return;
+	}
 
 	UAbilityComponent* PlayerAbilityComponent = PXCharacter->AbilityComponent;
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PlayerAbilityComponent)
-
+	if (!PlayerAbilityComponent)
+	{
+		K2_EndAbility();
+		return;
+	}
+	
 	AActor* HurtInstigator = PlayerAbilityComponent->HurtMaker;
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtInstigator);
+	if (!HurtInstigator)
+	{
+		K2_EndAbility();
+		return;
+	}
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtInstigator);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy);
-
-	if (!Enemy->Implements<UFight_Interface>()) return;
-	if (!IFight_Interface::Execute_IsAlive(Enemy)) return;
-
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
-
+	if (!Enemy || !Enemy->Implements<UFight_Interface>() || !IFight_Interface::Execute_IsAlive(Enemy))
+	{
+		K2_EndAbility();
+		return;
+	}
+	UHealthComponent* EnemyHealthComponent = Enemy->GetComponentByClass<UHealthComponent>();
+	if (!EnemyHealthComponent)
+	{
+		K2_EndAbility();
+		return;
+	}
+	
 	int Damage = IBuff_Interface::Execute_Buff_CalDamage(PXCharacter, PXCharacter->GetAttackDamage());
 	FVector PreEnemyLocation = Enemy->GetActorLocation();
 
 	Enemy->SetActorLocation(Enemy->GetActorScale3D() * FVector(0, 0, 44.0f) + PXCharacter->GetActorLocation());
 	PXCharacter->SetActorLocation(PreEnemyLocation);
 	
-	UHealthComponent* EnemyHealthComponent = Enemy->GetComponentByClass<UHealthComponent>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyHealthComponent);
 	EnemyHealthComponent->DecreaseHP(Damage, FVector(0,0,0),
 		PXCharacter, true, true, false);
 
+	
 	const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceSettings);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceSettings->NS_Mobiliarbus);
+	if (!ResourceSettings || !ResourceSettings->NS_Mobiliarbus)
+	{
+		K2_EndAbility();
+		return;
+	}
 
 	UNiagaraSystem* LoadedNS = ResourceSettings->NS_Mobiliarbus.LoadSynchronous();
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNS, PXCharacter->GetActorLocation());

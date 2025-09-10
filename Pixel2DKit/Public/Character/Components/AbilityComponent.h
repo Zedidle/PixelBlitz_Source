@@ -106,7 +106,7 @@ public:
 
 
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
-	void CreateQTE(float _SustainTime, float _Scale);
+	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);
 
 	UFUNCTION(BlueprintCallable)
 	void OnKeyPressed(const FName& TagName, bool& Keep);

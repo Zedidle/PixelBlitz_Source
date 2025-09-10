@@ -329,22 +329,8 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 		SurDamage = 0;
 	}
 
-	// 检查天手力是否有效 且 冷却结束
-	// if (FGameplayAbilitySpec* Spec = GetAbilitySpec("Ability.SkyHandPower"))
-	// {
-	// 	UGameplayAbility* AbilityInstance_SkyHandPower = Spec->GetPrimaryInstance();
-	// 	if (AbilityInstance_SkyHandPower->K2_CheckAbilityCooldown())
-	// 	{
-	// 		OnHurtInstigatorDead(nullptr);
-	// 		CreateQTE();
-	// 		ListenHurtInstigatorDead();
-	// 	}
-	// }
-
-	if (CachedASC->GetAbilityByTagName("Ability.SkyHandPower") && !CachedASC->HasTag(FName("AbilityCD.SkyHandPower")))
+	if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer("Ability.SkyHandPower.QTE"), "AbilityCD.SkyHandPower.QTE"))
 	{
-		OnHurtInstigatorDead(nullptr);
-		CreateQTE(1.5, 1.2);
 		ListenHurtInstigatorDead();
 	}
 
@@ -353,6 +339,8 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 {
+	OnHurtInstigatorDead(nullptr);
+	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountdownWidgetClass)
 	KeyPressCountDownWidget = CreateWidget<UKeyPressCountDownWidget>(GetWorld(), KeyPressCountdownWidgetClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountDownWidget)
@@ -364,7 +352,7 @@ void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 	ArrowLineWidget = CreateWidget<UArrowLineWidget>(GetWorld(), ArrowLineWidgetClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ArrowLineWidget)
 	ArrowLineWidget->InitializeData(PXCharacter, HurtMaker, true, 10,
-		600, FLinearColor::White, 1.5, FVector2D(36, 54),
+		600, FLinearColor::White, _SustainTime, FVector2D(36, 54),
 		FVector2D(64, 64), FVector::Zero());
 	ArrowLineWidget->SetRenderScale(FVector2D(_Scale));
 	ArrowLineWidget->AddToViewport(100);
@@ -401,16 +389,18 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 		return;
 	}
 
+	if (ArrowLineWidget)
+	{
+		ArrowLineWidget->RemoveArrowLine();
+	}
 	
-	if (CachedASC && ArrowLineWidget)
+	if (CachedASC)
 	{
 		if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer("Ability.SkyHandPower"), "AbilityCD.SkyHandPower"))
 		{
-			ArrowLineWidget->RemoveFromParent();
 			Keep = false;
 		}
 	}
-	
 }
 
 void UAbilityComponent::OnHurtInstigatorDead(ABaseEnemy* DeadEnemy)
@@ -421,7 +411,7 @@ void UAbilityComponent::OnHurtInstigatorDead(ABaseEnemy* DeadEnemy)
 	}
 	if (ArrowLineWidget)
 	{
-		ArrowLineWidget->RemoveFromParent();
+		ArrowLineWidget->RemoveArrowLine();
 	}
 }
 

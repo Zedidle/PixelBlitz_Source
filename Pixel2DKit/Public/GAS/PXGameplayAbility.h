@@ -27,7 +27,7 @@ public:
 	UPROPERTY(Transient)
 	FGameplayTagContainer TempCooldownTags; 
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Cooldown")
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Cooldown")
 	float GetCooldownDuration() const;
 	
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;

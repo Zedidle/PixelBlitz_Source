@@ -31,6 +31,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool ActorAtActorRight(AActor* A, AActor* B, const int PlayerIndex = 0);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static bool ActorAtActorRightWithOffset(AActor* A, AActor* B, const int PlayerIndex = 0, FVector OffsetA = FVector(0), FVector OffsetB = FVector(0));
+
+	// 获得某镜头中，A相对B的距离
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static FVector2D GetDistance2D_InScreen(AActor* A, AActor* B, const int PlayerIndex = 0, FVector OffsetA = FVector(0), FVector OffsetB = FVector(0));
+	
 	// 判断某个镜头中，A是否在B的前侧（离镜头更近）
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool ActorAtActorFront(AActor* A, AActor* B, const int PlayerIndex = 0);
@@ -62,9 +69,16 @@ public:
 	static FVector GetDirection2DFromPlayerViewPoint(const int PlayerIndex = 0);
 
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static bool IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0));
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static FVector2D GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0));
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static float CalAngle(FVector A, FVector B);
 	
-	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static float CalAngle2D(FVector2D A, FVector2D B);
 };
 	
