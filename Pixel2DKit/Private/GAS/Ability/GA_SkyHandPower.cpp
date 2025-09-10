@@ -59,6 +59,12 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		K2_EndAbility();
 		return;
 	}
+
+	if (!K2_CommitAbility())
+	{
+		K2_EndAbility();
+		return;
+	}
 	
 	int Damage = IBuff_Interface::Execute_Buff_CalDamage(PXCharacter, PXCharacter->GetAttackDamage());
 	FVector PreEnemyLocation = Enemy->GetActorLocation();

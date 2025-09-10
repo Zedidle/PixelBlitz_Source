@@ -4,6 +4,7 @@
 #include "Enemy/EnemySpawner.h"
 
 #include "Enemy/BaseEnemy.h"
+#include "Utilitys/CommonFuncLib.h"
 
 // Sets default values
 AEnemySpawner::AEnemySpawner()
@@ -33,42 +34,25 @@ ABaseEnemy* AEnemySpawner::SpawnEnemy()
 	{
 		return SelfEnemy;
 	}
-
-	int32 Max = 0;
-	for (auto ele : EnemyClassRate)
+	TSubclassOf<ABaseEnemy> EnemyClass;
+	if (UCommonFuncLib::CalRandomMap(EnemyClassRate, EnemyClass))
 	{
-		Max += ele.Value;
-	}
-	
-	if (Max <= 0) return nullptr;
-
-	
-	int32 LocalV = FMath::RandHelper(Max);
-	int32 LocalR = 0;
-	for (auto ele : EnemyClassRate)
-	{
-		LocalR += ele.Value;
-		if (LocalR > LocalV)
+		FTransform* SpawnTransform = new FTransform();
+		SpawnTransform->SetLocation(GetActorLocation());
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		SelfEnemy = Cast<ABaseEnemy>(GetWorld()->SpawnActor(EnemyClass, SpawnTransform, SpawnParams));
+		SelfEnemy->Initialize(EnemyLevel);
+		if (SelfEnemy)
 		{
-			if (IsValid(ele.Key))
+			for (auto Tag : Tags)
 			{
-				FTransform* SpawnTransform = new FTransform();
-				SpawnTransform->SetLocation(GetActorLocation());
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-				SelfEnemy = Cast<ABaseEnemy>(GetWorld()->SpawnActor(ele.Key.Get(), SpawnTransform, SpawnParams));
-				SelfEnemy->Initialize(EnemyLevel);
-				if (SelfEnemy)
-				{
-					for (auto Tag : Tags)
-					{
-						SelfEnemy->Tags.Add(Tag);
-					}
-				}
-				return SelfEnemy;
+				SelfEnemy->Tags.Add(Tag);
 			}
 		}
+		return SelfEnemy;
 	}
+
 	return nullptr;
 }
 

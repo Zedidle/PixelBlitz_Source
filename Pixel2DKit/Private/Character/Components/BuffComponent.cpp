@@ -15,6 +15,7 @@
 #include "Settings/CustomResourceSettings.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
+#include "Utilitys/DebugFuncLab.h"
 
 // Sets default values for this component's properties
 UBuffComponent::UBuffComponent()
@@ -220,8 +221,9 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
-		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("AbilityCD")) || 
-			Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectApplied Tag: %s"), *Tag.ToString()));
+
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
 		{
 			if(Tag2BuffOnWidgetData.Contains(Tag))
 			{
@@ -237,8 +239,11 @@ void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Gamepl
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
-		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("AbilityCD")) || 
-			Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectRemoved Tag: %s"), *Tag.ToString()));
+
+		// if (Tag.GetTagName().ToString().Contains(".CD") || 
+		// Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
 		{
 			AddBuffByTag(Tag);
 		}
@@ -479,12 +484,11 @@ float UBuffComponent::GetSlowDownResistancePercent_Implementation()
 
 void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 {
+	if(!Tag2BuffOnWidgetData.Contains(Tag)) return;
+	
 	FName BuffName = GetBuffRownameByTag(Tag);
-	if(Tag2BuffOnWidgetData.Contains(Tag))
-	{
-		FBuffOnWidget Data = Tag2BuffOnWidgetData[Tag];
-		IBuff_Interface::Execute_AddBuff(this, Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
-	}
+	FBuffOnWidget Data = Tag2BuffOnWidgetData[Tag];
+	IBuff_Interface::Execute_AddBuff(this, Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
 }
 
 void UBuffComponent::DispearBuff(FGameplayTag Tag)

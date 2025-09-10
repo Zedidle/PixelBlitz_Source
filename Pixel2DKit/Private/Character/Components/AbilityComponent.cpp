@@ -340,6 +340,8 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 {
 	OnHurtInstigatorDead(nullptr);
+	if (!HurtMaker || !HurtMaker->Implements<UFight_Interface>()
+		|| !IFight_Interface::Execute_IsAlive(HurtMaker)) return;
 	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountdownWidgetClass)
 	KeyPressCountDownWidget = CreateWidget<UKeyPressCountDownWidget>(GetWorld(), KeyPressCountdownWidgetClass);
