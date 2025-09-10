@@ -149,7 +149,7 @@ struct FAbility: public FTableRowBase
 	TMap<FGameplayTag, float> Effect_GameplayTag;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	TSoftClassPtr<UGameplayAbility> AbilityClass;
+	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FGameplayTag AbilityTag;

@@ -40,25 +40,18 @@ bool UPXASComponent::TryActivateAbilities(const FGameplayTagContainer& GameplayT
 	return HasTag(CDTagName);
 }
 
-TWeakObjectPtr<UGameplayAbility> UPXASComponent::GetAbilityByTag(FGameplayTag AbilityTag)
+FGameplayAbilitySpec* UPXASComponent::GetAbilityByTagName(FName AbilityTagName)
 {
 	// 遍历所有激活的技能
 	for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 	{
 		if (Spec.Ability)
 		{
-			if (Spec.Ability->AbilityTags.HasTagExact(AbilityTag))
+			if (Spec.Ability->AbilityTags.HasTagExact(FGameplayTag::RequestGameplayTag(AbilityTagName)))
 			{
-				return Spec.Ability;
+				return &Spec;
 			}
 		}
-		
-		// 检查技能Tag匹配
-		// if (Spec.Ability && Spec.DynamicAbilityTags.HasTagExact(AbilityTag))
-		// {
-		// 	// 返回安全弱指针
-		// 	return TWeakObjectPtr<UGameplayAbility>(Spec.Ability);
-		// }
 	}
 	return nullptr; // 安全返回空
 }
@@ -66,5 +59,9 @@ TWeakObjectPtr<UGameplayAbility> UPXASComponent::GetAbilityByTag(FGameplayTag Ab
 
 bool UPXASComponent::HasTag(FName TagName)
 {
-	return HasMatchingGameplayTag(FGameplayTag::RequestGameplayTag(TagName));
+	if (!TagCache.Contains(TagName))
+	{
+		TagCache.Add(TagName, FGameplayTag::RequestGameplayTag(TagName));
+	}
+	return HasMatchingGameplayTag(TagCache[TagName]);
 }

@@ -105,15 +105,13 @@ public:
 
 
 
-	UFUNCTION(BlueprintCosmetic)
-	void CreateQTE();
-	
+	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
+	void CreateQTE(float _SustainTime, float _Scale);
 
 	UFUNCTION(BlueprintCallable)
 	void OnKeyPressed(const FName& TagName, bool& Keep);
 
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 	void OnHurtInstigatorDead(ABaseEnemy* DeadEnemy);
 
 	UFUNCTION()

@@ -105,11 +105,14 @@ void UAbilityComponent::LearnAbility(FName AbilityIndex)
 	{
 		TakeEffectAbilityIndexes.AddUnique(AbilityIndex);
 		// 由于同一技能的不同等级都使用相同的GA，只是数值不同，就只用在学习第一个技能是GiveAbility
-		UClass* AbilityClass = AbilityData.AbilityClass.LoadSynchronous();
-		if (!AbilityClass) return;
-		
-		FGameplayAbilitySpec Spec(AbilityClass);
-		CachedASC->GiveAbility(Spec);
+		for (auto& AbilityClass: AbilityData.AbilityClass)
+		{
+			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
+			{
+				FGameplayAbilitySpec Spec(LoadedClass);
+				CachedASC->GiveAbility(Spec);
+			}
+		}
 	}
 	else if (TakeEffectAbilityIndexes.Contains(AbilityData.PreLevelIndex))
 	{
@@ -142,10 +145,13 @@ void UAbilityComponent::LoadAbility()
 	for (auto Index : TakeEffectAbilityIndexes)
 	{
 		FAbility AbilityData = DataTableManager->FindRow<FAbility>(AbilityDataTable, Index);
-		if (UClass* LoadedClass = AbilityData.AbilityClass.LoadSynchronous())
+		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
-			FGameplayAbilitySpec Spec(LoadedClass);
-			CachedASC->GiveAbility(Spec);
+			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
+			{
+				FGameplayAbilitySpec Spec(LoadedClass);
+				CachedASC->GiveAbility(Spec);
+			}
 		}
 		
 		TArray<FGameplayTag> Keys;
@@ -334,30 +340,23 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 	// 		ListenHurtInstigatorDead();
 	// 	}
 	// }
-	
-	const TWeakObjectPtr<UGameplayAbility> Ability = CachedASC->GetAbilityByTag(FGameplayTag::RequestGameplayTag("Ability.SkyHandPower"));
-	if (Ability.IsValid())
+
+	if (CachedASC->GetAbilityByTagName("Ability.SkyHandPower") && !CachedASC->HasTag(FName("AbilityCD.SkyHandPower")))
 	{
-		if (UGameplayAbility* GA = Ability.Get())
-		{
-			if (GA->K2_CheckAbilityCooldown())
-			{
-				OnHurtInstigatorDead(nullptr);
-				CreateQTE();
-				ListenHurtInstigatorDead();
-			}
-		}
+		OnHurtInstigatorDead(nullptr);
+		CreateQTE(1.5, 1.2);
+		ListenHurtInstigatorDead();
 	}
 
 	OutDamage = SurDamage; 
 }
 
-void UAbilityComponent::CreateQTE()
+void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountdownWidgetClass)
 	KeyPressCountDownWidget = CreateWidget<UKeyPressCountDownWidget>(GetWorld(), KeyPressCountdownWidgetClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountDownWidget)
-	KeyPressCountDownWidget->InitializeData(1.5, 1.2);
+	KeyPressCountDownWidget->InitializeData(_SustainTime, _Scale, Action_Jump);
 	KeyPressCountDownWidget->AddToViewport(100);
 
 	
@@ -367,6 +366,7 @@ void UAbilityComponent::CreateQTE()
 	ArrowLineWidget->InitializeData(PXCharacter, HurtMaker, true, 10,
 		600, FLinearColor::White, 1.5, FVector2D(36, 54),
 		FVector2D(64, 64), FVector::Zero());
+	ArrowLineWidget->SetRenderScale(FVector2D(_Scale));
 	ArrowLineWidget->AddToViewport(100);
 }
 
@@ -380,18 +380,12 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 
 	const auto& ActionMap = PXCharacter->DataAsset->InputConfig->ActionMap;
 	FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName);
-	if (!ActionMap.Contains(Tag))
+	if (!ActionMap.Contains(Tag) || Action_Jump != ActionMap[Tag])
 	{
 		Keep = true;
 		return;
 	}
 	
-	if (Action_Jump != ActionMap[Tag])
-	{
-		Keep = true;
-		return;
-	}
-
 	if (!IsValid(KeyPressCountDownWidget))
 	{
 		Keep = true;
@@ -407,11 +401,10 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 		return;
 	}
 
-
 	
 	if (CachedASC && ArrowLineWidget)
 	{
-		if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer(FName("Ability.SkyHandPower")), "AbilityCD.SkyHandPower"))
+		if (CachedASC->TryActivateAbilities(CreateGameplayTagContainer("Ability.SkyHandPower"), "AbilityCD.SkyHandPower"))
 		{
 			ArrowLineWidget->RemoveFromParent();
 			Keep = false;
@@ -420,7 +413,7 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 	
 }
 
-void UAbilityComponent::OnHurtInstigatorDead_Implementation(ABaseEnemy* DeadEnemy)
+void UAbilityComponent::OnHurtInstigatorDead(ABaseEnemy* DeadEnemy)
 {
 	if (KeyPressCountDownWidget)
 	{
@@ -430,16 +423,19 @@ void UAbilityComponent::OnHurtInstigatorDead_Implementation(ABaseEnemy* DeadEnem
 	{
 		ArrowLineWidget->RemoveFromParent();
 	}
-	
 }
+
 
 void UAbilityComponent::ListenHurtInstigatorDead()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HurtMaker)
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtMaker);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
-	Enemy->OnEnemyDie.AddDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
 
+	if (!Enemy->OnEnemyDie.IsAlreadyBound(this, &UAbilityComponent::OnHurtInstigatorDead))
+	{
+		Enemy->OnEnemyDie.AddDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
+	}
 }
 
 FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FGameplayTag& Tag)

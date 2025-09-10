@@ -14,6 +14,8 @@ class PIXEL2DKIT_API UPXASComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 
+	TMap<FName, FGameplayTag> TagCache;
+	
 public:
 	
 	virtual FGameplayEffectSpecHandle MakeOutgoingSpec(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level, FGameplayEffectContextHandle Context) const override;
@@ -22,7 +24,7 @@ public:
 	bool TryActivateAbilities(const FGameplayTagContainer& GameplayTagContainer, FName CDTagName);
 
 	// 声明安全的获取函数
-	TWeakObjectPtr<UGameplayAbility> GetAbilityByTag(FGameplayTag AbilityTag);
+	FGameplayAbilitySpec* GetAbilityByTagName(FName AbilityTagName);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC")
 	bool HasTag(FName TagName);

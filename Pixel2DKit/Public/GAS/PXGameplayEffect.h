@@ -15,7 +15,9 @@ class PIXEL2DKIT_API UPXGameplayEffect : public UGameplayEffect
 	GENERATED_BODY()
 
 public:
+	UPXGameplayEffect();
 
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EffectTags)
 	FGameplayTagContainer AssetTags;
 
