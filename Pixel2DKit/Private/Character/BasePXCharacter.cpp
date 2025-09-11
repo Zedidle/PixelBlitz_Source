@@ -590,7 +590,8 @@ void ABasePXCharacter::Revive_Implementation()
 	}
 	SetDead(false);
 	SetDashing(false);
-	SetFalling(false);
+	SetFalling(true);
+	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 
 	if (APXPlayerController* PC = GetController<APXPlayerController>())
 	{
@@ -1254,6 +1255,7 @@ int ABasePXCharacter::OnDefendingHit_Implementation(int inValue)
 void ABasePXCharacter::OnAttackHolding_Implementation()
 {
 	IFight_Interface::OnAttackHolding_Implementation();
+	SetAttackHolding(true);
 }
 
 void ABasePXCharacter::OnDefendingHitEffect_Implementation()
@@ -1546,24 +1548,22 @@ void ABasePXCharacter::Move2D(const FInputActionValue& Value)
 
 void ABasePXCharacter::TryToAttack()
 {
-	if (IFight_Interface::Execute_CanAttack(this))
-	{
-		UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
-
-		if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
-		{
-			UDebugFuncLab::ScreenMessage("ABasePXCharacter::TryToAttack");
-			bAttackStartup = true;
-			SetAttackAnimToggle(true);
-			OnPlayerAttackStart.Broadcast();
-		}
-	}
+	if (!IFight_Interface::Execute_CanAttack(this)) return;
 	
+	UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
+	
+	if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
+	{
+		bAttackStartup = true;
+		SetAttackAnimToggle(true);
+		OnPlayerAttackStart.Broadcast();
+	}
 }
 
 void ABasePXCharacter::AttackRelease()
 {
+	EndNormalAttack();
 	if (bAttackHolding)
 	{
 		OnAttackHoldingRelease();
