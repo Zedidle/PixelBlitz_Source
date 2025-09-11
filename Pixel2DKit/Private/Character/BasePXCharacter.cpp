@@ -40,6 +40,7 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "Utilitys/UserWidgetFuncLib.h"
@@ -590,7 +591,7 @@ void ABasePXCharacter::Revive_Implementation()
 	SetDead(false);
 	SetDashing(false);
 	SetFalling(false);
-	// bInAttackStatus = false;
+
 	if (APXPlayerController* PC = GetController<APXPlayerController>())
 	{
 		PC->OnCharacterControl(true);
@@ -952,9 +953,7 @@ void ABasePXCharacter::SetMoving(bool V)
 
 void ABasePXCharacter::EndNormalAttack()
 {
-	// bInAttackStatus = false;
 	SetAttackAnimToggle(false);
-	SetAttackFire(false);
 }
 
 
@@ -1339,12 +1338,13 @@ APawn* ABasePXCharacter::GetPawn_Implementation()
 
 void ABasePXCharacter::OnAttackRelease_Implementation()
 {
-	EndNormalAttack();
+	SetAttackFire(true);
 }
 
 
 void ABasePXCharacter::OnAttackHoldingRelease_Implementation()
 {
+	SetAttackFire(true);
 	SetAttackHolding(false);
 }
 
@@ -1553,7 +1553,7 @@ void ABasePXCharacter::TryToAttack()
 
 		if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
 		{
-			// bInAttackStatus = true;
+			UDebugFuncLab::ScreenMessage("ABasePXCharacter::TryToAttack");
 			bAttackStartup = true;
 			SetAttackAnimToggle(true);
 			OnPlayerAttackStart.Broadcast();

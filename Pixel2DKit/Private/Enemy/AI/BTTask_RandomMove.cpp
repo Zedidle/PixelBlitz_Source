@@ -41,7 +41,10 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 	
 	APawn* Pawn = AIOwner->GetPawn();
 
-	if (!Pawn || !Pawn->Implements<UEnemyAI_Interface>())
+	if (!Pawn ||
+		!Pawn->Implements<UFight_Interface>() ||
+		!IFight_Interface::Execute_IsAlive(Pawn) ||
+		!Pawn->Implements<UEnemyAI_Interface>())
 	{
 		FinishExecute(false);
 		return EBTNodeResult::Failed;
@@ -80,8 +83,8 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 void UBTTask_RandomMove::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	APawn* Pawn = AIOwner->GetPawn();
-	if (!Pawn) FinishAbort();
-	if (!Pawn->Implements<UFight_Interface>() ||
+	if (!Pawn ||
+		!Pawn->Implements<UFight_Interface>() ||
 		!IFight_Interface::Execute_IsAlive(Pawn) ||
 		!Pawn->Implements<UEnemyAI_Interface>())
 	{

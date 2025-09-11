@@ -365,10 +365,6 @@ public:
 	// 仅用于控制攻击动画的进入
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackAnimToggle; 
-	
-	// 用于管理攻击冷却, 目前暂无用于动画控制（引入GAS后似乎无用，准备移除）
-	UPROPERTY(BlueprintReadWrite, Category = Animation)
-	bool bInAttackStatus;
 
 	// 处于攻击前摇
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
