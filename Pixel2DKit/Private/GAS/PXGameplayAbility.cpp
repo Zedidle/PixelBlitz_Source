@@ -4,9 +4,13 @@
 #include "GAS/PXGameplayAbility.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "AbilitySystemLog.h"
 #include "GAS/PXGameplayEffect.h"
 #include "opensubdiv/far/error.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/LocalizationFuncLib.h"
 
 class UPXGameplayEffect;
 
@@ -43,6 +47,48 @@ void UPXGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
 	
 	// 应用至所有者
 	ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, SpecHandle);
+}
+
+
+
+bool UPXGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	FGameplayTagContainer* OptionalRelevantTags) const
+{
+	UGameplayEffect* CostGE = GetCostGameplayEffect();
+	if (CostGE)
+	{
+		UAbilitySystemComponent* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
+		check(AbilitySystemComponent != nullptr);
+		if (!AbilitySystemComponent->CanApplyAttributeModifiers(CostGE, GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo)))
+		{
+			const FGameplayTag& CostTag = UAbilitySystemGlobals::Get().ActivateFailCostTag;
+
+			if (OptionalRelevantTags && CostTag.IsValid())
+			{
+				OptionalRelevantTags->AddTag(CostTag);
+			}
+
+			if (!CostGE->Modifiers.IsEmpty())
+			{
+				for (auto& Modify : CostGE->Modifiers)
+				{
+					if (Modify.Attribute.AttributeName == "EP")
+					{
+						UCommonFuncLib::SpawnCenterTipLocalized(
+							FLocalizedTableData("Basic/Tips", "EPNotEnough"),
+							FLinearColor::White, FVector2D(0, 300)
+						);
+					}
+
+					// …… 后续其它属性
+				}
+
+			}
+
+			return false;
+		}
+	}
+	return true;
 }
 
 const FGameplayTagContainer* UPXGameplayAbility::GetCooldownTags() const

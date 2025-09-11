@@ -30,7 +30,7 @@ void UEnergyComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PlayerCharacter = Cast<ABasePXCharacter>(GetOwner());
+	PXCharacter = Cast<ABasePXCharacter>(GetOwner());
 
 	
 	
@@ -48,25 +48,27 @@ void UEnergyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 bool UEnergyComponent::DecreaseEP(int32 Amount, AActor* Instigator)
 {
-	int32 Consume = FMath::RoundToInt(Amount * (PlayerCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, false)
 
-	if (const AActor* TargetActor = GetOwner())
+	if (!IsEPEnough(Amount, true)) return false;
+	
+	int32 Consume = FMath::RoundToInt(Amount * (PXCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
+
+	if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PXCharacter))
 	{
-		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 		{
-			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			float CurValue = PixelAS->GetEP();
+			
+			if (CurValue >= Consume)
 			{
-				float CurValue = PixelAS->GetEP();
-				if (CurValue >= Consume)
-				{
-					CurValue -= Consume;
-					TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), CurValue);
-					return true;
-				}
+				CurValue -= Consume;
+				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), CurValue);
+				return true;
 			}
 		}
 	}
-	
+
 	return false;
 }
 
@@ -142,11 +144,11 @@ void UEnergyComponent::SetMaxEP(int32 NewValue)
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
 }
 
-bool UEnergyComponent::IsEPEnough(int32 Cost)
+bool UEnergyComponent::IsEPEnough(int32 Cost, bool bNeedTip)
 {
-	if (!PlayerCharacter) return false;
+	if (!PXCharacter) return false;
 
-	Cost = FMath::RoundToInt(Cost * (PlayerCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
+	Cost = FMath::RoundToInt(Cost * (PXCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
 
 	if (const AActor* TargetActor = GetOwner())
 	{
@@ -158,7 +160,15 @@ bool UEnergyComponent::IsEPEnough(int32 Cost)
 			}
 		}
 	}
-	
+
+	if (bNeedTip)
+	{
+		UCommonFuncLib::SpawnCenterTipLocalized(
+			FLocalizedTableData("Basic/Tips", "EPNotEnough"),
+			FLinearColor::White, FVector2D(0, 300)
+		);
+	}
+
 	return false;
 }
 

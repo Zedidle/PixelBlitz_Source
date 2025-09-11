@@ -27,7 +27,6 @@ void UDataTableSettings::PostInitProperties()
 {
 	Super::PostInitProperties();
 
-	LoadWeaponData();
 }
 
 UDataTable* UDataTableSettings::GetLocalizedDataTable(const FString& Path) const
@@ -62,7 +61,11 @@ void UDataTableSettings::LoadWeaponData() const
 
 const FWeaponData* UDataTableSettings::GetWeaponDataByTag(FGameplayTag WeaponTag) const
 {
-	LoadWeaponData();
+	if (!WeaponData.Contains(WeaponTag))
+	{
+		LoadWeaponData();
+	}
+	
 	if (WeaponData.Contains(WeaponTag))
 	{
 		return &WeaponData[WeaponTag];

@@ -152,14 +152,13 @@ void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, co
 	
 	if (ChangeType == EStatChange::Increase)
 	{
-		MaxHealth += value;
+		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), MaxHealth + value);
 		if (current)
 		{
 			SetHP(CurrentHealth + value, false);
 		}
-	}
 
-	if (ChangeType == EStatChange::Decrease)
+	}else if (ChangeType == EStatChange::Decrease)
 	{
 		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), FMath::Max(0, MaxHealth - value));
 		if (current)
@@ -167,8 +166,7 @@ void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, co
 			SetHP(FMath::Max(0, CurrentHealth - value), false);
 		}
 	}
-
-	if (ChangeType == EStatChange::Reset)
+	else if (ChangeType == EStatChange::Reset)
 	{
 		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), value);
 		if (current || value < CurrentHealth)
@@ -176,8 +174,6 @@ void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, co
 			SetHP(value, false);
 		}
 	}
-
-	// OnMaxHPChanged.Broadcast(MaxHealth, ChangeType);
 }
 
 void UHealthComponent::SetHP(const int32 value, const bool broadcast)

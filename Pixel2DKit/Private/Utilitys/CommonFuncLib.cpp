@@ -115,8 +115,15 @@ float UCommonFuncLib::DealDeltaTime(float Seconds)
 	return Seconds * UGameplayStatics::GetWorldDeltaSeconds(World) * 60;
 }
 
+void UCommonFuncLib::SpawnCenterTipLocalized(const FLocalizedTableData& LocalizedTableData, FLinearColor Color,
+	FVector2D Translation, FVector2D Scale, float PlaybackSpeed, EFloatingTextAnimType AnimType)
+{
+	FString Word = ULocalizationFuncLib::GetLocalizedString(FLocalizedTableData("Basic/Tips", "EPNotEnough"));
+	SpawnCenterTip(FText::FromString(Word), Color, Translation, Scale, PlaybackSpeed, AnimType);
+}
+
 void UCommonFuncLib::SpawnCenterTip(FText Tip, FLinearColor Color, FVector2D Translation, FVector2D Scale,
-	float PlaybackSpeed, EFloatingTextAnimType AnimType)
+                                    float PlaybackSpeed, EFloatingTextAnimType AnimType)
 {
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)

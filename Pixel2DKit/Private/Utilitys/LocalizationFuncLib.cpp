@@ -80,6 +80,11 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data
 	return "";
 }
 
+FString ULocalizationFuncLib::GetLocalizedString(const FString& TableName, const FName& RowName)
+{
+	return GetLocalizedString(FLocalizedTableData(TableName, RowName));
+}
+
 FString ULocalizationFuncLib::GetBuffText(FName BuffName)
 {
 	const FLocalizedTableData D = FLocalizedTableData("Buff/BuffText", BuffName);

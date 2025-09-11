@@ -54,7 +54,11 @@ public:
 	static float DealDeltaTime(float Seconds);
 
 	UFUNCTION(BlueprintCallable, Category="Common | UserWidget")
-	static void SpawnCenterTip(FText Tip, FLinearColor Color, FVector2D Translation = FVector2D(0,0),
+	static void SpawnCenterTipLocalized(const FLocalizedTableData&  LocalizedTableData, FLinearColor Color = FLinearColor::White, FVector2D Translation = FVector2D(0,0),
+		FVector2D Scale = FVector2D(1.0f, 1.0f), float PlaybackSpeed = 1.0f, EFloatingTextAnimType AnimType = EFloatingTextAnimType::Shaking);
+	
+	UFUNCTION(BlueprintCallable, Category="Common | UserWidget")
+	static void SpawnCenterTip(FText Tip, FLinearColor Color = FLinearColor::White, FVector2D Translation = FVector2D(0,0),
 		FVector2D Scale = FVector2D(1.0f, 1.0f), float PlaybackSpeed = 1.0f, EFloatingTextAnimType AnimType = EFloatingTextAnimType::Shaking);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")

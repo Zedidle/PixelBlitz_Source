@@ -77,12 +77,12 @@ void ABasePXCharacter::LoadData()
 
 	if (EnergyComponent)
 	{
-		EnergyComponent->SetMaxEP(Attribute.MaxEnergy + InheritAttribute.MaxEnergy);
+		EnergyComponent->SetMaxEP(Attribute.MaxEP + InheritAttribute.MaxEP);
 	}
 
 	if (HealthComponent)
 	{
-		HealthComponent->ModifyMaxHP(Attribute.MaxHealth + InheritAttribute.MaxHealth, EStatChange::Reset, true);
+		HealthComponent->ModifyMaxHP(Attribute.MaxHP + InheritAttribute.MaxHP, EStatChange::Reset, true);
 		HealthComponent->RepelResistancePercent = Attribute.RepelResistPercent + InheritAttribute.RepelResistPercent;
 	}
 	

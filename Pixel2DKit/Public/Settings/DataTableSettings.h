@@ -39,7 +39,7 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 	UPROPERTY(Config, EditAnywhere, Category = "Weather")
 	TSoftObjectPtr<UDataTable> WeatherDataPath;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Weather")
+	UPROPERTY(Config, EditAnywhere, Category = "Weapon")
 	TSoftObjectPtr<UDataTable> WeaponDataPath;
 	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
 	

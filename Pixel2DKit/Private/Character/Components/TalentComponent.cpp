@@ -26,8 +26,7 @@ void UTalentComponent::InitTalents()
 
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	TArray<FName> ChoicedTalentIndexes = BasicBuildSaveGame->ChoicedTalentIndexes;
-	for (FName Index: ChoicedTalentIndexes)
+	for (const FName& Index: BasicBuildSaveGame->ChoicedTalentIndexes)
 	{
 		// 获取对应的Talent结构
 		FTalent* Data = TalentData->FindRow<FTalent>(Index, "Find Talent Data");
@@ -35,10 +34,7 @@ void UTalentComponent::InitTalents()
 
 		for (auto& D: Data->Effect_GameplayTag)
 		{
-			if (Data->Effect_GameplayTag.Contains(D.Key))
-			{
-				EffectGameplayTags.AddData(D.Key, D.Value);
-			}
+			EffectGameplayTags.AddData(D.Key, D.Value);
 		}
 	}
 }
@@ -176,7 +172,7 @@ void UTalentComponent::LoadTalents()
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
+	const FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
 	if (Loaded) return;
 	Loaded = true;
@@ -242,7 +238,7 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 最大生命值
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxHealthPlus");
+	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxHPPlus");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		if (PXCharacter->HealthComponent)
@@ -252,13 +248,12 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 最大体力值
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxEnergyPlus");
+	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxEPPlus");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		if (UEnergyComponent* EnergyComponent = PXCharacter->EnergyComponent)
 		{
 			EnergyComponent->SetMaxEP(EffectGameplayTags[TalentTag] + EnergyComponent->GetMaxEP());
-			EnergyComponent->SetEP(EnergyComponent->GetMaxEP(), PXCharacter);
 		}
 	}
 
@@ -319,7 +314,7 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 武术
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHealthPercent");
+	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.WuShu"));
@@ -458,7 +453,7 @@ int UTalentComponent::GetAttackDamagePlus()
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 
 	int LocalPlus = 0;
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHealthPercent");
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->HealthComponent->GetMaxHP()) ;
@@ -580,15 +575,15 @@ void UTalentComponent::MakeImmortalPower(bool First)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->HealthComponent)
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
-	FGameplayTag AttackDamagePlusOnMaxHealthPercentTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.AttackDamagePlusOnMaxHealthPercent");
+	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.AttackDamagePlusOnMaxHPPercent");
 	FGameplayTag IntervalTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.Interval");
-	FGameplayTag MaxHealthPlusAfterAttackTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.MaxHealthPlusAfterAttack");
+	FGameplayTag MaxHPPlusAfterAttackTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.MaxHPPlusAfterAttack");
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHealthPercentTag) || 
+	if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag) || 
 		!EffectGameplayTags.Contains(IntervalTag) ||
-		!EffectGameplayTags.Contains(MaxHealthPlusAfterAttackTag)
+		!EffectGameplayTags.Contains(MaxHPPlusAfterAttackTag)
 	) return;
 
 	FGameplayTag ImmortalPowerTag = FGameplayTag::RequestGameplayTag("Buff.Talent.ImmortalPower");
@@ -602,14 +597,14 @@ void UTalentComponent::MakeImmortalPower(bool First)
 	}
 
 	PXCharacter->GetGameInstance()->GetTimerManager().SetTimer(
-		ImmortalPower_TimerHandle, [this, AttackDamagePlusOnMaxHealthPercentTag, ImmortalPowerTag]
+		ImmortalPower_TimerHandle, [this, AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
 	{
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 		FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-		if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHealthPercentTag)) return;
+		if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
 			
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, ImmortalPowerTag, 0.0f,
-			FMath::RoundToInt(PXCharacter->HealthComponent->GetCurrentHP() + EffectGameplayTags[AttackDamagePlusOnMaxHealthPercentTag]),
+			FMath::RoundToInt(PXCharacter->HealthComponent->GetCurrentHP() + EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]),
 			0.0f
 		);
 		if (PXCharacter->BuffComponent)
@@ -622,7 +617,7 @@ void UTalentComponent::MakeImmortalPower(bool First)
 		UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 		UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
-		MainSaveGame->CharacterInheritAttribute.MaxHealth ++;
+		MainSaveGame->CharacterInheritAttribute.MaxHP ++;
 			
 	}, EffectGameplayTags[IntervalTag], false);
 	 

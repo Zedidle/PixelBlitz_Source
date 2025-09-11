@@ -46,7 +46,7 @@ public:
 	UEnergyComponent();
 
 	UPROPERTY(BlueprintReadWrite)
-	ABasePXCharacter* PlayerCharacter;
+	ABasePXCharacter* PXCharacter;
 
 	
 protected:
@@ -76,5 +76,5 @@ public:
 	void SetMaxEP(int32 NewValue);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool IsEPEnough(int32 Cost);
+	bool IsEPEnough(int32 Cost, bool bNeedTip = false);
 };

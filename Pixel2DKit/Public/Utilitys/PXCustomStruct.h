@@ -192,10 +192,10 @@ struct FCharacterAttribute
 	float SpringArmLengthSight;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int MaxHealth;
+	int MaxHP;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int MaxEnergy;
+	int MaxEP;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	int BasicAttackValue;
