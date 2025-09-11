@@ -48,10 +48,12 @@ bool UPXASComponent::TryActivateAbilityByTagName(FName TagName, bool bAllowRemot
 	FName CDTagName = FName(TagName.ToString() + ".CD");
 	if (HasTag(CDTagName)) return false;
 
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName);
+	
 	bool bSuccess = false;
 	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 	{		
-		if (Spec.Ability && Spec.Ability->AbilityTags.HasTagExact(FGameplayTag::RequestGameplayTag(TagName)))
+		if (Spec.Ability && Spec.Ability->AbilityTags.HasTagExact(Tag))
 		{
 			bSuccess |= TryActivateAbility(Spec.Handle, bAllowRemoteActivation);
 		}
@@ -62,12 +64,15 @@ bool UPXASComponent::TryActivateAbilityByTagName(FName TagName, bool bAllowRemot
 
 FGameplayAbilitySpec* UPXASComponent::GetAbilityByTagName(FName AbilityTagName)
 {
+
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag(AbilityTagName);
+
 	// 遍历所有激活的技能
 	for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 	{
 		if (Spec.Ability)
 		{
-			if (Spec.Ability->AbilityTags.HasTagExact(FGameplayTag::RequestGameplayTag(AbilityTagName)))
+			if (Spec.Ability->AbilityTags.HasTagExact(Tag))
 			{
 				return &Spec;
 			}
@@ -79,6 +84,8 @@ FGameplayAbilitySpec* UPXASComponent::GetAbilityByTagName(FName AbilityTagName)
 
 bool UPXASComponent::HasTag(FName TagName)
 {
+	if (TagName.IsNone()) return false;
+	
 	if (!TagCache.Contains(TagName))
 	{
 		TagCache.Add(TagName, FGameplayTag::RequestGameplayTag(TagName));
