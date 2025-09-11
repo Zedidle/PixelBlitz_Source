@@ -5,6 +5,7 @@
 
 #include "Character/Components/BuffComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Fight/Components/EnergyComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -13,6 +14,34 @@
 #include "Settings/SkillSettings.h"
 #include "Utilitys/CommonFuncLib.h"
 
+
+void UTalentComponent::InitTalents()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
+
+	UDataTable* TalentData = UDataTableSettings::Get().GetTalentData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentData)
+
+	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
+	
+	TArray<FName> ChoicedTalentIndexes = BasicBuildSaveGame->ChoicedTalentIndexes;
+	for (FName Index: ChoicedTalentIndexes)
+	{
+		// 获取对应的Talent结构
+		FTalent* Data = TalentData->FindRow<FTalent>(Index, "Find Talent Data");
+		if (!Data) continue;
+
+		for (auto& D: Data->Effect_GameplayTag)
+		{
+			if (Data->Effect_GameplayTag.Contains(D.Key))
+			{
+				EffectGameplayTags.AddData(D.Key, D.Value);
+			}
+		}
+	}
+}
 
 // Sets default values for this component's properties
 UTalentComponent::UTalentComponent()
@@ -31,34 +60,9 @@ void UTalentComponent::BeginPlay()
 	Super::BeginPlay();
 
 	PXCharacter = Cast<ABasePXCharacter>(GetOwner());
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	OwnerPreLocation = PXCharacter->GetActorLocation();
-	if (UPXSaveGameSubsystem* SaveGameSubsystem = PXCharacter->GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>())
-	{
-		UDataTable* TalentData = UDataTableSettings::Get().GetTalentData();
-		if (SaveGameSubsystem->GetBasicBuildData() && TalentData)
-		{
-			TArray<FName> ChoicedTalentIndexes = SaveGameSubsystem->GetBasicBuildData()->ChoicedTalentIndexes;
-			for (FName Index: ChoicedTalentIndexes)
-			{
-				// 获取对应的Talent结构
-				FTalent* Data = TalentData->FindRow<FTalent>(Index, "Find Talent Data");
-				if (!Data) continue;
 
-				TArray<FGameplayTag> Tags;
-				Data->Effect_GameplayTag.GetKeys(Tags);
-				for (auto& Tag: Tags)
-				{
-					if (Data->Effect_GameplayTag.Contains(Tag))
-					{
-						EffectGameplayTags.AddData(Tag, Data->Effect_GameplayTag[Tag]);
-					}
-				}
-				
-			}
-		}
-	}
+	InitTalents();
 
 	// 对 OnPlayerAttack 的绑定，在玩家发起攻击时的事件
 	PXCharacter->OnPlayerAttackStart.AddDynamic(this, &UTalentComponent::Event_OnPlayerAttackStart);

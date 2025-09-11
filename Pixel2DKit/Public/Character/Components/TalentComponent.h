@@ -39,7 +39,8 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 	
 #pragma endregion
 
-
+	UFUNCTION()
+	void InitTalents();
 	
 public:	
 	// Sets default values for this component's properties
@@ -67,8 +68,8 @@ public:
 	
 	UFUNCTION()
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage);
-
-
+	
+	
 	UFUNCTION(BlueprintCallable)
 	void LoadTalents();
 
