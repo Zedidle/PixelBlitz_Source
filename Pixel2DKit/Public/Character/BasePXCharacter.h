@@ -361,14 +361,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bLanding;
 	
-	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	bool bDashing;
 
-	// 冲刺生效期间
-	UPROPERTY(BlueprintReadWrite, Category = Animation)
-	bool InDashEffect;
+	// 仅用于控制攻击动画的进入
+	UPROPERTY(BlueprintReadOnly, Category = Animation)
+	bool bAttackAnimToggle; 
 	
-	// 用于管理攻击冷却, 目前暂无用于动画控制
+	// 用于管理攻击冷却, 目前暂无用于动画控制（引入GAS后似乎无用，准备移除）
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackStatus;
 
@@ -380,11 +378,13 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackEffect;
 
-
-	
-	// 仅仅用于控制攻击动画开关
+	// 冲刺进入
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	bool bAttackAnimToggle;  
+	bool bDashing;
+
+	// 冲刺生效期间
+	UPROPERTY(BlueprintReadWrite, Category = Animation)
+	bool InDashEffect;
 
 	// 攻击蓄力中
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
@@ -505,6 +505,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnAttackRelease();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnAttackHoldingRelease();
 	
 #pragma region IBuff_Interface
 	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
@@ -541,7 +543,7 @@ public:
 
 inline bool ABasePXCharacter::CanAttack_Implementation()
 {
-	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead && !bInAttackStatus;
+	return !GetIsAttacking() && !bDashing && !bRepulsion &&	!bHurt && !bDead;
 }
 
 inline void ABasePXCharacter::SetBlendPitch(float V)

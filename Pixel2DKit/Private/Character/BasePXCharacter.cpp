@@ -590,7 +590,7 @@ void ABasePXCharacter::Revive_Implementation()
 	SetDead(false);
 	SetDashing(false);
 	SetFalling(false);
-	bInAttackStatus = false;
+	// bInAttackStatus = false;
 	if (APXPlayerController* PC = GetController<APXPlayerController>())
 	{
 		PC->OnCharacterControl(true);
@@ -952,12 +952,9 @@ void ABasePXCharacter::SetMoving(bool V)
 
 void ABasePXCharacter::EndNormalAttack()
 {
-	if (!bAttackHolding)
-	{
-		bInAttackStatus = false;
-		SetAttackAnimToggle(false);
-		SetAttackFire(false);
-	}
+	// bInAttackStatus = false;
+	SetAttackAnimToggle(false);
+	SetAttackFire(false);
 }
 
 
@@ -1236,18 +1233,18 @@ void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, 
 
 int ABasePXCharacter::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 {
-	if (GetCharacterMovement()->IsMovingOnGround())
+	int Result = 0;
+	
+	if (!GetCharacterMovement()->IsMovingOnGround())
 	{
-		return 0;
+		float AirFightPlus = 0;
+		if (Execute_FindEffectGameplayTag(this, FGameplayTag::RequestGameplayTag("AbilitySet.InAir.DamagePlus"), AirFightPlus))
+		{
+			Result += AirFightPlus;
+		}
 	}
 
-	float AirFightPlus;
-	if (Execute_FindEffectGameplayTag(this, FGameplayTag::RequestGameplayTag("AbilitySet.InAir.DamagePlus"), AirFightPlus))
-	{
-		return FMath::RoundToInt(AirFightPlus);
-	}
-	
-	return 0;
+	return Result;
 }
 
 int ABasePXCharacter::OnDefendingHit_Implementation(int inValue)
@@ -1294,6 +1291,7 @@ void ABasePXCharacter::OnAttackEffectBegin_Implementation()
 {
 	bInAttackEffect = true;
 	bAttackStartup = false;
+	SetAttackFire(false);
 	Execute_OnAttackEffect(this);
 }
 
@@ -1310,8 +1308,6 @@ void ABasePXCharacter::OnDashEffectBegin_Implementation()
 void ABasePXCharacter::OnDashEffectEnd_Implementation()
 {
 	InDashEffect = false;
-	bInAttackStatus = false;
-	bInAttackEffect = false;
 
 	if (TalentComponent)
 	{
@@ -1343,10 +1339,14 @@ APawn* ABasePXCharacter::GetPawn_Implementation()
 
 void ABasePXCharacter::OnAttackRelease_Implementation()
 {
-	SetAttackHolding(false);
 	EndNormalAttack();
 }
 
+
+void ABasePXCharacter::OnAttackHoldingRelease_Implementation()
+{
+	SetAttackHolding(false);
+}
 
 void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
@@ -1548,13 +1548,12 @@ void ABasePXCharacter::TryToAttack()
 {
 	if (IFight_Interface::Execute_CanAttack(this))
 	{
-		UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+		UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
 
-		bool ActivateSuccess = ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.NormalAttack")), true);
-		if (ActivateSuccess)
+		if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
 		{
-			bInAttackStatus = true;
+			// bInAttackStatus = true;
 			bAttackStartup = true;
 			SetAttackAnimToggle(true);
 			OnPlayerAttackStart.Broadcast();
@@ -1565,7 +1564,11 @@ void ABasePXCharacter::TryToAttack()
 
 void ABasePXCharacter::AttackRelease()
 {
-	if (bInAttackStatus)
+	if (bAttackHolding)
+	{
+		OnAttackHoldingRelease();
+	}
+	else
 	{
 		OnAttackRelease();
 	}

@@ -39,7 +39,7 @@ class PIXEL2DKIT_API UArrowLineWidget : public UUserWidget
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ExposeOnSpawn))
 	FLinearColor Color = FLinearColor::White;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ExposeOnSpawn))
-	float LifeSpan = 1.5;
+	float LifeSpan = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ExposeOnSpawn))
 	FVector2D BodySize = FVector2D(36, 54);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ExposeOnSpawn))
@@ -81,7 +81,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void InitializeData(AActor* _StartActor, AActor* _EndActor, bool _TwoWay = true, int _MaxArrowBodyNum = 10,
-		float _MaxDistance = 600, FLinearColor _Color = FLinearColor::White, float _LifeSpan = 1.5,
+		float _MaxDistance = 600, FLinearColor _Color = FLinearColor::White, float _LifeSpan = 0.f,
 		FVector2D _BodySize = FVector2D(36, 54), FVector2D _HeadSize = FVector2D(64, 64),
 		FVector _StartOffset = FVector(0)
 		);
