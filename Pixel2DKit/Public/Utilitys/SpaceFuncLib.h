@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interfaces/Fight_Interface.h"
+#include "Kismet/GameplayStatics.h"
 #include "UObject/NoExportTypes.h"
 #include "SpaceFuncLib.generated.h"
 
@@ -69,10 +71,10 @@ public:
 	static FVector GetDirection2DFromPlayerViewPoint(const int PlayerIndex = 0);
 
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
-	static bool IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0));
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
+	static bool IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0), float BufferPercentage = 0.05);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
 	static FVector2D GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0));
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
@@ -80,5 +82,91 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static float CalAngle2D(FVector2D A, FVector2D B);
+
+
+	template<typename T>
+	static T* FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, TSubclassOf<T> TargetClass, FVector2D InRange = {0, 1000}, bool bAlive = true);
+	template<typename T>
+	static T* FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, TSubclassOf<T> TargetClass, FVector2D InRange = {0, 1000}, bool bAlive = true);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
+	static ABaseEnemy* FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange = FVector2D(0, 1000));
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
+	static ABaseEnemy* FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange = FVector2D(0, 1000));
+	
 };
+
+template <typename T>
+T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, TSubclassOf<T> TargetClass, FVector2D InRange, bool bAlive)
+{
+	check(A);
+	check(TargetClass);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(TargetClass, nullptr)
+
+	check(TargetClass);
+	
+	TArray<AActor*> OutFoundActors;
+	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, TargetClass, OutFoundActors);
+	if (OutFoundActors.IsEmpty()) return nullptr;
+
+	AActor* Result = nullptr;
+	float TmpCurDistance = MAX_FLOAT;
+	for (auto& B : OutFoundActors)
+	{
+		if (bAlive)
+		{
+			if (!B->Implements<UFight_Interface>() || !IFight_Interface::Execute_IsAlive(B))
+			{
+				continue;
+			}
+		}
+		
+		float Distance = A->GetDistanceTo(B);
+		if (Distance < InRange.X || Distance > InRange.Y) continue;
+		
+		if (Distance > TmpCurDistance)
+		{
+			TmpCurDistance = Distance;
+			Result = B;
+		}
+	}
+	
+	return Cast<T>(Result);
+}
+
+template <typename T>
+T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, TSubclassOf<T> TargetClass, FVector2D InRange, bool bAlive)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
+
+	TArray<AActor*> OutFoundActors;
+	UGameplayStatics::GetAllActorsOfClass(WorldContextObject, TargetClass, OutFoundActors);
+	if (OutFoundActors.IsEmpty()) return nullptr;
+
+	AActor* Result = nullptr;
+	float TmpCurDistance = 0;
+	for (auto& B : OutFoundActors)
+	{
+		if (bAlive)
+		{
+			if (!B->Implements<UFight_Interface>() || !IFight_Interface::Execute_IsAlive(B))
+			{
+				continue;
+			}
+		}
+
+		float Distance = A->GetDistanceTo(B);
+		if (Distance < InRange.X || Distance > InRange.Y) continue;
+		
+		if (Distance > TmpCurDistance)
+		{
+			TmpCurDistance = Distance;
+			Result = B;
+		}
+	}
+
+	return Cast<T>(Result);
+}
 	

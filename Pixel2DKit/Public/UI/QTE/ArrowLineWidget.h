@@ -88,7 +88,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveArrowLine();
-
+	
 	UFUNCTION()
-	void Hide();
+	void SetHide(bool bHide);
 };

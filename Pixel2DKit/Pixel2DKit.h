@@ -35,6 +35,5 @@ DECLARE_STATS_GROUP(TEXT("RAGame"), STATGROUP_RAGame, STATCAT_Advanced);
 #define IS_SINGLE_PLAYER_FROM_PAWN(Pawn) (ROLE_Authority == Role&&Pawn->IsLocallyControlled())
 #define IS_SINGLE_PLAYERF_ROM_CONTROLLER(Controller) (ROLE_Authority == Role&&Controller->IsLocalPlayerController())
 
-
-
-
+// 获取float最大值
+#define MAX_FLOAT std::numeric_limits<float>::max()

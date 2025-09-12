@@ -68,21 +68,6 @@ void UArrowLineWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	Tick_Update();
 }
 
-void UArrowLineWidget::Hide()
-{
-	if (!ArrowParts.IsEmpty())
-	{
-		for (UUserWidget* Widget : ArrowParts)
-		{
-			Widget->SetVisibility(ESlateVisibility::Collapsed);
-		}
-	}
-	if (ArrowHeadAntiWidget)
-	{
-		ArrowHeadAntiWidget->SetVisibility(ESlateVisibility::Collapsed);
-	}
-}
-
 void UArrowLineWidget::RemoveArrowLine()
 {
 	if (ArrowParts.IsEmpty())
@@ -114,6 +99,24 @@ void UArrowLineWidget::RemoveArrowLine()
 	}
 }
 
+
+void UArrowLineWidget::SetHide(bool bHide)
+{
+	ESlateVisibility Visibele = bHide ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible;
+	
+	if (!ArrowParts.IsEmpty())
+	{
+		for (UUserWidget* Widget : ArrowParts)
+		{
+			Widget->SetVisibility(Visibele);
+		}
+	}
+	if (ArrowHeadAntiWidget)
+	{
+		ArrowHeadAntiWidget->SetVisibility(Visibele);
+	}
+}
+
 void UArrowLineWidget::Tick_Update()
 {
 	UWorld* World = GetWorld();
@@ -123,8 +126,13 @@ void UArrowLineWidget::Tick_Update()
 
 	if (ArrowParts.IsEmpty()) return;
 	
-	if (!StartActor->Implements<UFight_Interface>() || !EndActor->Implements<UFight_Interface>()) return;
-	if (!IFight_Interface::Execute_IsAlive(StartActor) || !IFight_Interface::Execute_IsAlive(EndActor))
+	// 如果开始是活的，后来没活
+	if (StartActor->Implements<UFight_Interface>() && !IFight_Interface::Execute_IsAlive(StartActor))
+	{
+		RemoveArrowLine();
+		return;
+	}
+	if (EndActor->Implements<UFight_Interface>() && !IFight_Interface::Execute_IsAlive(EndActor))
 	{
 		RemoveArrowLine();
 		return;
@@ -132,7 +140,7 @@ void UArrowLineWidget::Tick_Update()
 
 	if (!USpaceFuncLib::IsActorInScreen(World, StartActor, StartOffset) || !USpaceFuncLib::IsActorInScreen(World, EndActor))
 	{
-		RemoveArrowLine();
+		SetHide(true);
 		return;
 	}
 

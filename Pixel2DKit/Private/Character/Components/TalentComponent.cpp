@@ -382,13 +382,15 @@ ABaseSkill* UTalentComponent::SpawnSkill(TSubclassOf<ABaseSkill> Skill_Class, co
 	UWorld* World = GetWorld();
 	if (!World) return nullptr;
 	if (!Skill_Class) return nullptr;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = PXCharacter;
+	SpawnParams.Instigator = PXCharacter;
 	
-	if (ABaseSkill* Skill = World->SpawnActor<ABaseSkill>(Skill_Class, SpawnTransform))
+	if (ABaseSkill* Skill = World->SpawnActor<ABaseSkill>(Skill_Class, SpawnTransform, SpawnParams))
 	{
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
 		Skill->AttachToActor(PXCharacter, AttachmentRules);
-		Skill->SetOwner(PXCharacter);
-		Skill->SetInstigator(PXCharacter);
 
 		if (ABaseDefenseSkill* DefenseSkill = Cast<ABaseDefenseSkill>(Skill))
 		{

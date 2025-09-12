@@ -2,11 +2,15 @@
 
 
 #include "Utilitys/SpaceFuncLib.h"
+
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Enemy/BaseEnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "GameFramework/Character.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Utilitys/DebugFuncLab.h"
 
 bool USpaceFuncLib::ActorAtActorRight(AActor* A, AActor* B, const int PlayerIndex)
 {
@@ -155,7 +159,7 @@ FVector USpaceFuncLib::GetDirection2DFromPlayerViewPoint(const int PlayerIndex)
 	return (PlayerCharacterLocation - outLocation).GetSafeNormal2D(0.1);
 }
 
-bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset)
+bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset, float BufferPercentage)
 {
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 	if (!GameInstance) return false;
@@ -166,11 +170,20 @@ bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* A
 	APlayerController* PC = UGameplayStatics::GetPlayerController(World, 0);
 	if (!PC) return false;
 
+	int SizeX, SizeY;
+	PC->GetViewportSize(SizeX, SizeY);
+
+	BufferPercentage = FMath::Clamp(BufferPercentage, 0.0f, 0.2f);
+	int LeftLedge = -BufferPercentage * SizeX;
+	int UpLedge = -BufferPercentage * SizeY;
+	int RightLedge = (BufferPercentage + 1) * SizeX;
+	int DownLedge = (BufferPercentage + 1) * SizeY;
+	
 	FVector2D ScreenPosition;
 	UGameplayStatics::ProjectWorldToScreen(PC, Actor->GetActorLocation() + Offset, ScreenPosition, false);
-
-	// 可能后续还要加上屏幕上限
-	return ScreenPosition.X > 0 && ScreenPosition.Y > 0;
+	
+	return ScreenPosition.X > LeftLedge && ScreenPosition.Y > UpLedge &&
+			ScreenPosition.X < RightLedge && ScreenPosition.Y < DownLedge;
 }
 
 FVector2D USpaceFuncLib::GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset)
@@ -200,4 +213,14 @@ float USpaceFuncLib::CalAngle2D(FVector2D A, FVector2D B)
 {
 	float Angle = UKismetMathLibrary::DegAcos(FVector2D::DotProduct(A.GetSafeNormal(), B.GetSafeNormal()));
 	return Angle;
+}
+
+ABaseEnemy* USpaceFuncLib::FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
+{
+	return FindActorInRangeClosest<ABaseEnemy>(WorldContextObject, A, TSubclassOf<ABaseEnemy>(ABaseEnemy::StaticClass()), InRange);
+}
+
+ABaseEnemy* USpaceFuncLib::FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
+{
+	return FindActorInRangeFarthest<ABaseEnemy>(WorldContextObject, A, TSubclassOf<ABaseEnemy>(ABaseEnemy::StaticClass()), InRange);
 }
