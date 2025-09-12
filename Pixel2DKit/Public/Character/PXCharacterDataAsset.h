@@ -19,7 +19,7 @@ class PIXEL2DKIT_API UPXCharacterDataAsset : public UDataAsset
 public:
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	TSoftObjectPtr<UDataTable> AbilityDataTable;
+	TArray<TSoftObjectPtr<UDataTable>> AbilityDataTables;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	TSoftObjectPtr<UPXCharacterInputConfig> InputConfig;

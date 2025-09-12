@@ -162,7 +162,7 @@ UPXMainSaveGame* UPXSaveGameSubsystem::GetMainData()
 
 bool UPXSaveGameSubsystem::Main_HasChoiceAbility()
 {
-    return MainSaveGame->CurLevelChoiceAbility ==  MainSaveGame->CurLevelName;
+    return MainSaveGame->CurLevelToChoiceAbility ==  MainSaveGame->CurLevelName;
 }
 
 void UPXSaveGameSubsystem::Main_TotalInit(TSubclassOf<UPrimaryDataAsset> WeatherType, EStyleType StyleType)
@@ -186,7 +186,7 @@ void UPXSaveGameSubsystem::Main_AddResult(float Result)
 
 void UPXSaveGameSubsystem::Main_SyncLevel()
 {
-    MainSaveGame->CurLevelChoiceAbility = MainSaveGame->CurLevelName;
+    MainSaveGame->CurLevelToChoiceAbility = MainSaveGame->CurLevelName;
     MainSaveGame->PreLevelClearAllMonster = false;
 }
 

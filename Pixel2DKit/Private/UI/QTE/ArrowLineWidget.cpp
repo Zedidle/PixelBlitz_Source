@@ -59,7 +59,7 @@ void UArrowLineWidget::NativeConstruct()
 void UArrowLineWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
-	
+
 }
 
 void UArrowLineWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -70,6 +70,12 @@ void UArrowLineWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 
 void UArrowLineWidget::RemoveArrowLine()
 {
+	if (ArrowHeadAntiWidget)
+	{
+		ArrowHeadAntiWidget->SetVisibility(ESlateVisibility::Collapsed);
+		ArrowHeadAntiWidget->RemoveFromParent();
+	}
+	
 	if (ArrowParts.IsEmpty())
 	{
 		RemoveFromParent();
@@ -84,13 +90,7 @@ void UArrowLineWidget::RemoveArrowLine()
 			Widget->RemoveFromParent();
 		}
 	}
-
 	ArrowParts.Empty();
-	if (ArrowHeadAntiWidget)
-	{
-		ArrowHeadAntiWidget->SetVisibility(ESlateVisibility::Collapsed);
-		ArrowHeadAntiWidget->RemoveFromParent();
-	}
 
 	if (GetParent())
 	{
@@ -121,20 +121,24 @@ void UArrowLineWidget::Tick_Update()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(StartActor)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EndActor)
 
 	if (ArrowParts.IsEmpty()) return;
+
+	if (!StartActor || !EndActor)
+	{
+		SetHide(true);
+		return;
+	}
 	
 	// 如果开始是活的，后来没活
 	if (StartActor->Implements<UFight_Interface>() && !IFight_Interface::Execute_IsAlive(StartActor))
 	{
-		RemoveArrowLine();
+		SetHide(true);
 		return;
 	}
 	if (EndActor->Implements<UFight_Interface>() && !IFight_Interface::Execute_IsAlive(EndActor))
 	{
-		RemoveArrowLine();
+		SetHide(true);
 		return;
 	}
 

@@ -22,7 +22,7 @@ public:
 	TSubclassOf<ABaseSkill> MagicShield;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Skill", DisplayName = "雷公助我")
-	TSubclassOf<ABaseSkill> ThunderGod;
+	TSubclassOf<ABaseSkill> Thor;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Skill", DisplayName = "光合作用")
 	TSubclassOf<ABaseSkill> SunHeal;

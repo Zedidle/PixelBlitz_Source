@@ -14,6 +14,7 @@
 #include "Character/PXCharacterDataAsset.h"
 #include "Character/Components/BuffComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -65,8 +66,11 @@ void UAbilityComponent::BeginPlay()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
 
-	if (!AbilityDataTable && PXCharacter->DataAsset->AbilityDataTable) {
-		AbilityDataTable = PXCharacter->DataAsset->AbilityDataTable.LoadSynchronous();
+	if (!PXCharacter->DataAsset->AbilityDataTables.IsEmpty()) {
+		for (auto& AbilityDataTable: PXCharacter->DataAsset->AbilityDataTables)
+		{
+			AbilityDataTables.Add(AbilityDataTable.LoadSynchronous());
+		}
 	}
 
 	if (UPXASComponent* PXASComponent = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent()))
@@ -84,28 +88,24 @@ void UAbilityComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
-void UAbilityComponent::LearnAbility(FName AbilityIndex)
+void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityDataTable)
-	
-	if (!UDataTableFunctionLibrary::DoesDataTableRowExist(AbilityDataTable, AbilityIndex)) return;
-
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 
-	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
+	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
 
-	ChoicedAbilityIndexes.Add(AbilityIndex);
 	
-	FAbility AbilityData = DataTableManager->FindRow<FAbility>(AbilityDataTable, AbilityIndex);
+	ChosenAbilities.Add(AbilityTag);
+	
+	const FAbility* AbilityData = DataTableSettings.GetAbilityDataByTag(AbilityTag);
 
-	if (AbilityData.PreLevelIndex == EName::None)
+	if (!AbilityData->PreLevelAbility.IsValid())
 	{
-		TakeEffectAbilityIndexes.AddUnique(AbilityIndex);
+		TakeEffectAbilities.AddUnique(AbilityTag);
 		// 由于同一技能的不同等级都使用相同的GA，只是数值不同，就只用在学习第一个技能是GiveAbility
-		for (auto& AbilityClass: AbilityData.AbilityClass)
+		for (auto& AbilityClass: AbilityData->AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
@@ -114,10 +114,10 @@ void UAbilityComponent::LearnAbility(FName AbilityIndex)
 			}
 		}
 	}
-	else if (TakeEffectAbilityIndexes.Contains(AbilityData.PreLevelIndex))
+	else if (TakeEffectAbilities.Contains(AbilityData->PreLevelAbility))
 	{
-		TakeEffectAbilityIndexes.Remove(AbilityData.PreLevelIndex);
-		TakeEffectAbilityIndexes.AddUnique(AbilityIndex);
+		TakeEffectAbilities.Remove(AbilityData->PreLevelAbility);
+		TakeEffectAbilities.AddUnique(AbilityTag);
 	}
 	
 }
@@ -125,27 +125,24 @@ void UAbilityComponent::LearnAbility(FName AbilityIndex)
 void UAbilityComponent::LoadAbility()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityDataTable)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
-
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	for (auto Index : TempTestAbilityIndexes)
-	{
-		TakeEffectAbilityIndexes.AddUnique(Index);
-	}
-
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
 	
-	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
-
+	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
 	
-	for (auto Index : TakeEffectAbilityIndexes)
+	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
+	
+	for (auto Index : TempTestAbilities)
 	{
-		FAbility AbilityData = DataTableManager->FindRow<FAbility>(AbilityDataTable, Index);
-		for (auto& AbilityClass: AbilityData.AbilityClass)
+		TakeEffectAbilities.AddUnique(Index);
+	}
+	
+	for (auto Tag : TakeEffectAbilities)
+	{
+		const FAbility* AbilityData = DataTableSettings.GetAbilityDataByTag(Tag);
+		for (auto& AbilityClass: AbilityData->AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
@@ -154,12 +151,9 @@ void UAbilityComponent::LoadAbility()
 			}
 		}
 		
-		TArray<FGameplayTag> Keys;
-		AbilityData.Effect_GameplayTag.GetKeys(Keys);
-
-		for (auto Key : Keys)
+		for (auto& D : AbilityData->Effect_GameplayTag)
 		{
-			EffectGameplayTags.AddData(Key, AbilityData.Effect_GameplayTag[Key]);
+			EffectGameplayTags.AddData(D.Key, D.Value);
 		}
 	}
 
@@ -267,20 +261,22 @@ void UAbilityComponent::LoadAbility()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame)
-	MainSaveGame->ChoicedAbilityIndexes = ChoicedAbilityIndexes;
-	MainSaveGame->TakeEffectAbilityIndexes = TakeEffectAbilityIndexes;
+	MainSaveGame->ChosenAbilities = ChosenAbilities;
+	MainSaveGame->TakeEffectAbilities = TakeEffectAbilities;
 
 	SaveGameSubsystem->SaveMainData();
 }
 
-bool UAbilityComponent::HasChoiced(FName AbilityIndex)
+bool UAbilityComponent::HasChosenAbility(const FGameplayTag& AbilityTag)
 {
-	return ChoicedAbilityIndexes.Contains(AbilityIndex);
+	return ChosenAbilities.Contains(AbilityTag);
 }
 
-bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability)
+bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 {
 	if (!Ability.Enable) return false;
+	const FGameplayTag& AbilityTag = Ability.AbilityTag;
+	if (!AbilityTag.IsValid()) return false;
 
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, false)
 
@@ -293,18 +289,32 @@ bool UAbilityComponent::CanLearnAbility(const FName& RowNameIndex, const FAbilit
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSaveGame, false)
 
-	if (MainSaveGame->CurCharacterName != Ability.CharacterName && Ability.CharacterName != FName()) return false;
-
-	if (ChoicedAbilityIndexes.Contains(RowNameIndex)) return false;
+	// 通过分表，不再需要角色判断
+	// if (MainSaveGame->CurCharacterName != Ability.CharacterName && Ability.CharacterName != FName()) return false;
+	
+	if (ChosenAbilities.Contains(AbilityTag)) return false;
 
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->GetBasicBuildData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSaveGame, false)
 
-	if (Ability.DefaultLock && !BasicBuildSaveGame->UnlockAbilityIndexes.Contains(RowNameIndex)) return false;
+	if (Ability.DefaultLock && !BasicBuildSaveGame->UnlockedAbilities.Contains(AbilityTag)) return false;
 
-	if (Ability.PreLevelIndex == FName()) return true;
+	if (!Ability.RequiredAbilities.IsEmpty())
+	{
+		for (auto& RequiredAbility : Ability.RequiredAbilities)
+		{
+			if (!TakeEffectAbilities.Contains(RequiredAbility)) return false;
+		}
+	}
 
-	return TakeEffectAbilityIndexes.Contains(Ability.PreLevelIndex);
+	if (!Ability.RequiredTalents.IsEmpty())
+	{
+		for (auto& RequiredAbility : Ability.RequiredAbilities)
+		{
+			if (!TakeEffectAbilities.Contains(RequiredAbility)) return false;
+		}
+	}
+	return true;
 }
 
 void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage)

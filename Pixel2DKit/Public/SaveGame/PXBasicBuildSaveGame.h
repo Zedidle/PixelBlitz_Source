@@ -17,7 +17,7 @@ public:
 	int RemainGoldNum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	TArray<FName> ChoicedTalentIndexes;
+	TArray<FGameplayTag> ChosenTalents;
 
 
 	// 当前累计可用天赋点
@@ -29,8 +29,8 @@ public:
 	int MaxTalentPoint = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	TArray<FName> UnlockAbilityIndexes;
+	TArray<FGameplayTag> UnlockedAbilities;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	TArray<FName> UnlockTalentIndexes;
+	TArray<FGameplayTag> UnlockedTalents;
 };

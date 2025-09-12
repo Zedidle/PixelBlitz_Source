@@ -78,7 +78,7 @@ void UBuffStateWidget::BuffPermanent_Implementation(FGameplayTag Tag, const FStr
 	CreateWidget(GetWorld(), BuffFloatingTextPermanent_WidgetClass)))
 		{
 			BuffFloatingTextWidget->InitializeData(
-			FText::FromString(UKismetStringLibrary::Concat_StrStr(BuffName,"<")),
+			FText::FromString(UKismetStringLibrary::Concat_StrStr(BuffName,"*")),
 				TextColor,
 				FVector2D::ZeroVector,
 				FVector2D(1.0f, 1.0f),

@@ -38,7 +38,7 @@ public:
 	UAbilityComponent();
 
 	UPROPERTY()
-	UDataTable* AbilityDataTable;
+	TArray<UDataTable*> AbilityDataTables;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UKeyPressCountDownWidget> KeyPressCountdownWidgetClass;
@@ -52,17 +52,18 @@ public:
 	AActor* HurtMaker;
 	UPROPERTY(BlueprintReadOnly)
 	int AcceptDamage;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FGameplayTag> TempTestAbilities;
 	
 	// 选择了的技能列表
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FName> ChoicedAbilityIndexes;
+	TArray<FGameplayTag> ChosenAbilities;
 	
 	// 生效的技能列表（同一系列的技能，高等级会覆盖低等级的）
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FName> TakeEffectAbilityIndexes;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FName> TempTestAbilityIndexes;
+	TArray<FGameplayTag> TakeEffectAbilities;
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
@@ -89,16 +90,16 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	void LearnAbility(FName AbilityIndex);
+	void LearnAbility(const FGameplayTag& AbilityTag);
 	
 	UFUNCTION(BlueprintCallable)
 	void LoadAbility();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool HasChoiced(FName AbilityIndex);
+	bool HasChosenAbility(const FGameplayTag& AbilityTag);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool CanLearnAbility(const FName& RowNameIndex, const FAbility& Ability);
+	bool CanLearnAbility(const FAbility& Ability);
 
 	UFUNCTION(BlueprintCallable)
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage);

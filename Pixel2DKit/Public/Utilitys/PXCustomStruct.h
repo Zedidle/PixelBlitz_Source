@@ -8,6 +8,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
+#include "GAS/PXGameplayAbility.h"
 #include "PXCustomStruct.generated.h"
 
 
@@ -107,14 +108,9 @@ struct FAbility: public FTableRowBase
 	// 是否默认未解锁
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	bool DefaultLock;
-
-	// 可以学习的角色下标，对应角色表DT_CharacterData，如果是0则通用
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FName CharacterName;
-
-	// 费用，暂时都是1
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	int32 Price;
+	FGameplayTag AbilityTag;
 
 	// 技能名称本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
@@ -123,36 +119,33 @@ struct FAbility: public FTableRowBase
 	// 技能描述本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FLocalizedTableData AbilityDesc_Localized;
+	
+	// 费用，暂时都是1
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	int32 Price = 1;
 
 	// 技能品阶
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TEnumAsByte<EAbilityQuality> AbilityQuality;
 
-	// 当前技能等级
+	// 唯一的技能的前一级，学习后会替换
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	int32 CurLevel;
-
-	// 技能的最大等级
+	FGameplayTag PreLevelAbility;
+	
+	// 前置所需学习的技能 GameplayTag
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	int32 MaxLevel;
+	TArray<FGameplayTag> RequiredAbilities;
 
-	// 前置学习的技能NameIndex，如果前技能没学习，则无法学习该技能
+	// 前置选择的天赋 GameplayTag
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FName PreLevelIndex;
-
-	// 技能的下一等级在技能列表的NameIndex
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FName NextLevelIndex;
-
+	TArray<FGameplayTag> RequiredTalents;
+	
 	// 技能的特殊附加值，以GameplayTag为前缀
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FGameplayTag AbilityTag;
 };
 
 
@@ -306,7 +299,13 @@ struct FTalent: public FTableRowBase
 	bool DefaultLock;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	FGameplayTag TalentTag;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	FLocalizedTableData TalentName_Localized;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	int Price = 3;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	FLocalizedTableData Desc_Localized;
@@ -315,10 +314,9 @@ struct FTalent: public FTableRowBase
 	TSoftObjectPtr<UTexture2D> Icon;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
-	int Price;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
-	
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 };
 #pragma endregion

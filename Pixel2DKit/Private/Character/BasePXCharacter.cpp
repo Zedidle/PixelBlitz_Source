@@ -299,7 +299,7 @@ void ABasePXCharacter::Tick_CalCameraOffset()
 void ABasePXCharacter::LoadAbility_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent->AbilityDataTable);
+	if (AbilityComponent->AbilityDataTables.IsEmpty()) return;
 
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);

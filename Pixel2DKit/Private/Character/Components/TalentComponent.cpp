@@ -21,15 +21,13 @@ void UTalentComponent::InitTalents()
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
 
-	UDataTable* TalentData = UDataTableSettings::Get().GetTalentData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentData)
-
+	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	for (const FName& Index: BasicBuildSaveGame->ChoicedTalentIndexes)
+	for (const FGameplayTag& TalentTag: BasicBuildSaveGame->ChosenTalents)
 	{
 		// 获取对应的Talent结构
-		FTalent* Data = TalentData->FindRow<FTalent>(Index, "Find Talent Data");
+		const FTalent* Data = DataTableSettings.GetTalentDataByTag(TalentTag);
 		if (!Data) continue;
 
 		for (auto& D: Data->Effect_GameplayTag)
@@ -270,7 +268,8 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 魔法护盾
-	if (BasicBuildSaveGame->ChoicedTalentIndexes.Contains(FName("12")))
+	// FGameplayTag::RequestGameplayTag("Talent.MagicShield");
+	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.MagicShield")))
 	{
 		if (SkillSettings->MagicShield)
 		{
@@ -279,19 +278,19 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 雷公助我
-	if (BasicBuildSaveGame->ChoicedTalentIndexes.Contains(FName("9")))
+	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.Thor")))
 	{
-		if (SkillSettings->ThunderGod)
+		if (SkillSettings->Thor)
 		{
-			if (SpawnSkill(SkillSettings->ThunderGod))
+			if (SpawnSkill(SkillSettings->Thor))
 			{
-				PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.GodThunder"));
+				PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.Thor"));
 			}
 		}
 	}
 
 	// 光合作用
-	if (BasicBuildSaveGame->ChoicedTalentIndexes.Contains(FName("10")))
+	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.SunHeal")))
 	{
 		if (SkillSettings->SunHeal)
 		{
