@@ -295,20 +295,22 @@ public:
 	int GetAttackDamage();
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float BasicMoveSpeed = 200.f;
+	float MaxWalkSpeed = 200.f;
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float BasicMoveAcceleration = 400.f;
+	float MaxAcceleration = 400.f;
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float BasicAirControl = 1.0f;
 	
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float BasicJumpZ_Velocity = 250.0f;
-
+	float JumpZVelocity = 250.0f;
+	
+	UPROPERTY(BlueprintReadWrite, Category = Movement)
+	float GravityScale = 1.0f;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float BasicDashSpeed = 400.0f;
-	
 	
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendPitch = -20.0f;
@@ -339,6 +341,8 @@ public:
 	int32 BasicMaxJumpCount = 2;
 	UPROPERTY(BlueprintReadonly, Category = Movement)
 	float BasicJumpMaxHoldTime = 0.3f;
+
+	
 	UPROPERTY(BlueprintReadonly, Category = Movement)
 	float BasicAttackInterval = 1.0f;
 	

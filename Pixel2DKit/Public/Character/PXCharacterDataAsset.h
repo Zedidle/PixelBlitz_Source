@@ -18,30 +18,30 @@ class PIXEL2DKIT_API UPXCharacterDataAsset : public UDataAsset
 
 public:
 	
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TArray<TSoftObjectPtr<UDataTable>> AbilityDataTables;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSoftObjectPtr<UPXCharacterInputConfig> InputConfig;
 	
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSoftObjectPtr<USoundCue> LandedSound;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSoftObjectPtr<USoundCue> JumpSoundOnGround;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSoftObjectPtr<USoundCue> JumpSoundInAir;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSoftObjectPtr<USoundCue> HurtSound;
 	
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	FCharacterAttribute CharacterAttribute;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSubclassOf<UBasePlayerStatusWidget> PlayerStatusWidgetClass;
 
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSubclassOf<ABaseWeapon> WeaponClass;
 };

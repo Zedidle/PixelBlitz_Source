@@ -34,6 +34,15 @@ void UTalentComponent::InitTalents()
 		{
 			EffectGameplayTags.AddData(D.Key, D.Value);
 		}
+
+		for (auto& AbilityClass: Data->AbilityClass)
+		{
+			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
+			{
+				FGameplayAbilitySpec Spec(LoadedClass);
+				CachedASC->GiveAbility(Spec);
+			}
+		}
 	}
 }
 
@@ -56,6 +65,12 @@ void UTalentComponent::BeginPlay()
 	PXCharacter = Cast<ABasePXCharacter>(GetOwner());
 	OwnerPreLocation = PXCharacter->GetActorLocation();
 
+	if (UPXASComponent* PXASComponent = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent()))
+	{
+		CachedASC = PXASComponent;
+	}
+	
+	
 	InitTalents();
 
 	// 对 OnPlayerAttack 的绑定，在玩家发起攻击时的事件
@@ -122,13 +137,10 @@ void UTalentComponent::RegisterDefenseSkill(ABaseDefenseSkill* Skill)
 
 void UTalentComponent::RemoveDefenseSkill(FGameplayTag Tag)
 {
-	for (int32 i = DefenseSkills.Num() - 1; i >= 0; --i)
+	DefenseSkills.RemoveAllSwap([&Tag](const ABaseDefenseSkill* Skill)
 	{
-		if (DefenseSkills[i] && DefenseSkills[i]->AbilityTags.HasTag(Tag))
-		{
-			DefenseSkills.RemoveAt(i);
-		}
-	}
+		return Skill && Skill->AbilityTags.HasTag(Tag);
+	}, false);
 }
 
 void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage)
@@ -189,10 +201,10 @@ void UTalentComponent::LoadTalents()
 	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.SpeedPlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
-		PXCharacter->BasicMoveSpeed = PXCharacter->BasicMoveSpeed * (1 + EffectGameplayTags[TalentTag]);
+		PXCharacter->MaxWalkSpeed = PXCharacter->MaxWalkSpeed * (1 + EffectGameplayTags[TalentTag]);
 		if (UCharacterMovementComponent* MovementComponent = PXCharacter->GetCharacterMovement())
 		{
-			MovementComponent->MaxWalkSpeed = PXCharacter->BasicMoveSpeed;
+			MovementComponent->MaxWalkSpeed = PXCharacter->MaxWalkSpeed;
 		}
 	}
 
@@ -200,10 +212,10 @@ void UTalentComponent::LoadTalents()
 	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.BasicJumpHeightPlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
-		PXCharacter->BasicJumpZ_Velocity = PXCharacter->BasicJumpZ_Velocity * (1 + EffectGameplayTags[TalentTag]);
+		PXCharacter->JumpZVelocity = PXCharacter->JumpZVelocity * (1 + EffectGameplayTags[TalentTag]);
 		if (UCharacterMovementComponent* MovementComponent = PXCharacter->GetCharacterMovement())
 		{
-			MovementComponent->MaxWalkSpeed = PXCharacter->BasicJumpZ_Velocity;
+			MovementComponent->JumpZVelocity = PXCharacter->JumpZVelocity;
 		}
 	}
 
@@ -268,7 +280,6 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 魔法护盾
-	// FGameplayTag::RequestGameplayTag("Talent.MagicShield");
 	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.MagicShield")))
 	{
 		if (SkillSettings->MagicShield)

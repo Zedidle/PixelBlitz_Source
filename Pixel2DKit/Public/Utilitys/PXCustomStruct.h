@@ -194,14 +194,20 @@ struct FCharacterAttribute
 	int BasicAttackValue;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float WalkMoveSpeed;
+	float MaxWalkSpeed;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float WalkMoveAcceleration;
+	float MaxAcceleration;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float JumpHeight;
+	float JumpZVelocity;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float GravityScale;
 
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float BasicAirControl;
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float RepelResistPercent;
 	

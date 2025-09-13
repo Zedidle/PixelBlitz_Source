@@ -174,10 +174,6 @@ void UAbilityComponent::LoadAbility()
 	{
 		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTags[Tag]);
 	}
-	else
-	{
-		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl;
-	}
 
 
 	// 跳跃上升时间
@@ -186,21 +182,12 @@ void UAbilityComponent::LoadAbility()
 	{
 		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTags[Tag];
 	}
-	else
-	{
-		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime;
-	}
-
-
+	
 	// 附加跳跃次数
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.MaxJumpCountPlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->CurMaxJumpCount = PXCharacter->BasicMaxJumpCount + EffectGameplayTags[Tag];
-	}
-	else
-	{
-		PXCharacter->CurMaxJumpCount = PXCharacter->BasicMaxJumpCount;
+		PXCharacter->CurMaxJumpCount = PXCharacter->CurMaxJumpCount + EffectGameplayTags[Tag];
 	}
 	
 	// EP恢复加快

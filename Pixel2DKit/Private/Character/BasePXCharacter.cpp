@@ -65,15 +65,19 @@ void ABasePXCharacter::LoadData()
 	const FCharacterAttribute& Attribute = DataAsset->CharacterAttribute;
 	const FCharacterAttribute& InheritAttribute = MainSaveGame->CharacterInheritAttribute;
 	
-	BasicMaxJumpCount = Attribute.BasicMaxJumpCount;
+	BasicMaxJumpCount = Attribute.BasicMaxJumpCount + InheritAttribute.BasicMaxJumpCount;
 	CurMaxJumpCount = BasicMaxJumpCount;
-	BasicJumpMaxHoldTime = DataAsset->CharacterAttribute.BasicJumpMaxHoldTime;
-	BasicAttackInterval = DataAsset->CharacterAttribute.BasicAttackInterval;
 	
 	BasicSpringArmLength = Attribute.SpringArmLengthSight + InheritAttribute.SpringArmLengthSight;
 	CurSpringArmLength = BasicSpringArmLength;
+
+	BasicJumpMaxHoldTime = Attribute.BasicJumpMaxHoldTime + InheritAttribute.BasicJumpMaxHoldTime;
+	JumpMaxHoldTime = BasicJumpMaxHoldTime;
+
+	BasicAirControl = Attribute.BasicAirControl + InheritAttribute.BasicJumpMaxHoldTime;
 	
 	BasicAttackValue = Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue;
+	BasicAttackInterval = Attribute.BasicAttackInterval + InheritAttribute.BasicAttackInterval;
 
 	if (EnergyComponent)
 	{
@@ -85,14 +89,19 @@ void ABasePXCharacter::LoadData()
 		HealthComponent->ModifyMaxHP(Attribute.MaxHP + InheritAttribute.MaxHP, EStatChange::Reset, true);
 		HealthComponent->RepelResistancePercent = Attribute.RepelResistPercent + InheritAttribute.RepelResistPercent;
 	}
+
 	
-	BasicMoveSpeed = Attribute.WalkMoveSpeed + InheritAttribute.WalkMoveSpeed;
-	BasicMoveAcceleration = Attribute.WalkMoveAcceleration + InheritAttribute.WalkMoveAcceleration;
+	MaxWalkSpeed = Attribute.MaxWalkSpeed + InheritAttribute.MaxWalkSpeed;
+	MaxAcceleration = Attribute.MaxAcceleration + InheritAttribute.MaxAcceleration;
+	JumpZVelocity = Attribute.JumpZVelocity + InheritAttribute.JumpZVelocity;
+	GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = BasicMoveSpeed;
-		GetCharacterMovement()->MaxAcceleration = BasicMoveAcceleration;
-		GetCharacterMovement()->JumpZVelocity = Attribute.JumpHeight + InheritAttribute.JumpHeight;
+		GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+		GetCharacterMovement()->MaxAcceleration = MaxAcceleration;
+		GetCharacterMovement()->JumpZVelocity = JumpZVelocity;
+		GetCharacterMovement()->GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
+		GetCharacterMovement()->AirControl = BasicAirControl;
 	}
 	
 }
@@ -357,6 +366,8 @@ void ABasePXCharacter::BeginPlay()
 	if (GetCharacterMovement())
 	{
 		SetFalling(GetCharacterMovement()->IsFalling());
+		GetCharacterMovement()->AirControlBoostVelocityThreshold = 0.0f;
+		
 	}
 
 	LoadData();
@@ -1223,10 +1234,7 @@ void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, 
 	if (SurDamage <= 0)
 	{
 		OutDamage = 0;
-		return;
 	}
-	
-	return;
 }
 
 
@@ -1365,8 +1373,8 @@ void ABasePXCharacter::BuffUpdate_Speed_Implementation()
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MovementComponent);
 
-	MovementComponent->MaxWalkSpeed = BasicMoveSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
-	MovementComponent->MaxAcceleration = BasicMoveAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
+	MovementComponent->MaxWalkSpeed = MaxWalkSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
+	MovementComponent->MaxAcceleration = MaxAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
 }
 
 void ABasePXCharacter::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
@@ -1461,7 +1469,7 @@ void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousF
 	                                        TimeDelta);
 	SetFalling(true);
 	SetMoving(false);
-	GetCharacterMovement()->MaxWalkSpeed = BasicMoveSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 }
 
 

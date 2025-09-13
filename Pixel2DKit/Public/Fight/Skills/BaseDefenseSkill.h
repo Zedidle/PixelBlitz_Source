@@ -4,30 +4,58 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "NiagaraComponent.h"
 #include "Fight/Skills/BaseSkill.h"
 #include "BaseDefenseSkill.generated.h"
 
-/**
- * 
- */
+UCLASS()
+class PIXEL2DKIT_API UDefenseSkillDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
+	FGameplayTagContainer AbilityTags;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
+	int Priority = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
+	bool StopPropagation = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
+	TSoftObjectPtr<UNiagaraSystem> NS_OnEffect;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
+	TSoftObjectPtr<USoundCue> SC_OnEffect;
+};
+
+
 UCLASS()
 class PIXEL2DKIT_API ABaseDefenseSkill : public ABaseSkill
 {
 	GENERATED_BODY()
 
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefenseSkill")
-	FGameplayTagContainer AbilityTags;	
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefenseSkill")
-	int Priority = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DefenseSkill")
+	
+public:
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "DefenseSkill")
+	UDefenseSkillDataAsset* DataAsset;
+
+	UPROPERTY(BlueprintReadOnly, Category = "DefenseSkill")
+	int Priority = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "DefenseSkill")
 	bool StopPropagation = false;
 	
-
+	// 技能的使用者被攻击时通过主体反馈触发
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "DefenseSkill")
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool& Stop);
 	
-
+	// 技能自身的防御 Box碰撞触发
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "DefenseSkill")
+	void OnDefenseEffect(AActor* Actor);
 };
