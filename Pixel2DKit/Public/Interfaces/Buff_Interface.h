@@ -21,25 +21,25 @@ class PIXEL2DKIT_API IBuff_Interface
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
-	void BuffEffect_Speed(FGameplayTag Tag, float Percent, float Value, float SustainTime);
+	void BuffEffect_Speed(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
 	void BuffUpdate_Speed();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
-	void BuffEffect_Attack(FGameplayTag Tag, float Percent, int32 Value, float SustainTime);
+	void BuffEffect_Attack(FGameplayTag Tag, float Percent, int32 Value, float SustainTime = 9999);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
 	void BuffUpdate_Attack();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
-	void BuffEffect_Sight(FGameplayTag Tag, float Percent, float Value, float SustainTime);
+	void BuffEffect_Sight(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
 	void BuffUpdate_Sight();
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
-	int32 Buff_CalDamage(int32 InDamage);
+	int32 Buff_CalInitDamage(int32 InDamage);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
 	void AddBuff(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);

@@ -66,7 +66,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 	
-	int Damage = IBuff_Interface::Execute_Buff_CalDamage(PXCharacter, PXCharacter->GetAttackDamage());
+	int Damage = IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, PXCharacter->GetAttackDamage());
 	FVector PreEnemyLocation = Enemy->GetActorLocation();
 
 	Enemy->SetActorLocation(Enemy->GetActorScale3D() * FVector(0, 0, 44.0f) + PXCharacter->GetActorLocation());

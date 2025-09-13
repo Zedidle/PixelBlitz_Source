@@ -7,6 +7,7 @@
 
 bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
 {
+	if (!GetOwner() || !Actor) return false;
 	if (!GetOwner()->Implements<UFight_Interface>()) return false;
 	if (!Actor->Implements<UFight_Interface>()) return false;
 

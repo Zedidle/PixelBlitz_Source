@@ -33,9 +33,6 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 	int WarmUP_Power = 0;
 	int WarmUP_MoveDistance = 0;
 
-	FTimerHandle MiracleWalker_TimerHandle;
-	FTimerHandle WarmUP_TimerHandle;
-	FTimerHandle ImmortalPower_TimerHandle;
 	
 #pragma endregion
 

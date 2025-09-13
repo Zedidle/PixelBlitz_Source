@@ -199,18 +199,6 @@ void UHealthComponent::SetHP(const int32 value, const bool broadcast)
 	}
 }
 
-// void UHealthComponent::SetEffectBySeconds(const int32 value, const FGameplayTag Tag)
-// {
-// 	if (value == 0)
-// 	{
-// 		Tag2EffectHealthPoint.Remove(Tag);
-// 	}
-// 	else
-// 	{
-// 		Tag2EffectHealthPoint.Add(Tag, value);
-// 		// SetActivateHealthEffectBySeconds();
-// 	}
-// }
 
 
 void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
@@ -235,48 +223,6 @@ void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
 	}
 }
 
-// void UHealthComponent::SetActivateHealthEffectBySeconds(const bool activate)
-// {
-// 	UWorld* world = GetWorld();
-// 	if (!IsValid(world)) return;
-// 	
-// 	if (!activate)
-// 	{
-// 		if (TimerHandle_EffectBySeconds.IsValid() && GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
-// 		{
-// 			world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
-// 		}
-// 		return;
-// 	}
-//
-// 	if (world->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds)) return;
-// 	
-// 	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-// 	[this]
-// 	{
-// 		UWorld* world = GetWorld();
-// 		if (!IsValid(world)) return;
-// 		
-// 		if (Tag2EffectHealthPoint.IsEmpty())
-// 		{
-// 			world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
-// 			return;
-// 		}
-// 			
-// 		for (auto& effect : Tag2EffectHealthPoint)
-// 		{
-// 			if (effect.Value > 0)
-// 			{
-// 				IncreaseHP(effect.Value, GetOwner());
-// 			}
-// 			else
-// 			{
-// 				DecreaseHP(effect.Value, FVector(0), GetOwner(), true, false, true);
-// 			}
-// 		}
-// 	});
-// 	world->GetTimerManager().SetTimer(TimerHandle_EffectBySeconds, TimerDel, 1.0f, true);
-// }
 
 // Called when the game starts
 void UHealthComponent::BeginPlay()

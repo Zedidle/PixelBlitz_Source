@@ -12,12 +12,14 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
 #include "Settings/SkillSettings.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 
 
 void UTalentComponent::InitTalents()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
 
@@ -42,6 +44,11 @@ void UTalentComponent::InitTalents()
 				FGameplayAbilitySpec Spec(LoadedClass);
 				CachedASC->GiveAbility(Spec);
 			}
+		}
+		if (Data->CommonInit)
+		{
+			SpawnSkill(Data->SkillClass);
+			PXCharacter->BuffComponent->AddBuffByTag(Data->BuffTagOnWidget);
 		}
 	}
 }
@@ -82,23 +89,10 @@ void UTalentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
+
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), "Talent_WarmingUP");
 	
 	PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &UTalentComponent::Event_OnPlayerAttackStart);
-	
-	if (MiracleWalker_TimerHandle.IsValid())
-	{
-		PXCharacter->GetGameInstance()->GetTimerManager().ClearTimer(MiracleWalker_TimerHandle);
-	}
-
-	if (WarmUP_TimerHandle.IsValid())
-	{
-		PXCharacter->GetGameInstance()->GetTimerManager().ClearTimer(WarmUP_TimerHandle);
-	}
-
-	if (ImmortalPower_TimerHandle.IsValid())
-	{
-		PXCharacter->GetGameInstance()->GetTimerManager().ClearTimer(ImmortalPower_TimerHandle);
-	}
 }
 
 
@@ -194,7 +188,6 @@ void UTalentComponent::LoadTalents()
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->ReviveTimes += FMath::RoundToInt(EffectGameplayTags[TalentTag]);
-		PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.Revive"));
 	}
 
 	// 基础移动速度
@@ -233,19 +226,11 @@ void UTalentComponent::LoadTalents()
 	{
 		if (PXCharacter->BuffComponent->Implements<UBuff_Interface>())
 		{
-			FGameplayTag EagleEyeTag = FGameplayTag::RequestGameplayTag("Buff.Talent.EagleEye");
 			IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
-				EagleEyeTag, EffectGameplayTags[TalentTag], 0, 999);
-			PXCharacter->BuffComponent->AddBuffByTag(EagleEyeTag);
+				FGameplayTag::RequestGameplayTag("Buff.Talent.EagleEye"), EffectGameplayTags[TalentTag], 0, 999);
 		}
 	}
-
-	// 减速抵抗
-	TalentTag = FGameplayTag::RequestGameplayTag("Buff.Talent.SlowDownResistance");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		PXCharacter->BuffComponent->AddBuffByTag(TalentTag);
-	}
+	
 
 	// 最大生命值
 	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxHPPlus");
@@ -267,51 +252,6 @@ void UTalentComponent::LoadTalents()
 		}
 	}
 
-	// 月光蛊
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.Moonlight.BasicDamage");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		if (SkillSettings->MoonLightInsect)
-		{
-			FTransform SpawnTransform;
-			SpawnTransform.SetLocation(FVector(0, 0, 50));
-			SpawnSkill(SkillSettings->MoonLightInsect, SpawnTransform);
-		}
-	}
-
-	// 魔法护盾
-	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.MagicShield")))
-	{
-		if (SkillSettings->MagicShield)
-		{
-			SpawnSkill(SkillSettings->MagicShield);
-		}
-	}
-
-	// 雷公助我
-	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.Thor")))
-	{
-		if (SkillSettings->Thor)
-		{
-			if (SpawnSkill(SkillSettings->Thor))
-			{
-				PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.Thor"));
-			}
-		}
-	}
-
-	// 光合作用
-	if (BasicBuildSaveGame->ChosenTalents.Contains(FGameplayTag::RequestGameplayTag("Talent.SunHeal")))
-	{
-		if (SkillSettings->SunHeal)
-		{
-			if (SpawnSkill(SkillSettings->SunHeal))
-			{
-				PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.SunHeal"));
-			}
-		}
-	}
-
 	// 奇迹行者
 	MakeMiracleWalker();
 
@@ -320,22 +260,14 @@ void UTalentComponent::LoadTalents()
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->SetScale(1 + EffectGameplayTags[TalentTag]);
-		PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.AntMan"));
 	}
-
-	// 武术
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.WuShu"));
-	}
-
+	
 	// 热身
 	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.Warmup.AttackDamagePlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
-		GameInstance->GetTimerManager().SetTimer(WarmUP_TimerHandle, this,
-			&UTalentComponent::MoveWarmingUP, 0.2, true);
+		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Talent_WarmingUP",
+			this, &UTalentComponent::MoveWarmingUP, 0.2);
 	}
 
 	// 摇摆拳
@@ -345,45 +277,8 @@ void UTalentComponent::LoadTalents()
 		MakeSwingFistPower();
 	}
 
-	// 淘金者
-	TalentTag = FGameplayTag::RequestGameplayTag("Buff.Talent.GoldRush");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		if (SkillSettings->GoldRush && SpawnSkill(SkillSettings->GoldRush))
-		{
-			PXCharacter->BuffComponent->AddBuffByTag(TalentTag);
-		}
-	}
-
-	// 赏金猎人
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.GoldPickup.SpeedupPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		PXCharacter->BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Talent.GoldHunter"));
-	}
-
-	// 静功
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.StaticPower.AttackDamagePlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		if (SkillSettings->StaticPower)
-		{
-			SpawnSkill(SkillSettings->StaticPower);
-		}
-	}
-
 	// 不灭
 	MakeImmortalPower(true);
-
-	// 飞沙走石
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.NoSandSpawnInterval");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		if (SkillSettings->NoSand && SpawnSkill(SkillSettings->NoSand))
-		{
-			PXCharacter->BuffComponent->AddBuffByTag(TalentTag);
-		}
-	}
 	
 }
 
@@ -468,7 +363,7 @@ int UTalentComponent::GetAttackDamagePlus()
 	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->HealthComponent->GetMaxHP()) ;
+		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->HealthComponent->GetCurrentHP()) ;
 	}
 
 	// …… 其它技能
@@ -532,13 +427,13 @@ void UTalentComponent::MakeSwingFistPower()
 	if (SwingFistPower)
 	{
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[IncreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  BuffName + "↓",
+		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  BuffName + TEXT("↓"),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[DecreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  BuffName + "↑",
+		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  BuffName + TEXT("↑"),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
 }
@@ -548,8 +443,9 @@ void UTalentComponent::MakeMiracleWalker()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
-
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, FGameplayTag::RequestGameplayTag("Buff.Talent.MiracleWalker"), true);
+	
+	FGameplayTag MiracleWalkerTag = FGameplayTag::RequestGameplayTag("Buff.Talent.MiracleWalker");
+	IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
 
 	FGameplayTag DamagePlusTag = FGameplayTag::RequestGameplayTag("TalentSet.MiracleWalker.DamagePlus");
 	FGameplayTag IntervalTag = FGameplayTag::RequestGameplayTag("TalentSet.MiracleWalker.Interval");
@@ -557,27 +453,25 @@ void UTalentComponent::MakeMiracleWalker()
 
 	if (!EffectGameplayTags.Contains(DamagePlusTag) || !EffectGameplayTags.Contains(IntervalTag)) return;
 
-	if (MiracleWalker_TimerHandle.IsValid())
-	{
-		PXCharacter->GetGameInstance()->GetTimerManager().ClearTimer(MiracleWalker_TimerHandle);
-	}
 	
-	PXCharacter->GetGameInstance()->GetTimerManager().SetTimer(MiracleWalker_TimerHandle, [this, DamagePlusTag]
-	{
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-		FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-		if (EffectGameplayTags.Contains(DamagePlusTag))
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "MakeMiracleWalker",
+		[WeakThis = TWeakObjectPtr<ThisClass>(this), DamagePlusTag, MiracleWalkerTag]
 		{
-			FGameplayTag MiracleWalkerTag = FGameplayTag::RequestGameplayTag("Buff.Talent.MiracleWalker");
-			IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, MiracleWalkerTag, 0.0,
-				EffectGameplayTags[DamagePlusTag], 999
-			);
-			if (PXCharacter->BuffComponent)
+			if (!WeakThis.IsValid()) return;
+			if (!WeakThis->PXCharacter) return;
+
+			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
+			if (EffectGameplayTags.Contains(DamagePlusTag))
 			{
-				PXCharacter->BuffComponent->AddBuffByTag(MiracleWalkerTag);
+				IBuff_Interface::Execute_BuffEffect_Attack(WeakThis->PXCharacter, MiracleWalkerTag, 0.0,
+					EffectGameplayTags[DamagePlusTag], 999
+				);
+				if (WeakThis->PXCharacter->BuffComponent)
+				{
+					WeakThis->PXCharacter->BuffComponent->AddBuffByTag(MiracleWalkerTag);
+				}
 			}
-		}
-	}, EffectGameplayTags[IntervalTag], false);
+		}, EffectGameplayTags[IntervalTag]);
 }
 
 void UTalentComponent::MakeImmortalPower(bool First)
@@ -597,42 +491,40 @@ void UTalentComponent::MakeImmortalPower(bool First)
 		!EffectGameplayTags.Contains(IntervalTag) ||
 		!EffectGameplayTags.Contains(MaxHPPlusAfterAttackTag)
 	) return;
-
 	FGameplayTag ImmortalPowerTag = FGameplayTag::RequestGameplayTag("Buff.Talent.ImmortalPower");
-	if (!First)
+
+	if (First || PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{
-		if (PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+	[WeakThis = TWeakObjectPtr<ThisClass>(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
 		{
-			IBuff_Interface::Execute_RemoveBuff(PXCharacter, ImmortalPowerTag, true);
-			PXCharacter->HealthComponent->ModifyMaxHP(1, EStatChange::Increase, true);
-		}
+			if (!WeakThis.IsValid()) return;
+			if (!WeakThis->PXCharacter) return;
+			if (!WeakThis->PXCharacter->HealthComponent) return;
+		
+			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
+			if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
+												
+			IBuff_Interface::Execute_BuffEffect_Attack(WeakThis->PXCharacter, ImmortalPowerTag, 0.0f,
+				FMath::RoundToInt(WeakThis->PXCharacter->HealthComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]),
+				999.f
+			);
+			if (WeakThis->PXCharacter->BuffComponent)
+			{
+				WeakThis->PXCharacter->BuffComponent->AddBuffByTag(ImmortalPowerTag);
+			}
+			UGameInstance* GameInstance = WeakThis->PXCharacter->GetGameInstance();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+			UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());
+			MainSaveGame->CharacterInheritAttribute.MaxHP ++;
+		}, EffectGameplayTags[IntervalTag]);
 	}
 
-	PXCharacter->GetGameInstance()->GetTimerManager().SetTimer(
-		ImmortalPower_TimerHandle, [this, AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
+	if (!First && PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-		FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-		if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
-			
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, ImmortalPowerTag, 0.0f,
-			FMath::RoundToInt(PXCharacter->HealthComponent->GetCurrentHP() + EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]),
-			0.0f
-		);
-		if (PXCharacter->BuffComponent)
-		{
-			PXCharacter->BuffComponent->AddBuffByTag(ImmortalPowerTag);
-		}
-
-		UGameInstance* GameInstance = PXCharacter->GetGameInstance();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-		UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-		UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
-		MainSaveGame->CharacterInheritAttribute.MaxHP ++;
-			
-	}, EffectGameplayTags[IntervalTag], false);
-	 
+		IBuff_Interface::Execute_RemoveBuff(PXCharacter, ImmortalPowerTag, true);
+		PXCharacter->HealthComponent->ModifyMaxHP(1, EStatChange::Increase, true);
+	}
 }
 
 

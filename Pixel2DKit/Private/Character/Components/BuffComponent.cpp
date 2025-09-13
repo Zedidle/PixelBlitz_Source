@@ -262,8 +262,6 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Speed.Add( Tag, SustainTime + Now);
 
-	if (Tag2BuffEffect_Speed.Contains(Tag)) return;
-
 	if (Percent < 0)
 	{
 		Percent = (1 - SlowDownResistancePercent) * Percent;
@@ -338,8 +336,6 @@ void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Pe
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Attack.Add(Tag, SustainTime + Now);
 
-	if (Tag2BuffEffect_Attack.Contains(Tag)) return;
-
 	EffectedPercent_Attack += Percent;
 	EffectedValue_Attack += Value;
 
@@ -371,8 +367,6 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	float ShortSightResistancePercent = IBuff_Interface::Execute_GetShortSightResistancePercent(Owner);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Sight.Add( Tag, SustainTime + Now);
-
-	if (Tag2BuffEndTime_Sight.Contains(Tag)) return;
 
 	if (Percent < 0)
 	{
@@ -414,9 +408,9 @@ void UBuffComponent::BuffUpdate_Sight_Implementation()
 	IBuff_Interface::BuffUpdate_Sight_Implementation();
 }
 
-int32 UBuffComponent::Buff_CalDamage_Implementation(int32 InDamage)
+int32 UBuffComponent::Buff_CalInitDamage_Implementation(int32 InDamage)
 {
-	return IBuff_Interface::Buff_CalDamage_Implementation(InDamage);
+	return IBuff_Interface::Buff_CalInitDamage(InDamage);
 }
 
 void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
@@ -482,6 +476,8 @@ float UBuffComponent::GetSlowDownResistancePercent_Implementation()
 
 void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 {
+	if (!Tag.IsValid()) return;
+	
 	if(!Tag2BuffOnWidgetData.Contains(Tag)) return;
 	
 	FName BuffName = GetBuffRownameByTag(Tag);

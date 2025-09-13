@@ -509,13 +509,13 @@ public:
 	void OnAttackHoldingRelease();
 	
 #pragma region IBuff_Interface
-	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
+	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999) override;
 	virtual void BuffUpdate_Speed_Implementation() override;
-	virtual void BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime) override;
+	virtual void BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime = 9999) override;
 	virtual void BuffUpdate_Attack_Implementation() override;
-	virtual void BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
+	virtual void BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999) override;
 	virtual void BuffUpdate_Sight_Implementation() override;
-	virtual int32 Buff_CalDamage_Implementation(int32 InDamage) override;
+	virtual int32 Buff_CalInitDamage_Implementation(int32 InDamage) override;
 	virtual void AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent) override;
 	virtual void RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf = true) override;
 	virtual float GetShortSightResistancePercent_Implementation() override;

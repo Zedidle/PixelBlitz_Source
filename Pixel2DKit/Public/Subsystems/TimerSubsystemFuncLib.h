@@ -47,7 +47,7 @@ public:
         SetDelay(WorldContext,
             [WeakObject, Callback = MoveTemp(Callback)]() mutable
             {
-                if (T* Object = WeakObject.IsValid())
+                if (T* Object = WeakObject.Get())
                 {
                    (Object->*Callback)();
                 }
@@ -55,7 +55,25 @@ public:
             Delay
         );
     }
-    
+
+    template<typename T, typename Callable>
+    static void SetDelayLoopSafe(UObject* WorldContext, const FName& TimerName, T* Object, Callable&& Callback, float InRate)
+    {
+        if (!Object) return;
+        
+        TWeakObjectPtr<T> WeakObject(Object);
+        SetDelayLoop(WorldContext, TimerName,
+            [WeakObject, Callback = MoveTemp(Callback)]() mutable
+            {
+                if (T* Object = WeakObject.Get())
+                {
+                   (Object->*Callback)();
+                }
+            },
+            InRate
+        );
+    }
+
     
     /* 设置可重触发延迟
      */

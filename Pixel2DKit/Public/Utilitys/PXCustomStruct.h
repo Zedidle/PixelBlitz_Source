@@ -8,6 +8,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
+#include "Fight/Skills/BaseSkill.h"
 #include "GAS/PXGameplayAbility.h"
 #include "PXCustomStruct.generated.h"
 
@@ -324,5 +325,15 @@ struct FTalent: public FTableRowBase
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
+
+	// 如果CommitInit为true，则会初始化生成SkillClass和显示BuffTagOnWidget
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	bool CommonInit = true;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	TSubclassOf<ABaseSkill> SkillClass;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	FGameplayTag BuffTagOnWidget;
 };
 #pragma endregion

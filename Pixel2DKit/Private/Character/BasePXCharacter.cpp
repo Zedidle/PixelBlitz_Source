@@ -581,6 +581,8 @@ int ABasePXCharacter::GetAttackDamage_Implementation()
 	{
 		 AttackValue += EffectGameplayTags[AttackDamagePlusTag];
 	}
+
+	AttackValue = Execute_Buff_CalInitDamage(this, AttackValue);
 	
 	return AttackValue;
 }
@@ -1412,19 +1414,21 @@ void ABasePXCharacter::BuffUpdate_Sight_Implementation()
 
 }
 
-int32 ABasePXCharacter::Buff_CalDamage_Implementation(int32 InDamage)
+int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
 {
-	int LocalDamage = 0;
+	int LocalDamage = InDamage;
+	if (BuffComponent)
+	{
+		LocalDamage += InDamage * (BuffComponent->EffectedPercent_Attack);
+		LocalDamage += BuffComponent->EffectedValue_Attack;
+	}
+	
 	if (TalentComponent)
 	{
 		TalentComponent->OnBuffCalDamage();
 		LocalDamage += TalentComponent->GetAttackDamagePlus();
 	}
-	if (BuffComponent)
-	{
-		LocalDamage += InDamage * (BuffComponent->EffectedPercent_Attack + 1);
-		LocalDamage += BuffComponent->EffectedValue_Attack;
-	}
+
 	return LocalDamage;
 }
 
@@ -1458,7 +1462,15 @@ float ABasePXCharacter::GetShortSightResistancePercent_Implementation()
 
 float ABasePXCharacter::GetSlowDownResistancePercent_Implementation()
 {
-	return IBuff_Interface::GetSlowDownResistancePercent_Implementation();
+	float Result = 0.0f;
+	
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("TalentSet.SpeedDownResistance");
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		Result += EffectGameplayTags[Tag];
+	}
+	
+	return Result;
 }
 
 
