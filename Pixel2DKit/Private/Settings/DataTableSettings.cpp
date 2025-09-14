@@ -84,6 +84,12 @@ const FAbility* UDataTableSettings::GetAbilityDataByTag(const FGameplayTag& Abil
 	return nullptr;
 }
 
+const TMap<FGameplayTag, FAbility>& UDataTableSettings::GetAllAbilities() const
+{
+	LoadAbilityData();
+	return AbilityData;
+}
+
 void UDataTableSettings::LoadTalentData() const
 {
 	UDataTable* DataTable = GetTalentData();

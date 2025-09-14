@@ -5,9 +5,24 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "Character/BasePXCharacter.h"
+#include "Character/PXCharacterDataAsset.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/PXInputSettings.h"
 
+class UPXInputSettings;
 class UEnhancedInputLocalPlayerSubsystem;
+
+void APXPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	PXCharacter = Cast<ABasePXCharacter>(GetPawn());
+
+	if (const UPXInputSettings* Settings = GetDefault<UPXInputSettings>())
+	{
+		IMC_GamePad = Settings->Gamepad_IMC.LoadSynchronous();
+		IMC_KeyBoard = Settings->Keyboard_IMC.LoadSynchronous();
+	}
+}
 
 void APXPlayerController::OnGameStart()
 {
@@ -21,30 +36,26 @@ void APXPlayerController::OnGameStart()
 
 void APXPlayerController::OnCharacterControl(bool On)
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Subsystem);
+
 	
 	CharacterControlling = On;
 	if (On)
 	{
-		Subsystem->AddMappingContext(IMC_GamePad.LoadSynchronous(), 1);
-		Subsystem->AddMappingContext(IMC_KeyBoard.LoadSynchronous(), 1);
+		Subsystem->AddMappingContext(IMC_GamePad, 1);
+		Subsystem->AddMappingContext(IMC_KeyBoard, 1);
 	}
 	else
 	{
-		Subsystem->RemoveMappingContext(IMC_GamePad.LoadSynchronous());
-		Subsystem->RemoveMappingContext(IMC_KeyBoard.LoadSynchronous());
+		Subsystem->RemoveMappingContext(IMC_GamePad);
+		Subsystem->RemoveMappingContext(IMC_KeyBoard);
 	}
 }
 
 UInputMappingContext* APXPlayerController::GetCurrentIMC()
 {
-	if (GamePadControlling)
-	{
-		return IMC_GamePad.LoadSynchronous();
-	}
-	else
-	{
-		return IMC_KeyBoard.LoadSynchronous();
-	}
+	return GamePadControlling ? IMC_GamePad : IMC_KeyBoard;
 }

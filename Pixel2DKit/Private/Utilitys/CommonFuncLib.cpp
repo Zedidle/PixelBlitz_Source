@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
+#include "Settings/PXInputSettings.h"
 #include "Settings/UserWidgetSettings.h"
 #include "UI/Common/CenterWordTipWidget.h"
 #include "UI/Common/BaseFloatingTextWidget.h"
@@ -18,6 +19,7 @@
 // #include "InputMappingContext.h"
 
 
+class UPXInputSettings;
 
 namespace FloatingTextColor
 {
@@ -137,13 +139,15 @@ void UCommonFuncLib::SpawnCenterTip(FText Tip, FLinearColor Color, FVector2D Tra
 	TipWidget->AddToViewport(1000);
 }
 
-FKey UCommonFuncLib::GetActionKey(UInputAction* IA)
+FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)
 {
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, FKey());
-	if (APXPlayerController* Controller = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
+
+	if (const UPXInputSettings* Settings = GetDefault<UPXInputSettings>())
 	{
-		if (UInputMappingContext* IMC = Controller->GetCurrentIMC())
+		UInputMappingContext* IMC = IsGamePad ? Settings->Gamepad_IMC.LoadSynchronous() : Settings->Keyboard_IMC.LoadSynchronous();
+		if (IMC)
 		{
 			for (auto& ele : IMC->GetMappings())
 			{

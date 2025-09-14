@@ -40,6 +40,12 @@ FAbility UAbilityFuncLib::GetAbilityByTag(const FGameplayTag& Tag)
 	return FAbility();
 }
 
+const TMap<FGameplayTag, FAbility>& UAbilityFuncLib::GetAllAbilities()
+{
+	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	return DataTableSettings.GetAllAbilities();
+}
+
 void UAbilityFuncLib::UnlockTalent(UObject* WorldContextObject, const FGameplayTag& Tag)
 {
 	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();

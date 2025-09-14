@@ -90,5 +90,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "LocalizationFuncLib")
 	static FString GetBuffText(FName BuffName);
-	
+
+	UFUNCTION(BlueprintCallable, Category = "LocalizationFuncLib", meta = (WorldContext = "WorldContextContext"))
+	static void SetLanguage(UObject* WorldContextContext, ELanguageEnum Language);
 };

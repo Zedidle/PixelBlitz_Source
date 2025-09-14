@@ -5,11 +5,21 @@
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSubsystemUtils.h"
 #include "Basic/PXGameInstance.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
+#include "UI/Common/PXCommonText.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data)
 {
+	if (Data.TableName.IsEmpty() || Data.RowName.IsNone())
+	{
+		return TEXT("");
+	}
+	
+	
 	UWorld* world = GEngine->GetCurrentPlayWorld();
 	if (!IsValid(world)) return "";
 	
@@ -46,7 +56,7 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data
 	if (!IsValid(ItemDataTable))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
-		FString::Printf(TEXT("ULocalizationFuncLib::GetLocalizedString  %s not found, %d"), *Data.TableName,__LINE__));
+		FString::Printf(TEXT("ULocalizationFuncLib::GetLocalizedString Table [ %s ] NotFound!"), *Data.TableName));
 		return "";
 	}
 
@@ -77,7 +87,7 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data
 		case ELanguageEnum::French: return LocalizedString->French;
 	}
 	
-	return "";
+	return TEXT("");
 }
 
 FString ULocalizationFuncLib::GetLocalizedString(const FString& TableName, const FName& RowName)
@@ -91,3 +101,21 @@ FString ULocalizationFuncLib::GetBuffText(FName BuffName)
 	return GetLocalizedString(D);
 }
 
+void ULocalizationFuncLib::SetLanguage(UObject* WorldContextContext, ELanguageEnum Language)
+{
+	if ( !WorldContextContext ) return;
+	const UWorld* const World = GEngine->GetWorldFromContextObject(WorldContextContext, EGetWorldErrorMode::LogAndReturnNull);
+	if ( !World ) return;
+	
+	UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(WorldContextContext);
+	SettingSaveGame->GeneralSetting_Language = Language;
+	UPXSaveGameSubSystemFuncLib::SaveSettingData(WorldContextContext);
+
+	for ( TObjectIterator<UPXCommonText> Itr; Itr; ++Itr )
+	{
+		UPXCommonText* LiveWidget = *Itr;
+		
+		if (LiveWidget->GetWorld() != World) continue;
+		LiveWidget->UpdateText();
+	}
+}

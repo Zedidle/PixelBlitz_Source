@@ -21,18 +21,25 @@ class PIXEL2DKIT_API APXPlayerController : public APlayerController
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess))
 	bool PausingToStartCounting = false;
 
+	UPROPERTY(BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess))
+	UInputMappingContext* IMC_GamePad;
+	UPROPERTY(BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess))
+	UInputMappingContext* IMC_KeyBoard;
+	
+protected:
 
+
+	virtual void BeginPlay() override;
+	
 	
 public:
+	UPROPERTY(BlueprintReadOnly)
+	class ABasePXCharacter* PXCharacter = nullptr;
+	
 	// 是否处于手柄控制
 	UPROPERTY(BlueprintReadOnly)
 	bool GamePadControlling = false;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Input)
-	TSoftObjectPtr<UInputMappingContext> IMC_GamePad;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Input)
-	TSoftObjectPtr<UInputMappingContext> IMC_KeyBoard;
-	
+
 	UFUNCTION(BlueprintCallable, Category = Game)
 	void OnGameStart();
 

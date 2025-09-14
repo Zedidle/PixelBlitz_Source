@@ -78,6 +78,7 @@ public:
 	}
 	void LoadAbilityData() const;
 	const FAbility* GetAbilityDataByTag(const FGameplayTag& AbilityTag) const;
+	const TMap<FGameplayTag, FAbility>& GetAllAbilities() const;
 	
 	TObjectPtr<UDataTable> GetTalentData() const { return GetData(TalentDataPath.ToString()); }
 	void LoadTalentData() const;

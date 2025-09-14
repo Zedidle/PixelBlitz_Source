@@ -17,7 +17,7 @@ public:
 
 #pragma region GeneralSetting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | General")
-	uint8 GeneralSetting_Language;
+	TEnumAsByte<ELanguageEnum> GeneralSetting_Language;
 #pragma endregion
 	
 #pragma region VideoSetting
@@ -77,6 +77,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | InGame")
 	bool GameSetting_ShowBlood = true;
 #pragma endregion
+
+
+
 
 	
 };

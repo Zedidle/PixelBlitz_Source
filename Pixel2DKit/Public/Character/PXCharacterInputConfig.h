@@ -8,6 +8,8 @@
 #include "PXCharacterInputConfig.generated.h"
 
 class UInputAction;
+class UInputMappingContext;
+
 UCLASS(Blueprintable, BlueprintType)
 class PIXEL2DKIT_API UPXCharacterInputConfig : public UDataAsset
 {

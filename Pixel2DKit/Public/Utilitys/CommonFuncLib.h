@@ -62,7 +62,7 @@ public:
 		FVector2D Scale = FVector2D(1.0f, 1.0f), float PlaybackSpeed = 1.0f, EFloatingTextAnimType AnimType = EFloatingTextAnimType::Shaking);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")
-	static FKey GetActionKey(UInputAction* IA);
+	static FKey GetActionKey(UInputAction* IA, bool IsGamePad);
 
 
 	

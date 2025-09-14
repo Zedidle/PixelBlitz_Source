@@ -35,7 +35,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsDemo = true;	
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TEnumAsByte<ELanguageEnum>> UsingLanguages;
 };
 
 #pragma endregion

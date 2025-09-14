@@ -27,7 +27,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib")
 	static FAbility GetAbilityByTag(const FGameplayTag& Tag);
 
-
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib")
+	static const TMap<FGameplayTag, FAbility>& GetAllAbilities();
 
 	
 	UFUNCTION(BlueprintCallable, Category="AbilityFuncLib", meta =(WorldContext = "WorldContextObject"))
