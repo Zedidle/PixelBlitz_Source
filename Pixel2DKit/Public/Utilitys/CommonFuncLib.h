@@ -79,7 +79,8 @@ public:
 	static bool CalRandMap_Float(const TMap<float, int32>& M, float& Result);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Math")
 	static bool CalRandMap_Int(const TMap<int, int32>& M, int& Result);
-
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Math")
+	static bool CalRandMap_Vector2D(const TMap<FVector2D, int32>& M, FVector2D& Result);
 };
 
 template <typename T>

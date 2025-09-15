@@ -7,7 +7,15 @@
 #include "GameFramework/GameState.h"
 #include "PXGameState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDayTimeTypeChanged);
+UENUM(BlueprintType)
+enum class EDayTimeType : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Light UMETA(DisplayName = "白天"),
+	Night UMETA(DisplayName = "黑夜"),
+	Dawn  UMETA(DisplayName = "黎明"),
+	Dusk  UMETA(DisplayName = "黄昏")
+};
 
 
 USTRUCT(BlueprintType)
@@ -19,7 +27,7 @@ struct FLevelWeatherRate: public FTableRowBase
 	TMap<FName, int> WeatherRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	TMap<float, int> TimeOfDayRate;
+	TMap<FVector2D, int> TimeOfDayRate;
 };
 
 USTRUCT(BlueprintType)
@@ -41,6 +49,11 @@ struct FWeather: public FTableRowBase
 };
 
 
+
+class UWeatherSubsystem;
+
+
+
 UCLASS()
 class PIXEL2DKIT_API APXGameState : public AGameState
 {
@@ -56,13 +69,12 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
-
-	UPROPERTY(BlueprintCallable, BlueprintAssignable, Category = "GameState | Weather")
-	FOnDayTimeTypeChanged OnDayTimeTypeChanged;
-
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
 	void EventOnDayTimeTypeChanged();
-	
+
+	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
+	TEnumAsByte<EDayTimeType> DayTimeType;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
 	FName CurWeatherIndex;
@@ -82,13 +94,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameState | Weather")
 	float GetDamagePlusPercent();
 	
-	
-	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
-	void SetForceWeatherIndex(const FName& WeatherIndex);
-
 	// 每一个关卡都有随机的天气
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
-	void UpdateWeather();
+	void RandomWeather();
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
+	void PassDayTime(float Time, bool DirectSet, float TransitionDuration = 3, FName _ForceWeatherIndex = FName("None"));
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
 	UPrimaryDataAsset* SetWeather(FName WeatherRowName);
@@ -105,7 +117,4 @@ public:
 	
 };
 
-inline void APXGameState::EventOnDayTimeTypeChanged_Implementation()
-{
-	UpdateWeather();
-}
+

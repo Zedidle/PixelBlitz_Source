@@ -30,19 +30,16 @@ struct FWeatherEffectData
 	float SightDistancePercent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 HealthEffectPerSecond;
+	int32 HPEffectPerSecond;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MoveSpeedEffectPercent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MoveAccelerationPercent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float EPConsumePercent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DamageAddPercent;
+	float DamagePlusPercent;
 };
 
 

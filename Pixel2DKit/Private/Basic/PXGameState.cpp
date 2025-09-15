@@ -9,20 +9,38 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/WeatherSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
 
 void APXGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	OnDayTimeTypeChanged.AddDynamic(this, &ThisClass::EventOnDayTimeTypeChanged);
 }
 
 void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	OnDayTimeTypeChanged.RemoveAll(this);
+}
+
+void APXGameState::EventOnDayTimeTypeChanged_Implementation()
+{
+	if (ForceWeatherIndex.IsValid())
+	{
+		CurWeatherIndex = ForceWeatherIndex;
+		SetWeather(CurWeatherIndex);
+	}
+	else
+	{
+		RandomWeather();
+	}
+
+	UWeatherSubsystem* WeatherSubsystem = GetGameInstance()->GetSubsystem<UWeatherSubsystem>();
+	if (WeatherSubsystem)
+	{
+		WeatherSubsystem->MakeWeatherEffect();
+	}
 }
 
 float APXGameState::GetEPConsumePlusPercent()
@@ -32,38 +50,43 @@ float APXGameState::GetEPConsumePlusPercent()
 
 float APXGameState::GetDamagePlusPercent()
 {
-	return WeatherEffect.DamageAddPercent;
+	return WeatherEffect.DamagePlusPercent;
 }
 
-void APXGameState::SetForceWeatherIndex(const FName& WeatherIndex)
+void APXGameState::RandomWeather()
 {
-	CurWeatherIndex = WeatherIndex;
-}
-
-void APXGameState::UpdateWeather()
-{
-	if (ForceWeatherIndex.IsNone())
+	if (const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>())
 	{
-		if (const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>())
+		if (UDataTable* Data= DataTableSettings->GetLevelWeatherRateData())
 		{
-			if (UDataTable* Data= DataTableSettings->GetLevelWeatherRateData())
+			if (UPXGameInstance* GameInstance= GetGameInstance<UPXGameInstance>())
 			{
-				if (UPXGameInstance* GameInstance= GetGameInstance<UPXGameInstance>())
-				{
-					FName LevelName = GameInstance->GetCurLevelName(true);
-					FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData"));
+				FName LevelName = GameInstance->GetCurLevelName(true);
+				FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData"));
 
-					// 概率计算
-					UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
-				}
+				// 概率计算
+				UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
 			}
 		}
 	}
-	else
-	{
-		CurWeatherIndex = ForceWeatherIndex;
-	}
+
 	SetWeather(CurWeatherIndex);
+}
+
+void APXGameState::PassDayTime_Implementation(float Time, bool DirectSet, float TransitionDuration,
+	FName _ForceWeatherIndex)
+{
+	if (_ForceWeatherIndex.IsValid())
+	{
+		ForceWeatherIndex = _ForceWeatherIndex;
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->ForceWeatherIndex = FName("");
+			}
+		}, TransitionDuration + 0.5);
+	}
 }
 
 void APXGameState::DealGolds()

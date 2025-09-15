@@ -9,7 +9,7 @@
 #include "SaveGame/PXSettingSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
-#include "Settings/PXInputSettings.h"
+#include "Settings/CustomConfigSettings.h"
 #include "Utilitys/SettingFuncLib.h"
 
 
@@ -46,7 +46,7 @@ void UPXSaveGameSubsystem::InitData_Setting()
         SettingSaveGame = SaveGame;
 
 
-        if (const UPXInputSettings* Settings = GetDefault<UPXInputSettings>())
+        if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
         {
             Settings->Gamepad_IMC->UnmapAll();
             Settings->Keyboard_IMC->UnmapAll();
@@ -66,7 +66,7 @@ void UPXSaveGameSubsystem::InitData_Setting()
     {
         SettingSaveGame = NewObject<UPXSettingSaveGame>(this);
         // 按键存档
-        if (const UPXInputSettings* Settings = GetDefault<UPXInputSettings>())
+        if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
         {
             UInputMappingContext* Gamepad_IMC = Cast<UInputMappingContext>(Settings->Gamepad_IMC.Get());
             UInputMappingContext* Keyboard_IMC = Cast<UInputMappingContext>(Settings->Keyboard_IMC.Get());

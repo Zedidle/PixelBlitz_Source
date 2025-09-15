@@ -417,15 +417,23 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 	bool Permanent)
 {
 	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
-	if (IsValid(BuffStateWidget))
+	if (!GetOwner()) return;
+	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	if (!Character) return;
+	
+	if (Character->GetController()->IsLocalController())
 	{
-		if (Permanent)
+		// 显示部分
+		if (IsValid(BuffStateWidget))
 		{
-			BuffStateWidget->BuffPermanent(Tag, BuffName, TextColor);
-		}
-		else
-		{
-			BuffStateWidget->BuffIn(Tag, BuffName, TextColor);
+			if (Permanent)
+			{
+				BuffStateWidget->BuffPermanent(Tag, BuffName, TextColor);
+			}
+			else
+			{
+				BuffStateWidget->BuffIn(Tag, BuffName, TextColor);
+			}
 		}
 	}
 	

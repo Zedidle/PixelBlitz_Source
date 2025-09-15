@@ -44,4 +44,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
 	TSubclassOf<ABaseWeapon> WeaponClass;
+
+	// 死亡复活所需时间
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset | GameplayFlow")
+	float ReviveDelayTime = 3.0f;
+
+	// 死亡复活期间过渡时间
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
+	float RevivePassTime = 600.0f;
 };

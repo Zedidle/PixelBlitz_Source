@@ -14,6 +14,7 @@
 #include "Basic/PXGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Enemy/EnemyAIController.h"
@@ -169,13 +170,22 @@ float ABaseEnemy::GetDistanceToPlayer() const
 	return 99999;
 }
 
+FVector ABaseEnemy::GetCurAttackRepel_Implementation()
+{
+	return CurAttackRepel;
+}
+
+int ABaseEnemy::GetCurAttackDamage_Implementation()
+{
+	return CurAttackDamage;
+}
+
+
 void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset)
-	if (!DataAsset->EnemyLevelDataTable.IsValid()) {
-		DataAsset->EnemyLevelDataTable.LoadSynchronous();
-	}
-	UDataTable* DataTable = DataAsset->EnemyLevelDataTable.Get();
+
+	UDataTable* DataTable = DataAsset->EnemyLevelDataTable.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
 	
 	UDataTableSubsystem* DataTableManager = GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
@@ -188,16 +198,14 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 	DropData = EnemyData.Drop;
 	LoadLookDeterrence(EnemyData.LookDeterrence);
 
-	BasicAttackDamage = EnemyData.AttackDamage;
-	CurAttackDamage = BasicAttackDamage;
+	CurAttackDamage = EnemyData.AttackDamage;
 	AttackInterval = EnemyData.AttackInterval;
 	
 	EnemyAIComponent->AttackRange = EnemyData.AttackRange;
 	GetCharacterMovement()->MaxAcceleration = EnemyData.MoveAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = EnemyData.MoveSpeed;
 
-	BasicAttackRepel = EnemyData.AttackKnockbackForce;
-	CurAttackRepel = BasicAttackRepel;
+	CurAttackRepel = EnemyData.AttackKnockbackForce;
 
 	PawnSensingComponent->SightRadius = EnemyData.SightRadius;
 	LostEnemyTime = EnemyData.LostEnemyTime;
@@ -230,6 +238,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
+	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	
 	// 近战的默认方位，针对不同怪物需要重定义
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
@@ -393,6 +402,32 @@ void ABaseEnemy::OnHurt_Implementation(int RemainHP, AActor* Maker)
 UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
 {
 	return AbilitySystem;
+}
+
+void ABaseEnemy::BuffUpdate_Attack_Implementation()
+{
+	if (BuffComponent)
+	{
+		CurAttackDamage = EnemyData.AttackDamage * (1 + BuffComponent->EffectedPercent_Attack) + BuffComponent->EffectedValue_Attack;
+	}
+}
+
+void ABaseEnemy::BuffUpdate_Speed_Implementation()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent);
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MovementComponent);
+
+	MovementComponent->MaxWalkSpeed = EnemyData.MoveSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
+	MovementComponent->MaxAcceleration = EnemyData.MoveAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
+}
+
+void ABaseEnemy::BuffUpdate_Sight_Implementation()
+{
+	if (PawnSensingComponent)
+	{
+		PawnSensingComponent->SightRadius = EnemyData.SightRadius * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight;
+	}
 }
 
 bool ABaseEnemy::GetIsAttacking()

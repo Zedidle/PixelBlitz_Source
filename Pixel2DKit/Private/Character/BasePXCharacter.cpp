@@ -13,6 +13,7 @@
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Basic/PXGameMode.h"
+#include "Basic/PXGameState.h"
 #include "Basic/PXPlayerController.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
@@ -920,6 +921,11 @@ void ABasePXCharacter::OnDie_Implementation()
 
 	if (AActor* RespawnPoint = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerRespawnPoint::StaticClass()))
 	{
+		if (APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld()))
+		{
+			GS->PassDayTime(DataAsset->RevivePassTime, false, DataAsset->ReviveDelayTime);
+		}
+		
 		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
 			[WeakThis = TWeakObjectPtr<ThisClass>(this), RespawnPoint]
 			{
@@ -928,7 +934,7 @@ void ABasePXCharacter::OnDie_Implementation()
 					WeakThis->SetActorLocation(RespawnPoint->GetActorLocation());
 					WeakThis->Revive();
 				}
-			}, 1.0f);
+			}, DataAsset->ReviveDelayTime);
 	}
 	
 	OnPlayerDie.Broadcast();

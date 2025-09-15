@@ -84,7 +84,7 @@ class ABasePXCharacter;
 
 
 UCLASS()
-class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IAbilitySystemInterface
+class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IBuff_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -103,14 +103,27 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
+	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
+	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UHealthComponent> HealthComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UFightComponent> FightComponent;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UAbilityComponent> AbilityComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UBuffComponent> BuffComponent;
+	
+	
 	UPROPERTY()
 	FEffectGameplayTags EffectGameplayTags;
-
-
-
 
 	
 	UFUNCTION(BlueprintNativeEvent)
@@ -134,17 +147,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDie OnEnemyDie;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
-	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
-	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UHealthComponent> HealthComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UFightComponent> FightComponent;
+
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
@@ -158,94 +161,79 @@ public:
 	UPROPERTY()
 	FDrop DropData;
 
-	UPROPERTY(BlueprintReadOnly)
-	int32 BasicAttackDamage = 10;
-
-	UPROPERTY(BlueprintReadWrite)
 	int32 CurAttackDamage = 10;
+	FVector CurAttackRepel = FVector(50,50,100);
 	
 	UPROPERTY(BlueprintReadWrite)
 	float AttackInterval = 2.0f;
 
-	UPROPERTY()
-	float BasicMoveSpeed = 100.0f;
-
 	UPROPERTY(BlueprintReadOnly);
 	float LostEnemyTime = 5.0f;
-	
-	
-	
-	// 基础攻击击退力度
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
-	FVector BasicAttackRepel = FVector(50,50,100); 
 
-	// 基础攻击击退力度
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
-	FVector CurAttackRepel = FVector(50,50,100); 
 
 	// 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
 	float RandomMoveRange = 100.0f; 
 	
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bDead; 
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bHurt;
 	
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bInAttackState;
 	
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bInAttackEffect;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bAttackAnimToggle;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bInDefendState;
 	
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bDefendStart;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bDefendHurt;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bJumping;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Fight")
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bLanding;
 
 	virtual void Jump() override;
 	virtual void Landed(const FHitResult& Hit) override;
 
 #pragma region Animations
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetDead(const bool V);
 
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetHurt(const bool V, const float duration);
 	
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetInAttackState(const bool V);
 
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetInAttackEffect(const bool V);
 	
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetAttackAnimToggle(const bool V);
 	
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetInDefendState(const bool V);
 
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetDefendStart(const bool V);
 
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetDefendHurt(const bool V);
 
-	UFUNCTION(BlueprintCallable, Category = "Enemy | Fight")
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetJumping(const bool V, const float time = 0.2f);
 #pragma endregion
 
@@ -253,13 +241,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
 	float GetDistanceToPlayer() const;
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Enemy | Fight")
 	void TryAttack();
 
-	UFUNCTION(BlueprintNativeEvent, Category="Fight_Interface")
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category="Enemy | Fight")
+	int GetCurAttackDamage();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category="Enemy | Fight")
+	FVector GetCurAttackRepel();
+	
+	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
 	void OnEnemyHPChanged(int32 NewValue, int32 ChangedValue, EStatChange ChangedStat, AActor* Maker, bool bInner);
 
-	UFUNCTION(BlueprintNativeEvent, Category="Fight_Interface")
+	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
 	void OnHurt(int RemainHP, AActor* Maker);
 	
 #pragma region GAS
@@ -276,7 +270,12 @@ public:
 
 
 
-
+#pragma region Buff_Interface
+	virtual void BuffUpdate_Attack_Implementation() override;
+	virtual void BuffUpdate_Speed_Implementation() override;
+	virtual void BuffUpdate_Sight_Implementation() override;
+	
+#pragma endregion
 
 	
 #pragma region Fight_Interface

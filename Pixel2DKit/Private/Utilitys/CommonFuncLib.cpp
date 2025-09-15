@@ -11,7 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
-#include "Settings/PXInputSettings.h"
+#include "Settings/CustomConfigSettings.h"
 #include "Settings/UserWidgetSettings.h"
 #include "UI/Common/CenterWordTipWidget.h"
 #include "UI/Common/BaseFloatingTextWidget.h"
@@ -19,7 +19,7 @@
 // #include "InputMappingContext.h"
 
 
-class UPXInputSettings;
+class UCustomConfigSettings;
 
 namespace FloatingTextColor
 {
@@ -144,7 +144,7 @@ FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, FKey());
 
-	if (const UPXInputSettings* Settings = GetDefault<UPXInputSettings>())
+	if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
 	{
 		UInputMappingContext* IMC = IsGamePad ? Settings->Gamepad_IMC.LoadSynchronous() : Settings->Keyboard_IMC.LoadSynchronous();
 		if (IMC)
@@ -191,6 +191,11 @@ bool UCommonFuncLib::CalRandMap_Float(const TMap<float, int32>& M, float& Result
 }
 
 bool UCommonFuncLib::CalRandMap_Int(const TMap<int, int32>& M, int& Result)
+{
+	return CalRandomMap(M, Result);
+}
+
+bool UCommonFuncLib::CalRandMap_Vector2D(const TMap<FVector2D, int32>& M, FVector2D& Result)
 {
 	return CalRandomMap(M, Result);
 }

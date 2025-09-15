@@ -86,11 +86,11 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 }
 
 void UFightComponent::MeleeTraceAttack(FName SocketName, USceneComponent* SceneComponent, int Damage,
-	const FVector& KnockbackForce, UNiagaraSystem* HitEffect)
+	const FVector& KnockBackForce, UNiagaraSystem* HitEffect)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SceneComponent)
 	
-	CurKnockbackForceMelee = KnockbackForce;
+	CurKnockbackForceMelee = KnockBackForce;
 	CurSceneComponent = SceneComponent;
 	CurMeleeDamage = Damage;
 	MeleeAttackActorsIgnore.Empty();
