@@ -28,6 +28,8 @@ void UCenterWordTipWidget::NativeConstruct()
 	if (TextTip)
 	{
 		TextTip->SetRenderScale(Scale);
+		TextTip->SetText(Tip);
+		TextTip->SetColorAndOpacity(Color);
 	}
 }
 

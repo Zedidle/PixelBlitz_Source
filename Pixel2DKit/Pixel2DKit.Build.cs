@@ -17,7 +17,7 @@ public class Pixel2DKit : ModuleRules
 		);
 
 		PublicDependencyModuleNames.AddRange(new string[] { 
-			"Core", "CoreUObject", "Engine", "InputCore",
+			"Core", "CoreUObject", "Engine", "InputCore", "CommonUI",
 			"Niagara","GameplayTags",
 			"UMG","AIModule","DeveloperSettings",
 			"GameplayAbilities", "GameplayTasks", 

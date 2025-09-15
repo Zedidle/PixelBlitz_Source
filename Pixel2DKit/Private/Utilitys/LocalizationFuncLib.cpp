@@ -22,43 +22,13 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data
 	
 	UWorld* world = GEngine->GetCurrentPlayWorld();
 	if (!IsValid(world)) return "";
-	
-	FString tDir;
-	FString tName;
+
 
 	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
 	
 	// 尝试读取表
-	TObjectPtr<UDataTable> ItemDataTable;
-	if (Data.TableName.Split("/", &tDir, &tName, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
-	{
-		if (tName == "") return "";
-		ItemDataTable = Settings->GetLocalizedDataTable(
-			FString::Printf(TEXT("/Game/LocalizationData/%s/DT_ML_%s.DT_ML_%s"), *tDir, *tName, *tName));
-		if (!IsValid(ItemDataTable))
-		{
-			ItemDataTable = Settings->GetLocalizedDataTable(
-				FString::Printf(TEXT("/Game/LocalizationData/%s/%s.%s"), *tDir, *tName, *tName));
-		}
-	}
-	else
-	{
-		tName = Data.TableName;
-		ItemDataTable = Settings->GetLocalizedDataTable(
-			FString::Printf(TEXT("/Game/LocalizationData/DT_ML_%s.DT_ML_%s"),  *tName, *tName));
-		if (!IsValid(ItemDataTable))
-		{
-			ItemDataTable = Settings->GetLocalizedDataTable(
-			FString::Printf(TEXT("/Game/LocalizationData/%s.%s"), *tName, *tName));	
-		}
-	}
-	
-	if (!IsValid(ItemDataTable))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
-		FString::Printf(TEXT("ULocalizationFuncLib::GetLocalizedString Table [ %s ] NotFound!"), *Data.TableName));
-		return "";
-	}
+	TObjectPtr<UDataTable> ItemDataTable = Settings->GetLocalizedDataTable(Data);
+	if (!IsValid(ItemDataTable)) return "";
 
 	FName RowName = Data.RowName;
 	FLocalizedStringData* LocalizedString = ItemDataTable->FindRow<FLocalizedStringData>(RowName, TEXT("ULocalizationFuncLibGetLocalizedString"));

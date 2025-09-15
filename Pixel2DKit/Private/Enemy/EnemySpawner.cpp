@@ -30,6 +30,7 @@ void AEnemySpawner::Tick(float DeltaTime)
 
 ABaseEnemy* AEnemySpawner::SpawnEnemy()
 {
+	if (!EnsureSpawn) return nullptr;
 	if (IsValid(SelfEnemy))
 	{
 		return SelfEnemy;

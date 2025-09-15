@@ -30,6 +30,7 @@
 #include "Subsystems/DropSubsystem.h"
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
 
 AActor* ABaseEnemy::GetPixelCharacter()
@@ -667,14 +668,15 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
 
-	float f = USpaceFuncLib::ActorAtActorRight(PixelCharacter,this) ? 180 : 0;
+	bool PlayerAtRight = USpaceFuncLib::ActorAtActorRight(PixelCharacter,this);
+	float f =  PlayerAtRight ? 180 : 0;
 
 	FVector L;
 	FRotator R; // 凑数，后面修改
 	UGameplayStatics::GetPlayerCameraManager(World, 0 )->GetActorEyesViewPoint(L,R);
 	R = UKismetMathLibrary::FindLookAtRotation (L, GetActorLocation());
 
-
+	
 	FVector PlayerForward = PixelCharacter->GetMoveForwardVector();
 	FVector PlayerToSelf = (GetActorLocation() - PixelCharacter->GetActorLocation()).GetSafeNormal2D();
 	float c = PlayerForward.Dot(PlayerToSelf);
@@ -683,36 +685,62 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	float z = PlayerForward.Cross(PlayerToSelf).Z;
 	
 	float yaw = f + R.Yaw - 90;
-	
+
 	// 判断怪物是否在玩家的东侧或西侧
 	FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
-	if (ActionField.GetTagName() == TEXT("ActionField.East.Near") ||
-		ActionField.GetTagName() == TEXT("ActionField.East.Mid"))
+	if (!ActionField.IsValid()) return;
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter Dir: %s"), *ActionField.GetTagName().ToString()));
+	if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.East")))
 	{
 		if (z > 0)
 		{
 			SetActorRotation(FRotator(0, yaw + d, 0));
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw + d));
 		}
 		else
 		{
 			SetActorRotation(FRotator(0, yaw - d, 0));
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw - d));
+
 		}
 	}
-	else if (ActionField.GetTagName() == TEXT("ActionField.West.Near") ||
-		ActionField.GetTagName() == TEXT("ActionField.West.Mid"))
+	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.West")))
 	{
 		if (z > 0)
 		{
 			SetActorRotation(FRotator(0, yaw + d + 180, 0));
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw + d + 180));
+
 		}
 		else
 		{
 			SetActorRotation(FRotator(0, yaw - d + 180, 0));
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw - d + 180));
+
+		}
+
+	}
+	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.North")))
+	{
+		if (PlayerAtRight)
+		{
+			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw + 45, 0));
+		}
+		else
+		{
+			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw + 135, 0));
 		}
 	}
-	else
+	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.South")))
 	{
-		SetActorRotation(FRotator(0, yaw, 0));
+		if (PlayerAtRight)
+		{
+			SetActorRotation(FRotator(0,PixelCharacter->CurBlendYaw - 45, 0));
+		}
+		else
+		{
+			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw - 135, 0));
+		}
 	}
 	
 }

@@ -5,6 +5,8 @@
 
 TAttribute<FText> UPXCommonText::GetDisplayText()
 {
+	if (LocalizedTableData.TableName.IsEmpty() || LocalizedTableData.RowName.IsNone()) return PROPERTY_BINDING(FText, Text);
+	
 	FString S = ULocalizationFuncLib::GetLocalizedString(LocalizedTableData);
 	if (!S.IsEmpty())
 	{
@@ -13,13 +15,6 @@ TAttribute<FText> UPXCommonText::GetDisplayText()
 	return PROPERTY_BINDING(FText, Text);
 }
 
-void UPXCommonText::PostLoad()
-{
-	Super::PostLoad();
-
-	// 读取配置好的字体
-	
-}
 
 void UPXCommonText::UpdateText()
 {

@@ -286,6 +286,11 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 
 	if (Ability.DefaultLock && !BasicBuildSaveGame->UnlockedAbilities.Contains(AbilityTag)) return false;
 
+	if (Ability.PreLevelAbility.IsValid())
+	{
+		if (!TakeEffectAbilities.Contains(Ability.PreLevelAbility)) return false;
+	}
+	
 	if (!Ability.RequiredAbilities.IsEmpty())
 	{
 		for (auto& RequiredAbility : Ability.RequiredAbilities)

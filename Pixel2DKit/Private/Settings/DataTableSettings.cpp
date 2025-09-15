@@ -30,21 +30,53 @@ void UDataTableSettings::PostInitProperties()
 
 }
 
-UDataTable* UDataTableSettings::GetLocalizedDataTable(const FString& Path) const
+UDataTable* UDataTableSettings::GetLocalizedDataTable(const FLocalizedTableData& Data) const
 {
-	if (LocalizedDataTables.Contains(*Path))
+	if (Data.TableName.IsEmpty()) return nullptr;
+
+	if (LocalizedDataTables.Contains(Data.TableName))
 	{
-		return LocalizedDataTables[*Path];
+		return LocalizedDataTables[Data.TableName];
 	}
 	
-	if (const TObjectPtr<UDataTable> ItemDataTable = LoadObject<UDataTable>(nullptr, *Path))
+	FString tDir;
+	FString tName;
+	TObjectPtr<UDataTable> ItemDataTable;
+	if (Data.TableName.Split("/", &tDir, &tName, ESearchCase::IgnoreCase, ESearchDir::FromEnd))
 	{
-		LocalizedDataTables.Add(*Path, ItemDataTable);
-		ItemDataTable->AddToRoot();
-		return LocalizedDataTables[*Path];
+		if (tName.IsEmpty()) return nullptr;
+		
+		ItemDataTable = LoadObject<UDataTable>(nullptr,
+			*FString::Printf(TEXT("/Game/LocalizationData/%s/DT_ML_%s.DT_ML_%s"), *tDir, *tName, *tName));
+		if (!IsValid(ItemDataTable))
+		{
+			ItemDataTable = LoadObject<UDataTable>(nullptr,
+			*FString::Printf(TEXT("/Game/LocalizationData/%s/%s.%s"), *tDir, *tName, *tName));
+		}
 	}
-	
-	return nullptr;
+	else
+	{
+		tName = Data.TableName;
+		ItemDataTable = LoadObject<UDataTable>(nullptr,
+			*FString::Printf(TEXT("/Game/LocalizationData/DT_ML_%s.DT_ML_%s"),  *tName, *tName));
+		
+		if (!IsValid(ItemDataTable))
+		{
+			ItemDataTable = LoadObject<UDataTable>(nullptr,
+			*FString::Printf(TEXT("/Game/LocalizationData/%s.%s"), *tName, *tName));
+		}
+	}
+
+	if (!IsValid(ItemDataTable))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
+		FString::Printf(TEXT("ULocalizationFuncLib::GetLocalizedString Table [ %s ] NotFound!"), *Data.TableName));
+		return nullptr;
+	}
+
+	LocalizedDataTables.Add(Data.TableName, ItemDataTable);
+
+	return ItemDataTable;
 }
 
 void UDataTableSettings::LoadAbilityData() const

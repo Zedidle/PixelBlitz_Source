@@ -58,9 +58,10 @@ public:
 	{
 		return *GetDefault<UDataTableSettings>();
 	}
-	
-	mutable TMap<FName, TObjectPtr<UDataTable>> LocalizedDataTables;
-	UDataTable* GetLocalizedDataTable(const FString& Path) const;
+
+
+	mutable TMap<FString, TObjectPtr<UDataTable>> LocalizedDataTables;
+	UDataTable* GetLocalizedDataTable(const FLocalizedTableData& Data) const;
 
 
 	TObjectPtr<UDataTable> GetCharacterData() const { return GetData(CharacterDataPath.ToString()); }

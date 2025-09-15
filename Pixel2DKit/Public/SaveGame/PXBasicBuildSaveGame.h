@@ -6,7 +6,7 @@
 #include "GameFramework/SaveGame.h"
 #include "PXBasicBuildSaveGame.generated.h"
 
-
+struct FGameplayTag;
 
 UCLASS()
 class PIXEL2DKIT_API UPXBasicBuildSaveGame : public USaveGame

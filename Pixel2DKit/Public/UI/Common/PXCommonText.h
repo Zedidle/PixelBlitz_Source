@@ -24,8 +24,6 @@ protected:
 	
 	
 public:
-	virtual void PostLoad() override;
-
 	UFUNCTION(BlueprintCallable)
 	void UpdateText();
 

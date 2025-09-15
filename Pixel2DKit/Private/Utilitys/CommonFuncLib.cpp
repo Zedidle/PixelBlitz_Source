@@ -124,8 +124,8 @@ void UCommonFuncLib::SpawnCenterTipLocalized(const FLocalizedTableData& Localize
 	SpawnCenterTip(FText::FromString(Word), Color, Translation, Scale, PlaybackSpeed, AnimType);
 }
 
-void UCommonFuncLib::SpawnCenterTip(FText Tip, FLinearColor Color, FVector2D Translation, FVector2D Scale,
-                                    float PlaybackSpeed, EFloatingTextAnimType AnimType)
+void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _Translation, FVector2D _Scale,
+                                    float _PlaybackSpeed, EFloatingTextAnimType _AnimType)
 {
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
@@ -135,7 +135,7 @@ void UCommonFuncLib::SpawnCenterTip(FText Tip, FLinearColor Color, FVector2D Tra
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetSettings->CenterWordTipClass)
 	
 	UCenterWordTipWidget* TipWidget = CreateWidget<UCenterWordTipWidget>(World, WidgetSettings->CenterWordTipClass);
-	TipWidget->Init(Tip, Color, Translation, Scale, PlaybackSpeed, AnimType);
+	TipWidget->Init(_Tip, _Color, _Translation, _Scale, _PlaybackSpeed, _AnimType);
 	TipWidget->AddToViewport(1000);
 }
 

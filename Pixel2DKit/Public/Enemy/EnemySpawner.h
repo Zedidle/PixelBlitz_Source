@@ -30,6 +30,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool EnsureSpawn = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<ABaseEnemy>, int32> EnemyClassRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
