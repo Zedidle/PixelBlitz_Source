@@ -5,10 +5,12 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "Basic/PXGameState.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 void UEnergyComponent::Recover()
 {
@@ -46,13 +48,23 @@ void UEnergyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-bool UEnergyComponent::DecreaseEP(int32 Amount, AActor* Instigator)
+int32 UEnergyComponent::CalEPCustomInFact(int32 Amount)
+{
+	APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GS, Amount)
+	
+	return FMath::RoundToInt(Amount * (GS->GetEPConsumePlusPercent() + 1.0f));
+}
+
+bool UEnergyComponent::DecreaseEP(int32 Amount)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, false)
-
-	if (!IsEPEnough(Amount, true)) return false;
+	APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GS, false)
 	
-	int32 Consume = FMath::RoundToInt(Amount * (PXCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
+	int32 Consume = CalEPCustomInFact(Amount);
+
+	if (!IsEPEnough(Consume, true)) return false;
 
 	if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PXCharacter))
 	{
@@ -72,10 +84,8 @@ bool UEnergyComponent::DecreaseEP(int32 Amount, AActor* Instigator)
 	return false;
 }
 
-void UEnergyComponent::IncreaseEP(int32 Amount, AActor* Instigator)
+void UEnergyComponent::IncreaseEP(int32 Amount)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Instigator)
-	
 	if (const AActor* TargetActor = GetOwner())
 	{
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
@@ -89,7 +99,7 @@ void UEnergyComponent::IncreaseEP(int32 Amount, AActor* Instigator)
 	}
 }
 
-void UEnergyComponent::SetEP(int32 NewValue, AActor* Instigator)
+void UEnergyComponent::SetEP(int32 NewValue)
 {
 	if (const AActor* TargetActor = GetOwner())
 	{
@@ -147,8 +157,8 @@ void UEnergyComponent::SetMaxEP(int32 NewValue)
 bool UEnergyComponent::IsEPEnough(int32 Cost, bool bNeedTip)
 {
 	if (!PXCharacter) return false;
-
-	Cost = FMath::RoundToInt(Cost * (PXCharacter->WeatherEffect.StaminaConsumePercent + 1.0f));
+	
+	Cost = CalEPCustomInFact(Cost);
 
 	if (const AActor* TargetActor = GetOwner())
 	{

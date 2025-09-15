@@ -4,10 +4,12 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "NiagaraClipboard.h"
 #include "GameplayEffectExtension.h"
+#include "Basic/PXGameState.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 void UPXAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -40,9 +42,19 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	
 	if(Attribute == GetHPAttribute())
 	{
-		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHP());
-		
 		int ChangedValue = NewValue - GetHP();
+
+		if (ChangedValue < 0)
+		{
+			if (APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld()))
+			{
+				// 天气的统一影响
+				ChangedValue = ChangedValue * (1 + GS->GetDamagePlusPercent());
+			}
+		}
+		
+		NewValue = FMath::Clamp(GetHP() + ChangedValue, 0.f, GetMaxHP());
+		
 		if (ChangedValue != 0.f)
 		{
 			if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())

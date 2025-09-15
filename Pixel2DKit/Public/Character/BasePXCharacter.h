@@ -39,7 +39,7 @@ struct FWeatherEffectData
 	float MoveAccelerationPercent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float StaminaConsumePercent;
+	float EPConsumePercent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageAddPercent;
@@ -145,9 +145,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnPlayerAttackStart OnPlayerAttackStart;
-	
-	UPROPERTY(BlueprintReadWrite)
-	FWeatherEffectData WeatherEffect;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FVector FightCenterForCameraOffset = FVector(0.0f);

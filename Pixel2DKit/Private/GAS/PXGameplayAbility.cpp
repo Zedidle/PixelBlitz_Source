@@ -6,17 +6,34 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "AbilitySystemLog.h"
+#include "Basic/PXGameState.h"
 #include "GAS/PXGameplayEffect.h"
+#include "GAS/AttributeSet/PXAttributeSet.h"
 #include "opensubdiv/far/error.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/LocalizationFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 class UPXGameplayEffect;
 
 float UPXGameplayAbility::GetCooldownDuration_Implementation() const
 {
 	return CooldownDuration.GetValueAtLevel(GetAbilityLevel());
+}
+
+float UPXGameplayAbility::GetCostEP_Implementation() const
+{
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Cost.EP");
+	if (Cost.Contains(Tag))
+	{
+		APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld());
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GS, 0);
+		
+		return Cost[Tag].GetValueAtLevel(GetAbilityLevel()) * (1 + GS->GetEPConsumePlusPercent());
+	}
+
+	return 0;
 }
 
 void UPXGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
@@ -54,41 +71,38 @@ void UPXGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
 bool UPXGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	FGameplayTagContainer* OptionalRelevantTags) const
 {
-	UGameplayEffect* CostGE = GetCostGameplayEffect();
-	if (CostGE)
+	UAbilitySystemComponent* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
+	check(AbilitySystemComponent != nullptr);
+
+	const UPXAttributeSet* Set = AbilitySystemComponent->GetSet<UPXAttributeSet>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Set, true)
+	if (GetCostEP() > Set->GetEP())
 	{
-		UAbilitySystemComponent* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-		check(AbilitySystemComponent != nullptr);
-		if (!AbilitySystemComponent->CanApplyAttributeModifiers(CostGE, GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo)))
-		{
-			const FGameplayTag& CostTag = UAbilitySystemGlobals::Get().ActivateFailCostTag;
-
-			if (OptionalRelevantTags && CostTag.IsValid())
-			{
-				OptionalRelevantTags->AddTag(CostTag);
-			}
-
-			if (!CostGE->Modifiers.IsEmpty())
-			{
-				for (auto& Modify : CostGE->Modifiers)
-				{
-					if (Modify.Attribute.AttributeName == "EP")
-					{
-						UCommonFuncLib::SpawnCenterTipLocalized(
-							FLocalizedTableData("Basic/Tips", "EPNotEnough"),
-							FLinearColor::White, FVector2D(0, 300)
-						);
-					}
-
-					// …… 后续其它属性
-				}
-
-			}
-
-			return false;
-		}
+		UCommonFuncLib::SpawnCenterTipLocalized(
+			FLocalizedTableData("Basic/Tips", "EPNotEnough"),
+			FLinearColor::White, FVector2D(0, 300)
+		);
+		return false;
 	}
+	
 	return true;
+}
+
+void UPXGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	UGameplayEffect* CostGE = GetCostGameplayEffect();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CostGE)
+	
+	FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(CostGE->GetClass(), GetAbilityLevel());
+	FGameplayEffectSpec* Spec = SpecHandle.Data.Get();
+	if (Spec)
+	{
+		Spec->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag(FName("Cost.EP")), -GetCostEP());
+	}
+
+	ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, SpecHandle);
+
 }
 
 const FGameplayTagContainer* UPXGameplayAbility::GetCooldownTags() const

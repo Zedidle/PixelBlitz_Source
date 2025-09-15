@@ -16,6 +16,7 @@
 #include "AbilitySystemGlobals.h"
 #include "Basic/PXGameState.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 class ULegacyCameraShake;
 
@@ -311,13 +312,6 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 		return;
 	}
 
-	// 天气影响的伤害增幅, 记录在 GameState的天气数值
-	if (APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(Owner)))
-	{
-		Damage += Damage * GS->WeatherEffectData.DamageAddPercent;
-	}
-
-	
 	int OutDamage = Damage;
 	if (!bInner)
 	{

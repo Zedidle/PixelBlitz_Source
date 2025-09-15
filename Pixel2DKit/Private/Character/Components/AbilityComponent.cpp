@@ -142,6 +142,7 @@ void UAbilityComponent::LoadAbility()
 	for (auto Tag : TakeEffectAbilities)
 	{
 		const FAbility* AbilityData = DataTableSettings.GetAbilityDataByTag(Tag);
+		if (!AbilityData) continue;
 		for (auto& AbilityClass: AbilityData->AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())

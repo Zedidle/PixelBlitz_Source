@@ -595,7 +595,7 @@ void ABasePXCharacter::Revive_Implementation()
 	}
 	if (EnergyComponent)
 	{
-		EnergyComponent->SetEP(EnergyComponent->GetMaxEP() * 0.5, this);
+		EnergyComponent->SetEP(EnergyComponent->GetMaxEP() * 0.5);
 	}
 	if (GetCharacterMovement())
 	{

@@ -25,18 +25,24 @@ void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	OnDayTimeTypeChanged.RemoveAll(this);
 }
 
-void APXGameState::LoadWeatherEffect()
+float APXGameState::GetEPConsumePlusPercent()
 {
+	return WeatherEffect.EPConsumePercent;
 }
 
-void APXGameState::SetWeatherEffect(const FWeatherEffectData& data)
+float APXGameState::GetDamagePlusPercent()
 {
-	WeatherEffectData = data;
+	return WeatherEffect.DamageAddPercent;
+}
+
+void APXGameState::SetForceWeatherIndex(const FName& WeatherIndex)
+{
+	CurWeatherIndex = WeatherIndex;
 }
 
 void APXGameState::UpdateWeather()
 {
-	if (ForceWeatherIndex == FName())
+	if (ForceWeatherIndex.IsNone())
 	{
 		if (const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>())
 		{
@@ -103,8 +109,11 @@ UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
 			if (UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld()))
 			{
 				SettingSaveGame->GameSetting_WeatherType = UGameplayStatics::GetObjectClass(WeatherData->WeatherSetting);
-				// UPXSaveGameSubSystemFuncLib::SaveSettingData(GetWorld());
+
+				WeatherName_Localized = WeatherData->WeatherName_Localized;
 				WeatherType = WeatherData->WeatherType;
+				WeatherEffect = WeatherData->WeatherEffect;
+
 				return WeatherData->WeatherSetting;
 			}
 		}

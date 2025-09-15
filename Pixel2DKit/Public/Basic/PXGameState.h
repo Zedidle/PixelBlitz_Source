@@ -66,19 +66,27 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
 	FName CurWeatherIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
+	FLocalizedTableData WeatherName_Localized;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather")
 	TEnumAsByte<EWeather> WeatherType;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
-	FWeatherEffectData WeatherEffectData;
+	FWeatherEffectData WeatherEffect;
 
-	UFUNCTION(Category = "GameState | Weather")
-	void LoadWeatherEffect();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameState | Weather")
+	float GetEPConsumePlusPercent();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameState | Weather")
+	float GetDamagePlusPercent();
+	
+	
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
-	void SetWeatherEffect(const FWeatherEffectData& data);
+	void SetForceWeatherIndex(const FName& WeatherIndex);
 
+	// 每一个关卡都有随机的天气
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
 	void UpdateWeather();
 	

@@ -689,19 +689,16 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	// 判断怪物是否在玩家的东侧或西侧
 	FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 	if (!ActionField.IsValid()) return;
-	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter Dir: %s"), *ActionField.GetTagName().ToString()));
+	
 	if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.East")))
 	{
 		if (z > 0)
 		{
 			SetActorRotation(FRotator(0, yaw + d, 0));
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw + d));
 		}
 		else
 		{
 			SetActorRotation(FRotator(0, yaw - d, 0));
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw - d));
-
 		}
 	}
 	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.West")))
@@ -709,14 +706,10 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 		if (z > 0)
 		{
 			SetActorRotation(FRotator(0, yaw + d + 180, 0));
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw + d + 180));
-
 		}
 		else
 		{
 			SetActorRotation(FRotator(0, yaw - d + 180, 0));
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Tick_KeepFaceToPixelCharacter yaw: %f"), yaw - d + 180));
-
 		}
 
 	}

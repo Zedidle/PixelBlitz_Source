@@ -19,6 +19,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown")
 	FScalableFloat CooldownDuration; 
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cost")
+	TMap<FGameplayTag, FScalableFloat> Cost;
+
+	
 	// 技能专属冷却标签
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown")
 	FGameplayTagContainer CooldownTags; 
@@ -29,10 +33,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Cooldown")
 	float GetCooldownDuration() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Cost")
+	float GetCostEP() const;
 	
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
+
 	
 	virtual const FGameplayTagContainer* GetCooldownTags() const override;
 
