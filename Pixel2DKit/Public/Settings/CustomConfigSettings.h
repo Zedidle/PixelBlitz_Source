@@ -27,4 +27,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "GAS | GameplayEffect")
 	TSubclassOf<class UPXGameplayEffect> GE_WeatherEffect_HP;
+
+	UPROPERTY(Config, BlueprintReadOnly, EditAnywhere, Category = "GameplayFlow | Ability")	
+	int BasePerLevelSkillPointsGet = 2;
 };

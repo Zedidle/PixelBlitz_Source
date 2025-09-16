@@ -96,7 +96,7 @@ void UBasePlayerStatusWidget::RefreshLife_Implementation()
 	
 	if (HeartsWidget)
 	{
-		HeartsWidget->FillHearts(MainSaveGame->SupLife);
+		HeartsWidget->FillHearts(MainSaveGame->RemLife);
 	}
 }
 

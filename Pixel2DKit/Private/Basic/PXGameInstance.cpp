@@ -28,32 +28,32 @@ FName UPXGameInstance::GetCurLevelName(bool Continue)
 	}
 	else
 	{
-		if (MainSaveGame->SurLevels.Num() == 0) return "";
+		if (MainSaveGame->RemLevels.Num() == 0) return "";
 		
-		if (MainSaveGame->SurLevels.Num() == 1)
+		if (MainSaveGame->RemLevels.Num() == 1)
 		{
-			MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
+			MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
 		}
 		else
 		{
-			const FString s0 = UKismetStringLibrary::GetSubstring(MainSaveGame->SurLevels[0].ToString(), 1, 1);
+			const FString s0 = UKismetStringLibrary::GetSubstring(MainSaveGame->RemLevels[0].ToString(), 1, 1);
 			float v0 = FCString::Atod(*s0);
 
-			const FString s1 = UKismetStringLibrary::GetSubstring(MainSaveGame->SurLevels[1].ToString(), 1, 1);
+			const FString s1 = UKismetStringLibrary::GetSubstring(MainSaveGame->RemLevels[1].ToString(), 1, 1);
 			float v1 = FCString::Atod(*s1);
 
 			float r = v0 / (v0 + v1);
 			if (FMath::FRand() > r)
 			{
-				MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
+				MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
 			}
 			else
 			{
-				MainSaveGame->CurLevelName = MainSaveGame->SurLevels[1];
+				MainSaveGame->CurLevelName = MainSaveGame->RemLevels[1];
 			}
 		}
 
-		MainSaveGame->SurLevels.Remove(MainSaveGame->CurLevelName);
+		MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
 		return MainSaveGame->CurLevelName;
 	}
 }
@@ -66,18 +66,18 @@ FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	if (!MainSaveGame) return FName();
 	
-	if (MainSaveGame->SurLevels.Num() == 0) return "";
+	if (MainSaveGame->RemLevels.Num() == 0) return "";
 	
 	if (Next)
 	{
-		MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
-		MainSaveGame->SurLevels.Remove(MainSaveGame->CurLevelName);
+		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
+		MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
 		return MainSaveGame->CurLevelName;
 	}
 	
 	if (MainSaveGame->CurLevelName == FName("None"))
 	{
-		MainSaveGame->CurLevelName = MainSaveGame->SurLevels[0];
+		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
 	}
 	
 	return MainSaveGame->CurLevelName;	
@@ -122,7 +122,7 @@ void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 	}
 	
 	MainSaveGame->DieTimes++;
-	MainSaveGame->SupLife--;
+	MainSaveGame->RemLife--;
 	
-	End = MainSaveGame->SupLife == -1;
+	End = MainSaveGame->RemLife == -1;
 }

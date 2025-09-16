@@ -21,11 +21,14 @@ public:
 	FName CurLevelToChoiceAbility;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int SupLife = 5;
+	int RemLife = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxLife = 5;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int RemSkillPoints = 0;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FGameplayTag> ChosenAbilities;
 
@@ -81,5 +84,5 @@ public:
 	FName CurLevelName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FName> SurLevels;
+	TArray<FName> RemLevels;
 };
