@@ -16,6 +16,7 @@
 #include "UI/Common/CenterWordTipWidget.h"
 #include "UI/Common/BaseFloatingTextWidget.h"
 #include "Utilitys/LocalizationFuncLib.h"
+#include "Utilitys/SpaceFuncLib.h"
 // #include "InputMappingContext.h"
 
 
@@ -85,6 +86,9 @@ void UCommonFuncLib::SpawnFloatingText(FText Text, FVector WorldLocation, FLinea
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+
+	if (!USpaceFuncLib::IsPointInScreen(World, WorldLocation, -0.05)) return;
+	
 	if (Settings->FloatingTextDefaultClass)
 	{
 		if (UBaseFloatingTextWidget* Widget = CreateWidget<UBaseFloatingTextWidget>(World, Settings->FloatingTextDefaultClass))

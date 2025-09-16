@@ -75,7 +75,7 @@ void ABasePXCharacter::LoadData()
 	BasicJumpMaxHoldTime = Attribute.BasicJumpMaxHoldTime + InheritAttribute.BasicJumpMaxHoldTime;
 	JumpMaxHoldTime = BasicJumpMaxHoldTime;
 
-	BasicAirControl = Attribute.BasicAirControl + InheritAttribute.BasicJumpMaxHoldTime;
+	BasicAirControl = Attribute.BasicAirControl + InheritAttribute.BasicAirControl;
 	
 	BasicAttackValue = Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue;
 	BasicAttackInterval = Attribute.BasicAttackInterval + InheritAttribute.BasicAttackInterval;
@@ -367,8 +367,8 @@ void ABasePXCharacter::BeginPlay()
 	if (GetCharacterMovement())
 	{
 		SetFalling(GetCharacterMovement()->IsFalling());
-		GetCharacterMovement()->AirControlBoostVelocityThreshold = 0.0f;
-		
+		GetCharacterMovement()->AirControlBoostVelocityThreshold = 600;
+		GetCharacterMovement()->AirControlBoostMultiplier = 10.0f;
 	}
 
 	LoadData();
@@ -923,7 +923,7 @@ void ABasePXCharacter::OnDie_Implementation()
 	{
 		if (APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld()))
 		{
-			GS->PassDayTime(DataAsset->RevivePassTime, false, DataAsset->ReviveDelayTime);
+			GS->PassDayTime(DataAsset->RevivePassDayTime, false, DataAsset->ReviveDelayTime);
 		}
 		
 		UTimerSubsystemFuncLib::SetDelay(GetWorld(),

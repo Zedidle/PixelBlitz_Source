@@ -169,7 +169,7 @@ void UAbilityComponent::LoadAbility()
 	FGameplayTag Tag;
 	FGameplayTagContainer Tags;
 
-	// 空中移动的控制（暂且无用）
+	// 空中移动的控制
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AirMoveEffectAddPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{

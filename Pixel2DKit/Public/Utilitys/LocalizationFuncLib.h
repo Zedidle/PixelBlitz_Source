@@ -74,7 +74,11 @@ struct FLocalizedTableData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName RowName;
-	
+
+	bool IsValid() const
+	{
+		return !TableName.IsEmpty() && RowName.IsValid();
+	}
 };
 
 

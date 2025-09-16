@@ -67,7 +67,7 @@ public:
 
 	FTimerHandle TimerHandle_CheckBuffEnd;
 	UFUNCTION()
-	void CheckBuffEnd();
+	void CheckBuffExpire();
 	
 	
 	
@@ -128,7 +128,7 @@ public:
 	void AddBuffByTag(FGameplayTag Tag);
 
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
-	void DispearBuff(FGameplayTag Tag);
+	void ExpireBuff(FGameplayTag Tag);
 	
 };
 

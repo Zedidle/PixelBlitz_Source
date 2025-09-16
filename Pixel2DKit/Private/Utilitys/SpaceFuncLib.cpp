@@ -161,6 +161,12 @@ FVector USpaceFuncLib::GetDirection2DFromPlayerViewPoint(const int PlayerIndex)
 
 bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset, float BufferPercentage)
 {
+	if (!Actor) return false;
+	return IsPointInScreen(WorldContextObject, Actor->GetActorLocation() + Offset, BufferPercentage);
+}
+
+bool USpaceFuncLib::IsPointInScreen(const UObject* WorldContextObject, const FVector& Point, float BufferPercentage)
+{
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 	if (!GameInstance) return false;
 
@@ -173,14 +179,14 @@ bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* A
 	int SizeX, SizeY;
 	PC->GetViewportSize(SizeX, SizeY);
 
-	BufferPercentage = FMath::Clamp(BufferPercentage, 0.0f, 0.2f);
+	BufferPercentage = FMath::Clamp(BufferPercentage, -0.1f, 0.2f);
 	int LeftLedge = -BufferPercentage * SizeX;
 	int UpLedge = -BufferPercentage * SizeY;
 	int RightLedge = (BufferPercentage + 1) * SizeX;
 	int DownLedge = (BufferPercentage + 1) * SizeY;
 	
 	FVector2D ScreenPosition;
-	UGameplayStatics::ProjectWorldToScreen(PC, Actor->GetActorLocation() + Offset, ScreenPosition, false);
+	UGameplayStatics::ProjectWorldToScreen(PC, Point, ScreenPosition, false);
 	
 	return ScreenPosition.X > LeftLedge && ScreenPosition.Y > UpLedge &&
 			ScreenPosition.X < RightLedge && ScreenPosition.Y < DownLedge;

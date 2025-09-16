@@ -117,7 +117,7 @@ void UBuffStateWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UBuffStateWidget::BuffDispear_Implementation(FGameplayTag Tag)
+void UBuffStateWidget::BuffExpire_Implementation(FGameplayTag Tag)
 {
 	if (!Tag2Widget.Contains(Tag)) return;
 

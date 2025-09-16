@@ -50,6 +50,6 @@ public:
 	float ReviveDelayTime = 3.0f;
 
 	// 死亡复活期间过渡时间
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset")
-	float RevivePassTime = 600.0f;
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset | GameplayFlow")
+	float RevivePassDayTime = 600.0f;
 };

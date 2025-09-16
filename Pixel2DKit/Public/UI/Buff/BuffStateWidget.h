@@ -54,7 +54,7 @@ public:
 	void BuffOut(FGameplayTag Tag);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void BuffDispear(FGameplayTag Tag);
+	void BuffExpire(FGameplayTag Tag);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void BuffPermanent(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor);

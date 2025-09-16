@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Subsystems/WeatherSubsystem.h"
-
 #include "Basic/PXGameState.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/Components/BuffComponent.h"
@@ -80,13 +79,15 @@ void UWeatherSubsystem::MakeWeatherEffect()
 
 		// 天气影响
 		IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
-		IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag,
-			ULocalizationFuncLib::GetLocalizedString(GS->WeatherName_Localized), FLinearColor::White, false);
-		
+		if (GS->WeatherName_Localized.IsValid())
+		{
+			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag,
+				ULocalizationFuncLib::GetLocalizedString(GS->WeatherName_Localized), FLinearColor::White, false);
+		}
+
 		IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
 		IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, WeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
-
-
+		
 		
 		// 针对玩家的血量影响
 		if (Cast<ABasePXCharacter>(Actor) && ConfigSettings->GE_WeatherEffect_HP)

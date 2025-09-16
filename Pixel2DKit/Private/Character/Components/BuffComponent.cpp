@@ -16,6 +16,7 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/DebugFuncLab.h"
+#include "Utilitys/SpaceFuncLib.h"
 
 // Sets default values for this component's properties
 UBuffComponent::UBuffComponent()
@@ -54,7 +55,7 @@ void UBuffComponent::InitData()
 }
 
 
-void UBuffComponent::CheckBuffEnd()
+void UBuffComponent::CheckBuffExpire()
 {
 	float CurTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 
@@ -87,6 +88,10 @@ void UBuffComponent::CheckBuffEnd()
 	for (auto& ele : RemovedTags)
 	{
 		RemoveBuff_EffectAll(ele);
+		if (BuffStateWidget)
+		{
+			BuffStateWidget->BuffExpire(ele);
+		}
 	}
 }
 
@@ -120,7 +125,7 @@ void UBuffComponent::BeginPlay()
 	if (GetWorld())
 	{
 		GetWorld()->GetTimerManager().SetTimer(TimerHandle_CheckBuffEnd,
-		this, &UBuffComponent::CheckBuffEnd,0.1, true);
+		this, &UBuffComponent::CheckBuffExpire,0.1, true);
 	}
 
 }
@@ -221,7 +226,7 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
-		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectApplied Tag: %s"), *Tag.ToString()));
+		// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectApplied Tag: %s"), *Tag.ToString()));
 
 		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
 		{
@@ -277,7 +282,7 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	Tag2BuffEffect_Speed.Add(Tag, FBuffValueEffect(Percent, Value));
 	
 	Execute_BuffUpdate_Speed(Owner);
-	
+
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
 	{
@@ -493,11 +498,11 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 	IBuff_Interface::Execute_AddBuff(this, Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
 }
 
-void UBuffComponent::DispearBuff(FGameplayTag Tag)
+void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 {
 	if (IsValid(BuffStateWidget))
 	{
-		BuffStateWidget->BuffDispear(Tag);
+		BuffStateWidget->BuffExpire(Tag);
 	}
 }
 
