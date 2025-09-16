@@ -46,10 +46,17 @@ void APlatformFight::Tick(float DeltaTime)
 	TmpCenterLocation = TmpCenterLocation / TmpNum;
 	FVector PlayerLocation = PXCharacter->GetActorLocation();
 	FVector DirLength = TmpCenterLocation - PlayerLocation;
-	PXCharacter->FightCenterForCameraOffset = DirLength *
-		FRotator(0, PXCharacter->CurBlendYaw, 0).RotateVector(FVector(0.25, 0.15, 0.3));
 
+	if (DirLength.Size() < 1000)
+	{
+		float MaxDistanceFromPlayerToCenter = FMath::Min(500.f, DirLength.Size());
 
+		PXCharacter->FightCenterForCameraOffset = DirLength.GetSafeNormal() * MaxDistanceFromPlayerToCenter * 0.2;
+
+		// DrawDebugSphere(GetWorld(), TmpCenterLocation, 30, 1, FColor::Red);
+	}
+
+	
 	// 设置镜头偏转
 	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 	FVector EyeViewPoint; FRotator _;
@@ -109,7 +116,6 @@ void APlatformFight::FightEnd_Implementation()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 
 	PXCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
-	PXCharacter->SetBlendYaw(0.0f);
 	PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::FightEnd);
 	PXCharacter = nullptr;
 

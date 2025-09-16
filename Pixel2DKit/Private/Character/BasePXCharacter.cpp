@@ -235,15 +235,10 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 {
 	if (!GetCharacterMovement()) return;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
-	FVector PowFactor = SpringArmMotivationVelocityPowFactor;
-
 	FVector Velocity = GetCharacterMovement()->Velocity;
-	Velocity = {
-		FMath::Pow(Velocity.X, PowFactor.X),
-		FMath::Pow(Velocity.Y, PowFactor.Y),
-		FMath::Pow(Velocity.Z, PowFactor.Z) };
 	
 	float d = FVector::DotProduct(GetFaceToCamera(), Velocity.GetSafeNormal());
+	bool CharacterMoveToCamera = d > 0;
 	
 	// 镜头偏转
 	float pitch = FMath::Clamp(d,-0.3, 0.5) * -15 + CurBlendPitch;
@@ -260,10 +255,16 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 				{
 					Velocity *= FrontViewFactor;
 					FVector Location = GetActorLocation() + Velocity;
-					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
-							(d > 0 ? 1 : FMath::GetMappedRangeValueClamped(FVector2D(-1, 0), FVector2D(0.2, 1), d));
+					// 偏移因子，如果玩家朝向镜头移动将会偏移得更多
+					float OffsetFactor = CharacterMoveToCamera ? 1 : 0.5;
 
-					SpringArm->SetWorldLocation(FMath::Lerp(SpringArm->GetComponentLocation(), Location + FightOffset, 0.1));
+					FVector BlendOffset = CurCameraOffset * CurSpringArmLength / 300 * OffsetFactor;
+					if (!FightCenterForCameraOffset.IsZero())
+					{
+						BlendOffset = FMath::Lerp(BlendOffset, FightCenterForCameraOffset, 0.5);
+					}
+					
+					SpringArm->SetWorldLocation(Location + BlendOffset);
 					break;
 				}
 			case 1: // 镜头跟随
