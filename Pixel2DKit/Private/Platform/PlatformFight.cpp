@@ -5,15 +5,17 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 
 void APlatformFight::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PlayerCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	
 	if (Enemies.IsEmpty())
 	{
-		PlayerCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
+		PXCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
 		return;
 	}
 	int32 TmpNum = 0;
@@ -25,7 +27,7 @@ void APlatformFight::Tick(float DeltaTime)
 		{
 			if (IFight_Interface::Execute_GetTarget(Enemy))
 			{
-				if (PlayerCharacter->CurSpringArmLength * 1.2 > Enemy->GetDistanceTo(PlayerCharacter))
+				if (PXCharacter->CurSpringArmLength * 1.2 > Enemy->GetDistanceTo(PXCharacter))
 				{
 					TmpCenterLocation += Enemy->GetActorLocation();
 					TmpNum++;
@@ -36,16 +38,16 @@ void APlatformFight::Tick(float DeltaTime)
 
 	if (TmpNum == 0)
 	{
-		PlayerCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
+		PXCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
 		return;
 	}
 
 	// 设置镜头中心偏移
 	TmpCenterLocation = TmpCenterLocation / TmpNum;
-	FVector PlayerLocation = PlayerCharacter->GetActorLocation();
+	FVector PlayerLocation = PXCharacter->GetActorLocation();
 	FVector DirLength = TmpCenterLocation - PlayerLocation;
-	PlayerCharacter->FightCenterForCameraOffset = DirLength *
-		FRotator(0, PlayerCharacter->CurBlendYaw, 0).RotateVector(FVector(0.25, 0.15, 0.3));
+	PXCharacter->FightCenterForCameraOffset = DirLength *
+		FRotator(0, PXCharacter->CurBlendYaw, 0).RotateVector(FVector(0.25, 0.15, 0.3));
 
 
 	// 设置镜头偏转
@@ -55,7 +57,7 @@ void APlatformFight::Tick(float DeltaTime)
 	
 	FVector CenterToViewPoint =  TmpCenterLocation - EyeViewPoint;
 	float DistanceCenterToPlayer = DirLength.Size();
-	float cal2 = PlayerCharacter->CurSpringArmLength + FMath::GetMappedRangeValueClamped(FVector2D(InRangeA, PlayerCharacter->CurSpringArmLength * 0.7),
+	float cal2 = PXCharacter->CurSpringArmLength + FMath::GetMappedRangeValueClamped(FVector2D(InRangeA, PXCharacter->CurSpringArmLength * 0.7),
 		FVector2D(0.0f, 100.0f), DistanceCenterToPlayer);
 
 	if (CenterToViewPoint.Size() < cal2)
@@ -63,8 +65,8 @@ void APlatformFight::Tick(float DeltaTime)
 		float CrossZ = FVector::CrossProduct(CenterToViewPoint.GetSafeNormal(), (PlayerLocation - EyeViewPoint).GetSafeNormal()).Z;
 		if (FMath::Abs(CrossZ) > 0.15)
 		{
-			PlayerCharacter->AddViewYaw(CrossZ * FMath::GetMappedRangeValueClamped(FVector2D(0, 300),
-					FVector2D(-1.8, OutRangeB), PlayerCharacter->GetVelocity().Size()), false);
+			PXCharacter->AddViewYaw(CrossZ * FMath::GetMappedRangeValueClamped(FVector2D(0, 300),
+					FVector2D(-1.8, OutRangeB), PXCharacter->GetVelocity().Size()), false);
 		}
 	}
 }
@@ -92,17 +94,26 @@ void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
 		PlatformFightCountWidget->UpdateCount(Enemies.Num());
 	}
 
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("APlatformFight::OnEnemyDie Num: %d"), Enemies.Num()));
+
 	if (Enemies.IsEmpty())
 	{
 		SetActorTickEnabled(false);
 		FightEnd();
-		
 	}
 
 }
 
 void APlatformFight::FightEnd_Implementation()
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+
+	PXCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
+	PXCharacter->SetBlendYaw(0.0f);
+	PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::FightEnd);
+	PXCharacter = nullptr;
+
+	ActivateFight(false);
 }
 
 void APlatformFight::ShowCountWidget(bool bShow)
@@ -120,6 +131,7 @@ void APlatformFight::ShowCountWidget(bool bShow)
 				PlatformFightCountWidget = CreateWidget<UPlatformFightCountWidget>(GetWorld(), PlatformFightCountWidgetClass);
 				if (PlatformFightCountWidget)
 				{
+					PlatformFightCountWidget->CurNum = Enemies.Num();
 					PlatformFightCountWidget->AddToViewport(999);
 				}
 			}
@@ -134,17 +146,24 @@ void APlatformFight::ShowCountWidget(bool bShow)
 	}
 }
 
-
-void APlatformFight::ActivateFight(bool bActivate)
+bool APlatformFight::ActivateFight_Implementation(bool bActivate)
 {
 	if (bActivate)
 	{
-		
+		if (Enemies.IsEmpty()) return false;
+
+		ShowCountWidget(true);
+		return true;
 	}
-	else
-	{
-		
-	}
+	
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+			WeakThis->ShowCountWidget(false);
+		}, 2);
+	
+	return false;
 }
 
 void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
@@ -152,14 +171,22 @@ void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 	Super::NotifyActorBeginOverlap(OtherActor);
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
 	{
-		PlayerCharacter = C;
 		SetActorTickEnabled(true);
+		PXCharacter = C;
+		if (!PXCharacter->OnPlayerDie.IsAlreadyBound(this, &ThisClass::FightEnd))
+		{
+			PXCharacter->OnPlayerDie.AddDynamic(this, &ThisClass::FightEnd);
+		}
+		ActivateFight(true);
 	}
 }
 
 void APlatformFight::NotifyActorEndOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorEndOverlap(OtherActor);
-	SetActorTickEnabled(false);
-	PlayerCharacter = nullptr;
+	if (OtherActor == PXCharacter && Enemies.Num() > 0)
+	{
+		FightEnd();
+	}
+
 }

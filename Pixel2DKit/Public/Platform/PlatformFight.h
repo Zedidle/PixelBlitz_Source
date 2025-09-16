@@ -22,7 +22,7 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 public:
 
 	UPROPERTY(BlueprintReadWrite)
-	ABasePXCharacter* PlayerCharacter;
+	ABasePXCharacter* PXCharacter;
 
 	UPROPERTY(BlueprintReadOnly)
 	TArray<ABaseEnemy*> Enemies;
@@ -30,21 +30,17 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<AEnemySpawner*> EnemySpawners;
 
-
 	
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void RegisterEnemies();
-	void RegisterEnemies_Implementation();
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void OnEnemyDie(ABaseEnemy* enemy);
-	void OnEnemyDie_Implementation(ABaseEnemy* enemy);
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void FightEnd();
-	void FightEnd_Implementation();
 
 	
 	UPROPERTY(BlueprintReadOnly)
@@ -55,8 +51,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowCountWidget(bool bShow);
 
-	UFUNCTION(BlueprintCallable)
-	void ActivateFight(bool bActivate);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool ActivateFight(bool bActivate);
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;

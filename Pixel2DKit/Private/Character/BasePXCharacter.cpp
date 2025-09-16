@@ -235,9 +235,9 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 {
 	if (!GetCharacterMovement()) return;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
+	FVector PowFactor = SpringArmMotivationVelocityPowFactor;
 
 	FVector Velocity = GetCharacterMovement()->Velocity;
-	FVector PowFactor = SpringArmMotivationVelocityPowFactor;
 	Velocity = {
 		FMath::Pow(Velocity.X, PowFactor.X),
 		FMath::Pow(Velocity.Y, PowFactor.Y),
@@ -262,13 +262,15 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 					FVector Location = GetActorLocation() + Velocity;
 					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 300 *
 							(d > 0 ? 1 : FMath::GetMappedRangeValueClamped(FVector2D(-1, 0), FVector2D(0.2, 1), d));
-					SpringArm->SetWorldLocation(Location + FightOffset);
+
+					SpringArm->SetWorldLocation(FMath::Lerp(SpringArm->GetComponentLocation(), Location + FightOffset, 0.1));
 					break;
 				}
 			case 1: // 镜头跟随
 				{
 					SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
 					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 280;
+					
 					SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
 					break;
 				}
