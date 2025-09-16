@@ -4,10 +4,15 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "NiagaraClipboard.h"
 #include "GameplayEffectExtension.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Basic/PXGameState.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
+#include "SaveGame/PXSettingSaveGame.h"
+#include "Settings/CustomResourceSettings.h"
+#include "Slate/SGameLayerManager.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 
@@ -39,6 +44,20 @@ void UPXAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
+
+	AActor* Owner = GetOwningActor();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+
+	APawn* Pawn;
+	if (Owner->Implements<UFight_Interface>())
+	{
+		Pawn = IFight_Interface::Execute_GetPawn(Owner);
+	}
+	else
+	{
+		Pawn = Cast<APawn>(Owner);
+	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Pawn)	
 	
 	if(Attribute == GetHPAttribute())
 	{
@@ -57,23 +76,13 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 		
 		if (ChangedValue != 0.f)
 		{
-			if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
-			{
-				AActor* Owner = ASC->GetOwnerActor();
-				if (Owner && Owner->Implements<UFight_Interface>())
-				{
-					if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Owner))
-					{
-						EFloatingTextType ChangedType = ChangedValue > 0 ? EFloatingTextType::Health : EFloatingTextType::Damage;
-						UCommonFuncLib::SpawnFloatingCombatText(
-							ChangedType,
-						FText::AsNumber(FMath::Abs(ChangedValue)),
-						nullptr,
-							Pawn->GetActorLocation(),
-						FVector2D(0.8f, 0.8f));
-					}
-				}
-			}
+			EFloatingTextType ChangedType = ChangedValue > 0 ? EFloatingTextType::Health : EFloatingTextType::Damage;
+			UCommonFuncLib::SpawnFloatingCombatText(
+				ChangedType,
+			FText::AsNumber(FMath::Abs(ChangedValue)),
+			nullptr,
+				Pawn->GetActorLocation(),
+			FVector2D(0.8f, 0.8f));
 		}
 
 		// GEngine->AddOnScreenDebugMessage(INDEX_NONE, 3.0f, FColor(255,48,16),
@@ -86,22 +95,12 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 
 		if (ChangedValue > 5.f)
 		{
-			if (UAbilitySystemComponent* ASC = GetOwningAbilitySystemComponent())
-			{
-				AActor* Owner = ASC->GetOwnerActor();
-				if (Owner && Owner->Implements<UFight_Interface>())
-				{
-					if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Owner))
-					{
-						UCommonFuncLib::SpawnFloatingCombatText(
-							EFloatingTextType::Energy,
-						FText::AsNumber(FMath::Abs(ChangedValue)),
-						nullptr,
-							 Pawn->GetActorLocation(),
-						FVector2D(0.8f, 0.8f));
-					}
-				}
-			}
+			UCommonFuncLib::SpawnFloatingCombatText(
+				EFloatingTextType::Energy,
+			FText::AsNumber(FMath::Abs(ChangedValue)),
+			nullptr,
+				 Pawn->GetActorLocation(),
+			FVector2D(0.8f, 0.8f));
 		}
 	}
 	

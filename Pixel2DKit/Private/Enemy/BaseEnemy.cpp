@@ -17,6 +17,7 @@
 #include "Character/Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/EnemyDataAsset.h"
 #include "Fight/Components/FightComponent.h"
@@ -342,14 +343,9 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 NewValue, int32 ChangedVa
 			{
 				USoundFuncLib::PlaySoundAtLocation(DieSound, GetActorLocation(), 1.0f);
 			}
-			UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-			if (SaveGameSubsystem && SaveGameSubsystem->GetSettingData() &&
-					SaveGameSubsystem->GetSettingData()->GameSetting_ShowBlood)
+			if (UNiagaraSystem* NS_Die = DataAsset->NS_Die.LoadSynchronous())
 			{
-				if (UNiagaraSystem* NS_Die = DataAsset->NS_Die.LoadSynchronous())
-				{
-					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Die, GetActorLocation());
-				}
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Die, GetActorLocation());
 			}
 		}
 
@@ -390,11 +386,17 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 NewValue, int32 ChangedVa
 
 void ABaseEnemy::OnHurt_Implementation(int RemainHP, AActor* Maker)
 {
-	if (DataAsset && DataAsset->HurtSound)
+	InjuredNum++;
+	if (DataAsset)
 	{
 		if (USoundCue* HurtSound = DataAsset->HurtSound.LoadSynchronous())
 		{
 			USoundFuncLib::PlaySoundAtLocation(HurtSound, GetActorLocation(), 1.0f);
+		}
+
+		if (UNiagaraSystem* NS_Hurt = DataAsset->NS_Hurt.LoadSynchronous())
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Hurt, GetActorLocation());
 		}
 	}
 }

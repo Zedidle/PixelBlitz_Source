@@ -39,6 +39,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnEnemyDie(ABaseEnemy* enemy);
 
+	// 战斗结束，触发条件之一：玩家死亡 || 玩家逃出 || 怪物清空
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void FightEnd();
 
@@ -56,4 +57,17 @@ public:
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnPlayerIn();
+	UFUNCTION(BlueprintNativeEvent)
+	void OnPlayerOut();
 };
+
+inline void APlatformFight::OnPlayerOut_Implementation()
+{
+}
+
+inline void APlatformFight::OnPlayerIn_Implementation()
+{
+}

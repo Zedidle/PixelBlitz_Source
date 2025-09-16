@@ -170,6 +170,8 @@ public:
 	UPROPERTY(BlueprintReadOnly);
 	float LostEnemyTime = 5.0f;
 
+	UPROPERTY(BlueprintReadOnly)
+	int InjuredNum;
 
 	// 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")

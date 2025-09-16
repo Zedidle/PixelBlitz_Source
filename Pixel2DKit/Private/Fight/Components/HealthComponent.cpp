@@ -14,8 +14,13 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemGlobals.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Basic/PXGameState.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
+#include "SaveGame/PXSettingSaveGame.h"
+#include "Settings/CustomResourceSettings.h"
 #include "Utilitys/PXGameplayStatics.h"
 
 class ULegacyCameraShake;
@@ -326,11 +331,34 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 
 	int preHealth = PixelAS->GetHP();
 	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
-	int changedValue = FMath::Abs(preHealth - CurrentHealth);
-	if (changedValue <= 0) return;
+	int ChangedValue = FMath::Abs(preHealth - CurrentHealth);
+	if (ChangedValue <= 0) return;
 
+	const UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld());
+	if (SettingSaveGame && SettingSaveGame->GameSetting_ShowBlood)
+	{
+		if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+		{
+			if ( ChangedValue < 10)
+			{
+				if (UNiagaraSystem* NS_HitBlood_Little = ResourceSettings->NS_HitBlood_Little.LoadSynchronous())
+				{
+					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood_Little, Owner->GetActorLocation());
+				}
+			}
+			else
+			{
+				if (UNiagaraSystem* NS_HitBlood = ResourceSettings->NS_HitBlood.LoadSynchronous())
+				{
+					UNiagaraComponent* NSEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood, Owner->GetActorLocation());
+					NSEffect->SetVariableVec3(FName("Dir"), (Owner->GetActorLocation() - Maker->GetActorLocation()).GetSafeNormal()) ;
+				}
+			}
+		}
+	}
+	
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-	OnHPChanged.Broadcast(CurrentHealth, changedValue, EStatChange::Decrease, Maker, bInner);
+	OnHPChanged.Broadcast(CurrentHealth, ChangedValue, EStatChange::Decrease, Maker, bInner);
 
 	// 触发受伤闪烁
 	if (!bInner)

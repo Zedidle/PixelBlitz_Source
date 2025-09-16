@@ -40,9 +40,16 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Ability | SoundCue")
 	TSoftObjectPtr<USoundCue> SC_Revive;
 
+
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Common | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_HitSmoke;
+	UPROPERTY(Config, EditAnywhere, Category = "Common | Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_HitBlood;
+	UPROPERTY(Config, EditAnywhere, Category = "Common | Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_HitBlood_Little;
+
+
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Buff | Niagara")
 	TSoftObjectPtr<UNiagaraSystem> NS_SpeedUP;

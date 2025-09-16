@@ -101,11 +101,10 @@ void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
 		PlatformFightCountWidget->UpdateCount(Enemies.Num());
 	}
 
-	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("APlatformFight::OnEnemyDie Num: %d"), Enemies.Num()));
+	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("APlatformFight::OnEnemyDie Num: %d"), Enemies.Num()));
 
 	if (Enemies.IsEmpty())
 	{
-		SetActorTickEnabled(false);
 		FightEnd();
 	}
 
@@ -114,6 +113,8 @@ void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
 void APlatformFight::FightEnd_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	
+	SetActorTickEnabled(false);
 
 	PXCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
 	PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::FightEnd);
@@ -130,16 +131,13 @@ void APlatformFight::ShowCountWidget(bool bShow)
 		{
 			PlatformFightCountWidget->Show();
 		}
-		else
+		else if (PlatformFightCountWidgetClass)
 		{
-			if (PlatformFightCountWidgetClass)
+			PlatformFightCountWidget = CreateWidget<UPlatformFightCountWidget>(GetWorld(), PlatformFightCountWidgetClass);
+			if (PlatformFightCountWidget)
 			{
-				PlatformFightCountWidget = CreateWidget<UPlatformFightCountWidget>(GetWorld(), PlatformFightCountWidgetClass);
-				if (PlatformFightCountWidget)
-				{
-					PlatformFightCountWidget->CurNum = Enemies.Num();
-					PlatformFightCountWidget->AddToViewport(999);
-				}
+				PlatformFightCountWidget->CurNum = Enemies.Num();
+				PlatformFightCountWidget->AddToViewport(999);
 			}
 		}
 	}
