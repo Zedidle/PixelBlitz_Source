@@ -30,4 +30,5 @@ public:
 
 	UPROPERTY(Config, BlueprintReadOnly, EditAnywhere, Category = "GameplayFlow | Ability")	
 	int BasePerLevelSkillPointsGet = 2;
+
 };

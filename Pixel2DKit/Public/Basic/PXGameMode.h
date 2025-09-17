@@ -20,8 +20,11 @@ class PIXEL2DKIT_API APXGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
-	FString PreLevelName;
-	FString CurLevelName;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FName PreLevelName;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FName CurLevelName;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	ULevelStreamingDynamic* CurLevelInstance;
@@ -39,7 +42,7 @@ public:
 	APlayerRespawnPoint* PlayerRespawnPoint;
 
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void LoadLevel(FString LevelName, FVector Location=FVector(0));
+	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0), FRotator StartRotation= FRotator(0, 0,0));
 
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void StartCurLevel();
@@ -75,5 +78,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Nav")
 	void NavRebuild();
 #pragma endregion
+
+	UFUNCTION()
+	void OnLevelLoaded();
 	
 };

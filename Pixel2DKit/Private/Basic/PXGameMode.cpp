@@ -13,11 +13,14 @@
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
+#include "Utilitys/DebugFuncLab.h"
 
 
 void APXGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+
 	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
 	{
 		if (UCapsuleComponent* CapsuleComponent = PlayerStart->GetComponentByClass<UCapsuleComponent>())
@@ -28,16 +31,17 @@ void APXGameMode::BeginPlay()
 
 	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
 	{
-		LoadLevel(GameInstance->GetCurLevelName_Simple(true).ToString());
+		LoadLevel(GameInstance->GetCurLevelName_Simple(true));
 		StartCurLevel();
 	}
+	
 }
 
-void APXGameMode::LoadLevel(FString LevelName, FVector Location)
+void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator StartRotation)
 {
 	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
 	{
-		PlayerStart->SetActorLocation(Location + FVector(0,0,200));
+		PlayerStart->SetActorLocation(StartLocation + FVector(0,0,200));
 		if (!PlayerRespawnPoint)
 		{
 			if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
@@ -50,20 +54,27 @@ void APXGameMode::LoadLevel(FString LevelName, FVector Location)
 		}
 		if (PlayerRespawnPoint)
 		{
-			PlayerRespawnPoint->SetActorLocation(Location + FVector(0,0,200));
+			PlayerRespawnPoint->SetActorLocation(PlayerStart->GetActorLocation());
 		}
 	}
 
+	if (CurLevelInstance)
+	{
+		CurLevelInstance->OnLevelLoaded.RemoveDynamic(this, &ThisClass::OnLevelLoaded);
+	}
+	
 	PreLevelName = CurLevelName;
 	CurLevelName = LevelName;
 
 	
 	bool LoadLevelSuccess;
-	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(),  LevelName, FVector(0), FRotator(0),
+	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(), LevelName.ToString(), StartLocation, StartRotation,
 		LoadLevelSuccess);
 	if (LoadLevelSuccess && LoadedLevel)
 	{
 		CurLevelInstance = LoadedLevel;
+
+		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
 	}
 }
 
@@ -71,29 +82,22 @@ void APXGameMode::StartCurLevel()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-	UGameplayStatics::SetGlobalTimeDilation(World, 0.15);
 	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
 	{
 		PC->OnCharacterControl(false);
 	}
 	
 	TArray<AActor*> Actors;
-	UGameplayStatics::GetAllActorsOfClassWithTag(World, AActor::StaticClass(), FName(*PreLevelName), Actors);
+	UGameplayStatics::GetAllActorsOfClassWithTag(World, AActor::StaticClass(), PreLevelName, Actors);
 	for (AActor* Actor : Actors)
 	{
 		Actor->SetActorEnableCollision(false);
-	}
-
-	UGameplayStatics::GetAllActorsOfClassWithTag(World, ABaseEnemy::StaticClass(), FName(*PreLevelName), Actors);
-	for (AActor* Actor : Actors)
-	{
-		Actor->Destroy();
+		Actor->SetLifeSpan(FMath::RandRange(0.05, 0.2));
 	}
 
 	if (CurLevelInstance)
 	{
 		OnStartLevelSuccess();
-		UGameplayStatics::SetGlobalTimeDilation(World, 1.0f);
 	}
 }
 
@@ -130,6 +134,21 @@ void APXGameMode::NavRebuild()
 	ANavMeshBoundsVolume* NavMesh = Cast<ANavMeshBoundsVolume>(UGameplayStatics::GetActorOfClass(GetWorld(), ANavMeshBoundsVolume::StaticClass()));
 	NavSys->OnNavigationBoundsAdded(NavMesh);
 	NavSys->Build();
+}
+
+void APXGameMode::OnLevelLoaded()
+{
+	if (CurLevelInstance && CurLevelInstance->GetLoadedLevel())
+	{
+		TArray<AActor*>& FoundActors = CurLevelInstance->GetLoadedLevel()->Actors;
+		for (AActor* Actor : FoundActors)
+		{
+			if (Actor)
+			{
+				Actor->Tags.Add(CurLevelName);
+			}
+		}
+	}
 }
 
 	
