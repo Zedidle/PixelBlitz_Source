@@ -258,11 +258,8 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 					// 偏移因子，如果玩家朝向镜头移动将会偏移得更多
 					float OffsetFactor = CharacterMoveToCamera ? 1 : 0.5;
 
-					FVector BlendOffset = CurCameraOffset * CurSpringArmLength / 300 * OffsetFactor;
-					if (!FightCenterForCameraOffset.IsZero())
-					{
-						BlendOffset = FMath::Lerp(BlendOffset, FightCenterForCameraOffset, 0.5);
-					}
+					FVector BlendOffset = CurMoveCameraOffset * CurSpringArmLength / 300 * OffsetFactor;
+					BlendOffset = FMath::Lerp(BlendOffset, CurFightCameraOffset, 0.5);
 					
 					SpringArm->SetWorldLocation(Location + BlendOffset);
 					break;
@@ -270,7 +267,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 			case 1: // 镜头跟随
 				{
 					SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
-					FVector FightOffset = (CurCameraOffset.IsNearlyZero(1) ? FightCenterForCameraOffset : CurCameraOffset) * CurSpringArmLength / 280;
+					FVector FightOffset = (CurMoveCameraOffset.IsNearlyZero(1) ? CurFightCameraOffset : CurMoveCameraOffset) * CurSpringArmLength / 280;
 					
 					SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
 					break;
@@ -297,15 +294,24 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 
 void ABasePXCharacter::Tick_CalCameraOffset()
 {
-	if (SurCameraOffset.Size() < 0.01) return;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
-	
 	UWorld* World = GetWorld();
 	if (!IsValid(World)) return;
-	FVector DeltaLocation = SurCameraOffset * World->GetDeltaSeconds() * 2.5;
-	SpringArm->AddWorldOffset(DeltaLocation);
-	CurCameraOffset += DeltaLocation;
-	SurCameraOffset -= DeltaLocation;
+
+	if (RemMoveCameraOffset.Size() > 0.1)
+	{
+		FVector DeltaMoveCameraOffset = RemMoveCameraOffset * World->GetDeltaSeconds() * 2.5;
+		SpringArm->AddWorldOffset(DeltaMoveCameraOffset);
+		CurMoveCameraOffset += DeltaMoveCameraOffset;
+		RemMoveCameraOffset -= DeltaMoveCameraOffset;
+	}
+
+	CurFightCameraOffset = FMath::Lerp(CurFightCameraOffset, TargetFightCameraOffset, FightCameraOffsetSpeedFactor);
+}
+
+void ABasePXCharacter::SetFightCameraOffset(FVector Offset)
+{
+	
 }
 
 
@@ -645,7 +651,7 @@ FVector ABasePXCharacter::GetFaceToCamera()
 
 void ABasePXCharacter::AddCameraOffset(const FVector& V)
 {
-	SurCameraOffset += V;
+	RemMoveCameraOffset += V;
 }
 
 bool ABasePXCharacter::GetIsAttacking()

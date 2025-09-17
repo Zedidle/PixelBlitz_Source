@@ -31,6 +31,7 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/DropSubsystem.h"
 #include "Subsystems/PXAnimSubsystem.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
@@ -242,9 +243,6 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
-	
-	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
-	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.East.Near")));
 
 	AbilitySystem = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
 	AbilitySystem->SetIsReplicated(true);
@@ -476,6 +474,29 @@ bool ABaseEnemy::InAttackRange()
 	return false;
 }
 
+void ABaseEnemy::DelayLosePlayer_Implementation()
+{
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "_DelayLosePlayer_Implementation"),
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+			if (WeakThis->bDead) return;
+
+			WeakThis->SetAttackAnimToggle(false);
+
+			UTimerSubsystemFuncLib::SetDelay(WeakThis->GetWorld(), [WeakThis]
+			{
+				if (!WeakThis.IsValid()) return;
+				WeakThis->SetPixelCharacter(nullptr);
+			}, 2);
+		}, LostEnemyTime);
+}
+
+void ABaseEnemy::OnAttack_Implementation()
+{
+	
+}
+
 bool ABaseEnemy::CanAttack_Implementation()
 {
 	if (!IsValid(PixelCharacter)) return false;
@@ -547,7 +568,13 @@ void ABaseEnemy::OnRemoteAttackEffect_Implementation()
 
 void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 {
-	IFight_Interface::OnRemoteAttackEnd_Implementation();
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "InAttackState"), 
+	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+
+			WeakThis->SetInAttackState(false);
+		}, AttackInterval);
 }
 
 void ABaseEnemy::OnDefendEffectBegin_Implementation()
@@ -562,12 +589,28 @@ void ABaseEnemy::OnDefendEffectEnd_Implementation()
 
 void ABaseEnemy::OnAttackEffectBegin_Implementation()
 {
-	IFight_Interface::OnAttackEffectBegin_Implementation();
+	if (bDead)
+	{
+		SetInAttackState(false);
+		return;
+	}
+
+	SetInAttackEffect(true);
+	OnAttack();
+	DelayLosePlayer();
 }
 
 void ABaseEnemy::OnAttackEffectEnd_Implementation()
 {
-	IFight_Interface::OnAttackEffectEnd_Implementation();
+	SetInAttackEffect(false);
+	
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "InAttackState"), 
+	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+
+			WeakThis->SetInAttackState(false);
+		}, AttackInterval);
 }
 
 UAbilityComponent* ABaseEnemy::GetAbilityComponent_Implementation()
@@ -611,6 +654,15 @@ void ABaseEnemy::TryAttack_Implementation()
 	
 	SetAttackAnimToggle(true);
 	SetInAttackState(true);
+	
+	// 为了解决在未定义Attack Action动画的ActionField行动后卡住不会攻击的问题
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "InAttackState"),
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+			WeakThis->SetInAttackState(false);
+		}, AttackInterval + 0.5);
+	
 	GetCharacterMovement()->StopMovementImmediately();
 }
 

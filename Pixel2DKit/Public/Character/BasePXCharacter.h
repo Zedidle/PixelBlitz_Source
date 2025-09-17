@@ -142,13 +142,19 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnPlayerAttackStart OnPlayerAttackStart;
+
 	
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FVector FightCenterForCameraOffset = FVector(0.0f);
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FVector CurCameraOffset = FVector(0.0f);
-	UPROPERTY(BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FVector SurCameraOffset = FVector(0.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FightCameraOffsetSpeedFactor = 0.05;
+	UPROPERTY(BlueprintReadWrite)
+	FVector CurFightCameraOffset = FVector(0.0f);
+	UPROPERTY(BlueprintReadWrite)
+	FVector TargetFightCameraOffset = FVector(0.0f);
+	
+	UPROPERTY(BlueprintReadWrite)
+	FVector CurMoveCameraOffset = FVector(0.0f);
+	UPROPERTY(BlueprintReadWrite)
+	FVector RemMoveCameraOffset = FVector(0.0f);
 
 	FTimerHandle ScaleTimerHandle;
 	FTimerHandle AttackHitTimerHandle;
@@ -187,6 +193,9 @@ public:
 	virtual void Tick_SpringArmMotivation();
 	virtual void Tick_CalCameraOffset();
 
+	void SetFightCameraOffset(FVector Offset);
+
+	
 	void SetLanding(const bool V, const float time = 0.1f);
 
 

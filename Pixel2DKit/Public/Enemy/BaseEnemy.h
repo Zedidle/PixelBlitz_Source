@@ -345,6 +345,12 @@ public:
 	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
 	virtual bool InAttackRange() override;
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnAttack();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void DelayLosePlayer();
+	
+	
 	// 默认可行动方位，一般为全方位距离可行，实际行动受设定距离限制与ActionAtPlayerXXXXX接口，需要针对不同怪物部分删除
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
 	FGameplayTagContainer ActionFieldsCanAttack;

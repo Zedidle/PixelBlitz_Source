@@ -19,6 +19,9 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 	float InRangeA = 0.0f;
 	float OutRangeB = -0.36f;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = true))
+	float FightCameraOffsetFactor = 1.0f;
+
 public:
 
 	UPROPERTY(BlueprintReadWrite)
