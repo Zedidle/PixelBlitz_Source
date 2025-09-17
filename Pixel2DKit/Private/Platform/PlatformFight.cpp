@@ -114,39 +114,37 @@ void APlatformFight::FightEnd_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	
-	SetActorTickEnabled(false);
 
 	PXCharacter->FightCenterForCameraOffset = FVector::ZeroVector;
 	PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::FightEnd);
 	PXCharacter = nullptr;
 
 	ActivateFight(false);
+	SetActorTickEnabled(false);
 }
 
-void APlatformFight::ShowCountWidget(bool bShow)
+void APlatformFight::ShowCountWidget()
 {
-	if (bShow)
+	if (IsValid(PlatformFightCountWidget))
 	{
-		if (IsValid(PlatformFightCountWidget))
+		PlatformFightCountWidget->Show();
+	}
+	else if (PlatformFightCountWidgetClass)
+	{
+		PlatformFightCountWidget = CreateWidget<UPlatformFightCountWidget>(GetWorld(), PlatformFightCountWidgetClass);
+		if (PlatformFightCountWidget)
 		{
-			PlatformFightCountWidget->Show();
-		}
-		else if (PlatformFightCountWidgetClass)
-		{
-			PlatformFightCountWidget = CreateWidget<UPlatformFightCountWidget>(GetWorld(), PlatformFightCountWidgetClass);
-			if (PlatformFightCountWidget)
-			{
-				PlatformFightCountWidget->CurNum = Enemies.Num();
-				PlatformFightCountWidget->AddToViewport(999);
-			}
+			PlatformFightCountWidget->CurNum = Enemies.Num();
+			PlatformFightCountWidget->AddToViewport(999);
 		}
 	}
-	else
+}
+
+void APlatformFight::HideCountWidget()
+{
+	if (IsValid(PlatformFightCountWidget))
 	{
-		if (IsValid(PlatformFightCountWidget))
-		{
-			PlatformFightCountWidget->Fade();
-		}
+		PlatformFightCountWidget->Fade();
 	}
 }
 
@@ -156,16 +154,11 @@ bool APlatformFight::ActivateFight_Implementation(bool bActivate)
 	{
 		if (Enemies.IsEmpty()) return false;
 
-		ShowCountWidget(true);
+		ShowCountWidget();
 		return true;
 	}
-	
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(),
-	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
-		{
-			if (!WeakThis.IsValid()) return;
-			WeakThis->ShowCountWidget(false);
-		}, 2);
+
+	HideCountWidget();
 	
 	return false;
 }
@@ -182,6 +175,7 @@ void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 			PXCharacter->OnPlayerDie.AddDynamic(this, &ThisClass::FightEnd);
 		}
 		ActivateFight(true);
+		OnPlayerIn();
 	}
 }
 
@@ -191,6 +185,7 @@ void APlatformFight::NotifyActorEndOverlap(AActor* OtherActor)
 	if (OtherActor == PXCharacter && Enemies.Num() > 0)
 	{
 		FightEnd();
+		OnPlayerOut();
 	}
 
 }

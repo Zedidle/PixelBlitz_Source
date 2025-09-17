@@ -68,6 +68,26 @@ struct FEnemyData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	FVector2D AttackRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	TArray<FGameplayTag> ActionFieldsCanAttack = {
+		FGameplayTag::RequestGameplayTag("ActionField.East.Near"),
+		FGameplayTag::RequestGameplayTag("ActionField.East.Mid"),
+		FGameplayTag::RequestGameplayTag("ActionField.East.Remote"),
+		FGameplayTag::RequestGameplayTag("ActionField.East.Far"),
+		FGameplayTag::RequestGameplayTag("ActionField.West.Near"),
+		FGameplayTag::RequestGameplayTag("ActionField.West.Mid"),
+		FGameplayTag::RequestGameplayTag("ActionField.West.Remote"),
+		FGameplayTag::RequestGameplayTag("ActionField.West.Far"),
+		FGameplayTag::RequestGameplayTag("ActionField.South.Near"),
+		FGameplayTag::RequestGameplayTag("ActionField.South.Mid"),
+		FGameplayTag::RequestGameplayTag("ActionField.South.Remote"),
+		FGameplayTag::RequestGameplayTag("ActionField.South.Far"),
+		FGameplayTag::RequestGameplayTag("ActionField.North.Near"),
+		FGameplayTag::RequestGameplayTag("ActionField.North.Mid"),
+		FGameplayTag::RequestGameplayTag("ActionField.North.Remote"),
+		FGameplayTag::RequestGameplayTag("ActionField.North.Far")
+	};
 };
 
 
@@ -120,26 +140,22 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UBuffComponent> BuffComponent;
-	
-	
+
+	// 怪物也可以使用技能与天赋，并获得对应属性
 	UPROPERTY()
 	FEffectGameplayTags EffectGameplayTags;
 
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
-	void Initialize_Implementation(FName Level);
-
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	
 	UFUNCTION(BlueprintNativeEvent)
 	void LoadEnemyData(FName Level);
-	void LoadEnemyData_Implementation(FName Level);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void LoadLookDeterrence(int32 Level);
-	void LoadLookDeterrence_Implementation(int32 Level);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnDie();
@@ -329,6 +345,7 @@ public:
 	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
 	virtual bool InAttackRange() override;
 
+	// 默认可行动方位，一般为全方位距离可行，实际行动受设定距离限制与ActionAtPlayerXXXXX接口，需要针对不同怪物部分删除
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
 	FGameplayTagContainer ActionFieldsCanAttack;
 	

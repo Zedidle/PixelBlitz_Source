@@ -22,9 +22,7 @@ protected:
 
 	
 public:
-
-	UPROPERTY(BlueprintReadWrite)
-	bool bIn = true;
+	
 	UPROPERTY(BlueprintReadWrite)
 	int32 CurNum = 99;
 	UPROPERTY(BlueprintReadWrite)
@@ -44,7 +42,7 @@ public:
 	void Show();
 
 	UFUNCTION(BlueprintCallable)
-	void Fade();
+	void Fade(float Delay = 2);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateCount(int32 Num);

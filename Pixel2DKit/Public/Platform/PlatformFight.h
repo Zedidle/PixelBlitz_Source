@@ -50,8 +50,10 @@ public:
 	TSubclassOf<UPlatformFightCountWidget> PlatformFightCountWidgetClass;
 
 	UFUNCTION(BlueprintCallable)
-	void ShowCountWidget(bool bShow);
-
+	void ShowCountWidget();
+	UFUNCTION(BlueprintCallable)
+	void HideCountWidget();
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool ActivateFight(bool bActivate);
 

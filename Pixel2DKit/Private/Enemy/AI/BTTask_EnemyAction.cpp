@@ -36,7 +36,7 @@ EBTNodeResult::Type UBTTask_EnemyAction::ExecuteTask(UBehaviorTreeComponent& Own
 		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 
 // 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow,
-// FString::Printf(TEXT("UBTTask_EnemyAction %s, %d"), *ActionField.ToString() ,__LINE__));
+// FString::Printf(TEXT("UBTTask_EnemyAction Field %s  %s, %d"), *Pawn->GetName(), *ActionField.ToString() ,__LINE__));
 // 		
 		
 		// 设置行动区间

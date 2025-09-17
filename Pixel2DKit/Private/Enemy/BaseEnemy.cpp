@@ -212,6 +212,8 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 	LostEnemyTime = EnemyData.LostEnemyTime;
 
 	HealthComponent->RepelResistance = EnemyData.RepelResistance;
+
+	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(EnemyData.ActionFieldsCanAttack);
 }
 
 void ABaseEnemy::SetLanding(const bool V, const float time)
@@ -241,7 +243,6 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	
-	// 近战的默认方位，针对不同怪物需要重定义
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.West.Near")));
 	ActionFieldsCanAttack.AddTag(FGameplayTag::RequestGameplayTag(TEXT("ActionField.East.Near")));
 
