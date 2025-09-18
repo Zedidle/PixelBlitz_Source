@@ -17,7 +17,7 @@ void UZDAN_OnDieEnd::OnReceiveNotify_Implementation(UPaperZDAnimInstance* Owning
 	{
 		if (PaperZDCharacter->Implements<UFight_Interface>())
 		{
-			IFight_Interface::Execute_OnDieEnd(PaperZDCharacter);
+			IFight_Interface::Execute_OnAnimDieEnd(PaperZDCharacter);
 		}
 	}
 }

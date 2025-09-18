@@ -62,8 +62,13 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnAttackHolding();
 
+    // 血量为 0 时触发
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    void OnDieEnd();
+    void OnDie();
+    
+    // 死亡动画播放结束时触发，需手动挂载，配合 ZDAN_OnDieEnd
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAnimDieEnd();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnRemoteAttackEffect();

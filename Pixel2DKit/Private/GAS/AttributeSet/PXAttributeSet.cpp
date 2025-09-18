@@ -32,6 +32,18 @@ void UPXAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallback
 	if (Data.EvaluatedData.Attribute == GetHPAttribute())
 	{
 		SetHP(FMath::Clamp(GetHP(), 0.f, GetMaxHP()));
+
+		// if (GetHP() == 0)
+		// {
+		// 	AActor* Actor = GetOwningActor();
+		// 	if (Actor && Actor->Implements<UFight_Interface>())
+		// 	{
+		// 		if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Actor))
+		// 		{
+		// 			IFight_Interface::Execute_OnDie(Pawn);
+		// 		}
+		// 	}
+		// }
 	}
 	
 	if (Data.EvaluatedData.Attribute == GetEPAttribute())
@@ -111,6 +123,16 @@ void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, f
 	Super::PostAttributeChange(Attribute, OldValue, NewValue);
 	
 	OnPXAttributeChange.Broadcast(Attribute, OldValue, NewValue);
+	if (Attribute == GetHPAttribute())
+	{
+		if (AActor* Actor = GetOwningActor())
+		{
+			if (UHealthComponent* HealthComp = Actor->GetComponentByClass<UHealthComponent>())
+			{
+				HealthComp->OnHPChanged.Broadcast(OldValue, NewValue);
+			}
+		}
+	}
 }
 
 bool UPXAttributeSet::GetAttrCurrentValueByName(FName AttrName, float& OutValue)

@@ -176,7 +176,7 @@ public:
 	int AttackHitDashing = 0; // 冲刺中命中
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Talent)
-	int ReviveTimes = 0;
+	int HereReviveTimes = 0;
 	
 	UPROPERTY(BlueprintReadWrite, Category = Achievement)
 	bool HasOneHealthPoint = false;
@@ -201,11 +201,10 @@ public:
 
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnHPChanged(int32 NewValue, int32 ChangedValue, EStatChange ChangeStat, AActor* Maker, bool bInner);
+	void OnHPChanged(int32 OldValue, int32 NewValue);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void CheckNearDeath();
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void OnDie();
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Revive();
 
@@ -510,6 +509,7 @@ public:
 	virtual float GetAttackInterval_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;
 	virtual FVector GetAttackRepel_Implementation() override;
+	virtual void OnDie_Implementation() override;
 #pragma endregion
 
 

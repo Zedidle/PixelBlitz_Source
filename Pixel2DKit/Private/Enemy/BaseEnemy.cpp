@@ -289,6 +289,8 @@ void ABaseEnemy::BeginPlay()
 	{
 		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
+	
+	
 }
 
 void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -347,13 +349,25 @@ void LoadLookDeterrence(int32 Level)
 }
 
 
-void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 NewValue, int32 ChangedValue, EStatChange ChangedStat,
-	AActor* Maker, bool bInner)
+void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 {
 	UGameInstance* GameInstance = GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
-	
-	if (NewValue < 1)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+
+	if (NewValue > 0)
+	{
+		OnHurt(NewValue);
+		
+		if (NewValue < OldValue)
+		{
+			if (OldValue - NewValue > HealthComponent->GetMaxHP() * 0.1)
+			{
+				SetHurt(true, 0.2f);
+			}
+		}
+	}
+	else
 	{
 		if (GetCharacterMovement())
 		{
@@ -382,7 +396,7 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 NewValue, int32 ChangedVa
 			}
 		}
 		SetDead(true);
-		OnDie();
+		Execute_OnDie(this);
 		if (GetSprite())
 		{
 			GetSprite()->SetLooping(false);
@@ -392,21 +406,9 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 NewValue, int32 ChangedVa
 			GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PlayerPawn, ECollisionResponse::ECR_Ignore);
 		}
 	}
-	else
-	{
-		OnHurt(NewValue, Maker);
-		if (HealthComponent)
-		{
-			if (ChangedValue > HealthComponent->GetMaxHP() * 0.1)
-			{
-				SetHurt(true, 0.2f);
-			}
-		}
-	}
-
 }
 
-void ABaseEnemy::OnHurt_Implementation(int RemainHP, AActor* Maker)
+void ABaseEnemy::OnHurt_Implementation(int RemainHP)
 {
 	InjuredNum++;
 	if (DataAsset)
@@ -586,9 +588,9 @@ int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 	return iniDamage;
 }
 
-void ABaseEnemy::OnDieEnd_Implementation()
+void ABaseEnemy::OnAnimDieEnd_Implementation()
 {
-	IFight_Interface::OnDieEnd_Implementation();
+
 }
 
 void ABaseEnemy::OnRemoteAttackEffect_Implementation()

@@ -187,7 +187,7 @@ void UTalentComponent::LoadTalents()
 	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.ReviveTimesPlus");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
-		PXCharacter->ReviveTimes += FMath::RoundToInt(EffectGameplayTags[TalentTag]);
+		PXCharacter->HereReviveTimes += FMath::RoundToInt(EffectGameplayTags[TalentTag]);
 	}
 
 	// 基础移动速度

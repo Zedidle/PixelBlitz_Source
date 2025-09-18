@@ -21,6 +21,7 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/CustomResourceSettings.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 
 class ULegacyCameraShake;
@@ -69,41 +70,36 @@ void UHealthComponent::InvulnerableForDuration(float duration)
 void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool force) 
 {
 	if (bInvulnerable && !force) return;
-
+	UWorld* World = GetWorld();
+	if (!World) return;
+	
 	FlashColor = color;
-	PreHurtTime = GetWorld()->GetTimeSeconds();
+	PreHurtTime = World->GetTimeSeconds();
 	FlashDuration = duration;
-	
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this]
+
+	FName TimerName = FName(GetName() + "FlashForDuration");
+	UTimerSubsystemFuncLib::SetDelayLoop(World, TimerName,
+		[WeakThis = TWeakObjectPtr<ThisClass>(), TimerName, World]
 		{
-			if (!IsValid(GetOwner()))
+			if (!World) return;
+			if (!WeakThis.IsValid() || !WeakThis->GetOwner())
 			{
-				if (UWorld* world = GetWorld())
-				{
-					world->GetTimerManager().ClearTimer(FlashTimerHandle);
-				}
+				UTimerSubsystemFuncLib::CancelDelay(World, TimerName);
 				return;
 			}
+			UPaperFlipbookComponent* PF = WeakThis->GetOwner()->GetComponentByClass<UPaperFlipbookComponent>();
+			if (!PF) return;
 			
-			if (IsValid(GetWorld()) && GetWorld()->GetTimeSeconds() - PreHurtTime > FlashDuration)
+			if (World->GetTimeSeconds() - WeakThis->PreHurtTime > WeakThis->FlashDuration)
 			{
-				if (UPaperFlipbookComponent* PF = GetOwner()->GetComponentByClass<UPaperFlipbookComponent>())
-				{
-					PF->SetSpriteColor(FLinearColor::White);
-				}
-				GetWorld()->GetTimerManager().ClearTimer(FlashTimerHandle);
+				PF->SetSpriteColor(FLinearColor::White);
+				UTimerSubsystemFuncLib::CancelDelay(World, TimerName);
 				return;
 			}
-			
-			bFlashing = !bFlashing;
-			if (UPaperFlipbookComponent* PF = GetOwner()->GetComponentByClass<UPaperFlipbookComponent>())
-			{
-				PF->SetSpriteColor(bFlashing ? FlashColor : FLinearColor::White);
-			}
-		});
-	GetWorld()->GetTimerManager().SetTimer(FlashTimerHandle, TimerDel, 0.2, true);
-	
+
+			WeakThis->bFlashing = !WeakThis->bFlashing;
+			PF->SetSpriteColor(WeakThis->bFlashing ? WeakThis->FlashColor : FLinearColor::White);
+		}, 0.2);
 }
 
 FVector UHealthComponent::GetRepel(FVector IncomeRepel, const AActor* Instigator) const
@@ -191,16 +187,8 @@ void UHealthComponent::SetHP(const int32 value, const bool broadcast)
 	{
 		if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 		{
-			int preHealth = PixelAS->GetHP();
 			int CurrentHealth = FMath::Clamp(value, 0, PixelAS->GetMaxHP());
-			int changedValue = CurrentHealth - preHealth;
 			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-		
-			EStatChange changeType = changedValue > 0 ? EStatChange::Increase : EStatChange::Decrease;
-			if (broadcast)
-			{
-				OnHPChanged.Broadcast(CurrentHealth, changedValue, changeType, nullptr, false);
-			}
 		}
 	}
 }
@@ -225,7 +213,6 @@ void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
 	if (CurrentHealth - preHealth > 0)
 	{
 		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-		OnHPChanged.Broadcast(CurrentHealth, CurrentHealth - preHealth, EStatChange::Increase, Instigator, false);
 	}
 }
 
@@ -358,7 +345,6 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	}
 	
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-	OnHPChanged.Broadcast(CurrentHealth, ChangedValue, EStatChange::Decrease, Maker, bInner);
 
 	// 触发受伤闪烁
 	if (!bInner)

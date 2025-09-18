@@ -143,14 +143,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void LoadLookDeterrence(int32 Level);
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OnDie();
-
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDie OnEnemyDie;
 	
-
-
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
@@ -250,10 +245,10 @@ public:
 	void TryAttack();
 
 	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
-	void OnEnemyHPChanged(int32 NewValue, int32 ChangedValue, EStatChange ChangedStat, AActor* Maker, bool bInner);
+	void OnEnemyHPChanged(int32 OldValue, int32 NewValue);
 
 	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
-	void OnHurt(int RemainHP, AActor* Maker);
+	void OnHurt(int RemainHP);
 	
 #pragma region GAS
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -295,7 +290,8 @@ public:
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual int DamagePlus_Implementation(int InDamage, AActor* Receiver) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
-	virtual void OnDieEnd_Implementation() override;
+	virtual void OnDie_Implementation() override;
+	virtual void OnAnimDieEnd_Implementation() override;
 	virtual void OnRemoteAttackEffect_Implementation() override;
 	virtual void OnRemoteAttackEnd_Implementation() override;
 	virtual void OnDefendEffectBegin_Implementation() override;

@@ -16,26 +16,20 @@ enum class EStatChange : uint8
 	Reset    UMETA(DisplayName = "Reset")
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(
-	FOnHealthChangedSignature,      // 委託類型名稱
-	int32,                          // NewValue 參數類型
-	NewValue,                       // NewValue 參數名稱
-	int32,                          // ChangedValue 參數類型
-	ChangedValue,                   // ChangedValue 參數名稱
-	EStatChange,                    // Change 參數類型
-	Change,                         // Change 參數名稱
-	AActor*,                        // Instigator 參數類型
-	Maker,                     // Instigator 參數名稱
-	bool,                           // bInner 參數類型
-	bInner                          // bInner 參數名稱
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
+	FOnHPChangedSignature, 
+	int32,                 
+	OldValue,               
+	int32,                     
+	NewValue                   
 );
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(
-	FMaxHealthChanged,
+	FOnMaxHPChanged,
 	int32,
-	NewValue,
-	EStatChange,
-	Change
+	OldValue,
+	int32,
+	NewValue
 );
 
 
@@ -78,7 +72,7 @@ public:
 	FVector GetRepel(FVector IncomeRepel, const AActor* Instigator) const;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
-	FOnHealthChangedSignature OnHPChanged;
+	FOnHPChangedSignature OnHPChanged;
 	
 public:	
 	// Sets default values for this component's properties
