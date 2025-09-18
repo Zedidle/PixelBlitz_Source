@@ -48,7 +48,7 @@ void APlatformFight::Tick(float DeltaTime)
 	FVector DirLength = TmpCenterLocation - PlayerLocation;
 
 
-	float FightCameraOffsetPoint = DirLength.Size() / (PXCharacter->CurSpringArmLength * 1.2);
+	float FightCameraOffsetPoint = DirLength.Size() / PXCharacter->CurSpringArmLength;
 	PXCharacter->TargetFightCameraOffset = FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint;
 
 	

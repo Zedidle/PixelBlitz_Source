@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "PaperZDAnimInstance.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "BasePXAnimInstance.generated.h"
 
@@ -59,8 +60,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDashing;
 
+
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	int eMoveStatus;
+	TEnumAsByte<EPathFollowingStatus::Type> eMoveStatus;
 	
 
 	UFUNCTION(BlueprintCallable, Category = Animation)

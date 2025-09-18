@@ -201,9 +201,11 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 	LoadLookDeterrence(EnemyData.LookDeterrence);
 
 	CurAttackDamage = EnemyData.AttackDamage;
-	AttackInterval = EnemyData.AttackInterval;
+	BasicAttackInterval = EnemyData.AttackInterval;
 	
+	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(DataAsset->ActionFieldsCanAttack);
 	EnemyAIComponent->AttackRange = EnemyData.AttackRange;
+	EnemyAIComponent->SetActionFieldDistance(EnemyData.ActionFieldDistance);
 	GetCharacterMovement()->MaxAcceleration = EnemyData.MoveAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = EnemyData.MoveSpeed;
 
@@ -214,7 +216,39 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	HealthComponent->RepelResistance = EnemyData.RepelResistance;
 
-	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(EnemyData.ActionFieldsCanAttack);
+	
+#pragma region GAS
+
+	InitAbilitiesToGive.Append(EnemyData.InitAbilitiesToGive);
+	InitEffects.Append(EnemyData.InitEffects);
+	if (AbilitySystem)
+	{
+		for (auto Ability : InitAbilitiesToGive)
+		{
+			AbilitySystem->K2_GiveAbility(Ability);
+		}
+
+		FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+		
+		for (auto Effect : InitEffects)
+		{
+			if (!Effect) continue;
+			UGameplayEffect* GameplayEffect = Effect->GetDefaultObject<UGameplayEffect>();
+			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
+				Effect, 
+				1.0f, 
+				EffectContext
+			);
+        
+			if (SpecHandle.IsValid())
+			{
+				// 应用效果到自身
+				AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			}
+		}	
+	}
+#pragma endregion
 }
 
 void ABaseEnemy::SetLanding(const bool V, const float time)
@@ -574,7 +608,7 @@ void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 			if (!WeakThis.IsValid()) return;
 
 			WeakThis->SetInAttackState(false);
-		}, AttackInterval);
+		}, BasicAttackInterval);
 }
 
 void ABaseEnemy::OnDefendEffectBegin_Implementation()
@@ -610,7 +644,7 @@ void ABaseEnemy::OnAttackEffectEnd_Implementation()
 			if (!WeakThis.IsValid()) return;
 
 			WeakThis->SetInAttackState(false);
-		}, AttackInterval);
+		}, BasicAttackInterval);
 }
 
 UAbilityComponent* ABaseEnemy::GetAbilityComponent_Implementation()
@@ -635,6 +669,17 @@ APawn* ABaseEnemy::GetPawn_Implementation()
 	return this;
 }
 
+float ABaseEnemy::GetAttackInterval_Implementation()
+{
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AttackAccPercent");
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		return BasicAttackInterval / (1 + EffectGameplayTags[Tag]);
+	}
+
+	return BasicAttackInterval;
+}
+
 void ABaseEnemy::Jump()
 {
 	Super::Jump();
@@ -651,19 +696,17 @@ void ABaseEnemy::TryAttack_Implementation()
 {
 	if (!Execute_CanAttack(this)) return;
 	if (!InAttackRange()) return;
+
+	UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
+
+	if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
+	{
+		SetAttackAnimToggle(true);
+		SetInAttackState(true);
 	
-	SetAttackAnimToggle(true);
-	SetInAttackState(true);
-	
-	// 为了解决在未定义Attack Action动画的ActionField行动后卡住不会攻击的问题
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "InAttackState"),
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
-		{
-			if (!WeakThis.IsValid()) return;
-			WeakThis->SetInAttackState(false);
-		}, AttackInterval + 0.5);
-	
-	GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->StopMovementImmediately();
+	}
 }
 
 
@@ -738,6 +781,7 @@ void ABaseEnemy::ActionAtPlayerSouthNear_Implementation(float Distance)
 
 void ABaseEnemy::ActionAtPlayerSouthMid_Implementation(float Distance)
 {
+	TryAttack();
 }
 
 void ABaseEnemy::ActionAtPlayerSouthFar_Implementation(float Distance)
@@ -767,7 +811,7 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	R = UKismetMathLibrary::FindLookAtRotation (L, GetActorLocation());
 
 	
-	FVector PlayerForward = PixelCharacter->GetMoveForwardVector();
+	FVector PlayerForward = PixelCharacter->GetRightVectorWithBlendYaw();
 	FVector PlayerToSelf = (GetActorLocation() - PixelCharacter->GetActorLocation()).GetSafeNormal2D();
 	float c = PlayerForward.Dot(PlayerToSelf);
 	float d = FMath::Acos(c) * 180 / PI;

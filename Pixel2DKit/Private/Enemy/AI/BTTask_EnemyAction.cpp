@@ -26,7 +26,7 @@ EBTNodeResult::Type UBTTask_EnemyAction::ExecuteTask(UBehaviorTreeComponent& Own
 
 	if (UEnemyAIComponent* EnemyAIComponent = Pawn->GetComponentByClass<UEnemyAIComponent>())
 	{
-		AActor* Player = EnemyAIComponent->PixelCharacter;
+		AActor* Player = EnemyAIComponent->PXCharacter;
 		if (!IsValid(Player))
 		{
 			FinishAbort();

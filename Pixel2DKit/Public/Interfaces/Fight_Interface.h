@@ -100,4 +100,7 @@ public:
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     APawn* GetPawn();
+    
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    float GetAttackInterval();
 };

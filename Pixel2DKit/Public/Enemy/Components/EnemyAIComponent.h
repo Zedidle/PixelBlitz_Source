@@ -45,32 +45,44 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	float PreDirValue = 0.7f; 
 	FVector PreDir = FVector::ZeroVector;
 
-	// 发现玩家后，如果 n 秒后没攻击到玩家，就放弃追踪
-	FTimerHandle AttackPatienceTimerHandle;
 
+	
 public:	
 	// Sets default values for this component's properties
 	UEnemyAIComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UPROPERTY(BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
-	class ABaseEnemy* Owner = nullptr;
+	virtual void BeginPlay() override;
+	
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+
+	
+	UPROPERTY(BlueprintReadOnly, Category = Enemy)
+	class ABaseEnemy* OwningEnemy = nullptr;
+
+	TMap<FGameplayTag, float> DirDistanceToActionPoint;
 	
 	// 随时变化的当前目标位置
 	FVector CurTargetLocation;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess))
-	ABasePXCharacter* PixelCharacter;
+
+	// 目标中的玩家
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy)
+	ABasePXCharacter* PXCharacter;
 	
 	// 如果 n 秒内都打不到玩家，则回到巡逻状态
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
+	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	float AttackPatienceTime = 5;   
 
 	// 最远的攻击距离, 20 - 50 为默认小怪攻击距离；
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
+	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	FVector2D AttackRange = {20.0f, 50.0f};  
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Enemy, meta = (AllowPrivateAccess))
+	// 行动区间范围定义
+	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	FActionFieldDistance ActionFieldDistance;
+
+	void SetActionFieldDistance(const FActionFieldDistance& actionFieldDistance);
 	
 	UFUNCTION(BlueprintCallable, Category="Enemy")
 	void SetPixelCharacter(ABasePXCharacter* Character);
@@ -93,28 +105,20 @@ public:
 	FVector GetAttackLocation();
 
 
-	// 获取 接近/远离 (-1 / 1)玩家的行动域位置
+	// 获取 接近/远离 (-1 / 1)玩家的行动域位置，不管是否能够攻击
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	FVector GetActionFieldLocation(const bool bNear = true);
+	FVector GetCurActionFieldDirectionLocation(const bool bNear = true);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
+	FVector GetNearestActionFieldCanAttackLocation();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	float GetCheckCliffHeight_EnemyAI();
 
 	UFUNCTION(Blueprintable, Blueprintable, Category = "EnemyAI")
 	FGameplayTag GetActionFieldByPlayer() const;
-	
-	
 
 
-	
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 		
 };

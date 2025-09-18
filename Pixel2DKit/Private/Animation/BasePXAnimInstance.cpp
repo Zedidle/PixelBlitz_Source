@@ -32,17 +32,17 @@ void UBasePXAnimInstance::Tick(float DeltaTime)
 		{
 
 			eMoveStatus = AIController->GetMoveStatus();
-			bMoving = eMoveStatus == 3; 
+			bMoving = eMoveStatus == EPathFollowingStatus::Moving; 
 		}
 		else
 		{
 			// 处理没有 AI 控制器的情况
-			eMoveStatus = 0; // 或者其他默认值
+			eMoveStatus = EPathFollowingStatus::Paused; // 或者其他默认值
 		}
 	}
 	else
 	{
-		eMoveStatus = 0; // 或者其他默认值
+		eMoveStatus = EPathFollowingStatus::Paused; // 或者其他默认值
 	}
 }
 

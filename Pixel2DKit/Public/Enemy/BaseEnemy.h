@@ -5,6 +5,7 @@
 #include "PaperZDCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "Character/BasePXCharacter.h"
+#include "Components/EnemyAIComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -69,25 +70,16 @@ struct FEnemyData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	FVector2D AttackRange;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	TArray<FGameplayTag> ActionFieldsCanAttack = {
-		FGameplayTag::RequestGameplayTag("ActionField.East.Near"),
-		FGameplayTag::RequestGameplayTag("ActionField.East.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.East.Remote"),
-		FGameplayTag::RequestGameplayTag("ActionField.East.Far"),
-		FGameplayTag::RequestGameplayTag("ActionField.West.Near"),
-		FGameplayTag::RequestGameplayTag("ActionField.West.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.West.Remote"),
-		FGameplayTag::RequestGameplayTag("ActionField.West.Far"),
-		FGameplayTag::RequestGameplayTag("ActionField.South.Near"),
-		FGameplayTag::RequestGameplayTag("ActionField.South.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.South.Remote"),
-		FGameplayTag::RequestGameplayTag("ActionField.South.Far"),
-		FGameplayTag::RequestGameplayTag("ActionField.North.Near"),
-		FGameplayTag::RequestGameplayTag("ActionField.North.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.North.Remote"),
-		FGameplayTag::RequestGameplayTag("ActionField.North.Far")
-	};
+	// 行动区间范围定义
+	UPROPERTY(BlueprintReadOnly, Category = Enemy)
+	FActionFieldDistance ActionFieldDistance;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
+
 };
 
 
@@ -181,7 +173,7 @@ public:
 	FVector CurAttackRepel = FVector(50,50,100);
 	
 	UPROPERTY(BlueprintReadWrite)
-	float AttackInterval = 2.0f;
+	float BasicAttackInterval = 2.0f;
 
 	UPROPERTY(BlueprintReadOnly);
 	float LostEnemyTime = 5.0f;
@@ -198,7 +190,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bHurt;
-	
+
+	// 是否处于攻击状态，理解为 冷却 即可，同步给行为树黑板控制状态
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bInAttackState;
 	
@@ -282,7 +275,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPXEnemyAttributeSet* AttributeSet = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
 	
 #pragma endregion
 
@@ -319,6 +317,7 @@ public:
 	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
+	virtual float GetAttackInterval_Implementation() override;
 #pragma endregion
 	
 #pragma region ActionFields

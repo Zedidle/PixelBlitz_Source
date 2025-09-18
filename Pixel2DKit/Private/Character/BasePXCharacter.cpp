@@ -104,6 +104,40 @@ void ABasePXCharacter::LoadData()
 		GetCharacterMovement()->GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
 		GetCharacterMovement()->AirControl = BasicAirControl;
 	}
+
+#pragma region GAS
+	InitAbilitiesToGive.Append(DataAsset->InitAbilitiesToGive);
+	InitEffects.Append(DataAsset->InitEffects);
+	// AttributeSet 初始化
+	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
+	{
+		for (auto Ability : InitAbilitiesToGive)
+		{
+			AbilitySystem->K2_GiveAbility(Ability);
+		}
+
+		FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+		
+		for (auto Effect : InitEffects)
+		{
+			if (!Effect) continue;
+			UGameplayEffect* GameplayEffect = Effect->GetDefaultObject<UGameplayEffect>();
+			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
+				Effect, 
+				1.0f, 
+				EffectContext
+			);
+        
+			if (SpecHandle.IsValid())
+			{
+				// 应用效果到自身
+				AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			}
+		}	
+	}
+#pragma endregion
+	
 	
 }
 
@@ -139,8 +173,8 @@ void ABasePXCharacter::Tick_SpriteRotation()
 		Velocity = GetCharacterMovement()->GetCurrentAcceleration();
 	}
 
-	float d = FVector::DotProduct(Velocity.GetSafeNormal2D(0.1f), GetFaceToCamera());
-	float cz = FVector::CrossProduct(Velocity.GetSafeNormal2D(0.1f), GetFaceToCamera()).Z;
+	float d = FVector::DotProduct(Velocity.GetSafeNormal2D(0.1f), GetVectorFaceToCamera());
+	float cz = FVector::CrossProduct(Velocity.GetSafeNormal2D(0.1f), GetVectorFaceToCamera()).Z;
 
 	float toLeft = FMath::GetMappedRangeValueClamped(
 		FVector2D(-0.5, 0.5),
@@ -165,7 +199,7 @@ void ABasePXCharacter::Tick_SpriteRotation()
 	else
 	{
 		// VelocityDotMoveForwardVector
-		float d2 = FVector::DotProduct(Velocity.GetSafeNormal2D(), GetMoveForwardVector());
+		float d2 = FVector::DotProduct(Velocity.GetSafeNormal2D(), GetRightVectorWithBlendYaw());
 		if (d != 0)
 		{
 			if (d2 < 0)
@@ -237,12 +271,12 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	
-	float d = FVector::DotProduct(GetFaceToCamera(), Velocity.GetSafeNormal());
+	float d = FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal());
 	bool CharacterMoveToCamera = d > 0;
 	
 	// 镜头偏转
 	float pitch = FMath::Clamp(d,-0.3, 0.5) * -15 + CurBlendPitch;
-	float yaw = FVector::DotProduct(GetMoveForwardVector(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
+	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
 	if (UPXSaveGameSubsystem* SettingSaveGame = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>())
@@ -383,34 +417,7 @@ void ABasePXCharacter::BeginPlay()
 	LoadData();
 	LoadWeapon();
 
-	// AttributeSet 初始化
-	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
-	{
-		for (auto Ability : InitAbilitiesToGive)
-		{
-			AbilitySystem->K2_GiveAbility(Ability);
-		}
 
-		FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
-		EffectContext.AddSourceObject(this);
-		
-		for (auto Effect : InitEffects)
-		{
-			if (!Effect) continue;
-			UGameplayEffect* GameplayEffect = Effect->GetDefaultObject<UGameplayEffect>();
-			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
-				Effect, 
-				1.0f, 
-				EffectContext
-			);
-        
-			if (SpecHandle.IsValid())
-			{
-				// 应用效果到自身
-				AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-			}
-		}	
-	}
 
 	if (HealthComponent)
 	{
@@ -639,12 +646,12 @@ UPXAttributeSet* ABasePXCharacter::GetAttributeSet() const
 	return AttributeSetBase.Get();
 }
 
-FVector ABasePXCharacter::GetMoveForwardVector()
+FVector ABasePXCharacter::GetRightVectorWithBlendYaw()
 {
 	return FRotator(0, CurBlendYaw,0 ).RotateVector(FVector(1,0,0));
 }
 
-FVector ABasePXCharacter::GetFaceToCamera()
+FVector ABasePXCharacter::GetVectorFaceToCamera()
 {
 	return FRotator(0, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
 }
@@ -1364,6 +1371,17 @@ APawn* ABasePXCharacter::GetPawn_Implementation()
 	return this;
 }
 
+float ABasePXCharacter::GetAttackInterval_Implementation()
+{
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AttackAccPercent");
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		return BasicAttackInterval / (1 + EffectGameplayTags[Tag]);
+	}
+
+	return BasicAttackInterval;
+}
+
 void ABasePXCharacter::OnAttackRelease_Implementation()
 {
 	SetAttackFire(true);
@@ -1562,7 +1580,7 @@ void ABasePXCharacter::MoveX(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
-	AddMovementInput(GetMoveForwardVector(), AxisValue, false);
+	AddMovementInput(GetRightVectorWithBlendYaw(), AxisValue, false);
 	
 }
 
@@ -1570,7 +1588,7 @@ void ABasePXCharacter::MoveY(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
-	AddMovementInput(GetFaceToCamera(), AxisValue, false);
+	AddMovementInput(GetVectorFaceToCamera(), AxisValue, false);
 	
 }
 

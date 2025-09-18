@@ -52,4 +52,10 @@ public:
 	// 死亡复活期间过渡时间
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "HeroDataAsset | GameplayFlow")
 	float RevivePassDayTime = 600.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
 };

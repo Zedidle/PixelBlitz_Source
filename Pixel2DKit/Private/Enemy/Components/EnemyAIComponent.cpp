@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 
 
 UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer)
@@ -19,32 +20,62 @@ UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer
 	
 }
 
+void UEnemyAIComponent::SetActionFieldDistance(const FActionFieldDistance& actionFieldDistance)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
+	
+	ActionFieldDistance = actionFieldDistance;
+	
+	const TArray<FGameplayTag>& ActionFieldTags = OwningEnemy->ActionFieldsCanAttack.GetGameplayTagArray();
+	for (const auto& ActionFieldTag : ActionFieldTags)
+	{
+		FString TagString = ActionFieldTag.ToString();
+		if (TagString.Contains("Near"))
+		{
+			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceNear.X + ActionFieldDistance.DistanceNear.Y) / 2);
+		}
+		else if (TagString.Contains("Mid"))
+		{
+			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceMid.X + ActionFieldDistance.DistanceMid.Y) / 2);
+		}
+		else if (TagString.Contains("Far"))
+		{
+			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceFar.X + ActionFieldDistance.DistanceFar.Y) / 2);
+		}
+		else if (TagString.Contains("Remote"))
+		{
+			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceRemote.X + ActionFieldDistance.DistanceRemote.Y) / 2);
+
+		}
+	}
+
+
+	
+	
+}
+
 void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
 {
-	if (AttackPatienceTimerHandle.IsValid())
-	{
-		GetWorld()->GetTimerManager().ClearTimer(AttackPatienceTimerHandle);
-	}
-	
+	PXCharacter = Character;
 	if (Character == nullptr) return;
 	
-	PixelCharacter = Character;
-	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda(
-		[this]()
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "UEnemyAIComponent::SetPixelCharacter"),
+	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		if (WeakThis->OwningEnemy)
 		{
-			if (ABaseEnemy* Owner = Cast<ABaseEnemy>(GetOwner()))
-			{
-				Owner->SetPixelCharacter(nullptr);
-			}
-		});
-	GetWorld()->GetTimerManager().SetTimer(AttackPatienceTimerHandle, TimerDelegate,AttackPatienceTime,false );
+			WeakThis->OwningEnemy->SetPixelCharacter(nullptr);
+		}
+	}, AttackPatienceTime);
 }
 
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, float DotDirPerRotate, float MaxRotateValue,
                                                      float DefaultDirRotate, const float MinDirectlyDistance)
 {
-	if (GetOwner() == nullptr) return FVector::ZeroVector;
-	FVector OwnerLocation = GetOwner()->GetActorLocation();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector);
+
+	FVector OwnerLocation = OwningEnemy->GetActorLocation();
 	TargetLocation.Z = OwnerLocation.Z; // 涉及到转向，避免Owner太高转到半空中导致无效位置
 	FVector DefaultDirVector = FRotator(0, (FMath::RandBool()? 1 : -1) * (DefaultDirRotate + BlockValue * BlockDirModifyValue), 0)
 							.RotateVector(TargetLocation - OwnerLocation);
@@ -56,7 +87,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		FVector Location = OwnerLocation + DefaultDirVector;
 		// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
 		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(GetOwner()); // 忽略自己
+		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
 		TArray<FHitResult> OutHits;
 		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, Location, 100, 
 	TraceTypeQuery4, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
@@ -115,7 +146,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		FVector TempTargetOffset = DistanceScale * FRotator(0, (FMath::RandBool() ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(DefaultDirVector);
 
 		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(GetOwner()); // 忽略自己
+		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
 
 		// 存储碰撞结果
 		FHitResult HitResult;
@@ -184,34 +215,38 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 
 FVector UEnemyAIComponent::GetAttackLocation()
 {
-	if (!IsValid(Owner)) return FVector::Zero();
-	if (!IsValid( PixelCharacter)) return FVector::Zero();	
+	if (!IsValid(OwningEnemy)) return FVector::Zero();
+	if (!IsValid( PXCharacter)) return FVector::Zero();	
 
-	FVector Dir = (Owner->GetActorLocation() - PixelCharacter->GetActorLocation()).GetSafeNormal2D();
-	if (Owner->GetDistanceToPlayer() < AttackRange.X)
+	FVector Dir = (OwningEnemy->GetActorLocation() - PXCharacter->GetActorLocation()).GetSafeNormal2D();
+	if (OwningEnemy->GetDistanceToPlayer() < AttackRange.X)
 	{
-		return PixelCharacter->GetActorLocation() + (AttackRange.X + 5) * Dir;
+		return PXCharacter->GetActorLocation() + (AttackRange.X + 5) * Dir;
 	}
 
-	if (Owner->GetDistanceToPlayer() > AttackRange.Y)
+	if (OwningEnemy->GetDistanceToPlayer() > AttackRange.Y)
 	{
-		return PixelCharacter->GetActorLocation() + (AttackRange.Y - 5) * Dir;
+		return PXCharacter->GetActorLocation() + (AttackRange.Y - 5) * Dir;
 	}
 
-	return Owner->GetActorLocation();
+	return OwningEnemy->GetActorLocation();
 }
 
 
-FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
+FVector UEnemyAIComponent::GetCurActionFieldDirectionLocation(const bool bNear)
 {
-	if (!IsValid(GetOwner())) return FVector(0);
-	if (!IsValid(PixelCharacter)) return GetOwner()->GetActorLocation();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector)
+	
+	if (!IsValid(PXCharacter)) return OwningEnemy->GetActorLocation();
 
-	const FVector PlayerLocation = PixelCharacter->GetActorLocation();
-	const FVector OwnerLocation = GetOwner()->GetActorLocation();
+	const FVector PlayerLocation = PXCharacter->GetActorLocation();
+	const FVector OwnerLocation = OwningEnemy->GetActorLocation();
 	float Distance = (PlayerLocation - OwnerLocation).Size2D();
 	FVector Dir = (OwnerLocation - PlayerLocation).GetSafeNormal2D();
 
+	// 应该直接走向最近的能攻击的区域
+	// 可能后续要加入直接跳跃到可攻击区域的技能
+	
 	FVector TargetLocation;
 	if (ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y)
 	{
@@ -263,27 +298,76 @@ FVector UEnemyAIComponent::GetActionFieldLocation(const bool bNear)
 	return CurTargetLocation;
 }
 
+FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector)
+
+	FVector EnemyLocation = OwningEnemy->GetActorLocation();
+	FGameplayTag GameplayTag = GetActionFieldByPlayer();
+	if (!GameplayTag.IsValid()) return EnemyLocation;
+
+	const FGameplayTagContainer& ActionFieldsCanAttack = OwningEnemy->ActionFieldsCanAttack;
+
+	FVector PlayerLocation = PXCharacter->GetActorLocation();
+	FVector EastDir = PXCharacter->GetRightVectorWithBlendYaw();
+	FVector NorthDir = FRotator(0, 90, 0).RotateVector(EastDir);
+	FVector WestDir = FRotator(0, 90, 0).RotateVector(NorthDir);
+	FVector SouthDir = FRotator(0, 90, 0).RotateVector(WestDir);
+
+	float CurDistance = MAX_FLOAT;
+	FVector Result = EnemyLocation;
+	FVector TmpPoint;
+	
+	for (auto& DirDistance: DirDistanceToActionPoint)
+	{
+		FString TagString = DirDistance.Key.ToString();
+		if (TagString.Contains("East"))
+		{
+			TmpPoint = PlayerLocation + EastDir * DirDistance.Value;
+		}
+		else if (TagString.Contains("North"))
+		{
+			TmpPoint = PlayerLocation + NorthDir * DirDistance.Value;
+		}
+		else if (TagString.Contains("West"))
+		{
+			TmpPoint = PlayerLocation + WestDir * DirDistance.Value;
+		}
+		else if (TagString.Contains("South"))
+		{
+			TmpPoint = PlayerLocation + SouthDir * DirDistance.Value;
+		}
+		
+		float TmpDistance = FVector::Distance(TmpPoint, EnemyLocation);
+		if (CurDistance > TmpDistance)
+		{
+			CurDistance = TmpDistance;
+			Result = TmpPoint;
+		}
+	}
+	
+	return GetMoveDotDirRandLocation(Result);
+}
+
 
 float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 {
-	if (!IsValid(Owner)) return 50;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, 50)
 	
-	UCapsuleComponent* CapsuleComponent = GetOwner()->GetComponentByClass<UCapsuleComponent>();
-	UCharacterMovementComponent* CharacterMovmentComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>();
-	if (!CapsuleComponent || !CharacterMovmentComponent) return 0;
+	UCapsuleComponent* CapsuleComponent = OwningEnemy->GetComponentByClass<UCapsuleComponent>();
+	UCharacterMovementComponent* CharacterMovementComponent = OwningEnemy->GetComponentByClass<UCharacterMovementComponent>();
+	if (!CapsuleComponent || !CharacterMovementComponent) return 0;
 	
-	float ScaleZ = GetOwner()->GetActorScale3D().Z;
-	return ScaleZ * (CharacterMovmentComponent->MaxStepHeight + CapsuleComponent->GetUnscaledCapsuleHalfHeight());
+	float ScaleZ = OwningEnemy->GetActorScale3D().Z;
+	return ScaleZ * (CharacterMovementComponent->MaxStepHeight + CapsuleComponent->GetUnscaledCapsuleHalfHeight());
 }
 
 FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const
 {
-	if (!IsValid(PixelCharacter)) return FGameplayTag();
-	if (!IsValid(GetOwner())) return FGameplayTag();
+	if (!IsValid(PXCharacter) || !OwningEnemy) return FGameplayTag();
 	
-	EWorldDirection Dir = USpaceFuncLib::ActorAtActorWorldDirection(GetOwner(), PixelCharacter, PixelCharacter->CurBlendYaw);
-	float Distance = (GetOwner()->GetActorLocation() - PixelCharacter->GetActorLocation()).Size2D();
-	
+	EWorldDirection Dir = USpaceFuncLib::ActorAtActorWorldDirection(OwningEnemy, PXCharacter, PXCharacter->CurBlendYaw);
+	float Distance = (OwningEnemy->GetActorLocation() - PXCharacter->GetActorLocation()).Size2D();
 	
 	if (Dir == East)
 	{
@@ -370,7 +454,7 @@ FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const
 void UEnemyAIComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	Owner = Cast<ABaseEnemy>(GetOwner());
+	OwningEnemy = Cast<ABaseEnemy>(GetOwner());
 	
 }
 

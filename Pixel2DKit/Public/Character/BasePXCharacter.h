@@ -328,11 +328,14 @@ public:
 	float BasicSpringArmLength = 280.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
 	float CurSpringArmLength = 280.0f;
-	
+
+	// Right就是东侧
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = View)
-	FVector GetMoveForwardVector();
+	FVector GetRightVectorWithBlendYaw();
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = View)
-	FVector GetFaceToCamera();
+	FVector GetVectorFaceToCamera();
+
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddCameraOffset(const FVector& V);
 
@@ -503,6 +506,7 @@ public:
 	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
+	virtual float GetAttackInterval_Implementation() override;
 #pragma endregion
 
 
