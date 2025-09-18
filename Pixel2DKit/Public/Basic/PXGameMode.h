@@ -14,6 +14,7 @@
 class APlayerRespawnPoint;
 class ULevelStreamingDynamic;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelLoadedSignature);
 
 UCLASS(BlueprintType, Blueprintable)
 class PIXEL2DKIT_API APXGameMode : public AGameMode
@@ -30,15 +31,21 @@ class PIXEL2DKIT_API APXGameMode : public AGameMode
 	ULevelStreamingDynamic* CurLevelInstance;
 
 	bool IsLevelLoaded = false;
+
+
 	
 protected:
 	
 	virtual void BeginPlay() override;
-	
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	
 public:
 
+
+	UPROPERTY(BlueprintAssignable)
+	FOnLevelLoadedSignature OnStartLevelLoaded;
+	
 #pragma region GameplayFlow
 	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
 	APlayerRespawnPoint* PlayerRespawnPoint;
@@ -48,7 +55,7 @@ public:
 
 	// 延迟加载效果
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void StartCurLevel(float CheckLevelLoadedSustainTime = 5.0f);
+	void StartCurLevel();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=GameplayFlow)
 	void OnStartLevelSuccess();

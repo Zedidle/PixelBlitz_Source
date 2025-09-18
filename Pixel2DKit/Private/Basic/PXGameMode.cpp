@@ -36,6 +36,12 @@ void APXGameMode::BeginPlay()
 	}
 }
 
+void APXGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	OnStartLevelLoaded.RemoveAll(this);
+}
+
 void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator StartRotation)
 {
 	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
@@ -76,27 +82,26 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator Sta
 	}
 }
 
-void APXGameMode::StartCurLevel(float CheckLevelLoadedSustainTime)
+void APXGameMode::StartCurLevel()
 {
-	if (!IsLevelLoaded)
+	if (IsLevelLoaded)
 	{
-		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), FName("APXGameMode::StartCurLevel"),
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
-		{
-			if (!WeakThis.IsValid()) return;
-
-			if (WeakThis->IsLevelLoaded)
-			{
-				WeakThis->StartCurLevel();
-				UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(), FName("APXGameMode::StartCurLevel"));
-			}
-		}, 0.2, CheckLevelLoadedSustainTime);
-		return;
+		OnStartLevelSuccess();
 	}
-	
+
+	if (!OnStartLevelLoaded.IsAlreadyBound(this, &ThisClass::OnStartLevelSuccess))
+	{
+		OnStartLevelLoaded.AddDynamic(this, &ThisClass::OnStartLevelSuccess);
+	}
+}
+
+void APXGameMode::OnStartLevelSuccess_Implementation()
+{
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CurLevelInstance);
+
+	OnStartLevelLoaded.RemoveDynamic(this, &ThisClass::OnStartLevelSuccess);
 	
 	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
 	{
@@ -110,13 +115,6 @@ void APXGameMode::StartCurLevel(float CheckLevelLoadedSustainTime)
 		Actor->SetActorEnableCollision(false);
 		Actor->SetLifeSpan(FMath::RandRange(0.05, 0.2));
 	}
-	
-	OnStartLevelSuccess();
-}
-
-void APXGameMode::OnStartLevelSuccess_Implementation()
-{
-	
 }
 
 void APXGameMode::UnloadCurLevel()
@@ -162,6 +160,7 @@ void APXGameMode::OnLevelLoaded_Implementation()
 				Actor->Tags.Add(CurLevelName);
 			}
 		}
+		OnStartLevelLoaded.Broadcast();
 	}
 }
 
