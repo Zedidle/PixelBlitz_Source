@@ -48,4 +48,10 @@ public:
 		FGameplayTag::RequestGameplayTag("ActionField.North.Far")
 	};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
+
 };

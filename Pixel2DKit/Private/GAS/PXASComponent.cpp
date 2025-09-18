@@ -44,12 +44,14 @@ bool UPXASComponent::TryActivateAbilities(const FGameplayTagContainer& GameplayT
 bool UPXASComponent::TryActivateAbilityByTagName(FName TagName, bool bAllowRemoteActivation)
 {
 	if (TagName.IsNone()) return false;
-	
-	FName CDTagName = FName(TagName.ToString() + ".CD");
+	return TryActivateAbilityByTag(FGameplayTag::RequestGameplayTag(TagName), bAllowRemoteActivation);
+}
+
+bool UPXASComponent::TryActivateAbilityByTag(const FGameplayTag& Tag, bool bAllowRemoteActivation)
+{
+	FName CDTagName = FName(Tag.ToString() + ".CD");
 	if (HasTag(CDTagName)) return false;
 
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName);
-	
 	bool bSuccess = false;
 	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 	{		
@@ -58,7 +60,6 @@ bool UPXASComponent::TryActivateAbilityByTagName(FName TagName, bool bAllowRemot
 			bSuccess |= TryActivateAbility(Spec.Handle, bAllowRemoteActivation);
 		}
 	}
-
 	return bSuccess && HasTag(CDTagName);
 }
 

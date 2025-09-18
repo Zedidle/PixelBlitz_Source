@@ -172,17 +172,6 @@ float ABaseEnemy::GetDistanceToPlayer() const
 	return 99999;
 }
 
-FVector ABaseEnemy::GetCurAttackRepel_Implementation()
-{
-	return CurAttackRepel;
-}
-
-int ABaseEnemy::GetCurAttackDamage_Implementation()
-{
-	return CurAttackDamage;
-}
-
-
 void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset)
@@ -219,8 +208,8 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 	
 #pragma region GAS
 
-	InitAbilitiesToGive.Append(EnemyData.InitAbilitiesToGive);
-	InitEffects.Append(EnemyData.InitEffects);
+	InitAbilitiesToGive.Append(DataAsset->InitAbilitiesToGive);
+	InitEffects.Append(DataAsset->InitEffects);
 	if (AbilitySystem)
 	{
 		for (auto Ability : InitAbilitiesToGive)
@@ -528,7 +517,14 @@ void ABaseEnemy::DelayLosePlayer_Implementation()
 
 void ABaseEnemy::OnAttack_Implementation()
 {
-	
+	if (FightComponent)
+	{
+		if (GetSprite())
+		{
+			FightComponent->MeleeTraceAttack(FName("HitSocket"), GetSprite(),
+				Execute_GetAttackDamage(this), Execute_GetAttackRepel(this));
+		}
+	}
 }
 
 bool ABaseEnemy::CanAttack_Implementation()
@@ -678,6 +674,16 @@ float ABaseEnemy::GetAttackInterval_Implementation()
 	}
 
 	return BasicAttackInterval;
+}
+
+int ABaseEnemy::GetAttackDamage_Implementation()
+{
+	return CurAttackDamage;
+}
+
+FVector ABaseEnemy::GetAttackRepel_Implementation()
+{
+	return CurAttackRepel;
 }
 
 void ABaseEnemy::Jump()

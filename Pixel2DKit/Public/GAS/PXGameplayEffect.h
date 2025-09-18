@@ -17,6 +17,8 @@ class PIXEL2DKIT_API UPXGameplayEffect : public UGameplayEffect
 public:
 	UPXGameplayEffect();
 
+	
+	
 	/* 资源Tag
 	 * 可以用于提示 Buff 的加入和移除，参考DT_BuffOnWidget */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EffectTags)

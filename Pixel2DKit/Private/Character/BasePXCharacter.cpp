@@ -77,6 +77,7 @@ void ABasePXCharacter::LoadData()
 
 	BasicAirControl = Attribute.BasicAirControl + InheritAttribute.BasicAirControl;
 	
+	BasicRepelValue = Attribute.BasicRepelValue + InheritAttribute.BasicRepelValue;
 	BasicAttackValue = Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue;
 	BasicAttackInterval = Attribute.BasicAttackInterval + InheritAttribute.BasicAttackInterval;
 
@@ -602,6 +603,22 @@ int ABasePXCharacter::GetAttackDamage_Implementation()
 	AttackValue = Execute_Buff_CalInitDamage(this, AttackValue);
 	
 	return AttackValue;
+}
+
+FVector ABasePXCharacter::GetAttackRepel_Implementation()
+{
+	float Value;
+	if (Weapon)
+	{
+		Value = Weapon->GetRepelPower() + BasicRepelValue;
+	}
+	else
+	{
+		Value = BasicRepelValue;
+	}
+
+
+	return FVector(Value) + GetVelocity() * VelocityRepelFactor;
 }
 
 void ABasePXCharacter::Revive_Implementation()

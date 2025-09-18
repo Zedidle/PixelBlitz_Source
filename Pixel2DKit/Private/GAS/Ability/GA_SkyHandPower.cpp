@@ -18,14 +18,14 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	AActor* Actor = GetAvatarActorFromActorInfo();
-	if (!Actor)
+	APawn* Pawn = GetPawn();
+	if (!Pawn)
 	{
 		K2_EndAbility();
 		return;
 	}
 	
-	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(IFight_Interface::Execute_GetPawn(Actor));
+	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Pawn);
 	if (!PXCharacter || !PXCharacter->Implements<UBuff_Interface>() ||
 		!PXCharacter->Implements<UFight_Interface>() ||
 		!IFight_Interface::Execute_IsAlive(PXCharacter))

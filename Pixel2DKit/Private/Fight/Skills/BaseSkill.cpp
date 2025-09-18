@@ -7,12 +7,11 @@
 
 bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
 {
-	if (!GetOwner() || !Actor) return false;
-	if (!GetOwner()->Implements<UFight_Interface>()) return false;
-	if (!Actor->Implements<UFight_Interface>()) return false;
+	if (!Owner || !Actor) return false;
+	if (!Owner->Implements<UFight_Interface>() || !Actor->Implements<UFight_Interface>()) return false;
 
-	const FGameplayTagContainer& DamageMakerEnemyCamp = IFight_Interface::Execute_GetEnemyCamp(Actor);
-	const FGameplayTagContainer& OwnerCamp = IFight_Interface::Execute_GetOwnCamp(GetOwner());
-
-	return DamageMakerEnemyCamp.HasAny(OwnerCamp);
+	const FGameplayTagContainer& DamageMakerEnemyCamp = IFight_Interface::Execute_GetEnemyCamp(Owner);
+	const FGameplayTagContainer& ActorCamp = IFight_Interface::Execute_GetOwnCamp(Actor);
+	
+	return DamageMakerEnemyCamp.HasAny(ActorCamp) || ActorCamp.HasAny(DamageMakerEnemyCamp);
 }

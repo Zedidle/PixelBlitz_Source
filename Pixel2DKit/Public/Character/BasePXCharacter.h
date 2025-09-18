@@ -143,7 +143,8 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnPlayerAttackStart OnPlayerAttackStart;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float VelocityRepelFactor = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float FightCameraOffsetSpeedFactor = 0.05;
 	UPROPERTY(BlueprintReadWrite)
@@ -294,9 +295,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Fight)
 	void LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass = nullptr);
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = Fight)
-	int GetAttackDamage();
-
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	float MaxWalkSpeed = 200.f;
 
@@ -404,6 +402,9 @@ public:
 	bool bMoving;
 
 	UPROPERTY(BlueprintReadWrite, Category = Fight)
+	float BasicRepelValue;
+	
+	UPROPERTY(BlueprintReadWrite, Category = Fight)
 	int	BasicAttackValue = 10;
 
 	
@@ -507,6 +508,8 @@ public:
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackInterval_Implementation() override;
+	virtual int GetAttackDamage_Implementation() override;
+	virtual FVector GetAttackRepel_Implementation() override;
 #pragma endregion
 
 

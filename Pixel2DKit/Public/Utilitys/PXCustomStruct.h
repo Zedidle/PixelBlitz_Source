@@ -194,7 +194,10 @@ struct FCharacterAttribute
 	int MaxEP;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int BasicAttackValue;
+	int BasicAttackValue = 5;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int BasicRepelValue = 20;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float MaxWalkSpeed;

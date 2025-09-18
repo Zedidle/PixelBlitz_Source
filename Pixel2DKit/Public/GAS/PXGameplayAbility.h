@@ -45,5 +45,8 @@ public:
 	
 	virtual const FGameplayTagContainer* GetCooldownTags() const override;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayAbility | GAS")
+	APawn* GetPawn() const;
+
 
 };

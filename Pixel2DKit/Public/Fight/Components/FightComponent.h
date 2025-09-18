@@ -58,6 +58,6 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable, Category="Components|Fight")
-	void MeleeTraceAttack(FName SocketName, USceneComponent* SceneComponent, int Damage, const FVector& KnockBackForce, UNiagaraSystem* HitEffect);
+	void MeleeTraceAttack(FName SocketName, USceneComponent* SceneComponent, int Damage, const FVector& KnockBackForce, UNiagaraSystem* HitEffect = nullptr);
 		
 };

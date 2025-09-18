@@ -25,6 +25,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "PXASC")
 	bool TryActivateAbilityByTagName(FName TagName, bool bAllowRemoteActivation = true);
+
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	bool TryActivateAbilityByTag(const FGameplayTag& Tag, bool bAllowRemoteActivation = true);
+	
 	
 	// 声明安全的获取函数
 	FGameplayAbilitySpec* GetAbilityByTagName(FName AbilityTagName);

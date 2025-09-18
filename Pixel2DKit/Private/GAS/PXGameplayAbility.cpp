@@ -117,3 +117,15 @@ const FGameplayTagContainer* UPXGameplayAbility::GetCooldownTags() const
 	return MutableTags;
 }
 
+APawn* UPXGameplayAbility::GetPawn() const
+{
+	AActor* Actor = GetAvatarActorFromActorInfo();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Actor, nullptr)
+
+	if (Actor->Implements<UFight_Interface>())
+	{
+		return IFight_Interface::Execute_GetPawn(Actor);
+	}
+	return nullptr;
+}
+

@@ -68,17 +68,11 @@ struct FEnemyData : public FTableRowBase
 	FDrop Drop;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FVector2D AttackRange;
+	FVector2D AttackRange = {20, 60};
 
 	// 行动区间范围定义
-	UPROPERTY(BlueprintReadOnly, Category = Enemy)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FActionFieldDistance ActionFieldDistance;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
 
 };
 
@@ -255,12 +249,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Enemy | Fight")
 	void TryAttack();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category="Enemy | Fight")
-	int GetCurAttackDamage();
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category="Enemy | Fight")
-	FVector GetCurAttackRepel();
-	
 	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
 	void OnEnemyHPChanged(int32 NewValue, int32 ChangedValue, EStatChange ChangedStat, AActor* Maker, bool bInner);
 
@@ -318,6 +306,8 @@ public:
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackInterval_Implementation() override;
+	virtual int GetAttackDamage_Implementation() override;
+	virtual FVector GetAttackRepel_Implementation() override;
 #pragma endregion
 	
 #pragma region ActionFields
