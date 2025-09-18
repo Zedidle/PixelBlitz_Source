@@ -417,12 +417,10 @@ void ABasePXCharacter::BeginPlay()
 
 	LoadData();
 	LoadWeapon();
-
-
-
+	
 	if (HealthComponent)
 	{
-		HealthComponent->OnHPChanged.AddDynamic(this, &ThisClass::OnHPChanged);
+		HealthComponent->OnHPChanged.AddDynamic(this, &ABasePXCharacter::OnHPChanged);
 	}
 }
 

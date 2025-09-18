@@ -40,7 +40,8 @@ class UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	float OnHurtInvulnerableDelay = 0.1;  // 受到伤害后的一段时候才会触发无敌帧，支持短时间内的连击，后续考虑拉长并多段连击，攻击命中后会续时
+	// 受到伤害后的一段时候才会触发无敌帧，支持短时间内的连击，后续考虑拉长并多段连击，攻击命中后会续时
+	float OnHurtInvulnerableDelay = 0.15;  
 	float InvulnerableDuration = 0.5; // 无敌帧时间
 
 	float PreHurtTime = 0; // 上次受到伤害的时间
@@ -98,14 +99,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void SetHP(const int32 value, const bool broadcast = true);
-
-	// UFUNCTION(BlueprintCallable, Category="Health")
-	// virtual void SetEffectBySeconds(const int32 value, const FGameplayTag Tag);
 	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	UFUNCTION()
+	void Event_OnHPChanged(int OldValue, int NewValue);
 
 public:	
 	// Called every frame
@@ -119,13 +120,10 @@ public:
 	float GetHPPercent();
 	
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce = false, bool bCauseInvul = true, bool bInner = false);
+	virtual void DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce = false);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void IncreaseHP(int32 value, AActor* Instigator);
-
-	// UFUNCTION(BlueprintCallable, Category="Health")
-	// void SetActivateHealthEffectBySeconds(const bool activate = true);
 	
 	UFUNCTION(BlueprintCallable, Category="HealthComponent | Movement")
 	void KnockBack(FVector Repel, AActor* Instigator);

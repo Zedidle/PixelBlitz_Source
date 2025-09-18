@@ -44,27 +44,22 @@ int UHealthComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 
 void UHealthComponent::OnHurtInvulnerable()
 {
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this]
-		{
-			InvulnerableForDuration(InvulnerableDuration);
-		});
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 1, false, OnHurtInvulnerableDelay);
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "OnHurtInvulnerable"),
+[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		WeakThis->InvulnerableForDuration(WeakThis->InvulnerableDuration);
+	}, OnHurtInvulnerableDelay);
 }
 
 void UHealthComponent::InvulnerableForDuration(float duration)
 {
 	bInvulnerable = true;
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this, &TimerHandle]
-		{
-			bInvulnerable = false;
-			GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
-		});
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, TimerDel, 1, false, duration);
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		WeakThis->bInvulnerable = false;
+	}, duration);
 }
 
 void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool force) 
@@ -79,7 +74,7 @@ void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool
 
 	FName TimerName = FName(GetName() + "FlashForDuration");
 	UTimerSubsystemFuncLib::SetDelayLoop(World, TimerName,
-		[WeakThis = TWeakObjectPtr<ThisClass>(), TimerName, World]
+		[WeakThis = TWeakObjectPtr<ThisClass>(this), TimerName, World]
 		{
 			if (!World) return;
 			if (!WeakThis.IsValid() || !WeakThis->GetOwner())
@@ -221,6 +216,7 @@ void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	OnHPChanged.AddDynamic(this, &UHealthComponent::Event_OnHPChanged);
 }
 
 void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -246,6 +242,22 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+
+
+void UHealthComponent::Event_OnHPChanged(int OldValue, int NewValue)
+{
+	if (NewValue < OldValue)
+	{
+		if (OldValue - NewValue >= 0.1 * GetMaxHP())
+		{
+			// 触发受伤闪烁
+			FlashForDuration();
+			// 触发无敌帧
+			OnHurtInvulnerable();
+		}
+	}
 }
 
 int UHealthComponent::GetCurrentHP()
@@ -285,8 +297,7 @@ float UHealthComponent::GetHPPercent()
 	return float(GetCurrentHP()) / float(GetMaxHP());
 }
 
-void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce,
-                                      bool bCauseInvul, bool bInner)
+void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce)
 {
 	if (Damage <= 0) return;
 	AActor* Owner = GetOwner();
@@ -305,11 +316,10 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	}
 
 	int OutDamage = Damage;
-	if (!bInner)
-	{
-		IFight_Interface::Execute_OnBeAttacked(Owner, Maker, Damage, OutDamage);
-		KnockBack(KnockbackForce * (OutDamage / Damage), Maker);
-	}
+
+	IFight_Interface::Execute_OnBeAttacked(Owner, Maker, Damage, OutDamage);
+	KnockBack(KnockbackForce * (OutDamage / Damage), Maker);
+	
 	
 	if (OutDamage <= 0) return;
 
@@ -345,18 +355,6 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	}
 	
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-
-	// 触发受伤闪烁
-	if (!bInner)
-	{
-		FlashForDuration();
-	}
-
-	// 触发无敌帧
-	if (bCauseInvul)
-	{
-		OnHurtInvulnerable();
-	}
 }
 
 void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)

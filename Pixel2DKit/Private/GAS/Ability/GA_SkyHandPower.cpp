@@ -72,9 +72,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Enemy->SetActorLocation(Enemy->GetActorScale3D() * FVector(0, 0, 44.0f) + PXCharacter->GetActorLocation());
 	PXCharacter->SetActorLocation(PreEnemyLocation);
 	
-	EnemyHealthComponent->DecreaseHP(Damage, FVector(0,0,0),
-		PXCharacter, true, true, false);
-
+	EnemyHealthComponent->DecreaseHP(Damage, FVector(0,0,0), PXCharacter, true);
 	
 	const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
 	if (!ResourceSettings || !ResourceSettings->NS_Mobiliarbus)
