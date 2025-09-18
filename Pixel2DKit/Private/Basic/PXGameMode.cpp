@@ -13,6 +13,7 @@
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 
 
@@ -32,9 +33,7 @@ void APXGameMode::BeginPlay()
 	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
 	{
 		LoadLevel(GameInstance->GetCurLevelName_Simple(true));
-		StartCurLevel();
 	}
-	
 }
 
 void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator StartRotation)
@@ -66,22 +65,39 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator Sta
 	PreLevelName = CurLevelName;
 	CurLevelName = LevelName;
 
-	
+	IsLevelLoaded = false;
 	bool LoadLevelSuccess;
 	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(), LevelName.ToString(), StartLocation, StartRotation,
 		LoadLevelSuccess);
 	if (LoadLevelSuccess && LoadedLevel)
 	{
 		CurLevelInstance = LoadedLevel;
-
 		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
 	}
 }
 
-void APXGameMode::StartCurLevel()
+void APXGameMode::StartCurLevel(float CheckLevelLoadedSustainTime)
 {
+	if (!IsLevelLoaded)
+	{
+		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), FName("APXGameMode::StartCurLevel"),
+		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+
+			if (WeakThis->IsLevelLoaded)
+			{
+				WeakThis->StartCurLevel();
+				UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(), FName("APXGameMode::StartCurLevel"));
+			}
+		}, 0.2, CheckLevelLoadedSustainTime);
+		return;
+	}
+	
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CurLevelInstance);
+	
 	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
 	{
 		PC->OnCharacterControl(false);
@@ -94,11 +110,8 @@ void APXGameMode::StartCurLevel()
 		Actor->SetActorEnableCollision(false);
 		Actor->SetLifeSpan(FMath::RandRange(0.05, 0.2));
 	}
-
-	if (CurLevelInstance)
-	{
-		OnStartLevelSuccess();
-	}
+	
+	OnStartLevelSuccess();
 }
 
 void APXGameMode::OnStartLevelSuccess_Implementation()
@@ -136,10 +149,11 @@ void APXGameMode::NavRebuild()
 	NavSys->Build();
 }
 
-void APXGameMode::OnLevelLoaded()
+void APXGameMode::OnLevelLoaded_Implementation()
 {
 	if (CurLevelInstance && CurLevelInstance->GetLoadedLevel())
 	{
+		IsLevelLoaded = true;
 		TArray<AActor*>& FoundActors = CurLevelInstance->GetLoadedLevel()->Actors;
 		for (AActor* Actor : FoundActors)
 		{
