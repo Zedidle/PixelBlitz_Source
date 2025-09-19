@@ -824,7 +824,8 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	
 	if (NewValue > 0)
 	{
 		// 生命值恢复或降低
@@ -835,14 +836,23 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		}
 		if (NewValue < OldValue)
 		{
-			USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation(), 3.f);
-			if (UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld()))
+			int ChangedValue = NewValue - OldValue;
+			float ChangedHPPercent = static_cast<float>(ChangedValue) / HealthComponent->GetMaxHP();
+
+			if (ChangedHPPercent >= 0.02)
 			{
-				MainSaveGame->HurtTimes ++;
+				USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation(), 3.f);
+				if (UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld()))
+				{
+					MainSaveGame->HurtTimes ++;
+				}
 			}
-			CameraOffset_BulletTime(0.03, FVector(0), 0.1f);
-			OutOfControl(UCommonFuncLib::DealDeltaTime(0.2));
-			SetHurt(true);
+			if (ChangedHPPercent >= 0.1)
+			{
+				CameraOffset_BulletTime(ChangedHPPercent / 10, FVector(0), 0.1f);
+				OutOfControl(UCommonFuncLib::DealDeltaTime(0.2));
+				SetHurt(true);
+			}
 		}
 	}
 	else

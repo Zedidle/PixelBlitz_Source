@@ -13,6 +13,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 
+extern TAutoConsoleVariable<int32> CDebugTraceDuration;
 
 UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
@@ -151,6 +152,15 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		// 存储碰撞结果
 		FHitResult HitResult;
 
+		EDrawDebugTrace::Type DrawType = EDrawDebugTrace::None;
+
+#if WITH_EDITOR
+		if (CDebugTraceDuration.GetValueOnGameThread())
+		{
+			DrawType = EDrawDebugTrace::ForDuration;
+		}
+#endif
+		
 		// 执行射线检测
 		bool bHit = UKismetSystemLibrary::LineTraceSingle(
 			this, // WorldContextObject
@@ -159,10 +169,9 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 			ETraceTypeQuery::TraceTypeQuery3, // 检测通道（例如 Visibility）
 			false, // bTraceComplex
 			ActorsToIgnore, // 忽略的 Actor
-			EDrawDebugTrace::None, // 调试绘制类型
+			DrawType, // 调试绘制类型
 			HitResult, // 碰撞结果
 			true // bIgnoreSelf
-			
 		);
 
 		// 检查是否命中
@@ -179,13 +188,19 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		
 		blockR -= tmpBlockAvg;
 	}
+	
+#if WITH_EDITOR
+	if (CDebugTraceDuration.GetValueOnGameThread())
+	{
+		// 寻路射线测试
+		for(auto& v : TargetOffsetMap)
+		{
+			FLinearColor color = FLinearColor::LerpUsingHSV(FLinearColor(0.1, 0.5, 0.1, 0.2),FLinearColor::Green, v.Key.Length() / 150);
+			UKismetSystemLibrary::DrawDebugLine(GetWorld(), OwnerLocation, OwnerLocation + v.Value, color, 0.2f, 0.5);
+		}
+	}
 
-	// 寻路射线测试
-	// for(auto& v : TargetOffsetMap)
-	// {
-	// 	FLinearColor color = FLinearColor::LerpUsingHSV(FLinearColor(0.1, 0.5, 0.1, 0.2),FLinearColor::Green, float(v.Key) / 150);
-	// 	UKismetSystemLibrary::DrawDebugLine(GetWorld(), OwnerLocation, OwnerLocation + v.Value, color, 0.2f, 0.5);
-	// }
+#endif
 
 	TArray<FVector> values;
 	TargetOffsetMap.GetKeys(values);

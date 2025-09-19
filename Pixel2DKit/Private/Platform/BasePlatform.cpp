@@ -36,7 +36,7 @@ void ABasePlatform::Tick(float DeltaTime)
 
 	if (EMovable == EComponentMobility::Movable)
 	{
-		FVector DeltaLocation = FloatDirection * FloatDistance * FMath::Sin(World->GetDeltaSeconds() * FloatSpeedPeroid);
+		FVector DeltaLocation = FloatDirection * FloatDistance * FMath::Sin(World->GetDeltaSeconds() * FloatSpeedPeriod);
 		FHitResult* OutSweepHitResult = nullptr;
 		AddActorWorldOffset(DeltaLocation, false, OutSweepHitResult, ETeleportType::None);
 	}

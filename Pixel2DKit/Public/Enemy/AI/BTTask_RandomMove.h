@@ -13,16 +13,34 @@ UCLASS()
 class PIXEL2DKIT_API UBTTask_RandomMove : public UBTTask_BlueprintBase
 {
 	GENERATED_BODY()
-	float CliffCheckRate = 0.9; // 悬崖测试 衰减调整率
-	float MinDirSwitchDistance = 100; // 最小的方向重置距离
+
+	// 当前移动偏转是顺时针还是逆时针，当移动成功会确定方向，直至下一次移动失败
+	bool bRotateClockwise = false;
+	bool bMoveSucceeded = false;
 	
-	float CurRotateValue = 30;  // 当前转向角度范围 
-	float MaxRotateValue = 150;  // 最大转向角度，当碰到悬崖逐渐增大
-	float MinRotateValue = 20;  // 最小转向角度，当顺利导航逐渐减少
+	// 当前移动偏转角度
+	float CurRotateValue = 5;
 
-	FVector CurTargetLocation;
-	FVector PreLocation; // TickTask 周期内的上一次位置
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", UIMin = 5, UIMax = 15))
+	float MinRotateValue = 5;
+	// 转向范围，当顺利导航逐渐减少
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", UIMin = 30, UIMax = 180))
+	float MaxRotateValue = 150;
+	
 
+	
+
+	
+	// 悬崖测试距离衰减率，0.5 到 0.95 之间， 值越小越快，但越容易漏
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", UIMin = 0.5, UIMax = 0.95))
+	float CliffCheckRate = 0.9;
+
+	// 最小的方向重置距离， 当某方向的悬崖测试距离衰减至小于该值，则重置方向与距离
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", UIMin = 10, UIMax = 100))
+	float MinDirSwitchDistance = 50; 
+
+
+	
 public:
 
 	UBTTask_RandomMove();

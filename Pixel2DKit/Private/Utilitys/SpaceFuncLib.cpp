@@ -12,6 +12,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Utilitys/DebugFuncLab.h"
 
+extern TAutoConsoleVariable<int32> CDebugTraceDuration;
+
+
 bool USpaceFuncLib::ActorAtActorRight(AActor* A, AActor* B, const int PlayerIndex)
 {
 	if (!A || !B) return false;
@@ -119,11 +122,20 @@ bool USpaceFuncLib::CheckCliff(const FVector& StartLocation, const float CliffHe
 
 	const FVector EndLocation = StartLocation - FVector(0, 0, CliffHeight);
 
+	EDrawDebugTrace::Type DrawType = EDrawDebugTrace::None;
+
+#if WITH_EDITOR
+	if (CDebugTraceDuration.GetValueOnGameThread())
+	{
+		DrawType = EDrawDebugTrace::ForDuration;
+	}
+#endif
+	
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
 	bool hit = UKismetSystemLibrary::LineTraceSingle(World, StartLocation, EndLocation,
 		ETraceTypeQuery::TraceTypeQuery1, false, ActorsToIgnore,
-				EDrawDebugTrace::None, OutHit, true,
+				DrawType, OutHit, true,
 				FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	return !hit;
