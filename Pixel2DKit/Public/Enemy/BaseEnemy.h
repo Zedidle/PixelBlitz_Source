@@ -282,7 +282,6 @@ public:
 	virtual bool GetIsDefending() override;
 	virtual bool IsAlive_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
-	virtual float GetRandomMoveRange_Implementation() override;
 	virtual bool CanMove_Implementation() override;
 	virtual bool CanAttack_Implementation() override;
 	virtual bool Dash_Implementation() override;

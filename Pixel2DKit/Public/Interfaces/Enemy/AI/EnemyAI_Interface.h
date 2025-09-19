@@ -13,9 +13,6 @@ class PIXEL2DKIT_API IEnemyAI_Interface
 	GENERATED_BODY()
     
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="EnemyAI_Interface")
-	float GetRandomMoveRange();
-
 	UFUNCTION(Category="EnemyAI_Interface")
 	virtual bool InAttackRange() = 0;
 

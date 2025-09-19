@@ -836,7 +836,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		}
 		if (NewValue < OldValue)
 		{
-			int ChangedValue = NewValue - OldValue;
+			int ChangedValue = OldValue - NewValue;
 			float ChangedHPPercent = static_cast<float>(ChangedValue) / HealthComponent->GetMaxHP();
 
 			if (ChangedHPPercent >= 0.02)
@@ -850,7 +850,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			if (ChangedHPPercent >= 0.1)
 			{
 				CameraOffset_BulletTime(ChangedHPPercent / 10, FVector(0), 0.1f);
-				OutOfControl(UCommonFuncLib::DealDeltaTime(0.2));
+				OutOfControl(UCommonFuncLib::DealDeltaTime(ChangedHPPercent / 20));
 				SetHurt(true);
 			}
 		}

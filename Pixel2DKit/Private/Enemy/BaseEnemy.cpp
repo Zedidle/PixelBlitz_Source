@@ -480,10 +480,6 @@ AActor* ABaseEnemy::GetTarget_Implementation()
 	return PixelCharacter;
 }
 
-float ABaseEnemy::GetRandomMoveRange_Implementation()
-{
-	return RandomMoveRange;
-}
 
 bool ABaseEnemy::CanMove_Implementation()
 {

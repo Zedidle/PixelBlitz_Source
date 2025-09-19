@@ -59,7 +59,7 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 	}
 	
 	// 重新计算方向与距离
-	float curDistance = IEnemyAI_Interface::Execute_GetRandomMoveRange(Pawn) * FMath::RandRange(0.8f, 1.2f);
+	float curDistance = CheckMoveStartDistance * FMath::RandRange(0.8f, 1.2f);
 	if (!bMoveSucceeded)
 	{
 		bRotateClockwise = FMath::RandBool();

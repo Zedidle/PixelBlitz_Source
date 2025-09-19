@@ -14,6 +14,11 @@ class PIXEL2DKIT_API UBTTask_RandomMove : public UBTTask_BlueprintBase
 {
 	GENERATED_BODY()
 
+	// 布置关卡时，也应注意平台之间的距离不应低于该值
+	// 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", UIMin = 50, UIMax = 100))
+	float CheckMoveStartDistance = 100;
+	
 	// 当前移动偏转是顺时针还是逆时针，当移动成功会确定方向，直至下一次移动失败
 	bool bRotateClockwise = false;
 	bool bMoveSucceeded = false;
