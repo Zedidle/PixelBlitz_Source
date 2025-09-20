@@ -107,18 +107,22 @@ void UUIManager::Initialize(FSubsystemCollectionBase& Collection)
 void UUIManager::PostInitialize()
 {
 	Super::PostInitialize();
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
-	UDataTableSubsystem* DataTableManager = GetWorld()->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
-
-	// if (UDataTable* UITable = DataTableSettings.GetUIData())
-	if (UDataTable* UITable = DataTableManager->GetDataTable("DT_UIConfig"))
+	// const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	if (GetWorld() && GetWorld()->GetGameInstance())
 	{
-		TArray<FUIStruct> UIInfos = DataTableManager->GetRowMap<FUIStruct>(UITable);
-		for (auto& Info : UIInfos)
+		UDataTableSubsystem* DataTableManager = GetWorld()->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	
+		if (UDataTable* UITable = DataTableManager->GetDataTable("DT_UIConfig"))
 		{
-			AddUIConfigData(Info);
+			TArray<FUIStruct> UIInfos = DataTableManager->GetRowMap<FUIStruct>(UITable);
+			for (auto& Info : UIInfos)
+			{
+				AddUIConfigData(Info);
+			}
 		}
 	}
+	
+
 }
 
 void UUIManager::OnWorldBeginPlay(UWorld& InWorld)

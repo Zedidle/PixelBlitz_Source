@@ -10,6 +10,7 @@
 #include "Settings/CustomResourceSettings.h"
 #include "NiagaraComponent.h"
 #include "Core/PXGameState.h"
+#include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 
 class UNiagaraComponent;
@@ -33,22 +34,21 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 
 
 	// 粒子特效
-	APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(GetWorld()));
+	APXGameState* GS = UPXGameplayStatics::GetGameState(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GS)
-	
-	TSoftObjectPtr<UNiagaraSystem> NS = ResourceSettings->WeatherTypeToNiagara.FindRef(GS->WeatherType);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(NS)
 
-	UNiagaraSystem* LoadedNS = NS.LoadSynchronous();
-	UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNS,
-		TargetLocation, FRotator(0), PFComp->GetRelativeScale3D(),true, true);
-	
-	NiagaraComponent->SetVariableVec3(TEXT("Dir"), -Velocity.GetSafeNormal());
-	NiagaraComponent->SetVariableFloat(TEXT("Speed"), Velocity.Size());
+	if (UNiagaraSystem* LoadedNS = ResourceSettings->WeatherTypeToNiagara.FindRef(GS->WeatherType).LoadSynchronous())
+	{
+		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNS,
+				TargetLocation, FRotator(0), PFComp->GetRelativeScale3D(),true, true);
+		NiagaraComponent->SetVariableVec3(TEXT("Dir"), -Velocity.GetSafeNormal());
+		NiagaraComponent->SetVariableFloat(TEXT("Speed"), Velocity.Size());
+	}
 
 	// 音效
-	TSoftObjectPtr<USoundBase> Sound = ResourceSettings->WeatherTypeToSound.FindRef(GS->WeatherType);
-	USoundBase* LoadedSound = Sound.LoadSynchronous();
-	USoundFuncLib::PlaySoundAtLocation(LoadedSound, TargetLocation);
+	if (USoundBase* LoadedSound = ResourceSettings->WeatherTypeToSound.FindRef(GS->WeatherType).LoadSynchronous())
+	{
+		USoundFuncLib::PlaySoundAtLocation(LoadedSound, TargetLocation);
+	}
 	
 }

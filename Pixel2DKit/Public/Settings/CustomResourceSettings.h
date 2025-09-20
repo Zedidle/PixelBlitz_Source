@@ -21,13 +21,13 @@ class PIXEL2DKIT_API UCustomResourceSettings : public UDeveloperSettings
 
 
 public:
-	UPROPERTY(Config, EditAnywhere, Category = "Custom")
+	UPROPERTY(Config, EditAnywhere, Category = "Custom | FootStep")
 	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<UNiagaraSystem>> WeatherTypeToNiagara;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Custom")
+	UPROPERTY(Config, EditAnywhere, Category = "Custom | FootStep")
 	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<USoundBase>> WeatherTypeToSound;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Custom")
+	UPROPERTY(Config, EditAnywhere, Category = "Custom | Audio")
 	TSoftObjectPtr<USoundAttenuation> Attenuation_Default;
 
 
