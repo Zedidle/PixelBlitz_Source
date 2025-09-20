@@ -5,23 +5,22 @@
 
 #include "Item/Weapon/BaseWeapon.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/PXCustomStruct.h"
+
 
 TObjectPtr<UDataTable> UDataTableSettings::GetData(const FString& Path) const
 {
-	if (DataTables.Contains(*Path))
-	{
-		return DataTables[*Path];
-	}
-	
-	if (const TObjectPtr<UDataTable> ItemDataTable = LoadObject<UDataTable>(nullptr, *Path))
-	{
-		DataTables.Add(FName(*Path), ItemDataTable);
-		ItemDataTable->AddToRoot();
-		return DataTables[*Path];
-	}
-	
-	return nullptr;
+	UWorld* World =  GEngine->GetCurrentPlayWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, nullptr)
+
+	UGameInstance* GameInstance = World->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, nullptr)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, nullptr)
+
+	return DataTableSubsystem->GetDataTable(Path);
 }
 
 void UDataTableSettings::PostInitProperties()

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Subsystems/WeatherSubsystem.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameState.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/Components/BuffComponent.h"
 #include "Enemy/BaseEnemy.h"

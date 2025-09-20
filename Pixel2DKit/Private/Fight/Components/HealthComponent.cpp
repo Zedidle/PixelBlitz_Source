@@ -16,7 +16,7 @@
 #include "AbilitySystemGlobals.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameState.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "SaveGame/PXSettingSaveGame.h"

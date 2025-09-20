@@ -2,15 +2,9 @@
 
 
 #include "Utilitys/CommonFuncLib.h"
-
-#include "NiagaraMeshRendererProperties.h"
-#include "NiagaraRibbonRendererProperties.h"
-#include "StaticMeshAttributes.h"
-#include "VisualizeTexture.h"
-#include "Basic/PXPlayerController.h"
+#include "Controller/PXPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
 #include "Settings/CustomConfigSettings.h"
 #include "Settings/UserWidgetSettings.h"
 #include "UI/Common/CenterWordTipWidget.h"
@@ -103,8 +97,11 @@ void UCommonFuncLib::SpawnFloatingText(FText Text, FVector WorldLocation, FLinea
 void UCommonFuncLib::SpawnFloatingTextDefault(const FString InTableName, const FName InRowName, FVector WorldLocation,
 	FLinearColor TextColor, FVector2D RenderScale, UPaperSprite* Icon)
 {
-	const FLocalizedTableData D = FLocalizedTableData(InTableName, InRowName);
-	FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(D));
+	// const FLocalizedTableData D = FLocalizedTableData(InTableName, InRowName);
+	// FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(D));
+
+	FText Text = FText::FromString(LocalizedString(InTableName, InRowName));
+	
 	SpawnFloatingText(Text, WorldLocation, TextColor, RenderScale, Icon);
 }
 

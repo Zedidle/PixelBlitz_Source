@@ -342,3 +342,21 @@ struct FTalent: public FTableRowBase
 	FGameplayTag BuffTagOnWidget;
 };
 #pragma endregion
+
+#pragma region FUIStruct
+USTRUCT(BlueprintType)
+struct FUIStruct : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UIStruct")
+	FName  UIName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UIStruct", meta = (Categories = "UI.Layer"))
+	FGameplayTag LayerTag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UIStruct")
+	TSubclassOf<UUserWidget>  WidgetClass;
+
+};
+#pragma endregion

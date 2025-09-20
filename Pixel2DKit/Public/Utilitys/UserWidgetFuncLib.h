@@ -14,16 +14,19 @@ class UUserWidgetFuncLib : public UObject
 {
 	GENERATED_BODY()
 
-	public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, DisplayName = "UWS_GetWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, DisplayName = "UI_GetCurWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
+	static UUserWidget* GetCurWidget();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, DisplayName = "UI_GetWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
 	static UUserWidget* GetWidget(TSubclassOf<UUserWidget> WidgetClass);
 
-	UFUNCTION(BlueprintCallable, DisplayName = "UWS_AddWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
+	UFUNCTION(BlueprintCallable, DisplayName = "UI_AddWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
 	static UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget = false);
 
-	UFUNCTION(BlueprintCallable, DisplayName = "UWS_ShowWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
+	UFUNCTION(BlueprintCallable, DisplayName = "UI_ShowWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
 	static UUserWidget* ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget = true);
 	
-	UFUNCTION(BlueprintCallable, DisplayName = "UWS_HideWidget" , Category="UserWidgetFuncLib" )
+	UFUNCTION(BlueprintCallable, DisplayName = "UI_HideWidget" , Category="UserWidgetFuncLib" )
 	static void HideWidget(TSubclassOf<UUserWidget> WidgetClass);
 };

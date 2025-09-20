@@ -2,13 +2,8 @@
 
 
 #include "Utilitys/LocalizationFuncLib.h"
-#include "Kismet/GameplayStatics.h"
-#include "OnlineSubsystemUtils.h"
-#include "Basic/PXGameInstance.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
-#include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/DataTableSettings.h"
 #include "UI/Common/PXCommonText.h"
 
@@ -24,10 +19,10 @@ FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data
 	if (!IsValid(world)) return "";
 
 
-	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
+	const UDataTableSettings& Settings = UDataTableSettings::Get();
 	
 	// 尝试读取表
-	TObjectPtr<UDataTable> ItemDataTable = Settings->GetLocalizedDataTable(Data);
+	TObjectPtr<UDataTable> ItemDataTable = Settings.GetLocalizedDataTable(Data);
 	if (!IsValid(ItemDataTable)) return "";
 
 	FName RowName = Data.RowName;

@@ -2,65 +2,63 @@
 
 
 #include "Utilitys/UserWidgetFuncLib.h"
-#include "Subsystems/UserWidgetSubsystem.h"
-#include "Kismet/GameplayStatics.h"
-#include "Tests/AutomationCommon.h"
+#include "UI/UIManager.h"
+
+
+UUserWidget* UUserWidgetFuncLib::GetCurWidget()
+{
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!World) return nullptr;
+
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	if (!UIManager) return nullptr;
+
+	return UIManager->GetCurWidget();
+}
 
 UUserWidget* UUserWidgetFuncLib::GetWidget(TSubclassOf<UUserWidget> WidgetClass)
 {
-	UWorld* world = GEngine->GetCurrentPlayWorld();
-	if (!world) return nullptr;
-	if (UGameInstance* GI = UGameplayStatics::GetGameInstance(world))
-	{
-		if (UUserWidgetSubsystem* UWS = GI->GetSubsystem<UUserWidgetSubsystem>())
-		{
-			return UWS->GetWidget(WidgetClass);
-		}
-	}
-	return nullptr;
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!World) return nullptr;
+
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	if (!UIManager) return nullptr;
+
+	return UIManager->GetWidget(WidgetClass);
 }
 
 UUserWidget* UUserWidgetFuncLib::AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget)
 {
-	UWorld* world = GEngine->GetCurrentPlayWorld();
-	if (!world) return nullptr;
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!World) return nullptr;
+
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	if (!UIManager) return nullptr;
 	
-	if (UGameInstance* GI = UGameplayStatics::GetGameInstance(world))
-	{
-		if (UUserWidgetSubsystem* UWS = GI->GetSubsystem<UUserWidgetSubsystem>())
-		{
-			return UWS->AddWidget(WidgetClass, Visibility, HideCurrentWidget);
-		}
-		
-	}
-	return nullptr;
+	return UIManager->AddWidget(WidgetClass, Visibility, HideCurrentWidget);
 }
 
 UUserWidget* UUserWidgetFuncLib::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget)
 {
-	UWorld* world = GEngine->GetCurrentPlayWorld();
-	if (!world) return nullptr;
-	if (UGameInstance* GI = UGameplayStatics::GetGameInstance(world))
-	{
-		if (UUserWidgetSubsystem* UWS = GI->GetSubsystem<UUserWidgetSubsystem>())
-		{
-			return UWS->ShowWidget(WidgetClass, Visibility);
-		}
-	}
-	return nullptr;
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!World) return nullptr;
+	
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	if (!UIManager) return nullptr;
+
+	return UIManager->ShowWidget(WidgetClass, Visibility);
 }
 
 void UUserWidgetFuncLib::HideWidget(TSubclassOf<UUserWidget> WidgetClass)
 {
-	UWorld* world = GEngine->GetCurrentPlayWorld();
-	if (!world) return;
-	if (UGameInstance* GI = UGameplayStatics::GetGameInstance(world))
-	{
-		if (UUserWidgetSubsystem* UWS = GI->GetSubsystem<UUserWidgetSubsystem>())
-		{
-			UWS->HideWidget(WidgetClass);
-		}
-	}
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!World) return;
+
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	if (!UIManager) return;
+
+	UIManager->HideWidget(WidgetClass);
+
 }
 
 

@@ -14,60 +14,44 @@ class PIXEL2DKIT_API UDataTableSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-
 	TObjectPtr<UDataTable> GetData(const FString& Path) const;
-	
-	mutable TMap<FName, TObjectPtr<UDataTable>> DataTables;
+	mutable TMap<FString, TObjectPtr<UDataTable>> LocalizedDataTables;
 
-	UPROPERTY(Config, EditAnywhere, Category = "Character")
-	TSoftObjectPtr<UDataTable> CharacterDataPath;
-
-	UPROPERTY(Config, EditAnywhere, Category = "ItemData")
-	TSoftObjectPtr<UDataTable> ItemDataPath;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Buff")
-	TSoftObjectPtr<UDataTable> BuffOnWidgetDataPath;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Ability")
-	TArray<TSoftObjectPtr<UDataTable>> AbilityDataPaths;
-	mutable TMap<FGameplayTag, FAbility> AbilityData;
-	
-	UPROPERTY(Config, EditAnywhere, Category = "Talent")
-	TSoftObjectPtr<UDataTable> TalentDataPath;
-	mutable TMap<FGameplayTag, FTalent> TalentData;
-	
-	UPROPERTY(Config, EditAnywhere, Category = "Achievement")
-	TSoftObjectPtr<UDataTable> AchievementDataPath;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Weather")
-	TSoftObjectPtr<UDataTable> LevelWeatherRateDataPath;
-	
-	UPROPERTY(Config, EditAnywhere, Category = "Weather")
-	TSoftObjectPtr<UDataTable> WeatherDataPath;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Weapon")
-	TSoftObjectPtr<UDataTable> WeaponDataPath;
-	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
-	
 public:
 
 	virtual void PostInitProperties() override;
 
-	
 	static const UDataTableSettings& Get()
 	{
 		return *GetDefault<UDataTableSettings>();
 	}
-
-
-	mutable TMap<FString, TObjectPtr<UDataTable>> LocalizedDataTables;
+	
 	UDataTable* GetLocalizedDataTable(const FLocalizedTableData& Data) const;
-
-
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Character")
+	TSoftObjectPtr<UDataTable> UIDataPath;
+	TObjectPtr<UDataTable> GetUIData() const { return GetData(UIDataPath.ToString()); }
+	
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Character")
+	TSoftObjectPtr<UDataTable> CharacterDataPath;
 	TObjectPtr<UDataTable> GetCharacterData() const { return GetData(CharacterDataPath.ToString()); }
+	
+	UPROPERTY(Config, EditAnywhere, Category = "ItemData")
+	TSoftObjectPtr<UDataTable> ItemDataPath;
 	TObjectPtr<UDataTable> GetItemData() const { return GetData(ItemDataPath.ToString()); }
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Buff")
+	TSoftObjectPtr<UDataTable> BuffOnWidgetDataPath;
 	TObjectPtr<UDataTable> GetBuffOnWidgetData() const { return GetData(BuffOnWidgetDataPath.ToString()); }
 
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Ability")
+	TArray<TSoftObjectPtr<UDataTable>> AbilityDataPaths;
+	mutable TMap<FGameplayTag, FAbility> AbilityData;
+	void LoadAbilityData() const;
+	const FAbility* GetAbilityDataByTag(const FGameplayTag& AbilityTag) const;
+	const TMap<FGameplayTag, FAbility>& GetAllAbilities() const;
 	TArray<TObjectPtr<UDataTable>> GetAbilityData() const
 	{
 		TArray<TObjectPtr<UDataTable>> Result;
@@ -77,21 +61,55 @@ public:
 		}
 		return Result;
 	}
-	void LoadAbilityData() const;
-	const FAbility* GetAbilityDataByTag(const FGameplayTag& AbilityTag) const;
-	const TMap<FGameplayTag, FAbility>& GetAllAbilities() const;
+
 	
+	UPROPERTY(Config, EditAnywhere, Category = "Talent")
+	TSoftObjectPtr<UDataTable> TalentDataPath;
+	mutable TMap<FGameplayTag, FTalent> TalentData;
 	TObjectPtr<UDataTable> GetTalentData() const { return GetData(TalentDataPath.ToString()); }
 	void LoadTalentData() const;
 	const FTalent* GetTalentDataByTag(const FGameplayTag& TalentTag) const;
+
+
 	
+	UPROPERTY(Config, EditAnywhere, Category = "Achievement")
+	TSoftObjectPtr<UDataTable> AchievementDataPath;
 	TObjectPtr<UDataTable> GetAchievementData() const { return GetData(AchievementDataPath.ToString()); }
-	TObjectPtr<UDataTable> GetLevelWeatherRateData() const { return GetData(LevelWeatherRateDataPath.ToString()); }
-	TObjectPtr<UDataTable> GetWeatherData() const { return GetData(WeatherDataPath.ToString()); }
+
+
 	
-	TObjectPtr<UDataTable> GetWeaponData() const { return GetData(WeaponDataPath.ToString()); }
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Weather")
+	TSoftObjectPtr<UDataTable> LevelWeatherRateDataPath;
+	TObjectPtr<UDataTable> GetLevelWeatherRateData() const { return GetData(LevelWeatherRateDataPath.ToString()); }
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Weather")
+	TSoftObjectPtr<UDataTable> WeatherDataPath;
+	TObjectPtr<UDataTable> GetWeatherData() const { return GetData(WeatherDataPath.ToString()); }
+
+	
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Weapon")
+	TSoftObjectPtr<UDataTable> WeaponDataPath;
+	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
 	void LoadWeaponData() const;
+	TObjectPtr<UDataTable> GetWeaponData() const { return GetData(WeaponDataPath.ToString()); }
 	const FWeaponData* GetWeaponDataByTag(const FGameplayTag& WeaponTag) const;
+
+
+
+
+
+
+
+
+
+
+	
+
+	
+	
+
 	
 
 

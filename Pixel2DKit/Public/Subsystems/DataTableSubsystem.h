@@ -14,16 +14,17 @@ class PIXEL2DKIT_API UDataTableSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+	UFUNCTION()
+	FString GetConfigPath(FString InName){ return FString::Printf(TEXT("/Game/Assets/Config/%s.%s"), *InName, *InName); };
+	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	UDataTable* LoadDataTable(const FString& Name) const;
-	
-	
-	
+	// 通过目录配置
 	UFUNCTION(BlueprintCallable)
 	UDataTable* GetDataTable(FString InName);
-	
+
+
 	template <class T>
 	T FindRow(UDataTable* DataTable, FName RowName, const TCHAR* ContextString = TEXT(""), bool bWarnIfRowMissing = false) const;	
 	template <class T>
@@ -31,7 +32,8 @@ public:
 
 protected:
 	UPROPERTY()
-	TMap<FString, UDataTable*> DataTableMap;
+	TMap<FName, TObjectPtr<UDataTable>> DataTableMap;
+
 };
 
 

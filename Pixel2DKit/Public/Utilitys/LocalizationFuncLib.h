@@ -6,6 +6,9 @@
 #include "UObject/NoExportTypes.h"
 #include "LocalizationFuncLib.generated.h"
 
+#define LocalizedString(TableName, RowName) ULocalizationFuncLib::GetLocalizedString(TableName, RowName)
+#define LocalizedTableData(TableData) ULocalizationFuncLib::GetLocalizedString(TableData)
+
 
 UENUM(BlueprintType)
 enum class ELanguageEnum : uint8

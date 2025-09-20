@@ -2,10 +2,9 @@
 
 
 #include "Utilitys/PXGameplayStatics.h"
-
-#include "Basic/PXGameMode.h"
-#include "Basic/PXGameState.h"
-#include "Basic/PXPlayerController.h"
+#include "Core/PXGameMode.h"
+#include "Core/PXGameState.h"
+#include "Controller/PXPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 UPXGameInstance* UPXGameplayStatics::GetGameInstance(const UObject* WorldContextObject)

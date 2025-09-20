@@ -5,7 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameState.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Pixel2DKit/Pixel2DKit.h"

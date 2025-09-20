@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Basic/PXGameInstance.h"
+#include "Core/PXGameInstance.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "PXGameplayStatics.generated.h"
 

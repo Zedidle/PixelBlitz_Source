@@ -10,8 +10,8 @@
 #include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/BasePXAnimInstance.h"
-#include "Basic/PXGameMode.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameMode.h"
+#include "Core/PXGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Components/BuffComponent.h"
@@ -548,11 +548,11 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 	OutDamage = InDamage;
 	int SurDamage = InDamage;
 
-	if (IFight_Interface::Execute_GetOwnCamp(this).HasTag(
+	if (Execute_GetOwnCamp(this).HasTag(
 				FGameplayTag::RequestGameplayTag("Enemy.BOSS")))
 	{
 		float Result;
-		if (IFight_Interface::Execute_FindEffectGameplayTag(Maker,
+		if (Maker->Implements<UFight_Interface>() && Execute_FindEffectGameplayTag(Maker,
 			FGameplayTag::RequestGameplayTag("AbilitySet.ToBossDamagePlusPercent"),
 			Result))
 		{

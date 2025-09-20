@@ -11,42 +11,27 @@ void UDataTableSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 }
 
-UDataTable* UDataTableSubsystem::LoadDataTable(const FString& Name) const
-{
-	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	FSoftObjectPath DataTablePath( FString::Printf(TEXT("/Game/Assets/Config/%s.%s"), *Name, *Name));
-	UDataTable* DataTable = Cast<UDataTable>(StreamableManager.LoadSynchronous(DataTablePath));
-
-	if (DataTable)
-	{
-		DataTable->AddToRoot();
-		return DataTable;
-	}
-	UE_LOG(LogTemp, Error, TEXT("Failed to load data table: %s"), *DataTablePath.ToString());
-	return nullptr;
-}
 
 UDataTable* UDataTableSubsystem::GetDataTable(FString InName)
 {
-	if(!DataTableMap.IsEmpty())
+	if (DataTableMap.Contains(*InName))
 	{
-		if (const auto& DataTablePtr = DataTableMap.Find(InName))
-		{
-			return *DataTablePtr;
-		}
+		return DataTableMap[*InName];
 	}
-	if(UDataTable* NewDataTable = LoadDataTable(InName))
+	
+	if (UDataTable* NewDataTable = LoadObject<UDataTable>(nullptr, *InName))
 	{
-		
-		DataTableMap.Add(InName,NewDataTable );
+		DataTableMap.Add(*InName, NewDataTable);
+		return NewDataTable;
 	}
-	else
+
+	FString ConfigPath = GetConfigPath(InName);
+	if (UDataTable* NewDataTable = LoadObject<UDataTable>(nullptr, *ConfigPath))
 	{
-		return nullptr;
+		DataTableMap.Add(*InName, NewDataTable);
+		return NewDataTable;
 	}
-	if(DataTableMap[InName])
-	{
-		return DataTableMap[InName];
-	}
+
+	UE_LOG(LogTemp, Error, TEXT("Failed to load data table: %s"), *InName);
 	return nullptr;
 }

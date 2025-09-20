@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameState.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "WeatherSubsystem.generated.h"

@@ -1,9 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Basic/PXGameState.h"
-
-#include "Basic/PXGameInstance.h"
+#include "Core/PXGameState.h"
+#include "Core/PXGameInstance.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"

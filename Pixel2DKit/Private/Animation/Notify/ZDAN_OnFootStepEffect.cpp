@@ -5,12 +5,11 @@
 #include "NiagaraFunctionLibrary.h"
 #include "PaperFlipbookComponent.h"
 #include "PaperZDCharacter.h"
-#include "Basic/PXGameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
 #include "NiagaraComponent.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameState.h"
 #include "Utilitys/SoundFuncLib.h"
 
 class UNiagaraComponent;

@@ -1,11 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Basic/PXPlayerController.h"
+#include "Controller/PXPlayerController.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "Character/BasePXCharacter.h"
-#include "Character/PXCharacterDataAsset.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomConfigSettings.h"
 

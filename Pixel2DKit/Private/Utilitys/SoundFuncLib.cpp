@@ -2,9 +2,7 @@
 
 
 #include "Utilitys/SoundFuncLib.h"
-#include "Basic/PXGameInstance.h"
-#include "Basic/PXGameMode.h"
-#include "CompGeom/FitOrientedBox3.h"
+#include "Core/PXGameMode.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"

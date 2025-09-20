@@ -2,17 +2,10 @@
 
 
 #include "GAS/AttributeSet/PXAttributeSet.h"
-#include "NiagaraClipboard.h"
 #include "GameplayEffectExtension.h"
-#include "NiagaraFunctionLibrary.h"
-#include "Basic/PXGameState.h"
-#include "Core/PXSaveGameSubSystemFuncLib.h"
+#include "Core/PXGameState.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Interfaces/Fight_Interface.h"
-#include "Kismet/GameplayStatics.h"
-#include "SaveGame/PXSettingSaveGame.h"
-#include "Settings/CustomResourceSettings.h"
-#include "Slate/SGameLayerManager.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 

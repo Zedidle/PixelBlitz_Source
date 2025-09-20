@@ -1,20 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Basic/PXGameMode.h"
+#include "Core/PXGameMode.h"
 #include "NavigationSystem.h"
-#include "Basic/PXGameInstance.h"
-#include "Basic/PXPlayerController.h"
+#include "Core/PXGameInstance.h"
+#include "Controller/PXPlayerController.h"
 #include "Components/CapsuleComponent.h"
-#include "Enemy/BaseEnemy.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomResourceSettings.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
-#include "Utilitys/DebugFuncLab.h"
 
 
 void APXGameMode::BeginPlay()

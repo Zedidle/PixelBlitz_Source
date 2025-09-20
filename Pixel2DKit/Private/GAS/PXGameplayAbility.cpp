@@ -5,11 +5,9 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-#include "AbilitySystemLog.h"
-#include "Basic/PXGameState.h"
+#include "Core/PXGameState.h"
 #include "GAS/PXGameplayEffect.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
-#include "opensubdiv/far/error.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/LocalizationFuncLib.h"
