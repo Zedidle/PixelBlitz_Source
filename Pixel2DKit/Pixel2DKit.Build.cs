@@ -27,7 +27,9 @@ public class Pixel2DKit : ModuleRules
 			"EnhancedInput",
 			"PaperZD", "Paper2D",
 			"NavigationSystem",
-			"UMGEditor", "GameplayAbilities"
+			"UMGEditor", "GameplayAbilities",
+			"ModularGameplay",
+			"ModularGameplayActors"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
@@ -41,7 +43,9 @@ public class Pixel2DKit : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Slate", "SlateCore",
-			"CommonInput"
+			"CommonInput",
+			"CommonGame",
+			"CommonUser"
 
 		});
 		
