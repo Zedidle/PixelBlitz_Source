@@ -8,7 +8,7 @@
 class UObject;
 struct FFrame;
 
-UCLASS()
+UCLASS(Abstract, BlueprintType, Blueprintable)
 class PIXEL2DKIT_API UPXButtonBase : public UCommonButtonBase
 {
 	GENERATED_BODY()
