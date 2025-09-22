@@ -5,7 +5,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Settings/DataTableSettings.h"
-#include "UI/Common/PXCommonText.h"
+#include "UI/Foundation/PXTextBlock.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data)
 {
@@ -76,9 +76,9 @@ void ULocalizationFuncLib::SetLanguage(UObject* WorldContextContext, ELanguageEn
 	SettingSaveGame->GeneralSetting_Language = Language;
 	UPXSaveGameSubSystemFuncLib::SaveSettingData(WorldContextContext);
 
-	for ( TObjectIterator<UPXCommonText> Itr; Itr; ++Itr )
+	for ( TObjectIterator<UPXTextBlock> Itr; Itr; ++Itr )
 	{
-		UPXCommonText* LiveWidget = *Itr;
+		UPXTextBlock* LiveWidget = *Itr;
 		
 		if (LiveWidget->GetWorld() != World) continue;
 		LiveWidget->UpdateText();

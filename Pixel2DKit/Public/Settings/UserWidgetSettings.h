@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "UI/Common/BaseFloatingTextWidget.h"
+#include "UI/Tips/BaseFloatingTextWidget.h"
 #include "UserWidgetSettings.generated.h"
 
 class UAchievementCompleteWidget;

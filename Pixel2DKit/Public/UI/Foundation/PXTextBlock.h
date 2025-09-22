@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "CommonTextBlock.h"
 #include "Utilitys/LocalizationFuncLib.h"
-#include "PXCommonText.generated.h"
+#include "PXTextBlock.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UPXCommonText : public UCommonTextBlock
+class PIXEL2DKIT_API UPXTextBlock : public UCommonTextBlock
 {
 	GENERATED_BODY()
 

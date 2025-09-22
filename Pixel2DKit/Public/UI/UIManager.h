@@ -7,6 +7,7 @@
 #include "Core/PXWorldSubsystem.h"
 #include "UIDefine.h"
 #include "Components/SlateWrapperTypes.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "UIManager.generated.h"
 
 

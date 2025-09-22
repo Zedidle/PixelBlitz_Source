@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/Common/BaseFloatingTextWidget.h"
+#include "UI/Tips/BaseFloatingTextWidget.h"
 #include "PaperSprite.h"
 
 

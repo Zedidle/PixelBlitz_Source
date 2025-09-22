@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/Common/PXCommonText.h"
+#include "UI/Foundation/PXTextBlock.h"
 
-TAttribute<FText> UPXCommonText::GetDisplayText()
+TAttribute<FText> UPXTextBlock::GetDisplayText()
 {
 	if (LocalizedTableData.TableName.IsEmpty() || LocalizedTableData.RowName.IsNone()) return PROPERTY_BINDING(FText, Text);
 	
@@ -18,7 +18,7 @@ TAttribute<FText> UPXCommonText::GetDisplayText()
 }
 
 
-void UPXCommonText::UpdateText()
+void UPXTextBlock::UpdateText()
 {
 	FString S = ULocalizationFuncLib::GetLocalizedString(LocalizedTableData);
 	if (!S.IsEmpty())
@@ -27,7 +27,7 @@ void UPXCommonText::UpdateText()
 	}
 }
 
-void UPXCommonText::SetLocalizedTableData(const FLocalizedTableData& _LocalizedTableData)
+void UPXTextBlock::SetLocalizedTableData(const FLocalizedTableData& _LocalizedTableData)
 {
 	LocalizedTableData = _LocalizedTableData;
 	UpdateText();

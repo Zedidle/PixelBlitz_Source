@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class PIXEL2DKIT_API UBaseFloatingTextWidget : public UUserWidget
 {
 	GENERATED_BODY()
