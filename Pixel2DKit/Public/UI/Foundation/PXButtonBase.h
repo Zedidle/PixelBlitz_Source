@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CommonButtonBase.h"
+#include "UI/Common/PXTabListWidgetBase.h"
 #include "PXButtonBase.generated.h"
 
 class UObject;
