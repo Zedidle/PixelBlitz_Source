@@ -19,6 +19,9 @@ class PIXEL2DKIT_API UPXGameInstance : public UGameInstance
 
 public:
 
+	UPROPERTY(BlueprintReadWrite, Category = "Game")
+	bool bGameStarted = false;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Game")
 	FName GetCurLevelName(bool Continue);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Game")

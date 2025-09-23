@@ -22,10 +22,12 @@ class PIXEL2DKIT_API UUIManager : public UPXWorldSubsystem
 	TArray<UUserWidget*> SimpleWidgetArray;
 	
 public:
+
+#pragma region SimpleOperator
+	// 简单通用 UserWidget写法，不走CommonUI流程，不用继承CommonActivatableWidget的UserWidget也能用，但是就缺少对应的控制手段
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UIManager", meta = (DeterminesOutputType = "WidgetClass"))
 	UUserWidget* GetCurWidget();
-
-	// 简单通用写法，忽略栈
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UIManager", meta = (DeterminesOutputType = "WidgetClass"))
 	UUserWidget* GetWidget(TSubclassOf<UUserWidget> WidgetClass);
 	
@@ -37,10 +39,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "UIManager")
 	void HideWidget(TSubclassOf<UUserWidget> WidgetClass);
+#pragma endregion 
 
 
-
-	
 
 	static UUIManager* GetSelfInstance(const UObject* WorldContext);
 	
@@ -53,28 +54,30 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "UIManager")
 	TSubclassOf<UUserWidget> GetWidgetClassByName(const FName& UIName);
+
+
+	// 走CommonActivatableWidget流程，需要先在 DT_UIConfig 中配置好
+	UFUNCTION(BlueprintCallable)
+	bool OpenUI(const FName UIType);
+	
 	
 	UFUNCTION(BlueprintCallable)
-	bool OpenUI(const FName& UIType);
-	
-	
-	UFUNCTION(BlueprintCallable)
-	bool CloseUI(const FName& UIType);
+	bool CloseUI(const FName UIType);
 
 	UFUNCTION(BlueprintCallable)
 	void CloseUIByLayer(FGameplayTag InLayer);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsOpen(const FName& UIType);
+	bool IsOpen(const FName UIType);
 
 	UFUNCTION(BlueprintCallable)
-	void ShowUI(const FName& UIType);
+	void ShowUI(const FName UIType);
 
 	UFUNCTION(BlueprintCallable)
-	void HideUI(const FName& UIType);
+	void HideUI(const FName UIType);
 
 	UFUNCTION(BlueprintCallable)
-	bool IsShow(const FName& UIType);
+	bool IsShow(const FName UIType);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsMouseInVisibleWidgetRange();

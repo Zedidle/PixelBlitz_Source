@@ -53,6 +53,7 @@ UUserWidget* UUIManager::AddWidget(TSubclassOf<UUserWidget> WidgetClass, const E
 	}
 	
 	return nullptr;
+	
 }
 
 UUserWidget* UUIManager::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility,
@@ -62,7 +63,10 @@ UUserWidget* UUIManager::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const 
 
 	if (HideCurrentWidget)
 	{
-		SimpleWidgetArray[SimpleWidgetArray.Num()-1]->SetVisibility(ESlateVisibility::Collapsed);
+		if (SimpleWidgetArray.IsValidIndex(SimpleWidgetArray.Num()-1))
+		{
+			SimpleWidgetArray[SimpleWidgetArray.Num()-1]->SetVisibility(ESlateVisibility::Collapsed);
+		}
 	}
 	
 	if (SimpleWidgetMap.Contains(WidgetClass))
@@ -130,7 +134,7 @@ void UUIManager::OnWorldBeginPlay(UWorld& InWorld)
 	Super::OnWorldBeginPlay(InWorld);
 }
 
-bool UUIManager::OpenUI(const FName& UIType)
+bool UUIManager::OpenUI(const FName UIType)
 {
 	const auto& ConfigDataPtr = ConfigDataMap.Find(UIType);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(ConfigDataPtr, false)
@@ -169,7 +173,7 @@ bool UUIManager::OpenUI(const FName& UIType)
 	return true;
 }
 
-bool UUIManager::CloseUI(const FName& UIType)
+bool UUIManager::CloseUI(const FName UIType)
 {
 	const auto& LayerPtr = WidgetLayerMap.Find(UIType);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(LayerPtr, false)
@@ -204,12 +208,12 @@ void UUIManager::CloseUIByLayer(FGameplayTag InLayer)
 	}
 }
 
-bool UUIManager::IsOpen(const FName& UIType)
+bool UUIManager::IsOpen(const FName UIType)
 {
 	return WidgetLayerMap.Contains(UIType);
 }
 
-void UUIManager::ShowUI(const FName& UIType)
+void UUIManager::ShowUI(const FName UIType)
 {
 	if(UUserWidget* Widget = GetUI(UIType))
 	{
@@ -217,7 +221,7 @@ void UUIManager::ShowUI(const FName& UIType)
 	}
 }
 
-void UUIManager::HideUI(const FName& UIType)
+void UUIManager::HideUI(const FName UIType)
 {
 	if(UUserWidget* Widget = GetUI(UIType))
 	{
@@ -225,7 +229,7 @@ void UUIManager::HideUI(const FName& UIType)
 	}
 }
 
-bool UUIManager::IsShow(const FName& UIType)
+bool UUIManager::IsShow(const FName UIType)
 {
 	if(UUserWidget* Widget = GetUI(UIType))
 	{
@@ -293,7 +297,7 @@ void UUIManager::InitRoot()
 			if (!Root.Get()->IsInViewport())
 			{
 				Root.Get()->AddToViewport();
-				//Root.Get()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+				Root.Get()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			}
 		}
 	}

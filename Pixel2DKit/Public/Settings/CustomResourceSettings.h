@@ -62,5 +62,7 @@ public:
 	TSubclassOf<APlayerRespawnPoint> PlayerRespawnPointClass;
 
 	
-	
+	UPROPERTY(Config, EditAnywhere, Category = "Buff | Niagara")
+	TSoftObjectPtr<USoundWave> SW_BeginBGM;
+
 };
