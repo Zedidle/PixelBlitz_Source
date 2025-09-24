@@ -59,7 +59,6 @@ void UPXAudioSubsystem::PlayBGM(USoundBase* Sound, float StartTime)
 		{
 			BGM->FadeIn(5,1, 0, EAudioFaderCurve::Linear);
 			CurBGM = BGM;
-			BGM->OnAudioFinished.AddDynamic(this, &ThisClass::OnBGM_Finished);
 		}
 	}
 }

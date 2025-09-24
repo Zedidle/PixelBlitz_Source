@@ -10,7 +10,7 @@
 class UTextBlock;
 class UWidgetAnimation;
 
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType)
 class PIXEL2DKIT_API UCenterWordTipWidget : public UUserWidget
 {
 	GENERATED_BODY()

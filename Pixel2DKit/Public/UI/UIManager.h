@@ -32,7 +32,7 @@ public:
 	UUserWidget* GetWidget(TSubclassOf<UUserWidget> WidgetClass);
 	
 	UFUNCTION(BlueprintCallable, Category = "UIManager", meta = (DeterminesOutputType = "WidgetClass"))
-	UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget);
+	UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility = ESlateVisibility::Visible, bool HideCurrentWidget = true);
 
 	UFUNCTION(BlueprintCallable, Category = "UIManager", meta = (DeterminesOutputType = "WidgetClass"))
 	UUserWidget* ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility = ESlateVisibility::Visible, bool HideCurrentWidget = true);
@@ -89,9 +89,9 @@ public:
 
 	void InitRoot();
 
-	// UFUNCTION(BlueprintCallable)
-	// void PopupTip(const FString& Content, float Time = 1.f);
-	//
+	UFUNCTION(BlueprintCallable)
+	void PopupTip(const FString& Content, float Time = 1.f);
+	
 	// UFUNCTION(BlueprintCallable)
 	// void HideItemTip();
 	

@@ -16,6 +16,7 @@
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "UI/Tips/CommonTipContainerWidget.h"
 
 
 UUserWidget* UUIManager::GetCurWidget()
@@ -300,6 +301,17 @@ void UUIManager::InitRoot()
 				Root.Get()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			}
 		}
+	}
+}
+
+void UUIManager::PopupTip(const FString& Content, float Time)
+{
+	OpenUI("UI_CommonTipContainer");
+
+	UCommonTipContainerWidget* CommonTipContainer = Cast<UCommonTipContainerWidget>(GetUI("UI_CommonTipContainer"));
+	if(IsValid(CommonTipContainer))
+	{
+		CommonTipContainer->AddTip(Content, Time);
 	}
 }
 

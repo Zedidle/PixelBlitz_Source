@@ -7,6 +7,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomConfigSettings.h"
 #include "Settings/UserWidgetSettings.h"
+#include "UI/UIManager.h"
 #include "UI/Tips/CenterWordTipWidget.h"
 #include "UI/Tips/BaseFloatingTextWidget.h"
 #include "Utilitys/LocalizationFuncLib.h"
@@ -134,10 +135,11 @@ void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _
 	const UUserWidgetSettings* WidgetSettings = GetDefault<UUserWidgetSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetSettings)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetSettings->CenterWordTipClass)
-	
-	UCenterWordTipWidget* TipWidget = CreateWidget<UCenterWordTipWidget>(World, WidgetSettings->CenterWordTipClass);
-	TipWidget->Init(_Tip, _Color, _Translation, _Scale, _PlaybackSpeed, _AnimType);
-	TipWidget->AddToViewport(1000);
+
+	UUIManager* UIManager = World->GetSubsystem<UUIManager>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
+
+	UIManager->OpenUI("CenterTip");
 }
 
 FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)

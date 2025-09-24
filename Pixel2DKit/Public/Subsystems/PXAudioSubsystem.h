@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/AudioComponent.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PXAudioSubsystem.generated.h"
 
@@ -34,18 +35,4 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Begin")
 	void SetBGMVolume(float VolumeMultiplier);
 
-
-
-protected:
-
-	UFUNCTION()
-	void OnBGM_Finished();
 };
-
-inline void UPXAudioSubsystem::OnBGM_Finished()
-{
-	if (CurBGM)
-	{
-		CurBGM->Play();
-	}
-}
