@@ -57,7 +57,7 @@ class IPXTabButtonInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintNativeEvent, Category = "Tab Button")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Tab Button")
 	void SetTabLabelInfo(const FPXTabDescriptor& TabDescriptor);
 };
 
