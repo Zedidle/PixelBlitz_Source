@@ -6,8 +6,8 @@
 #include "Character/BasePXCharacter.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/DataTableSettings.h"
-#include "Settings/UserWidgetSettings.h"
+#include "Settings/Config/DataTableSettings.h"
+#include "Settings/Config/UserWidgetSettings.h"
 #include "UI/Achievement/AchievementCompleteWidget.h"
 #include "Utilitys/PXGameplayStatics.h"
 

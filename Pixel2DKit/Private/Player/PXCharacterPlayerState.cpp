@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PlayerState/PXCharacterPlayerState.h"
+#include "Player/PXCharacterPlayerState.h"
 #include "GAS/PXCharacterASComponent.h"
 #include "Character/BasePXCharacter.h"
 #include "GAS/AttributeSet/PXCharacterAttributeSet.h"

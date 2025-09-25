@@ -6,7 +6,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 
 void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, float Volume)
 {

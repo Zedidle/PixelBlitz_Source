@@ -2,31 +2,17 @@
 
 
 #include "Character/Components/AbilityComponent.h"
-
-#include <opensubdiv/vtr/level.h>
-
 #include "AbilitySystemComponent.h"
-#include "ActorMode.h"
-#include "CurveEditorTypes.h"
-#include "InputAction.h"
-#include "NiagaraFunctionLibrary.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Character/Components/BuffComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
-#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/DataTableFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
-#include "Settings/SkillSettings.h"
-#include "Subsystems/DataTableSubsystem.h"
-#include "Util/ColorConstants.h"
 #include "Utilitys/PXCustomStruct.h"
-#include "WorldPartition/Cook/WorldPartitionCookPackage.h"
 
 // Sets default values for this component's properties
 UAbilityComponent::UAbilityComponent()

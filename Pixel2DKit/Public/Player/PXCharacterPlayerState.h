@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GAS/PXCharacterASComponent.h"
-#include "PlayerState/PXPlayerState.h"
+#include "Player/PXPlayerState.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "GAS/AttributeSet/PXCharacterAttributeSet.h"
 #include "Interfaces/Fight_Interface.h"

@@ -6,7 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Character/BasePXCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomConfigSettings.h"
+#include "Settings/Config/CustomConfigSettings.h"
 
 class UCustomConfigSettings;
 class UEnhancedInputLocalPlayerSubsystem;

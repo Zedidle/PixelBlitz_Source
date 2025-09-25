@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "PlayerState/PXPlayerState.h"
+#include "Player/PXPlayerState.h"
 
 #include "AbilitySystemComponent.h"
 #include "Character/BasePXCharacter.h"

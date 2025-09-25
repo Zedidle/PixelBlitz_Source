@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 
 #include "Item/Weapon/BaseWeapon.h"
 #include "Pixel2DKit/Pixel2DKit.h"

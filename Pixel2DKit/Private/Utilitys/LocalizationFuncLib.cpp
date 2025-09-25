@@ -4,7 +4,7 @@
 #include "Utilitys/LocalizationFuncLib.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 #include "UI/Foundation/PXTextBlock.h"
 
 FString ULocalizationFuncLib::GetLocalizedString(const FLocalizedTableData& Data)

@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "NiagaraSystem.h"
+#include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
 #include "EnemyDataAsset.generated.h"
 
-/**
- * 
- */
+
 UCLASS(Blueprintable)
 class PIXEL2DKIT_API UEnemyDataAsset : public UDataAsset
 {

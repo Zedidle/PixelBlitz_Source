@@ -10,7 +10,7 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
-#include "Settings/CameraShakeSettings.h"
+#include "Settings/Config/CameraShakeSettings.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "AbilitySystemInterface.h"
 #include "AbilitySystemGlobals.h"
@@ -20,7 +20,7 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "SaveGame/PXSettingSaveGame.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 

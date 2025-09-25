@@ -8,13 +8,11 @@
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "UI/PXUIRoot.h"
-#include "Blueprint/SlateBlueprintLibrary.h"
 #include "Blueprint/UserWidget.h"
-#include "Engine/AssetManager.h"
-#include "Engine/StreamableManager.h"
+
 #include "Kismet/GameplayStatics.h"
 #include "UI/Tips/CommonTipContainerWidget.h"
 

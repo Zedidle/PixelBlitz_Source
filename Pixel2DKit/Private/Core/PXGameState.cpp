@@ -7,7 +7,7 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"

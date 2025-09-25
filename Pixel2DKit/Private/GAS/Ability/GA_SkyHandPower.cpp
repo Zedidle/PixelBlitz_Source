@@ -9,7 +9,7 @@
 #include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 
 
 void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,

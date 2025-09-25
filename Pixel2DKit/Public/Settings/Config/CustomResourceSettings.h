@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
-#include "PlayerState/PlayerRespawnPoint.h"
+#include "Player/PlayerRespawnPoint.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "CustomResourceSettings.generated.h"
 

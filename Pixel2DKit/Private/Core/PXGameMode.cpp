@@ -11,7 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 
 
 void APXGameMode::BeginPlay()

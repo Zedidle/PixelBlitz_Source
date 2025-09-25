@@ -9,7 +9,7 @@
 #include "SaveGame/PXSettingSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
-#include "Settings/CustomConfigSettings.h"
+#include "Settings/Config/CustomConfigSettings.h"
 #include "Utilitys/SettingFuncLib.h"
 
 

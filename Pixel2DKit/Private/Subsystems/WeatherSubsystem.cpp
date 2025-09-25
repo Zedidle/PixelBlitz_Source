@@ -7,7 +7,7 @@
 #include "Enemy/BaseEnemy.h"
 #include "GAS/PXGameplayEffect.h"
 #include "Kismet/GameplayStatics.h"
-#include "Settings/CustomConfigSettings.h"
+#include "Settings/Config/CustomConfigSettings.h"
 #include "Utilitys/PXGameplayStatics.h"
 
 

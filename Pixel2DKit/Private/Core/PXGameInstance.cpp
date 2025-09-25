@@ -6,8 +6,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "SaveGame/PXSettingSaveGame.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 #include "Sound/SoundCue.h"
 #include "Utilitys/SoundFuncLib.h"
 

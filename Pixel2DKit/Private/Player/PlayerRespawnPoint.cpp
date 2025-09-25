@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PlayerState/PlayerRespawnPoint.h"
+#include "Player/PlayerRespawnPoint.h"
 
 // Sets default values
 APlayerRespawnPoint::APlayerRespawnPoint()

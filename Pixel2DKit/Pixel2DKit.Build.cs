@@ -17,7 +17,10 @@ public class Pixel2DKit : ModuleRules
 		);
 
 		PublicDependencyModuleNames.AddRange(new string[] { 
-			"Core", "CoreUObject", "Engine", "InputCore", "CommonUI",
+			"Core", "CoreUObject", "InputCore",
+			"ApplicationCore",
+			"Engine",  
+			"CommonUI",
 			"Niagara","GameplayTags",
 			"UMG","AIModule","DeveloperSettings",
 			"GameplayAbilities", "GameplayTasks", 
@@ -29,7 +32,7 @@ public class Pixel2DKit : ModuleRules
 			"NavigationSystem",
 			"UMGEditor", "GameplayAbilities",
 			"ModularGameplay",
-			"ModularGameplayActors"
+			"ModularGameplayActors", "GameFeatures", "GameSubtitles"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
@@ -44,8 +47,13 @@ public class Pixel2DKit : ModuleRules
 		{
 			"Slate", "SlateCore",
 			"CommonInput",
+			"GameSettings",
 			"CommonGame",
-			"CommonUser"
+			"CommonUser",
+			"GameSubtitles",
+			"AudioMixer",
+			"RHI"
+
 
 		});
 		

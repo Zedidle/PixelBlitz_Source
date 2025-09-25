@@ -4,7 +4,7 @@
 #include "Subsystems/DropSubsystem.h"
 #include "Item/BaseItem.h"
 #include "Engine/DataTable.h"
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 #include "Engine/DeveloperSettings.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/PXCustomStruct.h"

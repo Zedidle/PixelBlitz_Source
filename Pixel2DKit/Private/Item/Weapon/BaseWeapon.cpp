@@ -3,7 +3,7 @@
 
 #include "Item/Weapon/BaseWeapon.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 
 void ABaseWeapon::BeginPlay()
 {

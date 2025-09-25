@@ -10,7 +10,7 @@
 #include "GameplayEffect.h"
 #include "NiagaraComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/DataTableSettings.h"
+#include "Settings/Config/DataTableSettings.h"
 #include "BuffComponent.generated.h"
 
 

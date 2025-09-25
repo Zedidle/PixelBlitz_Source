@@ -12,11 +12,10 @@
 #include "Character/BasePXCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/DebugFuncLab.h"
-#include "Utilitys/SpaceFuncLib.h"
 
 // Sets default values for this component's properties
 UBuffComponent::UBuffComponent()

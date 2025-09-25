@@ -10,8 +10,8 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/DataTableSettings.h"
-#include "Settings/SkillSettings.h"
+#include "Settings/Config/DataTableSettings.h"
+#include "Settings/Config/SkillSettings.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 

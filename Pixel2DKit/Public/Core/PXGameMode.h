@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "PlayerState/PlayerRespawnPoint.h"
+#include "Player/PlayerRespawnPoint.h"
 #include "Utilitys/PXCustomStruct.h"
 
 #include "PXGameMode.generated.h"

@@ -7,7 +7,7 @@
 #include "PaperZDCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/CustomResourceSettings.h"
+#include "Settings/Config/CustomResourceSettings.h"
 #include "NiagaraComponent.h"
 #include "Core/PXGameState.h"
 #include "Utilitys/PXGameplayStatics.h"
