@@ -32,7 +32,7 @@ public class Pixel2DKit : ModuleRules
 			"NavigationSystem",
 			"UMGEditor", "GameplayAbilities",
 			"ModularGameplay",
-			"ModularGameplayActors", "GameFeatures", "GameSubtitles"
+			"ModularGameplayActors", "GameFeatures", "GameSubtitles", "GameSettings"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
