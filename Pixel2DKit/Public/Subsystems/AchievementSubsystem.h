@@ -24,6 +24,12 @@ struct FAchievement: public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
+	FName AchievementKey;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	TSoftObjectPtr<UTexture2D> Icon;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
 	FLocalizedTableData AchievementName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
@@ -41,9 +47,23 @@ class PIXEL2DKIT_API UAchievementSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
+	
+	TMap<FName, FAchievement> AchievementsMap;
+	
+	
 public:
+	/** Implement this for initialization of instances of the system */
+	virtual void Initialize(FSubsystemCollectionBase& Collection);
+
+	/** Implement this for deinitialization of instances of the system */
+	virtual void Deinitialize();
+
+	UFUNCTION()
+	void LoadAchievementData();
+	
+	
 	UFUNCTION(BlueprintCallable, Category = "AchievementSubsystem")
-	void CompleteAchievement(FName AchievementRowName);
+	void CompleteAchievement(FName AchievementKey);
 
 	
 	/* 击杀BOSS时触发的相关成就

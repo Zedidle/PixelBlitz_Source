@@ -8,22 +8,52 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/DataTableSettings.h"
 #include "Settings/Config/UserWidgetSettings.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "UI/Achievement/AchievementCompleteWidget.h"
 #include "Utilitys/PXGameplayStatics.h"
 
-void UAchievementSubsystem::CompleteAchievement(FName AchievementRowName)
+void UAchievementSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	
+}
+
+void UAchievementSubsystem::Deinitialize()
+{
+	Super::Deinitialize();
+}
+
+void UAchievementSubsystem::LoadAchievementData()
 {
 	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
 	UDataTable* DataTable = Settings->GetAchievementData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable);
 
-	FAchievement* AchievementData = DataTable->FindRow<FAchievement>(AchievementRowName, TEXT("UAchievementSubsystem::CompleteAchievement"));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AchievementData);
+	UDataTableSubsystem* DataTableSubsystem = GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+
+	TArray<FAchievement> Achievements = DataTableSubsystem->GetRowMap<FAchievement>(DataTable);
+
+	for (auto& achievement : Achievements)
+	{
+		AchievementsMap.Add(achievement.AchievementKey, achievement);
+	}
+}
+
+void UAchievementSubsystem::CompleteAchievement(FName AchievementKey)
+{
 	UPXSaveGameSubsystem* SaveGameSubsystem = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-	
-	if (SaveGameSubsystem->CompleteAchievement(AchievementRowName))
+
+	if (!AchievementsMap.Contains(AchievementKey))
+	{
+		LoadAchievementData();
+	}
+
+	const FAchievement& AchievementData = AchievementsMap.FindRef(AchievementKey);
+	check(AchievementData.AchievementKey.IsValid());
+	if (SaveGameSubsystem->CompleteAchievement(AchievementKey))
 	{
 		if (const UUserWidgetSettings* UserWidgetSettings = GetDefault<UUserWidgetSettings>())
 		{
@@ -32,7 +62,7 @@ void UAchievementSubsystem::CompleteAchievement(FName AchievementRowName)
 				if (UAchievementCompleteWidget* Widget = CreateWidget<UAchievementCompleteWidget>(GetWorld(),
 					UserWidgetSettings->AchievementCompleteWidgetClass))
 				{
-					Widget->SetData(*AchievementData);
+					Widget->SetData(AchievementData);
 					Widget->AddToViewport(1000);
 				}
 			}

@@ -262,12 +262,12 @@ UPXAchievementsSaveGame* UPXSaveGameSubsystem::GetAchievementsData()
     return AchievementsSaveGame;
 }
 
-bool UPXSaveGameSubsystem::CompleteAchievement(FName AchievementRowName)
+bool UPXSaveGameSubsystem::CompleteAchievement(FName AchievementKey)
 {
     CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AchievementsSaveGame, false);
-    if (AchievementsSaveGame->CompletedAchievements.Contains(AchievementRowName)) return false;
+    if (AchievementsSaveGame->CompletedAchievements.Contains(AchievementKey)) return false;
 
-    AchievementsSaveGame->CompletedAchievements.Add(AchievementRowName);
+    AchievementsSaveGame->CompletedAchievements.Add(AchievementKey);
 
     SaveAchievementsData();
 
