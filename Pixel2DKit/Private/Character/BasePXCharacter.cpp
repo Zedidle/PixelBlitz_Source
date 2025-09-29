@@ -33,11 +33,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
-#include "Settings/Config/CustomResourceSettings.h"
 #include "Settings/Config/PXCameraShakeDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
-#include "Settings/Config/UserWidgetSettings.h"
+#include "Settings/Config/PXWidgetsDataAsset.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
@@ -807,19 +806,22 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 
 void ABasePXCharacter::CheckNearDeath_Implementation()
 {
-	if (HealthComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
+
+	if (WidgetsDataAsset->NearDeathWidgetClass)
 	{
-		const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
-		if (Settings && Settings->NearDeathWidgetClass)
+		if (HealthComponent->GetHPPercent() < 0.3)
 		{
-			if (HealthComponent->GetHPPercent() < 0.3)
-			{
-				UUserWidgetFuncLib::AddWidget(Settings->NearDeathWidgetClass, ESlateVisibility::HitTestInvisible, false);
-			}
-			else
-			{
-				UUserWidgetFuncLib::HideWidget(Settings->NearDeathWidgetClass);
-			}
+			UUserWidgetFuncLib::AddWidget(WidgetsDataAsset->NearDeathWidgetClass, ESlateVisibility::HitTestInvisible, false);
+		}
+		else
+		{
+			UUserWidgetFuncLib::HideWidget(WidgetsDataAsset->NearDeathWidgetClass);
 		}
 	}
 }
@@ -917,10 +919,16 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			{
 				// 游戏结束
 				UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-				const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
-				if (Settings && Settings->NearDeathWidgetClass)
+
+				const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+				CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+				const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
+				CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
+
+				if (WidgetsDataAsset->NearDeathWidgetClass)
 				{
-					UUserWidgetFuncLib::AddWidget(Settings->NearDeathWidgetClass, ESlateVisibility::Visible, false);
+					UUserWidgetFuncLib::AddWidget(WidgetsDataAsset->NearDeathWidgetClass, ESlateVisibility::Visible, false);
 				}
 				if (APXPlayerController* PC = GetController<APXPlayerController>())
 				{

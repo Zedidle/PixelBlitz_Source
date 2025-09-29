@@ -3,13 +3,13 @@
 
 #include "Core/PXSaveGameSubsystem.h"
 
+#include "InputMappingContext.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
-#include "Settings/Config/CustomConfigSettings.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
 #include "Utilitys/SettingFuncLib.h"
@@ -69,14 +69,20 @@ void UPXSaveGameSubsystem::InitData_Setting()
     else
     {
         SettingSaveGame = NewObject<UPXSettingSaveGame>(this);
+
+        
+        
         // 按键存档
-        if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
+        if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
         {
-            UInputMappingContext* Gamepad_IMC = Cast<UInputMappingContext>(Settings->Gamepad_IMC.Get());
-            UInputMappingContext* Keyboard_IMC = Cast<UInputMappingContext>(Settings->Keyboard_IMC.Get());
+            if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
+            {
+                UInputMappingContext* Gamepad_IMC = Cast<UInputMappingContext>(GameDataAsset->Gamepad_IMC.Get());
+                UInputMappingContext* Keyboard_IMC = Cast<UInputMappingContext>(GameDataAsset->Keyboard_IMC.Get());
             
-            SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping = Gamepad_IMC->GetMappings();
-            SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping = Keyboard_IMC->GetMappings();
+                SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping = Gamepad_IMC->GetMappings();
+                SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping = Keyboard_IMC->GetMappings();
+            }
         }
 
         SaveSettingData();

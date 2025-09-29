@@ -10,7 +10,7 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/SkillSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 
@@ -178,8 +178,10 @@ void UTalentComponent::LoadTalents()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->GetBasicBuildData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
-	const USkillSettings* SkillSettings = GetDefault<USkillSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SkillSettings)
+
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	

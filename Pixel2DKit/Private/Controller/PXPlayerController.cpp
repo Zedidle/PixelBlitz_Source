@@ -6,7 +6,6 @@
 #include "EnhancedInputSubsystems.h"
 #include "Character/BasePXCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/CustomConfigSettings.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
 

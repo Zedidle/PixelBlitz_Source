@@ -11,7 +11,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/CustomResourceSettings.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 

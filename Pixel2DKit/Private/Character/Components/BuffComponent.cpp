@@ -12,7 +12,6 @@
 #include "Character/BasePXCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/CustomResourceSettings.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/DataTableSubsystem.h"

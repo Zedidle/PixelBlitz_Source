@@ -5,10 +5,10 @@
 #include "Controller/PXPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/CustomConfigSettings.h"
-#include "Settings/Config/UserWidgetSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXGameDataAsset.h"
+#include "Settings/Config/PXWidgetsDataAsset.h"
 #include "UI/UIManager.h"
-#include "UI/Tips/CenterWordTipWidget.h"
 #include "UI/Tips/BaseFloatingTextWidget.h"
 #include "Utilitys/SpaceFuncLib.h"
 
@@ -31,11 +31,18 @@ namespace FloatingTextColor
 void UCommonFuncLib::SpawnFloatingCombatText(EFloatingTextType TextType, FText Text, UPaperSprite* Icon,
 	FVector WorldLocation, FVector2D Scale, FLinearColor ColorMulti)
 {
-	const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
 	UWorld* World = GEngine->GetCurrentPlayWorld();
-	if (IsValid(World) && Settings && Settings->FloatingTextDefaultClass)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+	
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
+	
+	if (WidgetsDataAsset->FloatingTextDefaultClass)
 	{
-		if (UBaseFloatingTextWidget* Widget = CreateWidget<UBaseFloatingTextWidget>(World, Settings->FloatingTextDefaultClass))
+		if (UBaseFloatingTextWidget* Widget = CreateWidget<UBaseFloatingTextWidget>(World, WidgetsDataAsset->FloatingTextDefaultClass))
 		{
 			if (TextType == EFloatingTextType::Damage)
 			{
@@ -75,16 +82,21 @@ void UCommonFuncLib::SpawnFloatingCombatText(EFloatingTextType TextType, FText T
 
 void UCommonFuncLib::SpawnFloatingText(FText Text, FVector WorldLocation, FLinearColor TextColor, FVector2D RenderScale, UPaperSprite* Icon)
 {
-	const UUserWidgetSettings* Settings = GetDefault<UUserWidgetSettings>();
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+	
+	UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
+	
+
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 
 	if (!USpaceFuncLib::IsPointInScreen(World, WorldLocation, -0.05)) return;
 	
-	if (Settings->FloatingTextDefaultClass)
+	if (WidgetsDataAsset->FloatingTextDefaultClass)
 	{
-		if (UBaseFloatingTextWidget* Widget = CreateWidget<UBaseFloatingTextWidget>(World, Settings->FloatingTextDefaultClass))
+		if (UBaseFloatingTextWidget* Widget = CreateWidget<UBaseFloatingTextWidget>(World, WidgetsDataAsset->FloatingTextDefaultClass))
 		{
 			Widget->Init(Text, TextColor, Icon, WorldLocation);
 			Widget->SetRenderScale(RenderScale);
@@ -105,9 +117,12 @@ void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 
-	const UUserWidgetSettings* WidgetSettings = GetDefault<UUserWidgetSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetSettings)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetSettings->CenterWordTipClass)
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+	
+	UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset->CenterWordTipClass)
 
 	UUIManager* UIManager = World->GetSubsystem<UUIManager>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
@@ -120,20 +135,24 @@ FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, FKey());
 
-	if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Settings, FKey());
+	
+	UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameDataAsset, FKey());
+
+	UInputMappingContext* IMC = IsGamePad ? GameDataAsset->Gamepad_IMC.LoadSynchronous() : GameDataAsset->Keyboard_IMC.LoadSynchronous();
+	if (IMC)
 	{
-		UInputMappingContext* IMC = IsGamePad ? Settings->Gamepad_IMC.LoadSynchronous() : Settings->Keyboard_IMC.LoadSynchronous();
-		if (IMC)
+		for (auto& ele : IMC->GetMappings())
 		{
-			for (auto& ele : IMC->GetMappings())
+			if (ele.Action == IA)
 			{
-				if (ele.Action == IA)
-				{
-					return ele.Key;
-				}
+				return ele.Key;
 			}
 		}
 	}
+	
 
 	return FKey();
 }

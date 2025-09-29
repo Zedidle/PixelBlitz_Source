@@ -2,11 +2,11 @@
 
 
 #include "Subsystems/AchievementSubsystem.h"
-
 #include "Character/BasePXCharacter.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/UserWidgetSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXWidgetsDataAsset.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "UI/Achievement/AchievementCompleteWidget.h"
 #include "Utilitys/PXGameplayStatics.h"
@@ -42,7 +42,10 @@ void UAchievementSubsystem::LoadAchievementData()
 
 void UAchievementSubsystem::CompleteAchievement(FName AchievementKey)
 {
-	UPXSaveGameSubsystem* SaveGameSubsystem = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+	
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 
 	if (!AchievementsMap.Contains(AchievementKey))
@@ -54,16 +57,19 @@ void UAchievementSubsystem::CompleteAchievement(FName AchievementKey)
 	check(AchievementData.AchievementKey.IsValid());
 	if (SaveGameSubsystem->CompleteAchievement(AchievementKey))
 	{
-		if (const UUserWidgetSettings* UserWidgetSettings = GetDefault<UUserWidgetSettings>())
+		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+		const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
+		
+		if (WidgetsDataAsset->AchievementCompleteWidgetClass)
 		{
-			if (UserWidgetSettings->AchievementCompleteWidgetClass)
+			if (UAchievementCompleteWidget* Widget = CreateWidget<UAchievementCompleteWidget>(GetWorld(),
+				WidgetsDataAsset->AchievementCompleteWidgetClass))
 			{
-				if (UAchievementCompleteWidget* Widget = CreateWidget<UAchievementCompleteWidget>(GetWorld(),
-					UserWidgetSettings->AchievementCompleteWidgetClass))
-				{
-					Widget->SetData(AchievementData);
-					Widget->AddToViewport(1000);
-				}
+				Widget->SetData(AchievementData);
+				Widget->AddToViewport(1000);
 			}
 		}
 	}
