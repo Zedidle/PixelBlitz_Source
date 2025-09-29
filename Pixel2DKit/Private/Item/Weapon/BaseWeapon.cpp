@@ -2,8 +2,11 @@
 
 
 #include "Item/Weapon/BaseWeapon.h"
+#include "Core/PXGameInstance.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/DataTableSettings.h"
+#include "Subsystems/DataTableSubsystem.h"
+
+class UDataTableSubsystem;
 
 void ABaseWeapon::BeginPlay()
 {
@@ -29,11 +32,13 @@ void ABaseWeapon::LoadWeaponData(const FGameplayTag _WeaponTag)
 	if (!_WeaponTag.IsValid()) return;
 	if (!_WeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag("Weapon"))) return;
 
-	
-	const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSettings);
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
 
-	if (const FWeaponData* WeaponDataPtr = DataTableSettings->GetWeaponDataByTag(_WeaponTag))
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	if (const FWeaponData* WeaponDataPtr = DataTableSubsystem->GetWeaponDataByTag(_WeaponTag))
 	{
 		Data = *WeaponDataPtr;
 		WeaponTag = _WeaponTag;

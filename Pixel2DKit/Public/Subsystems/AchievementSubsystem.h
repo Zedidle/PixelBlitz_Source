@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Utilitys/LocalizationFuncLib.h"
 #include "AchievementSubsystem.generated.h"
 
 UENUM(BlueprintType)
@@ -30,10 +29,10 @@ struct FAchievement: public FTableRowBase
 	TSoftObjectPtr<UTexture2D> Icon;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
-	FLocalizedTableData AchievementName;
+	FText AchievementName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
-	FLocalizedTableData AchievementDesc;
+	FText AchievementDesc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
 	TEnumAsByte<EAchievementType> Type;

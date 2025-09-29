@@ -4,12 +4,11 @@
 
 #include "GameSettingCollection.h"
 #include "EditCondition/WhenPlayingAsPrimaryPlayer.h"
-#include "EditCondition/WhenPlatformHasTrait.h"
 #include "Settings/CustomSettings/PXSettingValueDiscrete_Language.h"
-#include "Settings/PXSettingsLocal.h"
 #include "GameSettingValueDiscreteDynamic.h"
 #include "Player/PXLocalPlayer.h"
-// #include "Replays/PXReplaySubsystem.h"
+#include "Settings/PXSettingsShared.h"
+
 
 #define LOCTEXT_NAMESPACE "PX"
 
@@ -17,30 +16,23 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("GameplayCollection"));
-	Screen->SetDisplayName(LOCTEXT("GameplayCollection_Name", "Gameplay"));
+	Screen->SetDisplayName(LOCTEXT("GameplayCollection_Name", "游戏内容"));
 	Screen->Initialize(InLocalPlayer);
 
 	{
 		UGameSettingCollection* LanguageSubsection = NewObject<UGameSettingCollection>();
-		LanguageSubsection->SetDevName(TEXT("LanguageCollection"));
-		LanguageSubsection->SetDisplayName(LOCTEXT("LanguageCollection_Name", "Language"));
+		LanguageSubsection->SetDevName(TEXT("CultureCollection"));
+		LanguageSubsection->SetDisplayName(LOCTEXT("CultureCollection_Name", "文化"));
 		Screen->AddSetting(LanguageSubsection);
 
 		//----------------------------------------------------------------------------------
 		{
 			UPXSettingValueDiscrete_Language* Setting = NewObject<UPXSettingValueDiscrete_Language>();
-			Setting->SetDevName(TEXT("Language"));
-			Setting->SetDisplayName(LOCTEXT("LanguageSetting_Name", "Language"));
-			Setting->SetDescriptionRichText(LOCTEXT("LanguageSetting_Description", "The language of the game."));
-			
-#if WITH_EDITOR
-			if (GIsEditor)
-			{
-				Setting->SetDescriptionRichText(LOCTEXT("LanguageSetting_WithEditor_Description", "The language of the game.\n\n<text color=\"#ffff00\">WARNING: Language changes will not affect PIE, you'll need to run with -game to test this, or change your PIE language options in the editor preferences.</>"));
-			}
-#endif
-			
-			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+			Setting->SetDevName(TEXT("Culture_Language"));
+			Setting->SetDisplayName(LOCTEXT("Culture_Language_Name", "语言"));
+			Setting->SetDescriptionRichText(LOCTEXT("Culture_Language_Description", "选择游戏语言"));
+
+			// Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 
 			LanguageSubsection->AddSetting(Setting);
 		}
@@ -48,53 +40,72 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 	}
 
 	{
-		// UGameSettingCollection* ReplaySubsection = NewObject<UGameSettingCollection>();
-		// ReplaySubsection->SetDevName(TEXT("ReplayCollection"));
-		// ReplaySubsection->SetDisplayName(LOCTEXT("ReplayCollection_Name", "Replays"));
-		// Screen->AddSetting(ReplaySubsection);
+		UGameSettingCollection* GameplayTextCollection = NewObject<UGameSettingCollection>();
+		GameplayTextCollection->SetDevName(TEXT("GameplayTextCollection"));
+		GameplayTextCollection->SetDisplayName(LOCTEXT("GameplayTextCollection_Name", "文本"));
+		Screen->AddSetting(GameplayTextCollection);
+		
+		{
+			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
+			Setting->SetDevName(TEXT("GameplayText_ShowDamage"));
+			Setting->SetDisplayName(LOCTEXT("GameplayText_ShowDamage_Name", "显示伤害值"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayText_ShowDamage_Description", "显示伤害值文本的开关."));
 
-		//----------------------------------------------------------------------------------
-		// {
-		// 	UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
-		// 	Setting->SetDevName(TEXT("RecordReplay"));
-		// 	Setting->SetDisplayName(LOCTEXT("RecordReplaySetting_Name", "Record Replays"));
-		// 	Setting->SetDescriptionRichText(LOCTEXT("RecordReplaySetting_Description", "Automatically record game replays. Experimental feature, recorded demos may have playback issues."));
-		//
-		// 	Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(ShouldAutoRecordReplays));
-		// 	Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetShouldAutoRecordReplays));
-		// 	Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->ShouldAutoRecordReplays());
-		//
-		// 	Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-		// 	Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(UPXReplaySubsystem::GetPlatformSupportTraitTag(), TEXT("Platform does not support saving replays")));
-		//
-		// 	ReplaySubsection->AddSetting(Setting);
-		//
-		// }
-		//----------------------------------------------------------------------------------
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetShowDamageText));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetShowDamageText));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetShowDamageText());
 
-		//----------------------------------------------------------------------------------
-		// {
-		// 	UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-		// 	Setting->SetDevName(TEXT("KeepReplayLimit"));
-		// 	Setting->SetDisplayName(LOCTEXT("KeepReplayLimitSetting_Name", "Keep Replay Limit"));
-		// 	Setting->SetDescriptionRichText(LOCTEXT("KeepReplayLimitSetting_Description", "Number of saved replays to keep, set to 0 for infinite."));
-		//
-		// 	Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetNumberOfReplaysToKeep));
-		// 	Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetNumberOfReplaysToKeep));
-		// 	Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetNumberOfReplaysToKeep());
-		// 	for (int32 Index = 0; Index <= 20; Index++)
-		// 	{
-		// 		Setting->AddOption(Index, FText::AsNumber(Index));
-		// 	}
-		//
-		// 	Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-		// 	Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(UPXReplaySubsystem::GetPlatformSupportTraitTag(), TEXT("Platform does not support saving replays")));
-		//
-		// 	ReplaySubsection->AddSetting(Setting);
-		//
-		// }
-		//----------------------------------------------------------------------------------
+			GameplayTextCollection->AddSetting(Setting);
+		}
+
+		{
+			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
+			Setting->SetDevName(TEXT("GameplayText_ShowRecover"));
+			Setting->SetDisplayName(LOCTEXT("GameplayText_ShowRecover_Name", "显示恢复值"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayText_ShowRecover_Description", "显示生命值与体力值恢复量文本的开关."));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetShowRecoverText));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetShowRecoverText));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetShowRecoverText());
+
+			GameplayTextCollection->AddSetting(Setting);
+		}
+		
+		{
+			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
+			Setting->SetDevName(TEXT("GameplayText_ShowGolds"));
+			Setting->SetDisplayName(LOCTEXT("GameplayText_ShowGolds_Name", "显示金币值"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayText_ShowGolds_Description", "显示获取金币值文本的开关."));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetShowDamageText));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetShowDamageText));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetShowDamageText());
+
+			GameplayTextCollection->AddSetting(Setting);
+		}
 	}
+
+
+	{
+		UGameSettingCollection* GameplayVFXCollection = NewObject<UGameSettingCollection>();
+		GameplayVFXCollection->SetDevName(TEXT("GameplayVFXCollection"));
+		GameplayVFXCollection->SetDisplayName(LOCTEXT("GameplayVFXCollection_Name", "视觉特效"));
+		Screen->AddSetting(GameplayVFXCollection);
+
+		{
+			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
+			Setting->SetDevName(TEXT("GameplayVFX_ShowBlood"));
+			Setting->SetDisplayName(LOCTEXT("GameplayVFX_ShowBlood_Name", "显示掉血效果"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayVFX_ShowBlood_Description", "任意生物在血量降低时触发的视觉特效"));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetShowBloodVFX));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetShowBloodVFX));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetShowBloodVFX());
+
+			GameplayVFXCollection->AddSetting(Setting);
+		}
+	}
+	
 
 	return Screen;
 }

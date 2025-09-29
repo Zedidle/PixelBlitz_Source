@@ -13,10 +13,17 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/DebugFuncLab.h"
 
+#define LOCTEXT_NAMESPACE "PX"
+
+
+class UDataTableSubsystem;
 // Sets default values for this component's properties
 UBuffComponent::UBuffComponent()
 {
@@ -29,10 +36,16 @@ UBuffComponent::UBuffComponent()
 
 void UBuffComponent::InitData()
 {
-	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+
+	UGameInstance* GameInstance = Owner->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+
 	
-	UDataTable* DataTable = Settings->GetBuffOnWidgetData();
+	UDataTable* DataTable = DataTableSubsystem->GetBuffOnWidgetData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable);
 
 	TArray<FBuffOnWidget*> Rows;
@@ -108,18 +121,19 @@ void UBuffComponent::BeginPlay()
 			BuffStateWidget = Cast<UBuffStateWidget>(CreateWidget(World, BuffStateWidgetClass));
 			BuffStateWidget->AddToViewport(100);
 		}
-
 	}
 
-	ABasePXCharacter* Owner = Cast<ABasePXCharacter>(GetOwner());
+	Owner = Cast<ABasePXCharacter>(GetOwner());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner);
 
-	UAbilitySystemComponent* AbilitySystemComponent = Owner->GetAbilitySystemComponent();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilitySystemComponent);
-	AbilitySystemComponent->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
-	AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
-
-
+	if (IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Owner))
+	{
+		UAbilitySystemComponent* AbilitySystemComponent = ASI->GetAbilitySystemComponent();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilitySystemComponent);
+		AbilitySystemComponent->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
+		AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
+	}
+	
 	
 	if (GetWorld())
 	{
@@ -166,7 +180,7 @@ void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
 
 	Tag2BuffEffect_Attack.Remove(Tag);
 	Tag2BuffEndTime_Attack.Remove(Tag);
-	AActor* Owner = GetOwner();
+
 	if (Owner && Owner->Implements<UBuff_Interface>())
 	{
 		Execute_BuffUpdate_Speed(Owner);
@@ -185,7 +199,7 @@ void UBuffComponent::RemoveBuff_Sight(FGameplayTag Tag)
 
 	Tag2BuffEffect_Sight.Remove(Tag);
 	Tag2BuffEndTime_Sight.Remove(Tag);
-	AActor* Owner = GetOwner();
+
 	if (Owner && Owner->Implements<UBuff_Interface>())
 	{
 		Execute_BuffUpdate_Sight(Owner);
@@ -202,7 +216,7 @@ void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
 
 	Tag2BuffEffect_Speed.Remove(Tag);
 	Tag2BuffEndTime_Speed.Remove(Tag);
-	AActor* Owner = GetOwner();
+
 	if (Owner && Owner->Implements<UBuff_Interface>())
 	{
 		Execute_BuffUpdate_Sight(Owner);
@@ -258,7 +272,6 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 
 	RemoveBuff_Speed(Tag);
 	
-	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (!Owner->Implements<UBuff_Interface>()) return;
 	
@@ -285,15 +298,13 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
 	{
-		UCommonFuncLib::SpawnFloatingText(
-		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SlowDown")),
+		UCommonFuncLib::SpawnFloatingText( LOCTEXT("BUFF_SLOWDOWN", "减速"),
 				Location + FVector(20, 0, 20),
 				FLinearColor::Gray);
 	}
 	else
 	{
-		UCommonFuncLib::SpawnFloatingText(
-		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_SpeedUp")),
+		UCommonFuncLib::SpawnFloatingText( LOCTEXT("BUFF_SPEEDUP", "加速"),
 				Location + FVector(-30, 0, 20),
 				FLinearColor::White);
 	}
@@ -307,11 +318,16 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 	
 	if (Percent > 0 && Value > 0)
 	{
-		const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
-		if (ResourceSettings && ResourceSettings->NS_SpeedUP.LoadSynchronous())
+		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+		const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+
+		if (ResourceDataAsset && ResourceDataAsset->NS_SpeedUP.LoadSynchronous())
 		{
 			UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-				ResourceSettings->NS_SpeedUP.LoadSynchronous(),
+				ResourceDataAsset->NS_SpeedUP.LoadSynchronous(),
 				Owner->GetRootComponent(),
 				FName(""),
 				FVector::ZeroVector,
@@ -345,7 +361,6 @@ void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Pe
 
 	Tag2BuffEffect_Attack.Add(Tag, FBuffValueEffect(Percent, Value));
 
-	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (Owner->Implements<UBuff_Interface>())
 	{
@@ -364,7 +379,6 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	
 	RemoveBuff_Sight(Tag);
 	
-	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (!Owner->Implements<UBuff_Interface>()) return;
 
@@ -391,8 +405,7 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
 	{
-		UCommonFuncLib::SpawnFloatingText(
-		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_Myopia")),
+		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Myopia", "远视"),
 			Location + FVector(10.0, 0, 20),
 			FLinearColor::White,
 			FVector2D(0.9, 0.9)
@@ -400,8 +413,7 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	}
 	else
 	{
-		UCommonFuncLib::SpawnFloatingText(
-		FText::FromString(ULocalizationFuncLib::GetBuffText("Buff_Hyperopia")),
+		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Hyperopia", "短视"),
 			Location + FVector(-50, 0, 20),
 			FLinearColor::Gray);
 	}
@@ -492,9 +504,9 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 	
 	if(!Tag2BuffOnWidgetData.Contains(Tag)) return;
 	
-	FName BuffName = GetBuffRownameByTag(Tag);
+	FText BuffName = GetBuffNameByTag(Tag);
 	FBuffOnWidget Data = Tag2BuffOnWidgetData[Tag];
-	IBuff_Interface::Execute_AddBuff(this, Tag, ULocalizationFuncLib::GetBuffText(BuffName), Data.Color, Data.Permanent);
+	IBuff_Interface::Execute_AddBuff(this, Tag, BuffName.ToString(), Data.Color, Data.Permanent);
 }
 
 void UBuffComponent::ExpireBuff(FGameplayTag Tag)
@@ -505,3 +517,4 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 	}
 }
 
+#undef LOCTEXT_NAMESPACE

@@ -4,21 +4,26 @@
 #include "Utilitys/AbilityFuncLib.h"
 
 #include "Core/PXSaveGameSubSystemFuncLib.h"
+#include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/DataTableSettings.h"
+#include "Subsystems/DataTableSubsystem.h"
 
 
 void UAbilityFuncLib::UnlockAbility(UObject* WorldContextObject, const FGameplayTag& Tag)
 {
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 
-	if (DataTableSettings.GetAbilityDataByTag(Tag))
-	{
-		UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject);
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
-		BasicBuildSaveGame->UnlockedAbilities.AddUnique(Tag);
-		UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(WorldContextObject);
-	}
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
+	if (!AbilityData.AbilityTag.IsValid()) return;
+	
+	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
+	BasicBuildSaveGame->UnlockedAbilities.Add(Tag);
+	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(WorldContextObject);
 }
 
 bool UAbilityFuncLib::AbilityHadUnlock(UObject* WorldContextObject, const FGameplayTag& Tag)
@@ -28,38 +33,27 @@ bool UAbilityFuncLib::AbilityHadUnlock(UObject* WorldContextObject, const FGamep
 	return BasicBuildSaveGame->UnlockedAbilities.Contains(Tag);
 }
 
-FAbility UAbilityFuncLib::GetAbilityByTag(const FGameplayTag& Tag)
-{
-	if (!Tag.IsValid()) return FAbility();
-	
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
-	if (const FAbility* Ability = DataTableSettings.GetAbilityDataByTag(Tag))
-	{
-		return *Ability;
-	}
-	return FAbility();
-}
 
-const TMap<FGameplayTag, FAbility>& UAbilityFuncLib::GetAllAbilities()
-{
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
-	return DataTableSettings.GetAllAbilities();
-}
 
 void UAbilityFuncLib::UnlockTalent(UObject* WorldContextObject, const FGameplayTag& Tag)
 {
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 
-	if (DataTableSettings.GetTalentDataByTag(Tag))
-	{
-		UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject);
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
-		BasicBuildSaveGame->UnlockedTalents.AddUnique(Tag);
-		UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(WorldContextObject);
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
 
-		// 天赋解锁界面弹出
-		// WB_Talent_Unlock  CreateWidget  AddToViewPort(1000)
-	}
+	const FTalent& TalentData = DataTableSubsystem->GetTalentDataByTag(Tag);
+	if (!TalentData.TalentTag.IsValid()) return;
+
+	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
+	BasicBuildSaveGame->UnlockedTalents.AddUnique(Tag);
+	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(WorldContextObject);
+
+	// 天赋解锁界面弹出
+	// WB_Talent_Unlock  CreateWidget  AddToViewPort(1000)
+	
 }
 
 bool UAbilityFuncLib::TalentHadUnlock(UObject* WorldContextObject, const FGameplayTag& Tag)
@@ -67,16 +61,4 @@ bool UAbilityFuncLib::TalentHadUnlock(UObject* WorldContextObject, const FGamepl
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSaveGame, false);
 	return BasicBuildSaveGame->UnlockedTalents.Contains(Tag);
-}
-
-FTalent UAbilityFuncLib::GetTalentByTag(const FGameplayTag& Tag)
-{
-	if (!Tag.IsValid()) return FTalent();
-
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
-	if (const FTalent* Talent = DataTableSettings.GetTalentDataByTag(Tag))
-	{
-		return *Talent;
-	}
-	return FTalent();
 }

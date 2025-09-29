@@ -10,8 +10,9 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/CommonFuncLib.h"
-#include "Utilitys/LocalizationFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
+
+#define LOCTEXT_NAMESPACE "PXGameplayAbility"
 
 class UPXGameplayEffect;
 
@@ -76,8 +77,7 @@ bool UPXGameplayAbility::CheckCost(const FGameplayAbilitySpecHandle Handle, cons
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Set, true)
 	if (GetCostEP() > Set->GetEP())
 	{
-		UCommonFuncLib::SpawnCenterTipLocalized(
-			FLocalizedTableData("Basic/Tips", "EPNotEnough"),
+		UCommonFuncLib::SpawnCenterTip( LOCTEXT("EPNotEnough", "体力不足！"),
 			FLinearColor::White, FVector2D(0, 300)
 		);
 		return false;
@@ -127,3 +127,4 @@ APawn* UPXGameplayAbility::GetPawn() const
 	return nullptr;
 }
 
+#undef LOCTEXT_NAMESPACE

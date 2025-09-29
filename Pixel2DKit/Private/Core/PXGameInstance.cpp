@@ -7,6 +7,8 @@
 #include "Kismet/KismetStringLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 #include "Sound/SoundCue.h"
 #include "Utilitys/SoundFuncLib.h"
 
@@ -111,14 +113,19 @@ void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+	
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
 
-	if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+	
+
+	if (USoundCue* SC_OnDie = ResourceDataAsset->SC_OnDie.LoadSynchronous())
 	{
-		if (USoundCue* SC_OnDie = ResourceSettings->SC_OnDie.LoadSynchronous())
-		{
-			USoundFuncLib::PlaySound2D(SC_OnDie, 1.f);
-		}
+		USoundFuncLib::PlaySound2D(SC_OnDie, 1.f);
 	}
+	
 	
 	MainSaveGame->DieTimes++;
 	MainSaveGame->RemLife--;

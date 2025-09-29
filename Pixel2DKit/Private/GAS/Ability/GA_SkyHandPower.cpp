@@ -10,6 +10,8 @@
 #include "Fight/Components/HealthComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 
 
 void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
@@ -73,15 +75,20 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	PXCharacter->SetActorLocation(PreEnemyLocation);
 	
 	EnemyHealthComponent->DecreaseHP(Damage, FVector(0,0,0), PXCharacter, true);
+
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
 	
-	const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
-	if (!ResourceSettings || !ResourceSettings->NS_Mobiliarbus)
+	if (!ResourceDataAsset || !ResourceDataAsset->NS_Mobiliarbus)
 	{
 		K2_EndAbility();
 		return;
 	}
 
-	UNiagaraSystem* LoadedNS = ResourceSettings->NS_Mobiliarbus.LoadSynchronous();
+	UNiagaraSystem* LoadedNS = ResourceDataAsset->NS_Mobiliarbus.LoadSynchronous();
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNS, PXCharacter->GetActorLocation());
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNS, Enemy->GetActorLocation());
 

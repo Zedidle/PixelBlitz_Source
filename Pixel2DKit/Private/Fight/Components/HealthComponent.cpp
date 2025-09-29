@@ -3,26 +3,24 @@
 
 #include "Fight/Components/HealthComponent.h"
 
-#include "GameDelegates.h"
 #include "PaperFlipbookComponent.h"
 #include "Character/BasePXCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
-#include "Settings/Config/CameraShakeSettings.h"
 #include "Utilitys/CommonFuncLib.h"
-#include "AbilitySystemInterface.h"
 #include "AbilitySystemGlobals.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Core/PXGameState.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
-#include "GAS/AttributeSet/PXAttributeSet.h"
 #include "SaveGame/PXSettingSaveGame.h"
-#include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCameraShakeDataAsset.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
-#include "Utilitys/PXGameplayStatics.h"
+
+#define LOCTEXT_NAMESPACE "PX"
 
 class ULegacyCameraShake;
 
@@ -334,24 +332,28 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	const UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld());
 	if (SettingSaveGame && SettingSaveGame->GameSetting_ShowBlood)
 	{
-		if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+		const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+		
+		if ( ChangedValue < 10)
 		{
-			if ( ChangedValue < 10)
+			if (UNiagaraSystem* NS_HitBlood_Little = ResourceDataAsset->NS_HitBlood_Little.LoadSynchronous())
 			{
-				if (UNiagaraSystem* NS_HitBlood_Little = ResourceSettings->NS_HitBlood_Little.LoadSynchronous())
-				{
-					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood_Little, Owner->GetActorLocation());
-				}
-			}
-			else
-			{
-				if (UNiagaraSystem* NS_HitBlood = ResourceSettings->NS_HitBlood.LoadSynchronous())
-				{
-					UNiagaraComponent* NSEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood, Owner->GetActorLocation());
-					NSEffect->SetVariableVec3(FName("Dir"), (Owner->GetActorLocation() - Maker->GetActorLocation()).GetSafeNormal()) ;
-				}
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood_Little, Owner->GetActorLocation());
 			}
 		}
+		else
+		{
+			if (UNiagaraSystem* NS_HitBlood = ResourceDataAsset->NS_HitBlood.LoadSynchronous())
+			{
+				UNiagaraComponent* NSEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood, Owner->GetActorLocation());
+				NSEffect->SetVariableVec3(FName("Dir"), (Owner->GetActorLocation() - Maker->GetActorLocation()).GetSafeNormal()) ;
+			}
+		}
+		
 	}
 	
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
@@ -361,7 +363,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 {
 	if (bInRock)
 	{
-		UCommonFuncLib::SpawnFloatingTextDefault(TEXT("Buff/BuffEffectText"), TEXT("Buff_InRock"),
+		UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_INROCK", "霸体"),
 			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.8, 0.8));
 		return;
 	}
@@ -384,7 +386,10 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 		return;
 	}
 
-	const UCameraShakeSettings* CameraShakeSettings = GetDefault<UCameraShakeSettings>();
+	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
+	UPXCameraShakeDataAsset* CameraShakeDataAsset = CustomSettings->CameraShakeDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CameraShakeDataAsset)
 
 	if (!GetOwner()->Implements<UFight_Interface>()) return;
 	bool bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
@@ -395,12 +400,12 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 	{
 		if (bOwnerIsPlayer)
 		{
-			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->PlayerHitedShake_Powerful,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake_Powerful,
 				ownerLocation, 0, 500, 0, true);
 		}
 		else
 		{
-			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->PlayerHitedShake_Powerful,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake_Powerful,
 				ownerLocation, 0, 500, 0.2, true);
 		}
 		IFight_Interface::Execute_PowerRepulsion(GetOwner(), Repel.Size());
@@ -409,14 +414,16 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 	{
 		if (bOwnerIsPlayer)
 		{
-			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->PlayerHitedShake,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake,
 				ownerLocation, 0, 500, 0, true);
 		}
 		else
 		{
-			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeSettings->MonsterHitedShake,
+			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->MonsterHitedShake,
 				ownerLocation, 0, 500, 1, true);
 		}
 	}
 	
 }
+
+#undef LOCTEXT_NAMESPACE

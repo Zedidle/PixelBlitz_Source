@@ -22,22 +22,11 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib", meta =(WorldContext = "WorldContextObject"))
 	static bool AbilityHadUnlock(UObject* WorldContextObject, const FGameplayTag& Tag);
-
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib")
-	static FAbility GetAbilityByTag(const FGameplayTag& Tag);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib")
-	static const TMap<FGameplayTag, FAbility>& GetAllAbilities();
-
 	
 	UFUNCTION(BlueprintCallable, Category="AbilityFuncLib", meta =(WorldContext = "WorldContextObject"))
 	static void UnlockTalent(UObject* WorldContextObject, const FGameplayTag& Tag);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib", meta =(WorldContext = "WorldContextObject"))
 	static bool TalentHadUnlock(UObject* WorldContextObject, const FGameplayTag& Tag);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="AbilityFuncLib")
-	static FTalent GetTalentByTag(const FGameplayTag& Tag);
 
 };

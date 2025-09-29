@@ -9,8 +9,6 @@
 #include "Utilitys/PXCustomStruct.h"
 #include "GameplayEffect.h"
 #include "NiagaraComponent.h"
-#include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/DataTableSettings.h"
 #include "BuffComponent.generated.h"
 
 
@@ -21,6 +19,8 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent, public IBuff_Inter
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	AActor* Owner;
 	
 	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Speed;
 	TMap<FGameplayTag, float> Tag2BuffEndTime_Speed;
@@ -107,7 +107,7 @@ public:
 	void OnGameplayEffectRemoved(const FActiveGameplayEffect& GameplayEffect);
 
 	UFUNCTION()
-	FName GetBuffRownameByTag(FGameplayTag Tag);
+	FText GetBuffNameByTag(FGameplayTag Tag);
 	
 #pragma region IBuff_Interface
 	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
@@ -132,14 +132,14 @@ public:
 	
 };
 
-inline FName UBuffComponent::GetBuffRownameByTag(FGameplayTag Tag)
+inline FText UBuffComponent::GetBuffNameByTag(FGameplayTag Tag)
 {
 	if (Tag2BuffOnWidgetData.Contains(Tag))
 	{
-		return Tag2BuffOnWidgetData[Tag].BuffName_UnLocalized;
+		return Tag2BuffOnWidgetData[Tag].BuffName;
 	}
 	
-	return FName();
+	return FText();
 }
 
 inline void UBuffComponent::RemoveBuff_EffectAll(FGameplayTag Tag)

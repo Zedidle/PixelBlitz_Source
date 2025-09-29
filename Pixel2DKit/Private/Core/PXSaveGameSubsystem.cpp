@@ -10,6 +10,8 @@
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
 #include "Settings/Config/CustomConfigSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXGameDataAsset.h"
 #include "Utilitys/SettingFuncLib.h"
 
 
@@ -45,21 +47,23 @@ void UPXSaveGameSubsystem::InitData_Setting()
     {
         SettingSaveGame = SaveGame;
 
-
-        if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
+        if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
         {
-            Settings->Gamepad_IMC->UnmapAll();
-            Settings->Keyboard_IMC->UnmapAll();
+            if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
+            {
+                GameDataAsset->Gamepad_IMC->UnmapAll();
+                GameDataAsset->Keyboard_IMC->UnmapAll();
 
-            for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
-            {
-                Settings->Gamepad_IMC->MapKey(KM.Action, KM.Key);
-            }
+                for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
+                {
+                    GameDataAsset->Gamepad_IMC->MapKey(KM.Action, KM.Key);
+                }
             
-            for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
-            {
-                Settings->Keyboard_IMC->MapKey(KM.Action, KM.Key);
-            } 
+                for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
+                {
+                    GameDataAsset->Keyboard_IMC->MapKey(KM.Action, KM.Key);
+                } 
+            }
         }
     }
     else

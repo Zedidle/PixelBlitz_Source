@@ -280,6 +280,51 @@ private:
 	/* If true, resets the culture to default. */
 	bool bResetToDefaultCulture = false;
 
+
+
+#pragma region Gameplay Settings
+
+public:
+	UFUNCTION()
+	bool GetShowDamageText() const { return bShowDamageText; }
+	UFUNCTION()
+	void SetShowDamageText(bool Value) { ChangeValueAndDirty(bShowDamageText, Value); }
+
+	UFUNCTION()
+	bool GetShowRecoverText() const { return bShowRecoverText; }
+	UFUNCTION()
+	void SetShowRecoverText(bool Value) { ChangeValueAndDirty(bShowRecoverText, Value); }
+	
+	UFUNCTION()
+	bool GetShowGoldsText() const { return bShowGoldsText; }
+	UFUNCTION()
+	void SetShowGoldsText(bool Value) { ChangeValueAndDirty(bShowGoldsText, Value); }
+
+	UFUNCTION()
+	bool GetShowBloodVFX() const { return bShowBloodVFX; }
+	UFUNCTION()
+	void SetShowBloodVFX(bool Value) { ChangeValueAndDirty(bShowBloodVFX, Value); }
+	
+	void ApplyGameplayOptions();
+
+private:
+	UPROPERTY()
+	bool bShowDamageText = true;
+
+	UPROPERTY()
+	bool bShowRecoverText = true;
+	
+	UPROPERTY()
+	bool bShowGoldsText = true;
+	
+	UPROPERTY()
+	bool bShowBloodVFX = true;
+
+
+#pragma endregion
+
+
+	
 	////////////////////////////////////////////////////////
 	// Gamepad Sensitivity
 public:

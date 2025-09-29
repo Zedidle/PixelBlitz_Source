@@ -4,9 +4,9 @@
 #include "Subsystems/DropSubsystem.h"
 #include "Item/BaseItem.h"
 #include "Engine/DataTable.h"
-#include "Settings/Config/DataTableSettings.h"
 #include "Engine/DeveloperSettings.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/PXCustomStruct.h"
 
 
@@ -31,10 +31,14 @@ void UDropSubsystem::BeginDestroy()
 void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocation, float SpawnFrequency)
 {
 	if (DropData.Items.IsEmpty()) return ;
-	const UDataTableSettings* Settings = GetDefault<UDataTableSettings>();
-	if (!IsValid(Settings)) return;
-	
-	ItemDataTable = Settings->GetItemData();
+
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	ItemDataTable = DataTableSubsystem->GetItemData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ItemDataTable)
 	
 	FTimerHandle timerHandle;

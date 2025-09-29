@@ -7,34 +7,11 @@
 #include "Item/BaseItem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "BaseWeapon.generated.h"
 
 class ABasePXCharacter;
-
-USTRUCT(BlueprintType)
-struct FWeaponData : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
-	FGameplayTag WeaponTag;
-		
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
-	TSubclassOf<ABaseWeapon> SpawnItemClass;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	TSoftObjectPtr<USoundCue> UseSound;
-
-	UPROPERTY(Config, EditAnywhere, Category = "CameraShake")
-	TSubclassOf<UCameraShakeBase> UseCameraShake;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	int Damage = 5.f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	float RepelPower = 50.f;
-};
 
 
 UCLASS(Abstract, Blueprintable)

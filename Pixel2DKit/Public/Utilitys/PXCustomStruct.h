@@ -4,12 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "LocalizationFuncLib.h"
-#include "UObject/NoExportTypes.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
 #include "Fight/Skills/BaseSkill.h"
-#include "GAS/PXGameplayAbility.h"
 #include "PXCustomStruct.generated.h"
 
 
@@ -31,13 +28,10 @@ class PIXEL2DKIT_API UConfigDataAsset : public UDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Version = "0.001";
+	FString Version = "v0.5.2.6.1";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsDemo = true;	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TEnumAsByte<ELanguageEnum>> UsingLanguages;
 };
 
 #pragma endregion
@@ -117,11 +111,11 @@ struct FAbility: public FTableRowBase
 
 	// 技能名称本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FLocalizedTableData AbilityName_Localized;
+	FText AbilityName;
 
 	// 技能描述本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FLocalizedTableData AbilityDesc_Localized;
+	FText AbilityDesc;
 	
 	// 费用，暂时都是1
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
@@ -252,10 +246,10 @@ struct FCharacterData : public FTableRowBase
 	bool Enable;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
-	FLocalizedTableData CharacterName_Localized;
+	FText CharacterName;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
-	FLocalizedTableData CharacterDesc_Localized;
+	FText CharacterDesc;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
 	TSubclassOf<ABasePXCharacter> Character_Class;
@@ -285,7 +279,7 @@ struct FBuffOnWidget : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
-	FName BuffName_UnLocalized;
+	FText BuffName;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
 	FGameplayTag Tag;
@@ -314,13 +308,13 @@ struct FTalent: public FTableRowBase
 	FGameplayTag TalentTag;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
-	FLocalizedTableData TalentName_Localized;
+	FText TalentName;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	int Price = 3;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
-	FLocalizedTableData Desc_Localized;
+	FText TalentDesc;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	TSoftObjectPtr<UTexture2D> Icon;
@@ -331,7 +325,7 @@ struct FTalent: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 
-	// 如果CommitInit为true，则会初始化生成SkillClass和显示BuffTagOnWidget
+	// 如果 CommonInit 为 true，则会初始化生成SkillClass和显示BuffTagOnWidget
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	bool CommonInit = true;
 	
@@ -360,3 +354,73 @@ struct FUIStruct : public FTableRowBase
 
 };
 #pragma endregion
+
+
+#pragma region FWeaponData
+
+USTRUCT(BlueprintType)
+struct FWeaponData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	FGameplayTag WeaponTag;
+		
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	TSubclassOf<class ABaseWeapon> SpawnItemClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	TSoftObjectPtr<USoundCue> UseSound;
+
+	UPROPERTY(Config, EditAnywhere, Category = "CameraShake")
+	TSubclassOf<UCameraShakeBase> UseCameraShake;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	int Damage = 5.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	float RepelPower = 50.f;
+};
+#pragma endregion
+
+
+
+#pragma region FLevelData
+USTRUCT(BlueprintType)
+struct FLevelData : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	TSoftObjectPtr<USoundWave> BGM;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	FText LevelName;
+};
+#pragma endregion
+
+
+#pragma region FNPCDialogues
+USTRUCT(BlueprintType)
+struct FNPCDialogues : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	float TalkSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	FText FirstTalk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	TArray<FText> RandomTalks;
+};
+#pragma endregion
+
+
+USTRUCT(BlueprintType)
+struct FLocalizedTableData: public FTableRowBase
+{
+	GENERATED_BODY()
+
+};

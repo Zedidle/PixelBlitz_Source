@@ -33,19 +33,22 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
-#include "Settings/Config/CameraShakeSettings.h"
 #include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCameraShakeDataAsset.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 #include "Settings/Config/UserWidgetSettings.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
-#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "Utilitys/UserWidgetFuncLib.h"
 
+
+#define LOCTEXT_NAMESPACE "PX"
 
 class UPXInputComponent;
 class UDataTableSubsystem;
@@ -523,9 +526,13 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	SetJumping(false);
 	SetFalling(false);
 	CurJumpCount = 0;
-	if (const UCameraShakeSettings* CameraShakeSettings = GetDefault<UCameraShakeSettings>())
+
+	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
 	{
-		UGameplayStatics::PlayWorldCameraShake(GetWorld(), CameraShakeSettings->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
+		if (UPXCameraShakeDataAsset* DA = CustomSettings->CameraShakeDataAsset.LoadSynchronous())
+		{
+			UGameplayStatics::PlayWorldCameraShake(GetWorld(), DA->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
+		}
 	}
 	if (bDead)
 	{
@@ -867,18 +874,23 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			{
 				Execute_RemoveBuff(this, FGameplayTag::RequestGameplayTag("Buff.Talent.Revive"), true);
 			}
-			if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
-			{
-				if (UNiagaraSystem* NS_Revive = ResourceSettings->NS_Revive.LoadSynchronous())
-				{
-					UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Revive, GetActorLocation());
 
-				}
-				if (USoundCue* SC_Revive = ResourceSettings->SC_Revive.LoadSynchronous())
-				{
-					USoundFuncLib::PlaySound2D(SC_Revive, 1.f);
-				}
+			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+			const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+			
+			if (UNiagaraSystem* NS_Revive = ResourceDataAsset->NS_Revive.LoadSynchronous())
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Revive, GetActorLocation());
+
 			}
+			if (USoundCue* SC_Revive = ResourceDataAsset->SC_Revive.LoadSynchronous())
+			{
+				USoundFuncLib::PlaySound2D(SC_Revive, 1.f);
+			}
+			
 			if (APXPlayerController* PC = GetController<APXPlayerController>())
 			{
 				PC->OnCharacterControl(false);
@@ -1199,11 +1211,16 @@ void ABasePXCharacter::OnAttackHiting_Implementation()
 
 void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
-	const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
-	if (ResourceSettings && ResourceSettings->NS_HitSmoke)
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+	
+	if (ResourceDataAsset && ResourceDataAsset->NS_HitSmoke)
 	{
 		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			ResourceSettings->NS_SpeedUP.LoadSynchronous(),
+			ResourceDataAsset->NS_SpeedUP.LoadSynchronous(),
 			GetRootComponent(),
 			FName(""),
 			FVector::ZeroVector,
@@ -1228,7 +1245,7 @@ void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 				{
 					ABasePXCharacter* PxCharacter = WeakThis.Get();
 					PxCharacter->bRepulsion = false;
-					UCommonFuncLib::SpawnFloatingTextDefault("Buff/BuffEffectText", "Buff_DeStun",
+					UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_DE-STUN", "解除硬直"),
 					PxCharacter->GetActorLocation(),
 					FLinearColor(0.68, 0.35, 1.0f, 1.0f),
 						FVector2D(0.8,0.8)
@@ -1681,3 +1698,8 @@ void ABasePXCharacter::JumpRelease()
 {
 	StopJumping();
 }
+
+
+
+
+#undef LOCTEXT_NAMESPACE

@@ -216,6 +216,10 @@ void UPXSettingsShared::ResetCultureToCurrentSettings()
 	bResetToDefaultCulture = false;
 }
 
+void UPXSettingsShared::ApplyGameplayOptions()
+{
+}
+
 const FString& UPXSettingsShared::GetPendingCulture() const
 {
 	return PendingCulture;

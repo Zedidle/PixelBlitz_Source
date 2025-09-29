@@ -42,21 +42,10 @@ public:
 	static void SpawnFloatingText(FText Text, FVector WorldLocation, FLinearColor TextColor = FLinearColor::White, FVector2D RenderScale = FVector2D(1,1),
 		UPaperSprite* Icon = nullptr);
 
-	UFUNCTION(BlueprintCallable, Category="Common | FloatingText")
-	static void SpawnFloatingTextDefault(const FString InTableName, const FName InRowName, FVector WorldLocation,
-		FLinearColor TextColor = FLinearColor::White, FVector2D RenderScale = FVector2D(1,1), UPaperSprite* Icon = nullptr);
-
-	UFUNCTION(BlueprintCallable, Category="Common | FloatingText")
-	static void SpawnFloatingTextLocalized(FLocalizedTableData LocalizedTableData, FVector WorldLocation,
-		FLinearColor TextColor = FLinearColor::White, FVector2D RenderScale = FVector2D(1,1), UPaperSprite* Icon = nullptr);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Time")
 	static float DealDeltaTime(float Seconds);
 
-	UFUNCTION(BlueprintCallable, Category="Common | UserWidget")
-	static void SpawnCenterTipLocalized(const FLocalizedTableData&  LocalizedTableData, FLinearColor Color = FLinearColor::White, FVector2D Translation = FVector2D(0,0),
-		FVector2D Scale = FVector2D(1.0f, 1.0f), float PlaybackSpeed = 1.0f, EFloatingTextAnimType AnimType = EFloatingTextAnimType::Shaking);
-	
 	UFUNCTION(BlueprintCallable, Category="Common | UserWidget")
 	static void SpawnCenterTip(FText _Tip, FLinearColor _Color = FLinearColor::White, FVector2D _Translation = FVector2D(0,0),
 		FVector2D _Scale = FVector2D(1.0f, 1.0f), float _PlaybackSpeed = 1.0f, EFloatingTextAnimType _AnimType = EFloatingTextAnimType::Shaking);

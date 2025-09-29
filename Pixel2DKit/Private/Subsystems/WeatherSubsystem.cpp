@@ -8,6 +8,8 @@
 #include "GAS/PXGameplayEffect.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/Config/CustomConfigSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXGameDataAsset.h"
 #include "Utilitys/PXGameplayStatics.h"
 
 
@@ -15,12 +17,14 @@ void UWeatherSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
-	const UCustomConfigSettings* ConfigSettings = GetDefault<UCustomConfigSettings>();
-	if (ConfigSettings)
+	if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
 	{
-		DayTimeEffectSight = ConfigSettings->DayTimeEffect.LoadSynchronous();
+		if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
+		{
+			DayTimeEffectSight = GameDataAsset->DayTimeEffect.LoadSynchronous();
+
+		}
 	}
-	
 }
 void UWeatherSubsystem::MakeWeatherEffect()
 {
@@ -28,10 +32,12 @@ void UWeatherSubsystem::MakeWeatherEffect()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 	APXGameState* GS = UPXGameplayStatics::GetGameState(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GS);
-	const UCustomConfigSettings* ConfigSettings = GetDefault<UCustomConfigSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ConfigSettings);
-	// CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DayTimeEffectSight);
 	
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
+
+	const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameDataAsset);
 	
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABasePXCharacter::StaticClass(), FoundActors);
@@ -79,10 +85,9 @@ void UWeatherSubsystem::MakeWeatherEffect()
 
 		// 天气影响
 		IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
-		if (GS->WeatherName_Localized.IsValid())
+		if (!GS->WeatherName.IsEmpty())
 		{
-			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag,
-				ULocalizationFuncLib::GetLocalizedString(GS->WeatherName_Localized), FLinearColor::White, false);
+			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag, GS->WeatherName.ToString(), FLinearColor::White, false);
 		}
 
 		IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
@@ -90,14 +95,14 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		
 		
 		// 针对玩家的血量影响
-		if (Cast<ABasePXCharacter>(Actor) && ConfigSettings->GE_WeatherEffect_HP)
+		if (Cast<ABasePXCharacter>(Actor) && GameDataAsset->GE_WeatherEffect_HP)
 		{
 			if (const IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Actor))
 			{
 				if (UAbilitySystemComponent* ASC = ASI->GetAbilitySystemComponent())
 				{
-					ASC->RemoveActiveGameplayEffectBySourceEffect(ConfigSettings->GE_WeatherEffect_HP, nullptr);
-					FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(ConfigSettings->GE_WeatherEffect_HP, 1, ASC->MakeEffectContext());
+					ASC->RemoveActiveGameplayEffectBySourceEffect(GameDataAsset->GE_WeatherEffect_HP, nullptr);
+					FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(GameDataAsset->GE_WeatherEffect_HP, 1, ASC->MakeEffectContext());
 					if (FGameplayEffectSpec* Spec = SpecHandle.Data.Get())
 					{
 						Spec->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Buff.Weather.HPEffectPerSeconds"), GS->WeatherEffect.HPEffectPerSecond);

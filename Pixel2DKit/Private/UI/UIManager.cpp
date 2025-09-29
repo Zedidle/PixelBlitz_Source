@@ -8,11 +8,9 @@
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/DataTableSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "UI/PXUIRoot.h"
 #include "Blueprint/UserWidget.h"
-
 #include "Kismet/GameplayStatics.h"
 #include "UI/Tips/CommonTipContainerWidget.h"
 
@@ -115,7 +113,7 @@ void UUIManager::PostInitialize()
 	{
 		UDataTableSubsystem* DataTableManager = GetWorld()->GetGameInstance()->GetSubsystem<UDataTableSubsystem>();
 	
-		if (UDataTable* UITable = DataTableManager->GetDataTable("DT_UIConfig"))
+		if (UDataTable* UITable = DataTableManager->GetDataTable("UIConfig"))
 		{
 			TArray<FUIStruct> UIInfos = DataTableManager->GetRowMap<FUIStruct>(UITable);
 			for (auto& Info : UIInfos)

@@ -7,7 +7,7 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/DataTableSettings.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
@@ -54,21 +54,21 @@ float APXGameState::GetDamagePlusPercent()
 
 void APXGameState::RandomWeather()
 {
-	if (const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>())
+	UPXGameInstance* GameInstance= GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+	
+	if (UDataTable* Data= DataTableSubsystem->GetLevelWeatherRateData())
 	{
-		if (UDataTable* Data= DataTableSettings->GetLevelWeatherRateData())
-		{
-			if (UPXGameInstance* GameInstance= GetGameInstance<UPXGameInstance>())
-			{
-				FName LevelName = GameInstance->GetCurLevelName(true);
-				FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData"));
+		FName LevelName = GameInstance->GetCurLevelName(true);
+		FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData"));
 
-				// 概率计算
-				UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
-			}
-		}
+		// 概率计算
+		UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
 	}
-
+	
 	SetWeather(CurWeatherIndex);
 }
 
@@ -122,24 +122,29 @@ void APXGameState::ToNextLevel_Implementation()
 
 UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
 {
-	if (const UDataTableSettings* DataTableSettings = GetDefault<UDataTableSettings>())
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, nullptr)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, nullptr)
+
+
+	if (UDataTable* DT= DataTableSubsystem->GetWeatherData())
 	{
-		if (UDataTable* DT= DataTableSettings->GetWeatherData())
+		FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("GetWeather"));
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(WeatherData, nullptr);
+		if (UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld()))
 		{
-			FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("GetWeather"));
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(WeatherData, nullptr);
-			if (UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld()))
-			{
-				SettingSaveGame->GameSetting_WeatherType = UGameplayStatics::GetObjectClass(WeatherData->WeatherSetting);
+			SettingSaveGame->GameSetting_WeatherType = UGameplayStatics::GetObjectClass(WeatherData->WeatherSetting);
 
-				WeatherName_Localized = WeatherData->WeatherName_Localized;
-				WeatherType = WeatherData->WeatherType;
-				WeatherEffect = WeatherData->WeatherEffect;
+			WeatherName = WeatherData->WeatherName;
+			WeatherType = WeatherData->WeatherType;
+			WeatherEffect = WeatherData->WeatherEffect;
 
-				return WeatherData->WeatherSetting;
-			}
+			return WeatherData->WeatherSetting;
 		}
 	}
+	
 	return nullptr;
 }
 

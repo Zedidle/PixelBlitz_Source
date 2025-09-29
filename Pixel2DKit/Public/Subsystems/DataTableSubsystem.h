@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "DataTableSubsystem.generated.h"
 
+struct FWeaponData;
+struct FGameplayTag;
 /**
  * 
  */
@@ -13,7 +16,9 @@ UCLASS()
 class PIXEL2DKIT_API UDataTableSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-
+	
+	mutable TMap<FString, TObjectPtr<UDataTable>> LocalizedDataTables;
+	
 	UFUNCTION()
 	FString GetConfigPath(FString InName){ return FString::Printf(TEXT("/Game/Assets/Config/%s.%s"), *InName, *InName); };
 	
@@ -34,6 +39,56 @@ protected:
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UDataTable>> DataTableMap;
 
+
+
+
+
+
+
+public:
+	
+	TObjectPtr<UDataTable> GetUIData(){ return GetDataTable("UIConfig"); }
+	TObjectPtr<UDataTable> GetCharacterData() { return GetDataTable("CharacterData"); }
+	TObjectPtr<UDataTable> GetItemData() { return GetDataTable( "ItemData"); }
+	TObjectPtr<UDataTable> GetBuffOnWidgetData() { return GetDataTable("BuffOnWidget"); }
+	TObjectPtr<UDataTable> GetAchievementData() { return GetDataTable("Achievement"); }
+	TObjectPtr<UDataTable> GetLevelWeatherRateData()  { return GetDataTable("LevelWeatherRate"); }
+	TObjectPtr<UDataTable> GetWeatherData()  { return GetDataTable("Weather"); }
+	
+	
+	mutable TMap<FGameplayTag, FAbility> AbilityData;
+	void LoadAbilityData();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const FAbility GetAbilityDataByTag(const FGameplayTag& AbilityTag);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	const TMap<FGameplayTag, FAbility>& GetAllAbilities();
+	TArray<FString> AbilityDataPaths = {"Ability_Common", "Ability_Saber", "Ability_Archer"};
+	TArray<TObjectPtr<UDataTable>> GetAbilityData()
+	{
+		TArray<TObjectPtr<UDataTable>> Result;
+		for (const auto& Path : AbilityDataPaths)
+		{
+			Result.Add(GetDataTable(Path));
+		}
+		return Result;
+	}
+
+
+	
+	mutable TMap<FGameplayTag, FTalent> TalentData;
+	TObjectPtr<UDataTable> GetTalentData() { return GetDataTable("Talent"); }
+	void LoadTalentData();
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FTalent GetTalentDataByTag(const FGameplayTag& TalentTag);
+	
+	
+	
+	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
+	void LoadWeaponData() ;
+	TObjectPtr<UDataTable> GetWeaponData()  { return GetDataTable("Weapon"); }
+	const FWeaponData* GetWeaponDataByTag(const FGameplayTag& WeaponTag) ;
+	
+	
 };
 
 

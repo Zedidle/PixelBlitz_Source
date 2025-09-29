@@ -12,6 +12,8 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 
+#define LOCTEXT_NAMESPACE "PX"
+
 void UEnergyComponent::Recover()
 {
 }
@@ -173,12 +175,11 @@ bool UEnergyComponent::IsEPEnough(int32 Cost, bool bNeedTip)
 
 	if (bNeedTip)
 	{
-		UCommonFuncLib::SpawnCenterTipLocalized(
-			FLocalizedTableData("Basic/Tips", "EPNotEnough"),
-			FLinearColor::White, FVector2D(0, 300)
-		);
+		UCommonFuncLib::SpawnCenterTip(LOCTEXT("EP_NOT_ENOUGH", "体力不足"),
+			FLinearColor::White, FVector2D(0, 300));
 	}
 
 	return false;
 }
 
+#undef LOCTEXT_NAMESPACE

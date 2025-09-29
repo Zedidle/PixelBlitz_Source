@@ -10,9 +10,7 @@
 #include "UI/UIManager.h"
 #include "UI/Tips/CenterWordTipWidget.h"
 #include "UI/Tips/BaseFloatingTextWidget.h"
-#include "Utilitys/LocalizationFuncLib.h"
 #include "Utilitys/SpaceFuncLib.h"
-// #include "InputMappingContext.h"
 
 
 class UCustomConfigSettings;
@@ -95,35 +93,10 @@ void UCommonFuncLib::SpawnFloatingText(FText Text, FVector WorldLocation, FLinea
 	}
 }
 
-void UCommonFuncLib::SpawnFloatingTextDefault(const FString InTableName, const FName InRowName, FVector WorldLocation,
-	FLinearColor TextColor, FVector2D RenderScale, UPaperSprite* Icon)
-{
-	// const FLocalizedTableData D = FLocalizedTableData(InTableName, InRowName);
-	// FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(D));
-
-	FText Text = FText::FromString(LocalizedString(InTableName, InRowName));
-	
-	SpawnFloatingText(Text, WorldLocation, TextColor, RenderScale, Icon);
-}
-
-void UCommonFuncLib::SpawnFloatingTextLocalized(FLocalizedTableData LocalizedTableData, FVector WorldLocation,
-	FLinearColor TextColor, FVector2D RenderScale, UPaperSprite* Icon)
-{
-	FText Text = FText::FromString(ULocalizationFuncLib::GetLocalizedString(LocalizedTableData));
-	SpawnFloatingText(Text, WorldLocation, TextColor, RenderScale, Icon);
-}
-
 float UCommonFuncLib::DealDeltaTime(float Seconds)
 {
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	return Seconds * UGameplayStatics::GetWorldDeltaSeconds(World) * 60;
-}
-
-void UCommonFuncLib::SpawnCenterTipLocalized(const FLocalizedTableData& LocalizedTableData, FLinearColor Color,
-	FVector2D Translation, FVector2D Scale, float PlaybackSpeed, EFloatingTextAnimType AnimType)
-{
-	FString Word = ULocalizationFuncLib::GetLocalizedString(FLocalizedTableData("Basic/Tips", "EPNotEnough"));
-	SpawnCenterTip(FText::FromString(Word), Color, Translation, Scale, PlaybackSpeed, AnimType);
 }
 
 void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _Translation, FVector2D _Scale,

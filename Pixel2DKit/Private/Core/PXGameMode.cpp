@@ -12,6 +12,8 @@
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 
 
 void APXGameMode::BeginPlay()
@@ -46,13 +48,17 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator Sta
 		PlayerStart->SetActorLocation(StartLocation + FVector(0,0,200));
 		if (!PlayerRespawnPoint)
 		{
-			if (const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>())
+			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+			const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+			
+			if (ResourceDataAsset->PlayerRespawnPointClass)
 			{
-				if (ResourceSettings->PlayerRespawnPointClass)
-				{
-					PlayerRespawnPoint = Cast<APlayerRespawnPoint>(GetWorld()->SpawnActor(ResourceSettings->PlayerRespawnPointClass));
-				}
+				PlayerRespawnPoint = Cast<APlayerRespawnPoint>(GetWorld()->SpawnActor(ResourceDataAsset->PlayerRespawnPointClass));
 			}
+			
 		}
 		if (PlayerRespawnPoint)
 		{

@@ -36,7 +36,7 @@ struct FWeather: public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	FLocalizedTableData WeatherName_Localized;
+	FText WeatherName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
 	TEnumAsByte<EWeather> WeatherType;
@@ -80,7 +80,7 @@ public:
 	FName CurWeatherIndex;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	FLocalizedTableData WeatherName_Localized;
+	FText WeatherName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather")
 	TEnumAsByte<EWeather> WeatherType;

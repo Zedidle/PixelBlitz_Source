@@ -7,6 +7,8 @@
 #include "Character/BasePXCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/CustomConfigSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXGameDataAsset.h"
 
 class UCustomConfigSettings;
 class UEnhancedInputLocalPlayerSubsystem;
@@ -16,10 +18,13 @@ void APXPlayerController::BeginPlay()
 	Super::BeginPlay();
 	PXCharacter = Cast<ABasePXCharacter>(GetPawn());
 
-	if (const UCustomConfigSettings* Settings = GetDefault<UCustomConfigSettings>())
+	if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
 	{
-		IMC_GamePad = Settings->Gamepad_IMC.LoadSynchronous();
-		IMC_KeyBoard = Settings->Keyboard_IMC.LoadSynchronous();
+		if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
+		{
+			IMC_GamePad = GameDataAsset->Gamepad_IMC.LoadSynchronous();
+			IMC_KeyBoard = GameDataAsset->Keyboard_IMC.LoadSynchronous();
+		}
 	}
 }
 

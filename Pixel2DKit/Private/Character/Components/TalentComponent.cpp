@@ -10,11 +10,13 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Settings/Config/DataTableSettings.h"
 #include "Settings/Config/SkillSettings.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
-#include "Utilitys/CommonFuncLib.h"
 
+#define LOCTEXT_NAMESPACE "PX"
+
+class UDataTableSubsystem;
 
 void UTalentComponent::InitTalents()
 {
@@ -23,21 +25,26 @@ void UTalentComponent::InitTalents()
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
 
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
 	for (const FGameplayTag& TalentTag: BasicBuildSaveGame->ChosenTalents)
 	{
 		// 获取对应的Talent结构
-		const FTalent* Data = DataTableSettings.GetTalentDataByTag(TalentTag);
-		if (!Data) continue;
+		const FTalent& TalentData = DataTableSubsystem->GetTalentDataByTag(TalentTag);
+		if (!TalentData.TalentTag.IsValid()) continue;
 
-		for (auto& D: Data->Effect_GameplayTag)
+		for (auto& D: TalentData.Effect_GameplayTag)
 		{
 			EffectGameplayTags.AddData(D.Key, D.Value);
 		}
 
-		for (auto& AbilityClass: Data->AbilityClass)
+		for (auto& AbilityClass: TalentData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
@@ -45,10 +52,10 @@ void UTalentComponent::InitTalents()
 				CachedASC->GiveAbility(Spec);
 			}
 		}
-		if (Data->CommonInit)
+		if (TalentData.CommonInit)
 		{
-			SpawnSkill(Data->SkillClass);
-			PXCharacter->BuffComponent->AddBuffByTag(Data->BuffTagOnWidget);
+			SpawnSkill(TalentData.SkillClass);
+			PXCharacter->BuffComponent->AddBuffByTag(TalentData.BuffTagOnWidget);
 		}
 	}
 }
@@ -398,9 +405,10 @@ void UTalentComponent::MoveWarmingUP()
 	float PlusPowerPercent = WarmUP_Power * EffectGameplayTags[AttackDamagePlusPercentTag];
 	FGameplayTag WarmUP_Tag = FGameplayTag::RequestGameplayTag("Buff.Talent.Warmup");
 	
-	FString BuffName = ULocalizationFuncLib::GetBuffText("Buff_Warmup") + FString::Printf(TEXT("%d"), WarmUP_Power);
+	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
+	
 	IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, WarmUP_Tag, PlusPowerPercent, 0, 999);
-	IBuff_Interface::Execute_AddBuff(PXCharacter, WarmUP_Tag, BuffName,
+	IBuff_Interface::Execute_AddBuff(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
 		FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
 }
 
@@ -422,18 +430,18 @@ void UTalentComponent::MakeSwingFistPower()
 	
 	FGameplayTag SwingFistTag = FGameplayTag::RequestGameplayTag("Buff.Talent.SwingFist");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
-	
-	FString BuffName = ULocalizationFuncLib::GetBuffText("Buff_SwingFist");
+
+	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
 	if (SwingFistPower)
 	{
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[IncreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  BuffName + TEXT("↓"),
+		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[DecreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  BuffName + TEXT("↑"),
+		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
 }
@@ -529,4 +537,4 @@ void UTalentComponent::MakeImmortalPower(bool First)
 
 
 
-
+#undef LOCTEXT_NAMESPACE

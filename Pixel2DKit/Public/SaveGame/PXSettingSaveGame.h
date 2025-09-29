@@ -8,6 +8,7 @@
 
 struct FEnhancedActionKeyMapping;
 
+
 UCLASS()
 class PIXEL2DKIT_API UPXSettingSaveGame : public USaveGame
 {
@@ -15,11 +16,6 @@ class PIXEL2DKIT_API UPXSettingSaveGame : public USaveGame
 
 public:
 
-#pragma region GeneralSetting
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | General")
-	TEnumAsByte<ELanguageEnum> GeneralSetting_Language;
-#pragma endregion
-	
 #pragma region VideoSetting
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting | Video")
 	int VideoSetting_CameraMode;

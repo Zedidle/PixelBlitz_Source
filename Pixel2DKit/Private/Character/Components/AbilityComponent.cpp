@@ -12,7 +12,15 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/PXCustomStruct.h"
+
+
+
+#define LOCTEXT_NAMESPACE "PX"
+
+
+
 
 // Sets default values for this component's properties
 UAbilityComponent::UAbilityComponent()
@@ -80,18 +88,18 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 
-	
 	ChosenAbilities.Add(AbilityTag);
 	
-	const FAbility* AbilityData = DataTableSettings.GetAbilityDataByTag(AbilityTag);
+	const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(AbilityTag);
 
-	if (!AbilityData->PreLevelAbility.IsValid())
+	if (!AbilityData.PreLevelAbility.IsValid())
 	{
 		TakeEffectAbilities.AddUnique(AbilityTag);
 		// 由于同一技能的不同等级都使用相同的GA，只是数值不同，就只用在学习第一个技能是GiveAbility
-		for (auto& AbilityClass: AbilityData->AbilityClass)
+		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
@@ -100,9 +108,9 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 			}
 		}
 	}
-	else if (TakeEffectAbilities.Contains(AbilityData->PreLevelAbility))
+	else if (TakeEffectAbilities.Contains(AbilityData.PreLevelAbility))
 	{
-		TakeEffectAbilities.Remove(AbilityData->PreLevelAbility);
+		TakeEffectAbilities.Remove(AbilityData.PreLevelAbility);
 		TakeEffectAbilities.AddUnique(AbilityTag);
 	}
 	
@@ -116,7 +124,8 @@ void UAbilityComponent::LoadAbility()
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
 	
-	const UDataTableSettings& DataTableSettings = UDataTableSettings::Get();
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
@@ -127,9 +136,10 @@ void UAbilityComponent::LoadAbility()
 	
 	for (auto Tag : TakeEffectAbilities)
 	{
-		const FAbility* AbilityData = DataTableSettings.GetAbilityDataByTag(Tag);
-		if (!AbilityData) continue;
-		for (auto& AbilityClass: AbilityData->AbilityClass)
+		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
+		if (!AbilityData.AbilityTag.IsValid()) continue;
+		
+		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
@@ -138,7 +148,7 @@ void UAbilityComponent::LoadAbility()
 			}
 		}
 		
-		for (auto& D : AbilityData->Effect_GameplayTag)
+		for (auto& D : AbilityData.Effect_GameplayTag)
 		{
 			EffectGameplayTags.AddData(D.Key, D.Value);
 		}
@@ -437,3 +447,6 @@ FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FG
 	
 	return OutAbilityHandles[0];
 }
+
+
+#undef LOCTEXT_NAMESPACE

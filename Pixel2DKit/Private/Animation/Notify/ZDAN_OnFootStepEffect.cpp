@@ -10,9 +10,12 @@
 #include "Settings/Config/CustomResourceSettings.h"
 #include "NiagaraComponent.h"
 #include "Core/PXGameState.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 
+class UPXCustomSettings;
 class UNiagaraComponent;
 
 void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
@@ -20,8 +23,11 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 	Super::OnReceiveNotify_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 
-	const UCustomResourceSettings* ResourceSettings = GetDefault<UCustomResourceSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceSettings)
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
 
 	APaperZDCharacter* Character = OwningInstance->GetPaperCharacter();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Character)
@@ -37,7 +43,7 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 	APXGameState* GS = UPXGameplayStatics::GetGameState(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GS)
 
-	if (UNiagaraSystem* LoadedNS = ResourceSettings->WeatherTypeToNiagara.FindRef(GS->WeatherType).LoadSynchronous())
+	if (UNiagaraSystem* LoadedNS = ResourceDataAsset->WeatherTypeToNiagara.FindRef(GS->WeatherType).LoadSynchronous())
 	{
 		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), LoadedNS,
 				TargetLocation, FRotator(0), PFComp->GetRelativeScale3D(),true, true);
@@ -46,7 +52,7 @@ void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance
 	}
 
 	// 音效
-	if (USoundBase* LoadedSound = ResourceSettings->WeatherTypeToSound.FindRef(GS->WeatherType).LoadSynchronous())
+	if (USoundBase* LoadedSound = ResourceDataAsset->WeatherTypeToSound.FindRef(GS->WeatherType).LoadSynchronous())
 	{
 		USoundFuncLib::PlaySoundAtLocation(LoadedSound, TargetLocation);
 	}

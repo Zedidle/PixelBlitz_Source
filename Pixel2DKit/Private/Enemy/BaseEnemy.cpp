@@ -10,14 +10,11 @@
 #include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/BasePXAnimInstance.h"
-#include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Core/PXSaveGameSubsystem.h"
-#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/EnemyDataAsset.h"
 #include "Fight/Components/FightComponent.h"
@@ -33,8 +30,10 @@
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
-#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
+
+
+#define LOCTEXT_NAMESPACE "PX"
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
@@ -580,8 +579,11 @@ int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 {
 	if (GetIsDefending())
 	{
-		UCommonFuncLib::SpawnFloatingTextDefault(TEXT("Ability/AbilityPassive"), TEXT("Defend"), GetActorLocation(),
+		UCommonFuncLib::SpawnFloatingText(
+			LOCTEXT("AbilityPassive_Defend", "防御"),
+			GetActorLocation(),
 			FLinearColor(0.491, 0.672, 0.672));
+		
 		SetDefendHurt(true);
 		return iniDamage / 2;
 	}
@@ -892,3 +894,10 @@ void ABaseEnemy::Tick(float DeltaSeconds)
 	}
 	
 }
+
+
+
+
+
+
+#undef LOCTEXT_NAMESPACE

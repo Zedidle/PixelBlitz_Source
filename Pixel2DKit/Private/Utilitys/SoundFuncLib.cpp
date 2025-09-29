@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/CustomResourceSettings.h"
+#include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXResourceDataAsset.h"
 
 void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, float Volume)
 {
@@ -32,12 +34,15 @@ void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, flo
 	float _Volume = GameMode->SoundSetting_Arg_MusicBasicMulti * SaveGame->SoundSetting_VolumeValue * Volume;
 
 	
-	const UCustomResourceSettings* ResourceSetting = GetDefault<UCustomResourceSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceSetting)
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
 
-	if (ResourceSetting->Attenuation_Default)
+	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+
+	if (ResourceDataAsset->Attenuation_Default)
 	{
-		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume, 1.0f, 0.0f, ResourceSetting->Attenuation_Default.Get());
+		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume, 1.0f, 0.0f, ResourceDataAsset->Attenuation_Default.Get());
 	}
 	else
 	{
