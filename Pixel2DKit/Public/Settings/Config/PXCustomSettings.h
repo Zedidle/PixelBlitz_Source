@@ -19,22 +19,22 @@ class PIXEL2DKIT_API UPXCustomSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, BlueprintReadOnly, EditAnywhere)
 	TSoftObjectPtr<UPXGameDataAsset> GameDataAsset;
 	
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXCameraShakeDataAsset> CameraShakeDataAsset;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXDataTablesDataAsset> DataTablesDataAsset;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXResourceDataAsset> ResourceDataAsset;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXSkillsDataAsset> SkillsDataAsset;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXWidgetsDataAsset> WidgetsDataAsset;
 
 	

@@ -10,6 +10,16 @@
 class UObject;
 struct FFrame;
 
+
+
+UENUM(BlueprintType)
+enum class ECameraFollowMode : uint8
+{
+	Preview,
+	
+	Behind
+};
+
 UENUM(BlueprintType)
 enum class EColorBlindMode : uint8
 {
@@ -304,6 +314,12 @@ public:
 	bool GetShowBloodVFX() const { return bShowBloodVFX; }
 	UFUNCTION()
 	void SetShowBloodVFX(bool Value) { ChangeValueAndDirty(bShowBloodVFX, Value); }
+
+	UFUNCTION()
+	ECameraFollowMode GetCameraFollowMode() const { return CameraFollowMode; }
+	UFUNCTION()
+	void SetCameraFollowMode(ECameraFollowMode InMode);
+
 	
 	void ApplyGameplayOptions();
 
@@ -320,7 +336,9 @@ private:
 	UPROPERTY()
 	bool bShowBloodVFX = true;
 
-
+	UPROPERTY()
+	ECameraFollowMode CameraFollowMode = ECameraFollowMode::Preview;
+	
 #pragma endregion
 
 

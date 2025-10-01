@@ -12,7 +12,7 @@ enum EWeather : uint8;
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PIXEL2DKIT_API UPXResourceDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

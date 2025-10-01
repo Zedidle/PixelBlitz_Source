@@ -22,10 +22,10 @@ void UPXSettingValueDiscrete_OverallQuality::OnInitialized()
 
 	auto AddOptionIfPossible = [&](int Index, FText&& Value) { if ((MaxQualityLevel < 0) || (Index <= MaxQualityLevel)) { Options.Add(Value); }};
 
-	AddOptionIfPossible(0, LOCTEXT("VideoQualityOverall_Low", "Low"));
-	AddOptionIfPossible(1, LOCTEXT("VideoQualityOverall_Medium", "Medium"));
-	AddOptionIfPossible(2, LOCTEXT("VideoQualityOverall_High", "High"));
-	AddOptionIfPossible(3, LOCTEXT("VideoQualityOverall_Epic", "Epic"));
+	AddOptionIfPossible(0, LOCTEXT("VideoQualityOverall_Low", "低"));
+	AddOptionIfPossible(1, LOCTEXT("VideoQualityOverall_Medium", "中"));
+	AddOptionIfPossible(2, LOCTEXT("VideoQualityOverall_High", "高"));
+	AddOptionIfPossible(3, LOCTEXT("VideoQualityOverall_Epic", "最高"));
 
 	OptionsWithCustom = Options;
 	OptionsWithCustom.Add(LOCTEXT("VideoQualityOverall_Custom", "Custom"));

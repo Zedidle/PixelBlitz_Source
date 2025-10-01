@@ -216,6 +216,14 @@ void UPXSettingsShared::ResetCultureToCurrentSettings()
 	bResetToDefaultCulture = false;
 }
 
+void UPXSettingsShared::SetCameraFollowMode(ECameraFollowMode InMode)
+{
+	if (CameraFollowMode != InMode)
+	{
+		CameraFollowMode = InMode;
+	}
+}
+
 void UPXSettingsShared::ApplyGameplayOptions()
 {
 }

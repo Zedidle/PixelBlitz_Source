@@ -1,18 +1,13 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "CommonInputBaseTypes.h"
 #include "EnhancedInputSubsystems.h"
 #include "Settings/CustomSettings/PXSettingKeyboardInput.h"
-#include "DataSource/GameSettingDataSource.h"
-#include "EditCondition/WhenCondition.h"
 #include "GameSettingCollection.h"
 #include "GameSettingValueDiscreteDynamic.h"
 #include "GameSettingValueScalarDynamic.h"
 #include "Settings/PXGameSettingRegistry.h"
-#include "Settings/PXSettingsLocal.h"
-#include "Settings/PXSettingsShared.h"
 #include "Player/PXLocalPlayer.h"
-#include "PlayerMappableInputConfig.h"
+#include "Settings/PXSettingsShared.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 
 class ULocalPlayer;
@@ -23,21 +18,10 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("MouseAndKeyboardCollection"));
-	Screen->SetDisplayName(LOCTEXT("MouseAndKeyboardCollection_Name", "Mouse & Keyboard"));
+	Screen->SetDisplayName(LOCTEXT("MouseAndKeyboardCollection_Name", "鼠标与键盘"));
 	Screen->Initialize(InLocalPlayer);
 
-	const TSharedRef<FWhenCondition> WhenPlatformSupportsMouseAndKeyboard = MakeShared<FWhenCondition>(
-		[](const ULocalPlayer*, FGameSettingEditableState& InOutEditState)
-		{
-			const UCommonInputPlatformSettings* PlatformInput = UPlatformSettingsManager::Get().GetSettingsForPlatform<UCommonInputPlatformSettings>();
-			if (!PlatformInput->SupportsInputType(ECommonInputType::MouseAndKeyboard))
-			{
-				InOutEditState.Kill(TEXT("Platform does not support mouse and keyboard"));
-			}
-		});
 
-	// Mouse Sensitivity
-	////////////////////////////////////////////////////////////////////////////////////
 	{
 		UGameSettingCollection* Sensitivity = NewObject<UGameSettingCollection>();
 		Sensitivity->SetDevName(TEXT("MouseSensitivityCollection"));
@@ -57,8 +41,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
 			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
 			Setting->SetMinimumLimit(0.01);
-
-			Setting->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
+			
 
 			Sensitivity->AddSetting(Setting);
 		}
@@ -75,8 +58,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
 			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
 			Setting->SetMinimumLimit(0.01);
-
-			Setting->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
+			
 
 			Sensitivity->AddSetting(Setting);
 		}
@@ -93,8 +75,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
 			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
 			Setting->SetMinimumLimit(0.01);
-
-			Setting->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
+			
 
 			Sensitivity->AddSetting(Setting);
 		}
@@ -109,8 +90,6 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis());
 
-			Setting->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
-
 			Sensitivity->AddSetting(Setting);
 		}
 		//----------------------------------------------------------------------------------
@@ -124,19 +103,17 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertHorizontalAxis));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis());
 
-			Setting->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
+
 
 			Sensitivity->AddSetting(Setting);
 		}
 		//----------------------------------------------------------------------------------
 	}
-
-	// Bindings for Mouse & Keyboard - Automatically Generated
-	////////////////////////////////////////////////////////////////////////////////////
+	
 	{
 		UGameSettingCollection* KeyBinding = NewObject<UGameSettingCollection>();
 		KeyBinding->SetDevName(TEXT("KeyBindingCollection"));
-		KeyBinding->SetDisplayName(LOCTEXT("KeyBindingCollection_Name", "Keyboard & Mouse"));
+		KeyBinding->SetDisplayName(LOCTEXT("KeyBindingCollection_Name", "按键绑定"));
 		Screen->AddSetting(KeyBinding);
 
 		const UEnhancedInputLocalPlayerSubsystem* EISubsystem = InLocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -152,7 +129,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 		auto GetOrCreateSettingCollection = [&CategoryToSettingCollection, &Screen](FText DisplayCategory) -> UGameSettingCollection*
 		{
 			static const FString DefaultDevName = TEXT("Default_KBM");
-			static const FText DefaultDevDisplayName = NSLOCTEXT("PXInputSettings", "PXInputDefaults", "Default Experiences");
+			static const FText DefaultDevDisplayName = NSLOCTEXT("PXInputSettings", "PXInputDefaults", "默认");
 
 			if (DisplayCategory.IsEmpty())
 			{
@@ -202,7 +179,6 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 						UPXSettingKeyboardInput* InputBinding = NewObject<UPXSettingKeyboardInput>();
 
 						InputBinding->InitializeInputData(Profile, RowPair.Value, Options);
-						InputBinding->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
 
 						Collection->AddSetting(InputBinding);
 						CreatedMappingNames.Add(RowPair.Key);

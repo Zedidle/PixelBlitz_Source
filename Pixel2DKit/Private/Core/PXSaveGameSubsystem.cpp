@@ -51,18 +51,25 @@ void UPXSaveGameSubsystem::InitData_Setting()
         {
             if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
             {
-                GameDataAsset->Gamepad_IMC->UnmapAll();
-                GameDataAsset->Keyboard_IMC->UnmapAll();
-
-                for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
+                if (UInputMappingContext* Keyboard_IMC = GameDataAsset->Keyboard_IMC.LoadSynchronous())
                 {
-                    GameDataAsset->Gamepad_IMC->MapKey(KM.Action, KM.Key);
+                    Keyboard_IMC->UnmapAll();
+                    for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
+                    {
+                        Keyboard_IMC->MapKey(KM.Action, KM.Key);
+                    } 
+                }
+
+                if (UInputMappingContext* Gamepad_IMC = GameDataAsset->Gamepad_IMC.LoadSynchronous())
+                {
+                    Gamepad_IMC->UnmapAll();
+                    for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
+                    {
+                        Gamepad_IMC->MapKey(KM.Action, KM.Key);
+                    }
                 }
             
-                for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
-                {
-                    GameDataAsset->Keyboard_IMC->MapKey(KM.Action, KM.Key);
-                } 
+
             }
         }
     }

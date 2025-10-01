@@ -10,23 +10,14 @@
 #include "CommonInputSubsystem.h"
 #include "GenericPlatform/GenericPlatformFramePacer.h"
 #include "Player/PXLocalPlayer.h"
-// #include "Performance/PXPerformanceStatTypes.h"
 #include "PlayerMappableInputConfig.h"
 #include "EnhancedInputSubsystems.h"
 #include "ICommonUIModule.h"
 #include "CommonUISettings.h"
-// #include "SoundControlBusMix.h"
 #include "Widgets/Layout/SSafeZone.h"
-// #include "Performance/PXPerformanceSettings.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
 #include "HAL/PlatformFramePacer.h"
-// #include "Development/PXPlatformEmulationSettings.h"
-// #include "SoundControlBus.h"
-// #include "AudioModulationStatics.h"
-// #include "Audio/PXAudioSettings.h"
-// #include "Audio/PXAudioMixEffectsSubsystem.h"
-#include "EnhancedActionKeyMapping.h"
 #include "Development/PXPlatformEmulationSettings.h"
 #include "Input/PXMappableConfigPair.h"
 #include "Performance/PXPerformanceSettings.h"
@@ -355,10 +346,6 @@ void UPXSettingsLocal::SetToDefaults()
 {
 	Super::SetToDefaults();
 
-	bUseHeadphoneMode = false;
-	bUseHDRAudioMode = false;
-	bSoundControlBusMixLoaded = false;
-
 	const UPXPlatformSpecificRenderingSettings* PlatformSettings = UPXPlatformSpecificRenderingSettings::Get();
 	UserChosenDeviceProfileSuffix = PlatformSettings->DefaultDeviceProfileSuffix;
 	DesiredUserChosenDeviceProfileSuffix = UserChosenDeviceProfileSuffix;
@@ -382,11 +369,7 @@ void UPXSettingsLocal::LoadSettings(bool bForceReload)
 		FrameRateLimit = 0.0f;
 	}
 
-	// Enable HRTF if needed
-	bDesiredHeadphoneMode = bUseHeadphoneMode;
-	SetHeadphoneModeEnabled(bUseHeadphoneMode);
-
-
+	
 	DesiredUserChosenDeviceProfileSuffix = UserChosenDeviceProfileSuffix;
 
 	PXSettingsHelpers::FillScalabilitySettingsFromDeviceProfile(DeviceDefaultScalabilitySettings);
@@ -401,8 +384,6 @@ void UPXSettingsLocal::LoadSettings(bool bForceReload)
 void UPXSettingsLocal::ResetToCurrentSettings()
 {
 	Super::ResetToCurrentSettings();
-
-	bDesiredHeadphoneMode = bUseHeadphoneMode;
 
 	UserChosenDeviceProfileSuffix = DesiredUserChosenDeviceProfileSuffix;
 
@@ -844,29 +825,7 @@ void UPXSettingsLocal::SetDesiredDeviceProfileQualitySuffix(const FString& InDes
 	DesiredUserChosenDeviceProfileSuffix = InDesiredSuffix;
 }
 
-void UPXSettingsLocal::SetHeadphoneModeEnabled(bool bEnabled)
-{
-	if (CanModifyHeadphoneModeEnabled())
-	{
-		static IConsoleVariable* BinauralSpatializationDisabledCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("au.DisableBinauralSpatialization"));
-		if (BinauralSpatializationDisabledCVar)
-		{
-			BinauralSpatializationDisabledCVar->Set(!bEnabled, ECVF_SetByGameSetting);
 
-			// Only save settings if the setting actually changed
-			if (bUseHeadphoneMode != bEnabled)
-			{
-				bUseHeadphoneMode = bEnabled;
-				SaveSettings();
-			}
-		}
-	}
-}
-
-bool UPXSettingsLocal::IsHeadphoneModeEnabled() const
-{
-	return bUseHeadphoneMode;
-}
 
 bool UPXSettingsLocal::CanModifyHeadphoneModeEnabled() const
 {
@@ -878,26 +837,6 @@ bool UPXSettingsLocal::CanModifyHeadphoneModeEnabled() const
 	return bHRTFOptionAvailable && !bBinauralSettingControlledByOS;
 }
 
-bool UPXSettingsLocal::IsHDRAudioModeEnabled() const
-{
-	return bUseHDRAudioMode;
-}
-
-// void UPXSettingsLocal::SetHDRAudioModeEnabled(bool bEnabled)
-// {
-// 	bUseHDRAudioMode = bEnabled;
-//
-// 	if (GEngine)
-// 	{
-// 		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
-// 		{
-// 			if (UPXAudioMixEffectsSubsystem* PXAudioMixEffectsSubsystem = World->GetSubsystem<UPXAudioMixEffectsSubsystem>())
-// 			{
-// 				PXAudioMixEffectsSubsystem->ApplyDynamicRangeEffectsChains(bEnabled);
-// 			}
-// 		}
-// 	}
-// }
 
 bool UPXSettingsLocal::CanRunAutoBenchmark() const
 {
@@ -939,192 +878,51 @@ void UPXSettingsLocal::ApplyScalabilitySettings()
 	Scalability::SetQualityLevels(ScalabilityQuality);
 }
 
-// float UPXSettingsLocal::GetOverallVolume() const
-// {
-// 	return OverallVolume;
-// }
-//
-// void UPXSettingsLocal::SetOverallVolume(float InVolume)
-// {
-// 	// Cache the incoming volume value
-// 	OverallVolume = InVolume;
-//
-// 	// Check to see if references to the control buses and control bus mixes have been loaded yet
-// 	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
-// 	if (!bSoundControlBusMixLoaded)
-// 	{
-// 		LoadUserControlBusMix();
-// 	}
-//
-// 	// Ensure it's been loaded before continuing
-// 	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-//
-// 	// Locate the locally cached bus and set the volume on it
-// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Overall")))
-// 	{
-// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-// 		{
-// 			SetVolumeForControlBus(ControlBusPtr, OverallVolume);
-// 		}
-// 	}
-// }
-//
-// float UPXSettingsLocal::GetMusicVolume() const
-// {
-// 	return MusicVolume;
-// }
-//
-// void UPXSettingsLocal::SetMusicVolume(float InVolume)
-// {
-// 	// Cache the incoming volume value
-// 	MusicVolume = InVolume;
-//
-// 	// Check to see if references to the control buses and control bus mixes have been loaded yet
-// 	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
-// 	if (!bSoundControlBusMixLoaded)
-// 	{
-// 		LoadUserControlBusMix();
-// 	}
-//
-// 	// Ensure it's been loaded before continuing
-// 	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-//
-// 	// Locate the locally cached bus and set the volume on it
-// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Music")))
-// 	{
-// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-// 		{
-// 			SetVolumeForControlBus(ControlBusPtr, MusicVolume);
-// 		}
-// 	}
-// }
-//
-// float UPXSettingsLocal::GetSoundFXVolume() const
-// {
-// 	return SoundFXVolume;
-// }
-//
-// void UPXSettingsLocal::SetSoundFXVolume(float InVolume)
-// {
-// 	// Cache the incoming volume value
-// 	SoundFXVolume = InVolume;
-//
-// 	// Check to see if references to the control buses and control bus mixes have been loaded yet
-// 	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
-// 	if (!bSoundControlBusMixLoaded)
-// 	{
-// 		LoadUserControlBusMix();
-// 	}
-//
-// 	// Ensure it's been loaded before continuing
-// 	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-//
-// 	// Locate the locally cached bus and set the volume on it
-// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("SoundFX")))
-// 	{
-// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-// 		{
-// 			SetVolumeForControlBus(ControlBusPtr, SoundFXVolume);
-// 		}
-// 	}
-// }
-//
-// float UPXSettingsLocal::GetDialogueVolume() const
-// {
-// 	return DialogueVolume;
-// }
-//
-// void UPXSettingsLocal::SetDialogueVolume(float InVolume)
-// {
-// 	// Cache the incoming volume value
-// 	DialogueVolume = InVolume;
-//
-// 	// Check to see if references to the control buses and control bus mixes have been loaded yet
-// 	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
-// 	if (!bSoundControlBusMixLoaded)
-// 	{
-// 		LoadUserControlBusMix();
-// 	}
-//
-// 	// Ensure it's been loaded before continuing
-// 	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-//
-// 	// Locate the locally cached bus and set the volume on it
-// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Dialogue")))
-// 	{
-// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-// 		{
-// 			SetVolumeForControlBus(ControlBusPtr, DialogueVolume);
-// 		}
-// 	}
-// }
-//
-// float UPXSettingsLocal::GetVoiceChatVolume() const
-// {
-// 	return VoiceChatVolume;
-// }
-//
-// void UPXSettingsLocal::SetVoiceChatVolume(float InVolume)
-// {
-// 	// Cache the incoming volume value
-// 	VoiceChatVolume = InVolume;
-//
-// 	// Check to see if references to the control buses and control bus mixes have been loaded yet
-// 	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
-// 	if (!bSoundControlBusMixLoaded)
-// 	{
-// 		LoadUserControlBusMix();
-// 	}
-//
-// 	// Ensure it's been loaded before continuing
-// 	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-//
-// 	// Locate the locally cached bus and set the volume on it
-// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("VoiceChat")))
-// 	{
-// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-// 		{
-// 			SetVolumeForControlBus(ControlBusPtr, VoiceChatVolume);
-// 		}
-// 	}
-// }
-//
-// void UPXSettingsLocal::SetVolumeForControlBus(USoundControlBus* InSoundControlBus, float InVolume)
-// {
-// 	// Check to see if references to the control buses and control bus mixes have been loaded yet
-// 	// Will likely need to be loaded if this function is the first time a setter has been called
-// 	if (!bSoundControlBusMixLoaded)
-// 	{
-// 		LoadUserControlBusMix();
-// 	}
-//
-// 	// Ensure it's been loaded before continuing
-// 	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-//
-// 	// Assuming everything has been loaded correctly, we retrieve the world and use AudioModulationStatics to update the Control Bus Volume values and
-// 	// apply the settings to the cached User Control Bus Mix
-// 	if (GEngine && InSoundControlBus && bSoundControlBusMixLoaded)
-// 	{
-// 			if (const UWorld* AudioWorld = GEngine->GetCurrentPlayWorld())
-// 			{
-// 				ensureMsgf(ControlBusMix, TEXT("Control Bus Mix failed to load."));
-//
-// 				// Create and set the Control Bus Mix Stage Parameters
-// 				FSoundControlBusMixStage UpdatedControlBusMixStage;
-// 				UpdatedControlBusMixStage.Bus = InSoundControlBus;
-// 				UpdatedControlBusMixStage.Value.TargetValue = InVolume;
-// 				UpdatedControlBusMixStage.Value.AttackTime = 0.01f;
-// 				UpdatedControlBusMixStage.Value.ReleaseTime = 0.01f;
-//
-// 				// Add the Control Bus Mix Stage to an Array as the UpdateMix function requires
-// 				TArray<FSoundControlBusMixStage> UpdatedMixStageArray;
-// 				UpdatedMixStageArray.Add(UpdatedControlBusMixStage);
-//
-// 				// Modify the matching bus Mix Stage parameters on the User Control Bus Mix
-// 				UAudioModulationStatics::UpdateMix(AudioWorld, ControlBusMix, UpdatedMixStageArray);
-// 			}
-// 	}
-// }
+float UPXSettingsLocal::GetOverallVolume() const
+{
+	return OverallVolume;
+}
+
+void UPXSettingsLocal::SetOverallVolume(float InVolume)
+{
+	// Cache the incoming volume value
+	OverallVolume = InVolume;
+}
+
+float UPXSettingsLocal::GetMusicVolume() const
+{
+	return MusicVolume;
+}
+
+void UPXSettingsLocal::SetMusicVolume(float InVolume)
+{
+	// Cache the incoming volume value
+	MusicVolume = InVolume;
+}
+
+float UPXSettingsLocal::GetSoundUIVolume() const
+{
+	return SoundUIVolume;
+}
+
+void UPXSettingsLocal::SetSoundUIVolume(float InVolume)
+{
+	// Cache the incoming volume value
+	SoundUIVolume = InVolume;
+
+}
+
+float UPXSettingsLocal::GetSoundBattleVolume() const
+{
+	return SoundBattleVolume;
+}
+
+void UPXSettingsLocal::SetSoundBattleVolume(float InVolume)
+{
+	
+}
+
+
 
 void UPXSettingsLocal::SetAudioOutputDeviceId(const FString& InAudioOutputDeviceId)
 {
@@ -1137,69 +935,18 @@ void UPXSettingsLocal::ApplySafeZoneScale()
 	SSafeZone::SetGlobalSafeZoneScale(GetSafeZone());
 }
 
+
+
 void UPXSettingsLocal::ApplyNonResolutionSettings()
 {
 	Super::ApplyNonResolutionSettings();
-
-	// Check if Control Bus Mix references have been loaded,
-	// Might be false if applying non resolution settings without touching any of the setters from UI
-	// if (!bSoundControlBusMixLoaded)
-	// {
-	// 	LoadUserControlBusMix();
-	// }
-	//
-	// // In this section, update each Control Bus to the currently cached UI settings
-	// {
-	// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Overall")))
-	// 	{
-	// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-	// 		{
-	// 			SetVolumeForControlBus(ControlBusPtr, OverallVolume);
-	// 		}
-	// 	}
-	//
-	// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Music")))
-	// 	{
-	// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-	// 		{
-	// 			SetVolumeForControlBus(ControlBusPtr, MusicVolume);
-	// 		}
-	// 	}
-	//
-	// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("SoundFX")))
-	// 	{
-	// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-	// 		{
-	// 			SetVolumeForControlBus(ControlBusPtr, SoundFXVolume);
-	// 		}
-	// 	}
-	//
-	// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Dialogue")))
-	// 	{
-	// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-	// 		{
-	// 			SetVolumeForControlBus(ControlBusPtr, DialogueVolume);
-	// 		}
-	// 	}
-	//
-	// 	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("VoiceChat")))
-	// 	{
-	// 		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-	// 		{
-	// 			SetVolumeForControlBus(ControlBusPtr, VoiceChatVolume);
-	// 		}
-	// 	}
-	// }
+	
 
 	if (UCommonInputSubsystem* InputSubsystem = UCommonInputSubsystem::Get(GetTypedOuter<ULocalPlayer>()))
 	{
 		InputSubsystem->SetGamepadInputType(ControllerPlatform);
 	}
 
-	if (bUseHeadphoneMode != bDesiredHeadphoneMode)
-	{
-		SetHeadphoneModeEnabled(bDesiredHeadphoneMode);
-	}
 	
 	if (DesiredUserChosenDeviceProfileSuffix != UserChosenDeviceProfileSuffix)
 	{
@@ -1434,120 +1181,6 @@ void UPXSettingsLocal::ResetKeybindingsToDefault(UPXLocalPlayer* LocalPlayer)
 }
 
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
-
-// void UPXSettingsLocal::LoadUserControlBusMix()
-// {
-// 	if (GEngine)
-// 	{
-// 		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
-// 		{
-// 			if (const UPXAudioSettings* PXAudioSettings = GetDefault<UPXAudioSettings>())
-// 			{
-// 				USoundControlBus* OverallControlBus = nullptr;
-// 				USoundControlBus* MusicControlBus = nullptr;
-// 				USoundControlBus* SoundFXControlBus = nullptr;
-// 				USoundControlBus* DialogueControlBus = nullptr;
-// 				USoundControlBus* VoiceChatControlBus = nullptr;
-//
-// 				ControlBusMap.Empty();
-//
-// 				if (UObject* ObjPath = PXAudioSettings->OverallVolumeControlBus.TryLoad())
-// 				{
-// 					if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
-// 					{
-// 						OverallControlBus = SoundControlBus;
-// 						ControlBusMap.Add(TEXT("Overall"), OverallControlBus);
-// 					}
-// 					else
-// 					{
-// 						ensureMsgf(SoundControlBus, TEXT("Overall Control Bus reference missing from PX Audio Settings."));
-// 					}
-// 				}
-//
-// 				if (UObject* ObjPath = PXAudioSettings->MusicVolumeControlBus.TryLoad())
-// 				{
-// 					if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
-// 					{
-// 						MusicControlBus = SoundControlBus;
-// 						ControlBusMap.Add(TEXT("Music"), MusicControlBus);
-// 					}
-// 					else
-// 					{
-// 						ensureMsgf(SoundControlBus, TEXT("Music Control Bus reference missing from PX Audio Settings."));
-// 					}
-// 				}
-//
-// 				if (UObject* ObjPath = PXAudioSettings->SoundFXVolumeControlBus.TryLoad())
-// 				{
-// 					if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
-// 					{
-// 						SoundFXControlBus = SoundControlBus;
-// 						ControlBusMap.Add(TEXT("SoundFX"), SoundFXControlBus);
-// 					}
-// 					else
-// 					{
-// 						ensureMsgf(SoundControlBus, TEXT("SoundFX Control Bus reference missing from PX Audio Settings."));
-// 					}
-// 				}
-//
-// 				if (UObject* ObjPath = PXAudioSettings->DialogueVolumeControlBus.TryLoad())
-// 				{
-// 					if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
-// 					{
-// 						DialogueControlBus = SoundControlBus;
-// 						ControlBusMap.Add(TEXT("Dialogue"), DialogueControlBus);
-// 					}
-// 					else
-// 					{
-// 						ensureMsgf(SoundControlBus, TEXT("Dialogue Control Bus reference missing from PX Audio Settings."));
-// 					}
-// 				}
-//
-// 				if (UObject* ObjPath = PXAudioSettings->VoiceChatVolumeControlBus.TryLoad())
-// 				{
-// 					if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
-// 					{
-// 						VoiceChatControlBus = SoundControlBus;
-// 						ControlBusMap.Add(TEXT("VoiceChat"), VoiceChatControlBus);
-// 					}
-// 					else
-// 					{
-// 						ensureMsgf(SoundControlBus, TEXT("VoiceChat Control Bus reference missing from PX Audio Settings."));
-// 					}
-// 				}
-//
-// 				if (UObject* ObjPath = PXAudioSettings->UserSettingsControlBusMix.TryLoad())
-// 				{
-// 					if (USoundControlBusMix* SoundControlBusMix = Cast<USoundControlBusMix>(ObjPath))
-// 					{
-// 						ControlBusMix = SoundControlBusMix;
-//
-// 						const FSoundControlBusMixStage OverallControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, OverallControlBus, OverallVolume);
-// 						const FSoundControlBusMixStage MusicControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, MusicControlBus, MusicVolume);
-// 						const FSoundControlBusMixStage SoundFXControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, SoundFXControlBus, SoundFXVolume);
-// 						const FSoundControlBusMixStage DialogueControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, DialogueControlBus, DialogueVolume);
-// 						const FSoundControlBusMixStage VoiceChatControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, VoiceChatControlBus, VoiceChatVolume);
-//
-// 						TArray<FSoundControlBusMixStage> ControlBusMixStageArray;
-// 						ControlBusMixStageArray.Add(OverallControlBusMixStage);
-// 						ControlBusMixStageArray.Add(MusicControlBusMixStage);
-// 						ControlBusMixStageArray.Add(SoundFXControlBusMixStage);
-// 						ControlBusMixStageArray.Add(DialogueControlBusMixStage);
-// 						ControlBusMixStageArray.Add(VoiceChatControlBusMixStage);
-//
-// 						UAudioModulationStatics::UpdateMix(World, ControlBusMix, ControlBusMixStageArray);
-//
-// 						bSoundControlBusMixLoaded = true;
-// 					}
-// 					else
-// 					{
-// 						ensureMsgf(SoundControlBusMix, TEXT("User Settings Control Bus Mix reference missing from PX Audio Settings."));
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
 
 void UPXSettingsLocal::OnAppActivationStateChanged(bool bIsActive)
 {

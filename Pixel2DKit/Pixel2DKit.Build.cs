@@ -52,7 +52,8 @@ public class Pixel2DKit : ModuleRules
 			"CommonUser",
 			"GameSubtitles",
 			"AudioMixer",
-			"RHI"
+			"RHI",
+			"AudioModulation"
 
 
 		});

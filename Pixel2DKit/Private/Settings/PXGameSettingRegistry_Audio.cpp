@@ -24,290 +24,109 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeAudioSettings(UPXLocal
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("AudioCollection"));
-	Screen->SetDisplayName(LOCTEXT("AudioCollection_Name", "Audio"));
+	Screen->SetDisplayName(LOCTEXT("AudioCollection_Name", "音频"));
 	Screen->Initialize(InLocalPlayer);
 
 	// Volume
 	////////////////////////////////////////////////////////////////////////////////////
-	// {
-	// 	UGameSettingCollection* Volume = NewObject<UGameSettingCollection>();
-	// 	Volume->SetDevName(TEXT("VolumeCollection"));
-	// 	Volume->SetDisplayName(LOCTEXT("VolumeCollection_Name", "Volume"));
-	// 	Screen->AddSetting(Volume);
-	//
-	// 	//----------------------------------------------------------------------------------
-	// 	{
-	// 		UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-	// 		Setting->SetDevName(TEXT("OverallVolume"));
-	// 		Setting->SetDisplayName(LOCTEXT("OverallVolume_Name", "Overall"));
-	// 		Setting->SetDescriptionRichText(LOCTEXT("OverallVolume_Description", "Adjusts the volume of everything."));
-	//
-	// 		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetOverallVolume));
-	// 		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetOverallVolume));
-	// 		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetOverallVolume());
-	// 		Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-	//
-	// 		Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-	//
-	// 		Volume->AddSetting(Setting);
-	// 	}
-	// 	//----------------------------------------------------------------------------------
-	// 	{
-	// 		UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-	// 		Setting->SetDevName(TEXT("MusicVolume"));
-	// 		Setting->SetDisplayName(LOCTEXT("MusicVolume_Name", "Music"));
-	// 		Setting->SetDescriptionRichText(LOCTEXT("MusicVolume_Description", "Adjusts the volume of music."));
-	//
-	// 		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetMusicVolume));
-	// 		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetMusicVolume));
-	// 		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetMusicVolume());
-	// 		Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-	//
-	// 		Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-	//
-	// 		Volume->AddSetting(Setting);
-	// 	}
-	// 	//----------------------------------------------------------------------------------
-	// 	{
-	// 		UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-	// 		Setting->SetDevName(TEXT("SoundEffectsVolume"));
-	// 		Setting->SetDisplayName(LOCTEXT("SoundEffectsVolume_Name", "Sound Effects"));
-	// 		Setting->SetDescriptionRichText(LOCTEXT("SoundEffectsVolume_Description", "Adjusts the volume of sound effects."));
-	//
-	// 		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundFXVolume));
-	// 		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundFXVolume));
-	// 		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetSoundFXVolume());
-	// 		Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-	//
-	// 		Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-	//
-	// 		Volume->AddSetting(Setting);
-	// 	}
-	// 	//----------------------------------------------------------------------------------
-	// 	{
-	// 		UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-	// 		Setting->SetDevName(TEXT("DialogueVolume"));
-	// 		Setting->SetDisplayName(LOCTEXT("DialogueVolume_Name", "Dialogue"));
-	// 		Setting->SetDescriptionRichText(LOCTEXT("DialogueVolume_Description", "Adjusts the volume of dialogue for game characters and voice overs."));
-	//
-	// 		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDialogueVolume));
-	// 		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDialogueVolume));
-	// 		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetDialogueVolume());
-	// 		Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-	//
-	// 		Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-	//
-	// 		Volume->AddSetting(Setting);
-	// 	}
-	// 	//----------------------------------------------------------------------------------
-	// 	{
-	// 		UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-	// 		Setting->SetDevName(TEXT("VoiceChatVolume"));
-	// 		Setting->SetDisplayName(LOCTEXT("VoiceChatVolume_Name", "Voice Chat"));
-	// 		Setting->SetDescriptionRichText(LOCTEXT("VoiceChatVolume_Description", "Adjusts the volume of voice chat."));
-	//
-	// 		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetVoiceChatVolume));
-	// 		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVoiceChatVolume));
-	// 		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetVoiceChatVolume());
-	// 		Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-	//
-	// 		Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-	//
-	// 		Volume->AddSetting(Setting);
-	// 	}
-	// }
-
-
-	// Sound
-	////////////////////////////////////////////////////////////////////////////////////
+	{
+		UGameSettingCollection* Volume = NewObject<UGameSettingCollection>();
+		Volume->SetDevName(TEXT("VolumeCollection"));
+		Volume->SetDisplayName(LOCTEXT("VolumeCollection_Name", "音量控制"));
+		Screen->AddSetting(Volume);
+	
+		//----------------------------------------------------------------------------------
+		{
+			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
+			Setting->SetDevName(TEXT("OverallVolume"));
+			Setting->SetDisplayName(LOCTEXT("OverallVolume_Name", "总音量"));
+			Setting->SetDescriptionRichText(LOCTEXT("OverallVolume_Desc", "调节总体的音量."));
+	
+			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetOverallVolume));
+			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetOverallVolume));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetOverallVolume());
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
+	
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+	
+			Volume->AddSetting(Setting);
+		}
+		//----------------------------------------------------------------------------------
+		{
+			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
+			Setting->SetDevName(TEXT("MusicVolume"));
+			Setting->SetDisplayName(LOCTEXT("MusicVolume_Name", "音乐音量"));
+			Setting->SetDescriptionRichText(LOCTEXT("MusicVolume_Desc", "调节背景音乐的音量"));
+	
+			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetMusicVolume));
+			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetMusicVolume));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetMusicVolume());
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
+	
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+	
+			Volume->AddSetting(Setting);
+		}
+		//----------------------------------------------------------------------------------
+		{
+			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
+			Setting->SetDevName(TEXT("SoundEffectsUIVolume"));
+			Setting->SetDisplayName(LOCTEXT("SoundEffectsUIVolume_Name", "UI效果音量"));
+			Setting->SetDescriptionRichText(LOCTEXT("SoundEffectsUIVolume_Desc", "调节UI音效的音量"));
+	
+			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundUIVolume));
+			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundUIVolume));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetSoundUIVolume());
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
+	
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+	
+			Volume->AddSetting(Setting);
+		}
+		
+		{
+			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
+			Setting->SetDevName(TEXT("SoundEffectsBattleVolume"));
+			Setting->SetDisplayName(LOCTEXT("SoundEffectsBattleVolume_Name", "战斗效果音效"));
+			Setting->SetDescriptionRichText(LOCTEXT("SoundEffectsBattleVolume_Desc", "调节战斗音效的音量"));
+	
+			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundBattleVolume));
+			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundBattleVolume));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetSoundBattleVolume());
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
+	
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+	
+			Volume->AddSetting(Setting);
+		}
+	}
+	
 	{
 		UGameSettingCollection* Sound = NewObject<UGameSettingCollection>();
 		Sound->SetDevName(TEXT("SoundCollection"));
-		Sound->SetDisplayName(LOCTEXT("SoundCollection_Name", "Sound"));
+		Sound->SetDisplayName(LOCTEXT("SoundCollection_Name", "声音处理"));
 		Screen->AddSetting(Sound);
-
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingCollectionPage* SubtitlePage = NewObject<UGameSettingCollectionPage>();
-			SubtitlePage->SetDevName(TEXT("SubtitlePage"));
-			SubtitlePage->SetDisplayName(LOCTEXT("SubtitlePage_Name", "Subtitles"));
-			SubtitlePage->SetDescriptionRichText(LOCTEXT("SubtitlePage_Description", "Configure the visual appearance of subtitles."));
-			SubtitlePage->SetNavigationText(LOCTEXT("SubtitlePage_Navigation", "Options"));
-
-			SubtitlePage->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-
-			Sound->AddSetting(SubtitlePage);
-
-			// Subtitles
-			////////////////////////////////////////////////////////////////////////////////////
-			{
-				UGameSettingCollection* SubtitleCollection = NewObject<UGameSettingCollection>();
-				SubtitleCollection->SetDevName(TEXT("SubtitlesCollection"));
-				SubtitleCollection->SetDisplayName(LOCTEXT("SubtitlesCollection_Name", "Subtitles"));
-				SubtitlePage->AddSetting(SubtitleCollection);
-
-				//----------------------------------------------------------------------------------
-				{
-					UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
-					Setting->SetDevName(TEXT("Subtitles"));
-					Setting->SetDisplayName(LOCTEXT("Subtitles_Name", "Subtitles"));
-					Setting->SetDescriptionRichText(LOCTEXT("Subtitles_Description", "Turns subtitles on/off."));
-
-					Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetSubtitlesEnabled));
-					Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetSubtitlesEnabled));
-					Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetSubtitlesEnabled());
-
-					SubtitleCollection->AddSetting(Setting);
-				}
-				//----------------------------------------------------------------------------------
-				{
-					UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-					Setting->SetDevName(TEXT("SubtitleTextSize"));
-					Setting->SetDisplayName(LOCTEXT("SubtitleTextSize_Name", "Text Size"));
-					Setting->SetDescriptionRichText(LOCTEXT("SubtitleTextSize_Description", "Choose different sizes of the the subtitle text."));
-
-					Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetSubtitlesTextSize));
-					Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetSubtitlesTextSize));
-					Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetSubtitlesTextSize());
-					Setting->AddEnumOption(ESubtitleDisplayTextSize::ExtraSmall, LOCTEXT("ESubtitleTextSize_ExtraSmall", "Extra Small"));
-					Setting->AddEnumOption(ESubtitleDisplayTextSize::Small, LOCTEXT("ESubtitleTextSize_Small", "Small"));
-					Setting->AddEnumOption(ESubtitleDisplayTextSize::Medium, LOCTEXT("ESubtitleTextSize_Medium", "Medium"));
-					Setting->AddEnumOption(ESubtitleDisplayTextSize::Large, LOCTEXT("ESubtitleTextSize_Large", "Large"));
-					Setting->AddEnumOption(ESubtitleDisplayTextSize::ExtraLarge, LOCTEXT("ESubtitleTextSize_ExtraLarge", "Extra Large"));
-
-					SubtitleCollection->AddSetting(Setting);
-				}
-				//----------------------------------------------------------------------------------
-				{
-					UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-					Setting->SetDevName(TEXT("SubtitleTextColor"));
-					Setting->SetDisplayName(LOCTEXT("SubtitleTextColor_Name", "Text Color"));
-					Setting->SetDescriptionRichText(LOCTEXT("SubtitleTextColor_Description", "Choose different colors for the subtitle text."));
-
-					Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetSubtitlesTextColor));
-					Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetSubtitlesTextColor));
-					Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetSubtitlesTextColor());
-					Setting->AddEnumOption(ESubtitleDisplayTextColor::White, LOCTEXT("ESubtitleTextColor_White", "White"));
-					Setting->AddEnumOption(ESubtitleDisplayTextColor::Yellow, LOCTEXT("ESubtitleTextColor_Yellow", "Yellow"));
-
-					SubtitleCollection->AddSetting(Setting);
-				}
-				//----------------------------------------------------------------------------------
-				{
-					UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-					Setting->SetDevName(TEXT("SubtitleTextBorder"));
-					Setting->SetDisplayName(LOCTEXT("SubtitleBackgroundStyle_Name", "Text Border"));
-					Setting->SetDescriptionRichText(LOCTEXT("SubtitleTextBorder_Description", "Choose different borders for the text."));
-
-					Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetSubtitlesTextBorder));
-					Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetSubtitlesTextBorder));
-					Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetSubtitlesTextBorder());
-					Setting->AddEnumOption(ESubtitleDisplayTextBorder::None, LOCTEXT("ESubtitleTextBorder_None", "None"));
-					Setting->AddEnumOption(ESubtitleDisplayTextBorder::Outline, LOCTEXT("ESubtitleTextBorder_Outline", "Outline"));
-					Setting->AddEnumOption(ESubtitleDisplayTextBorder::DropShadow, LOCTEXT("ESubtitleTextBorder_DropShadow", "Drop Shadow"));
-
-					SubtitleCollection->AddSetting(Setting);
-				}
-				//----------------------------------------------------------------------------------
-				{
-					UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-					Setting->SetDevName(TEXT("SubtitleBackgroundOpacity"));
-					Setting->SetDisplayName(LOCTEXT("SubtitleBackground_Name", "Background Opacity"));
-					Setting->SetDescriptionRichText(LOCTEXT("SubtitleBackgroundOpacity_Description", "Choose a different background or letterboxing for the subtitles."));
-
-					Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetSubtitlesBackgroundOpacity));
-					Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetSubtitlesBackgroundOpacity));
-					Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetSubtitlesBackgroundOpacity());
-					Setting->AddEnumOption(ESubtitleDisplayBackgroundOpacity::Clear, LOCTEXT("ESubtitleBackgroundOpacity_Clear", "Clear"));
-					Setting->AddEnumOption(ESubtitleDisplayBackgroundOpacity::Low, LOCTEXT("ESubtitleBackgroundOpacity_Low", "Low"));
-					Setting->AddEnumOption(ESubtitleDisplayBackgroundOpacity::Medium, LOCTEXT("ESubtitleBackgroundOpacity_Medium", "Medium"));
-					Setting->AddEnumOption(ESubtitleDisplayBackgroundOpacity::High, LOCTEXT("ESubtitleBackgroundOpacity_High", "High"));
-					Setting->AddEnumOption(ESubtitleDisplayBackgroundOpacity::Solid, LOCTEXT("ESubtitleBackgroundOpacity_Solid", "Solid"));
-
-					SubtitleCollection->AddSetting(Setting);
-				}
-			}
-		}
-		//----------------------------------------------------------------------------------
-		{
-			UPXSettingValueDiscreteDynamic_AudioOutputDevice* Setting = NewObject<UPXSettingValueDiscreteDynamic_AudioOutputDevice>();
-			Setting->SetDevName(TEXT("AudioOutputDevice"));
-			Setting->SetDisplayName(LOCTEXT("AudioOutputDevice_Name", "Audio Output Device"));
-			Setting->SetDescriptionRichText(LOCTEXT("AudioOutputDevice_Description", "Changes the audio output device for game audio (not voice chat)."));
-
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetAudioOutputDeviceId));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetAudioOutputDeviceId));
-
-			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-			Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(
-				TAG_Platform_Trait_SupportsChangingAudioOutputDevice,
-				TEXT("Platform does not support changing audio output device"))
-			);
-
-			Sound->AddSetting(Setting);
-		}
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
 			Setting->SetDevName(TEXT("BackgroundAudio"));
-			Setting->SetDisplayName(LOCTEXT("BackgroundAudio_Name", "Background Audio"));
-			Setting->SetDescriptionRichText(LOCTEXT("BackgroundAudio_Description", "Turns game audio on/off when the game is in the background. When on, the game audio will continue to play when the game is minimized, or another window is focused."));
+			Setting->SetDisplayName(LOCTEXT("BackgroundAudio_Name", "背景音"));
+			Setting->SetDescriptionRichText(LOCTEXT("BackgroundAudio_Desc", "当游戏处于后台时，开启或关闭游戏音频。当开启时，即使游戏被最小化或另一个窗口获得焦点，游戏音频仍会继续播放。"));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetAllowAudioInBackgroundSetting));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetAllowAudioInBackgroundSetting));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetAllowAudioInBackgroundSetting());
 
-			Setting->AddEnumOption(EPXAllowBackgroundAudioSetting::Off, LOCTEXT("EPXAllowBackgroundAudioSetting_Off", "Off"));
-			Setting->AddEnumOption(EPXAllowBackgroundAudioSetting::AllSounds, LOCTEXT("EPXAllowBackgroundAudioSetting_AllSounds", "All Sounds"));
+			Setting->AddEnumOption(EPXAllowBackgroundAudioSetting::Off, LOCTEXT("EPXAllowBackgroundAudioSetting_Off", "关闭"));
+			Setting->AddEnumOption(EPXAllowBackgroundAudioSetting::AllSounds, LOCTEXT("EPXAllowBackgroundAudioSetting_AllSounds", "所有音量"));
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 			Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(
-				TAG_Platform_Trait_SupportsBackgroundAudio,
-				TEXT("Platform does not support background audio"))
+				TAG_Platform_Trait_SupportsBackgroundAudio, TEXT("Platform does not support background audio"))
 			);
 
 			Sound->AddSetting(Setting);
 		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
-			Setting->SetDevName(TEXT("HeadphoneMode"));
-			Setting->SetDisplayName(LOCTEXT("HeadphoneMode_Name", "3D Headphones"));
-			Setting->SetDescriptionRichText(LOCTEXT("HeadphoneMode_Description", "Enable binaural audio.  Provides 3D audio spatialization, so you can hear the location of sounds more precisely, including above, below, and behind you. Recommended for use with stereo headphones only."));
-
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bDesiredHeadphoneMode));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bDesiredHeadphoneMode));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->IsHeadphoneModeEnabled());
-
-			Setting->AddEditCondition(MakeShared<FWhenCondition>(
-				[](const ULocalPlayer*, FGameSettingEditableState& InOutEditState)
-				{
-					if (!GetDefault<UPXSettingsLocal>()->CanModifyHeadphoneModeEnabled())
-					{
-						InOutEditState.Kill(TEXT("Binaural Spatialization option cannot be modified on this platform"));
-					}
-				}));
-
-			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-
-			Sound->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-		// {
-		// 	UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
-		// 	Setting->SetDevName(TEXT("HDRAudioMode"));
-		// 	Setting->SetDisplayName(LOCTEXT("HDRAudioMode_Name", "High Dynamic Range Audio"));
-		// 	Setting->SetDescriptionRichText(LOCTEXT("HDRAudioMode_Description", "Enable high dynamic range audio. Changes the runtime processing chain to increase the dynamic range of the audio mixdown, appropriate for theater or more cinematic experiences."));
-		//
-		// 	Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bUseHDRAudioMode));
-		// 	Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetHDRAudioModeEnabled));
-		// 	Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->IsHDRAudioModeEnabled());
-		//
-		// 	Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-		//
-		// 	Sound->AddSetting(Setting);
-		// }
-		//----------------------------------------------------------------------------------
 	}
 
 	return Screen;

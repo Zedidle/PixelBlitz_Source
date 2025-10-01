@@ -8,7 +8,7 @@
 
 class UCameraShakeBase;
 
-UCLASS()
+UCLASS(BlueprintType)
 class PIXEL2DKIT_API UPXCameraShakeDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

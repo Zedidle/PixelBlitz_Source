@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Performance/PXPerformanceStatTypes.h"
-// #include "Input/PXMappableConfigPair.h"
+#include "Input/PXMappableConfigPair.h"
 #include "InputCoreTypes.h"
 #include "PXSettingsLocal.generated.h"
 
@@ -231,40 +231,10 @@ public:
 	FAudioDeviceChanged OnAudioOutputDeviceChanged;
 
 public:
-	/** Returns if we're using headphone mode (HRTF) **/
-	UFUNCTION()
-	bool IsHeadphoneModeEnabled() const;
-
-	/** Enables or disables headphone mode (HRTF) - NOTE this setting will be overruled if au.DisableBinauralSpatialization is set */
-	UFUNCTION()
-	void SetHeadphoneModeEnabled(bool bEnabled);
 
 	/** Returns if we can enable/disable headphone mode (i.e., if it's not forced on or off by the platform) */
 	UFUNCTION()
 	bool CanModifyHeadphoneModeEnabled() const;
-
-public:
-	/** Whether we *want* to use headphone mode (HRTF); may or may not actually be applied **/
-	UPROPERTY(Transient)
-	bool bDesiredHeadphoneMode;
-
-private:
-	/** Whether to use headphone mode (HRTF) **/
-	UPROPERTY(config)
-	bool bUseHeadphoneMode;
-
-public:
-	/** Returns if we're using High Dynamic Range Audio mode (HDR Audio) **/
-	UFUNCTION()
-	bool IsHDRAudioModeEnabled() const;
-
-	/** Enables or disables High Dynamic Range Audio mode (HDR Audio) */
-	// UFUNCTION()
-	// void SetHDRAudioModeEnabled(bool bEnabled);
-
-	/** Whether to use High Dynamic Range Audio mode (HDR Audio) **/
-	UPROPERTY(config)
-	bool bUseHDRAudioMode;
 
 public:
 	/** Returns true if this platform can run the auto benchmark */
@@ -282,30 +252,26 @@ public:
 	/** Apply just the quality scalability settings */
 	void ApplyScalabilitySettings();
 
-	// UFUNCTION()
-	// float GetOverallVolume() const;
-	// UFUNCTION()
-	// void SetOverallVolume(float InVolume);
+	UFUNCTION()
+	float GetOverallVolume() const;
+	UFUNCTION()
+	void SetOverallVolume(float InVolume);
 
-	// UFUNCTION()
-	// float GetMusicVolume() const;
-	// UFUNCTION()
-	// void SetMusicVolume(float InVolume);
+	UFUNCTION()
+	float GetMusicVolume() const;
+	UFUNCTION()
+	void SetMusicVolume(float InVolume);
 
-	// UFUNCTION()
-	// float GetSoundFXVolume() const;
-	// UFUNCTION()
-	// void SetSoundFXVolume(float InVolume);
-	//
-	// UFUNCTION()
-	// float GetDialogueVolume() const;
-	// UFUNCTION()
-	// void SetDialogueVolume(float InVolume);
-	//
-	// UFUNCTION()
-	// float GetVoiceChatVolume() const;
-	// UFUNCTION()
-	// void SetVoiceChatVolume(float InVolume);
+	UFUNCTION()
+	float GetSoundUIVolume() const;
+	UFUNCTION()
+	void SetSoundUIVolume(float InVolume);
+	
+	UFUNCTION()
+	float GetSoundBattleVolume() const;
+	UFUNCTION()
+	void SetSoundBattleVolume(float InVolume);
+
 
 	//////////////////////////////////////////////////////////////////
 	// Audio - Sound
@@ -336,12 +302,6 @@ public:
 	void SetSafeZone(float Value) { SafeZoneScale = Value; ApplySafeZoneScale(); }
 
 	void ApplySafeZoneScale();
-private:
-	// void SetVolumeForControlBus(USoundControlBus* InSoundControlBus, float InVolume);
-
-	//////////////////////////////////////////////////////////////////
-	// Keybindings
-public:
 
 
 	// Sets the controller representation to use, a single platform might support multiple kinds of controllers.  For
@@ -432,27 +392,26 @@ public:
 	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 private:
-	// void LoadUserControlBusMix();
 
 	UPROPERTY(Config)
 	float OverallVolume = 1.0f;
 	UPROPERTY(Config)
 	float MusicVolume = 1.0f;
 	UPROPERTY(Config)
-	float SoundFXVolume = 1.0f;
+	float SoundUIVolume = 1.0f;
+	UPROPERTY(Config)
+	float SoundBattleVolume = 1.0f;
 	UPROPERTY(Config)
 	float DialogueVolume = 1.0f;
 	UPROPERTY(Config)
 	float VoiceChatVolume = 1.0f;
 
-	// UPROPERTY(Transient)
-	// TMap<FName/*SoundClassName*/, TObjectPtr<USoundControlBus>> ControlBusMap;
-	//
-	// UPROPERTY(Transient)
-	// TObjectPtr<USoundControlBusMix> ControlBusMix = nullptr;
-
 	UPROPERTY(Transient)
-	bool bSoundControlBusMixLoaded;
+	TMap<FName/*SoundClassName*/, TObjectPtr<USoundControlBus>> ControlBusMap;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<USoundControlBusMix> ControlBusMix = nullptr;
+
 
 	UPROPERTY(Config)
 	float SafeZoneScale = -1;

@@ -10,7 +10,7 @@ class ABaseSkill;
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PIXEL2DKIT_API UPXSkillsDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

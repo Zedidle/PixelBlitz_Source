@@ -11,7 +11,7 @@ class UBaseFloatingTextWidget;
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class PIXEL2DKIT_API UPXWidgetsDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

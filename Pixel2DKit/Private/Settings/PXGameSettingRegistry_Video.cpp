@@ -96,7 +96,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("VideoCollection"));
-	Screen->SetDisplayName(LOCTEXT("VideoCollection_Name", "Video"));
+	Screen->SetDisplayName(LOCTEXT("VideoCollection_Name", "视频"));
 	Screen->Initialize(InLocalPlayer);
 
 	UGameSettingValueDiscreteDynamic_Enum* WindowModeSetting = nullptr;
@@ -107,21 +107,21 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 	{
 		UGameSettingCollection* Display = NewObject<UGameSettingCollection>();
 		Display->SetDevName(TEXT("DisplayCollection"));
-		Display->SetDisplayName(LOCTEXT("DisplayCollection_Name", "Display"));
+		Display->SetDisplayName(LOCTEXT("DisplayCollection_Name", "显示"));
 		Screen->AddSetting(Display);
 
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
 			Setting->SetDevName(TEXT("WindowMode"));
-			Setting->SetDisplayName(LOCTEXT("WindowMode_Name", "Window Mode"));
-			Setting->SetDescriptionRichText(LOCTEXT("WindowMode_Description", "In Windowed mode you can interact with other windows more easily, and drag the edges of the window to set the size. In Windowed Fullscreen mode you can easily switch between applications. In Fullscreen mode you cannot interact with other windows as easily, but the game will run slightly faster."));
+			Setting->SetDisplayName(LOCTEXT("WindowMode_Name", "窗口模式"));
+			Setting->SetDescriptionRichText(LOCTEXT("WindowMode_Desc", "在窗口化模式下，您可以更轻松地与其他窗口交互，并可拖拽窗口边缘调整尺寸。在窗口化全屏模式下，您可以轻松切换不同应用程序。在独占全屏模式下，虽然与其他窗口的交互相对不便，但游戏运行速度会稍快一些。"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFullscreenMode));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFullscreenMode));
-			Setting->AddEnumOption(EWindowMode::Fullscreen, LOCTEXT("WindowModeFullscreen", "Fullscreen"));
-			Setting->AddEnumOption(EWindowMode::WindowedFullscreen, LOCTEXT("WindowModeWindowedFullscreen", "Windowed Fullscreen"));
-			Setting->AddEnumOption(EWindowMode::Windowed, LOCTEXT("WindowModeWindowed", "Windowed"));
+			Setting->AddEnumOption(EWindowMode::Fullscreen, LOCTEXT("WindowModeFullscreen", "独占全屏"));
+			Setting->AddEnumOption(EWindowMode::WindowedFullscreen, LOCTEXT("WindowModeWindowedFullscreen", "窗口化全屏"));
+			Setting->AddEnumOption(EWindowMode::Windowed, LOCTEXT("WindowModeWindowed", "窗口"));
 
 			Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(TAG_Platform_Trait_SupportsWindowedMode, TEXT("Platform does not support window mode")));
 
@@ -133,8 +133,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UPXSettingValueDiscrete_Resolution* Setting = NewObject<UPXSettingValueDiscrete_Resolution>();
 			Setting->SetDevName(TEXT("Resolution"));
-			Setting->SetDisplayName(LOCTEXT("Resolution_Name", "Resolution"));
-			Setting->SetDescriptionRichText(LOCTEXT("Resolution_Description", "Display Resolution determines the size of the window in Windowed mode. In Fullscreen mode, Display Resolution determines the graphics card output resolution, which can result in black bars depending on monitor and graphics card. Display Resolution is inactive in Windowed Fullscreen mode."));
+			Setting->SetDisplayName(LOCTEXT("Resolution_Name", "分辨率"));
+			Setting->SetDescriptionRichText(LOCTEXT("Resolution_Desc", "显示分辨率在窗口化模式下决定窗口的尺寸。在全屏模式下，显示分辨率决定显卡的输出分辨率，根据显示器与显卡的匹配情况，可能会产生黑边。在窗口化全屏模式下，显示分辨率的设置不生效。"));
 
 			Setting->AddEditDependency(WindowModeSetting);
 			Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(TAG_Platform_Trait_SupportsWindowedMode, TEXT("Platform does not support window mode")));
@@ -142,7 +142,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 			{
 				if (WindowModeSetting->GetValue<EWindowMode::Type>() == EWindowMode::WindowedFullscreen)
 				{
-					InOutEditState.Disable(LOCTEXT("ResolutionWindowedFullscreen_Disabled", "When the Window Mode is set to <strong>Windowed Fullscreen</>, the resolution must match the native desktop resolution."));
+					InOutEditState.Disable(LOCTEXT("ResolutionWindowedFullscreen_Disabled", "当显示模式设置为<strong>窗口化全屏</strong>时，分辨率必须与桌面的原生分辨率保持一致。"));
 				}
 			}));
 
@@ -150,7 +150,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		}
 		//----------------------------------------------------------------------------------
 		{
-			AddPerformanceStatPage(Display, InLocalPlayer);
+			// AddPerformanceStatPage(Display, InLocalPlayer);
 		}
 		//----------------------------------------------------------------------------------
 	}
@@ -160,53 +160,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 	{
 		UGameSettingCollection* Graphics = NewObject<UGameSettingCollection>();
 		Graphics->SetDevName(TEXT("GraphicsCollection"));
-		Graphics->SetDisplayName(LOCTEXT("GraphicsCollection_Name", "Graphics"));
+		Graphics->SetDisplayName(LOCTEXT("GraphicsCollection_Name", "图形"));
 		Screen->AddSetting(Graphics);
 
 		//----------------------------------------------------------------------------------
 		{
-			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-			Setting->SetDevName(TEXT("ColorBlindMode"));
-			Setting->SetDisplayName(LOCTEXT("ColorBlindMode_Name", "Color Blind Mode"));
-			Setting->SetDescriptionRichText(LOCTEXT("ColorBlindMode_Description", "Using the provided images, test out the different color blind modes to find a color correction that works best for you."));
-			
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetColorBlindMode));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetColorBlindMode));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetColorBlindMode());
-			Setting->AddEnumOption(EColorBlindMode::Off, LOCTEXT("ColorBlindRotatorSettingOff", "Off"));
-			Setting->AddEnumOption(EColorBlindMode::Deuteranope, LOCTEXT("ColorBlindRotatorSettingDeuteranope", "Deuteranope"));
-			Setting->AddEnumOption(EColorBlindMode::Protanope, LOCTEXT("ColorBlindRotatorSettingProtanope", "Protanope"));
-			Setting->AddEnumOption(EColorBlindMode::Tritanope, LOCTEXT("ColorBlindRotatorSettingTritanope", "Tritanope"));
-
-			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-
-			Graphics->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-			Setting->SetDevName(TEXT("ColorBlindStrength"));
-			Setting->SetDisplayName(LOCTEXT("ColorBlindStrength_Name", "Color Blind Strength"));
-			Setting->SetDescriptionRichText(LOCTEXT("ColorBlindStrength_Description", "Using the provided images, test out the different strengths to find a color correction that works best for you."));
-
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetColorBlindStrength));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetColorBlindStrength));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetColorBlindStrength());
-			for (int32 Index = 0; Index <= 10; Index++)
-			{
-				Setting->AddOption(Index, FText::AsNumber(Index));
-			}
-
-			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
-
-			Graphics->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-		{
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
 			Setting->SetDevName(TEXT("Brightness"));
-			Setting->SetDisplayName(LOCTEXT("Brightness_Name", "Brightness"));
-			Setting->SetDescriptionRichText(LOCTEXT("Brightness_Description", "Adjusts the brightness."));
+			Setting->SetDisplayName(LOCTEXT("Brightness_Name", "亮度"));
+			Setting->SetDescriptionRichText(LOCTEXT("Brightness_Desc", "调整屏幕亮度"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDisplayGamma));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDisplayGamma));
@@ -225,9 +187,9 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UPXSettingAction_SafeZoneEditor* Setting = NewObject<UPXSettingAction_SafeZoneEditor>();
 			Setting->SetDevName(TEXT("SafeZone"));
-			Setting->SetDisplayName(LOCTEXT("SafeZone_Name", "Safe Zone"));
-			Setting->SetDescriptionRichText(LOCTEXT("SafeZone_Description", "Set the UI safe zone for the platform."));
-			Setting->SetActionText(LOCTEXT("SafeZone_Action", "Set Safe Zone"));
+			Setting->SetDisplayName(LOCTEXT("SafeZone_Name", "安全区域"));
+			Setting->SetDescriptionRichText(LOCTEXT("SafeZone_Desc", "设置UI的安全区域"));
+			Setting->SetActionText(LOCTEXT("SafeZone_Action", "设置安全区"));
 			Setting->SetNamedAction(GameSettings_Action_EditSafeZone);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -251,7 +213,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 	{
 		UGameSettingCollection* GraphicsQuality = NewObject<UGameSettingCollection>();
 		GraphicsQuality->SetDevName(TEXT("GraphicsQuality"));
-		GraphicsQuality->SetDisplayName(LOCTEXT("GraphicsQuality_Name", "Graphics Quality"));
+		GraphicsQuality->SetDisplayName(LOCTEXT("GraphicsQuality_Name", "图形质量"));
 		Screen->AddSetting(GraphicsQuality);
 
 		UGameSetting* AutoSetQuality = nullptr;
@@ -262,8 +224,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 			// Console-style device profile selection
 			UGameSettingValueDiscreteDynamic* Setting = NewObject<UGameSettingValueDiscreteDynamic>();
 			Setting->SetDevName(TEXT("DeviceProfileSuffix"));
-			Setting->SetDisplayName(LOCTEXT("DeviceProfileSuffix_Name", "Quality Presets"));
-			Setting->SetDescriptionRichText(LOCTEXT("DeviceProfileSuffix_Description", "Choose between different quality presets to make a trade off between quality and speed."));
+			Setting->SetDisplayName(LOCTEXT("DeviceProfileSuffix_Name", "质量预设"));
+			Setting->SetDescriptionRichText(LOCTEXT("DeviceProfileSuffix_Desc", "在不同的质量预设之间进行选择，以在质量和速度之间进行权衡。"));
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDesiredDeviceProfileQualitySuffix));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDesiredDeviceProfileQualitySuffix));
 
@@ -291,8 +253,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 			MobileFPSType = Setting;
 
 			Setting->SetDevName(TEXT("FrameRateLimit_Mobile"));
-			Setting->SetDisplayName(LOCTEXT("FrameRateLimit_Mobile_Name", "Frame Rate Limit"));
-			Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_Mobile_Description", "Select a desired framerate. Use this to fine tune performance on your device."));
+			Setting->SetDisplayName(LOCTEXT("FrameRateLimit_Mobile_Name", "帧率限制"));
+			Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_Mobile_Desc", "选择期望的帧率，用于微调设备性能。"));
 
 			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EPXFramePacingMode::MobileStyle));
 
@@ -303,11 +265,11 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UGameSettingAction* Setting = NewObject<UGameSettingAction>();
 			Setting->SetDevName(TEXT("AutoSetQuality"));
-			Setting->SetDisplayName(LOCTEXT("AutoSetQuality_Name", "Auto-Set Quality"));
-			Setting->SetDescriptionRichText(LOCTEXT("AutoSetQuality_Description", "Automatically configure the graphics quality options based on a benchmark of the hardware."));
+			Setting->SetDisplayName(LOCTEXT("AutoSetQuality_Name", "自动设置"));
+			Setting->SetDescriptionRichText(LOCTEXT("AutoSetQuality_Desc", "根据硬件基准测试自动配置图形质量选项。"));
 
 			Setting->SetDoesActionDirtySettings(true);
-			Setting->SetActionText(LOCTEXT("AutoSetQuality_Action", "Auto-Set"));
+			Setting->SetActionText(LOCTEXT("AutoSetQuality_Action", "自动设置"));
 			Setting->SetCustomAction([](ULocalPlayer* LocalPlayer)
 			{
 				const UPXPlatformSpecificRenderingSettings* PlatformSettings = UPXPlatformSpecificRenderingSettings::Get();
@@ -351,8 +313,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UPXSettingValueDiscrete_OverallQuality* Setting = NewObject<UPXSettingValueDiscrete_OverallQuality>();
 			Setting->SetDevName(TEXT("GraphicsQualityPresets"));
-			Setting->SetDisplayName(LOCTEXT("GraphicsQualityPresets_Name", "Quality Presets"));
-			Setting->SetDescriptionRichText(LOCTEXT("GraphicsQualityPresets_Description", "Quality Preset allows you to adjust multiple video options at once. Try a few options to see what fits your preference and device's performance."));
+			Setting->SetDisplayName(LOCTEXT("GraphicsQualityPresets_Name", "质量预设"));
+			Setting->SetDescriptionRichText(LOCTEXT("GraphicsQualityPresets_Desc", "质量预设允许您一次性调整多个视频选项。尝试几种选项，找到最符合您偏好和设备性能的设置。"));
 
 			Setting->AddEditDependency(AutoSetQuality);
 
@@ -368,39 +330,20 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 
 			GraphicsQualityPresets = Setting;
 		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-			Setting->SetDevName(TEXT("ResolutionScale"));
-			Setting->SetDisplayName(LOCTEXT("ResolutionScale_Name", "3D Resolution"));
-			Setting->SetDescriptionRichText(LOCTEXT("ResolutionScale_Description", "3D resolution determines the resolution that objects are rendered in game, but does not affect the main menu.  Lower resolutions can significantly increase frame rate."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetResolutionScaleNormalized));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetResolutionScaleNormalized));
-			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-
-			Setting->AddEditDependency(AutoSetQuality);
-			Setting->AddEditDependency(GraphicsQualityPresets);
-			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_VideoQuality>(TEXT("Platform does not support 3D Resolution")));
-			//@TODO: Add support for 3d res on mobile
-
-			// When this setting changes, it can GraphicsQualityPresets to be set to custom, or a particular preset.
-			GraphicsQualityPresets->AddEditDependency(Setting);
-			GraphicsQuality->AddSetting(Setting);
-		}
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
 			Setting->SetDevName(TEXT("GlobalIlluminationQuality"));
-			Setting->SetDisplayName(LOCTEXT("GlobalIlluminationQuality_Name", "Global Illumination"));
-			Setting->SetDescriptionRichText(LOCTEXT("GlobalIlluminationQuality_Description", "Global Illumination controls the quality of dynamically calculated indirect lighting bounces, sky shadowing and Ambient Occlusion. Settings of 'High' and above use more accurate ray tracing methods to solve lighting, but can reduce performance."));
+			Setting->SetDisplayName(LOCTEXT("GlobalIlluminationQuality_Name", "全局光照"));
+			Setting->SetDescriptionRichText(LOCTEXT("GlobalIlluminationQuality_Desc", "全局光照控制着动态计算的间接光照反弹、天空阴影以及环境光遮蔽的质量。“高”及以上级别的设置会采用更精确的光线追踪方法来计算光照，但这可能会影响性能。"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetGlobalIlluminationQuality));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetGlobalIlluminationQuality));
-			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "Low"));
-			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("VisualEffectQualityEpic", "Epic"));
+			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "低"));
+			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "中"));
+			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "高"));
+			Setting->AddOption(3, LOCTEXT("VisualEffectQualityEpic", "优异"));
 
 			Setting->AddEditDependency(AutoSetQuality);
 			Setting->AddEditDependency(GraphicsQualityPresets);
@@ -415,15 +358,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
 			Setting->SetDevName(TEXT("Shadows"));
-			Setting->SetDisplayName(LOCTEXT("Shadows_Name", "Shadows"));
-			Setting->SetDescriptionRichText(LOCTEXT("Shadows_Description", "Shadow quality determines the resolution and view distance of dynamic shadows. Shadows improve visual quality and give better depth perception, but can reduce performance."));
+			Setting->SetDisplayName(LOCTEXT("Shadows_Name", "阴影"));
+			Setting->SetDescriptionRichText(LOCTEXT("Shadows_Desc", "阴影质量决定动态阴影的分辨率与可视距离。阴影能提升视觉品质并增强场景深度感知，但可能会影响性能。"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetShadowQuality));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetShadowQuality));
-			Setting->AddOption(0, LOCTEXT("ShadowLow", "Off"));
-			Setting->AddOption(1, LOCTEXT("ShadowMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("ShadowHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("ShadowEpic", "Epic"));
+			Setting->AddOption(0, LOCTEXT("ShadowLow", "关闭"));
+			Setting->AddOption(1, LOCTEXT("ShadowMedium", "中"));
+			Setting->AddOption(2, LOCTEXT("ShadowHigh", "高"));
+			Setting->AddOption(3, LOCTEXT("ShadowEpic", "优异"));
 
 			Setting->AddEditDependency(AutoSetQuality);
 			Setting->AddEditDependency(GraphicsQualityPresets);
@@ -438,15 +381,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
 			Setting->SetDevName(TEXT("AntiAliasing"));
-			Setting->SetDisplayName(LOCTEXT("AntiAliasing_Name", "Anti-Aliasing"));
-			Setting->SetDescriptionRichText(LOCTEXT("AntiAliasing_Description", "Anti-Aliasing reduces jaggy artifacts along geometry edges. Increasing this setting will make edges look smoother, but can reduce performance. Higher settings mean more anti-aliasing."));
+			Setting->SetDisplayName(LOCTEXT("AntiAliasing_Name", "抗锯齿"));
+			Setting->SetDescriptionRichText(LOCTEXT("AntiAliasing_Desc", "抗锯齿可减少几何边缘的锯齿瑕疵。提高此项设置会使边缘看起来更平滑，但可能会影响性能。设置越高意味着抗锯齿处理强度越大。"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetAntiAliasingQuality));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetAntiAliasingQuality));
-			Setting->AddOption(0, LOCTEXT("AntiAliasingLow", "Off"));
-			Setting->AddOption(1, LOCTEXT("AntiAliasingMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("AntiAliasingHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("AntiAliasingEpic", "Epic"));
+			Setting->AddOption(0, LOCTEXT("AntiAliasingLow", "关闭"));
+			Setting->AddOption(1, LOCTEXT("AntiAliasingMedium", "中"));
+			Setting->AddOption(2, LOCTEXT("AntiAliasingHigh", "高"));
+			Setting->AddOption(3, LOCTEXT("AntiAliasingEpic", "最高"));
 
 			Setting->AddEditDependency(AutoSetQuality);
 			Setting->AddEditDependency(GraphicsQualityPresets);
@@ -461,15 +404,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
 			Setting->SetDevName(TEXT("ViewDistance"));
-			Setting->SetDisplayName(LOCTEXT("ViewDistance_Name", "View Distance"));
-			Setting->SetDescriptionRichText(LOCTEXT("ViewDistance_Description", "View distance determines how far away objects are culled for performance."));
+			Setting->SetDisplayName(LOCTEXT("ViewDistance_Name", "视距"));
+			Setting->SetDescriptionRichText(LOCTEXT("ViewDistance_Desc", "视距设置决定物体在多大距离处被剔除以提升性能。"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetViewDistanceQuality));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetViewDistanceQuality));
-			Setting->AddOption(0, LOCTEXT("ViewDistanceNear", "Near"));
-			Setting->AddOption(1, LOCTEXT("ViewDistanceMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("ViewDistanceFar", "Far"));
-			Setting->AddOption(3, LOCTEXT("ViewDistanceEpic", "Epic"));
+			Setting->AddOption(0, LOCTEXT("ViewDistanceNear", "近"));
+			Setting->AddOption(1, LOCTEXT("ViewDistanceMedium", "中"));
+			Setting->AddOption(2, LOCTEXT("ViewDistanceFar", "远"));
+			Setting->AddOption(3, LOCTEXT("ViewDistanceEpic", "很远"));
 
 			Setting->AddEditDependency(AutoSetQuality);
 			Setting->AddEditDependency(GraphicsQualityPresets);
@@ -484,16 +427,16 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 		{
 			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
 			Setting->SetDevName(TEXT("TextureQuality"));
-			Setting->SetDisplayName(LOCTEXT("TextureQuality_Name", "Textures"));
+			Setting->SetDisplayName(LOCTEXT("TextureQuality_Name", "纹理"));
 
-			Setting->SetDescriptionRichText(LOCTEXT("TextureQuality_Description", "Texture quality determines the resolution of textures in game. Increasing this setting will make objects more detailed, but can reduce performance."));
+			Setting->SetDescriptionRichText(LOCTEXT("TextureQuality_Desc", "纹理质量决定游戏中纹理的分辨率。提高此项设置会使物体表面细节更丰富，但可能会影响性能。"));
 
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetTextureQuality));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetTextureQuality));
-			Setting->AddOption(0, LOCTEXT("TextureQualityLow", "Low"));
-			Setting->AddOption(1, LOCTEXT("TextureQualityMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("TextureQualityHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("TextureQualityEpic", "Epic"));
+			Setting->AddOption(0, LOCTEXT("TextureQualityLow", "低"));
+			Setting->AddOption(1, LOCTEXT("TextureQualityMedium", "中"));
+			Setting->AddOption(2, LOCTEXT("TextureQualityHigh", "高"));
+			Setting->AddOption(3, LOCTEXT("TextureQualityEpic", "最高"));
 
 			Setting->AddEditDependency(AutoSetQuality);
 			Setting->AddEditDependency(GraphicsQualityPresets);
@@ -504,109 +447,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeVideoSettings(UPXLocal
 
 			GraphicsQuality->AddSetting(Setting);
 		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-			Setting->SetDevName(TEXT("VisualEffectQuality"));
-			Setting->SetDisplayName(LOCTEXT("VisualEffectQuality_Name", "Effects"));
-			Setting->SetDescriptionRichText(LOCTEXT("VisualEffectQuality_Description", "Effects determines the quality of visual effects and lighting in game. Increasing this setting will increase the quality of visual effects, but can reduce performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetVisualEffectQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVisualEffectQuality));
-			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "Low"));
-			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("VisualEffectQualityEpic", "Epic"));
-
-			Setting->AddEditDependency(AutoSetQuality);
-			Setting->AddEditDependency(GraphicsQualityPresets);
-			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_VideoQuality>(TEXT("Platform does not support VisualEffectQuality")));
-
-			// When this setting changes, it can GraphicsQualityPresets to be set to custom, or a particular preset.
-			GraphicsQualityPresets->AddEditDependency(Setting);
-
-			GraphicsQuality->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-			Setting->SetDevName(TEXT("ReflectionQuality"));
-			Setting->SetDisplayName(LOCTEXT("ReflectionQuality_Name", "Reflections"));
-			Setting->SetDescriptionRichText(LOCTEXT("ReflectionQuality_Description", "Reflection quality determines the resolution and accuracy of reflections.  Settings of 'High' and above use more accurate ray tracing methods to solve reflections, but can reduce performance."));
-
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetReflectionQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetReflectionQuality));
-			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "Low"));
-			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("VisualEffectQualityEpic", "Epic"));
-
-			Setting->AddEditDependency(AutoSetQuality);
-			Setting->AddEditDependency(GraphicsQualityPresets);
-			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_VideoQuality>(TEXT("Platform does not support ReflectionQuality")));
-
-			// When this setting changes, it can GraphicsQualityPresets to be set to custom, or a particular preset.
-			GraphicsQualityPresets->AddEditDependency(Setting);
-
-			GraphicsQuality->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-			Setting->SetDevName(TEXT("PostProcessingQuality"));
-			Setting->SetDisplayName(LOCTEXT("PostProcessingQuality_Name", "Post Processing"));
-			Setting->SetDescriptionRichText(LOCTEXT("PostProcessingQuality_Description", "Post Processing effects include Motion Blur, Depth of Field and Bloom. Increasing this setting improves the quality of post process effects, but can reduce performance."));  
-
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetPostProcessingQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetPostProcessingQuality));
-			Setting->AddOption(0, LOCTEXT("PostProcessingQualityLow", "Low"));
-			Setting->AddOption(1, LOCTEXT("PostProcessingQualityMedium", "Medium"));
-			Setting->AddOption(2, LOCTEXT("PostProcessingQualityHigh", "High"));
-			Setting->AddOption(3, LOCTEXT("PostProcessingQualityEpic", "Epic"));
-
-			Setting->AddEditDependency(AutoSetQuality);
-			Setting->AddEditDependency(GraphicsQualityPresets);
-			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_VideoQuality>(TEXT("Platform does not support PostProcessingQuality")));
-
-			// When this setting changes, it can GraphicsQualityPresets to be set to custom, or a particular preset.
-			GraphicsQualityPresets->AddEditDependency(Setting);
-
-			GraphicsQuality->AddSetting(Setting);
-		}
-
-	}
-
-	// Advanced Graphics
-	////////////////////////////////////////////////////////////////////////////////////
-	{
-		UGameSettingCollection* AdvancedGraphics = NewObject<UGameSettingCollection>();
-		AdvancedGraphics->SetDevName(TEXT("AdvancedGraphics"));
-		AdvancedGraphics->SetDisplayName(LOCTEXT("AdvancedGraphics_Name", "Advanced Graphics"));
-		Screen->AddSetting(AdvancedGraphics);
-
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
-			Setting->SetDevName(TEXT("VerticalSync"));
-			Setting->SetDisplayName(LOCTEXT("VerticalSync_Name", "Vertical Sync"));
-			Setting->SetDescriptionRichText(LOCTEXT("VerticalSync_Description", "Enabling Vertical Sync eliminates screen tearing by always rendering and presenting a full frame. Disabling Vertical Sync can give higher frame rate and better input response, but can result in horizontal screen tearing."));
-
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(IsVSyncEnabled));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVSyncEnabled));
-			Setting->SetDefaultValue(false);
-
-			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EPXFramePacingMode::DesktopStyle));
-
-			Setting->AddEditDependency(WindowModeSetting);
-			Setting->AddEditCondition(MakeShared<FWhenCondition>([WindowModeSetting](const ULocalPlayer*, FGameSettingEditableState& InOutEditState) {
-				if (WindowModeSetting->GetValue<EWindowMode::Type>() != EWindowMode::Fullscreen)
-				{
-					InOutEditState.Disable(LOCTEXT("FullscreenNeededForVSync", "This feature only works if 'Window Mode' is set to 'Fullscreen'."));
-				}
-			}));
-
-			AdvancedGraphics->AddSetting(Setting);
-		}
 	}
 
 	return Screen;
@@ -619,67 +460,19 @@ void AddFrameRateOptions(UGameSettingValueDiscreteDynamic_Number* Setting)
 	{
 		Setting->AddOption((float)Rate, FText::Format(FPSFormat, Rate));
 	}
-	Setting->AddOption(0.0f, LOCTEXT("UnlimitedFPS", "Unlimited"));
+	Setting->AddOption(0.0f, LOCTEXT("UnlimitedFPS", "不限"));
 }
 
 void UPXGameSettingRegistry::InitializeVideoSettings_FrameRates(UGameSettingCollection* Screen, UPXLocalPlayer* InLocalPlayer)
 {
-	//----------------------------------------------------------------------------------
-	{
-		UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-		Setting->SetDevName(TEXT("FrameRateLimit_OnBattery"));
-		Setting->SetDisplayName(LOCTEXT("FrameRateLimit_OnBattery_Name", "Frame Rate Limit (On Battery)"));
-		Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_OnBattery_Description", "Frame rate limit when running on battery. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
 
-		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_OnBattery));
-		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_OnBattery));
-		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetFrameRateLimit_OnBattery());
 
-		Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EPXFramePacingMode::DesktopStyle));
-		//@TODO: Hide if this device doesn't have a battery (no API for this right now)
-
-		AddFrameRateOptions(Setting);
-
-		Screen->AddSetting(Setting);
-	}
-	//----------------------------------------------------------------------------------
-	{
-		UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-		Setting->SetDevName(TEXT("FrameRateLimit_InMenu"));
-		Setting->SetDisplayName(LOCTEXT("FrameRateLimit_InMenu_Name", "Frame Rate Limit (Menu)"));
-		Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_InMenu_Description", "Frame rate limit when in the menu. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
-
-		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_InMenu));
-		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_InMenu));
-		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetFrameRateLimit_InMenu());
-		Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EPXFramePacingMode::DesktopStyle));
-
-		AddFrameRateOptions(Setting);
-
-		Screen->AddSetting(Setting);
-	}
-	//----------------------------------------------------------------------------------
-	{
-		UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
-		Setting->SetDevName(TEXT("FrameRateLimit_WhenBackgrounded"));
-		Setting->SetDisplayName(LOCTEXT("FrameRateLimit_WhenBackgrounded_Name", "Frame Rate Limit (Background)"));
-		Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_WhenBackgrounded_Description", "Frame rate limit when in the background. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
-
-		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_WhenBackgrounded));
-		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_WhenBackgrounded));
-		Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetFrameRateLimit_WhenBackgrounded());
-		Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EPXFramePacingMode::DesktopStyle));
-
-		AddFrameRateOptions(Setting);
-
-		Screen->AddSetting(Setting);
-	}
 	//----------------------------------------------------------------------------------
 	{
 		UGameSettingValueDiscreteDynamic_Number* Setting = NewObject<UGameSettingValueDiscreteDynamic_Number>();
 		Setting->SetDevName(TEXT("FrameRateLimit_Always"));
-		Setting->SetDisplayName(LOCTEXT("FrameRateLimit_Always_Name", "Frame Rate Limit"));
-		Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_Always_Description", "Frame rate limit sets the highest frame rate that is allowed. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
+		Setting->SetDisplayName(LOCTEXT("FrameRateLimit_Always_Name", "帧率限制"));
+		Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_Always_Desc", "帧率上限设置了允许的最高帧率。调低此值可使帧率更稳定，调高则能让性能更强的设备获得最佳体验。"));
 
 		Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_Always));
 		Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_Always));

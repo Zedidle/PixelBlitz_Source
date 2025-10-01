@@ -11,7 +11,7 @@ class UDayTimeEffectSight;
 class UInputMappingContext;
 class UPXGameplayEffect;
 
-UCLASS()
+UCLASS(BlueprintType)
 class PIXEL2DKIT_API UPXGameDataAsset : public UDataAsset
 {
 	GENERATED_BODY()

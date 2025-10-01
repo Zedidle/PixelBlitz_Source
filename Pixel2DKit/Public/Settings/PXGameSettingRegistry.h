@@ -11,9 +11,6 @@
 class ULocalPlayer;
 class UObject;
 
-//--------------------------------------
-// UPXGameSettingRegistry
-//--------------------------------------
 
 class UGameSettingCollection;
 class UPXLocalPlayer;
