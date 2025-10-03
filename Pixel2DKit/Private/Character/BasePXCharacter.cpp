@@ -1609,13 +1609,14 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
-	
-	if (EffectGameplayTags.Contains(FGameplayTag::RequestGameplayTag("AbilitySet.Brake")))
+
+	FGameplayTag Tag = REQUEST_GAMEPLAY_TAG("AbilitySet.Brake");
+	if (EffectGameplayTags.Contains(Tag))
 	{
 		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
 		{
 			float speed = GetCharacterMovement()->Velocity.Length();
-			GetCharacterMovement()->Velocity = 0.2 * speed * dir;
+			GetCharacterMovement()->Velocity = EffectGameplayTags[Tag] * speed * dir;
 		}
 	}
 

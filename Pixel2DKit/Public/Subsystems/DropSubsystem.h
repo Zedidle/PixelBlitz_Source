@@ -16,6 +16,9 @@ struct FItemData: public FTableRowBase
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	FName ItemName;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	FText ItemDisplayName;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	TSubclassOf<ABaseItem> SpawnItemClass;

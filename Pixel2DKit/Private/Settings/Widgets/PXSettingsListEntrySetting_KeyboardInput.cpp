@@ -5,7 +5,9 @@
 
 #include "CommonUIExtensions.h"
 #include "NativeGameplayTags.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/CustomSettings/PXSettingKeyboardInput.h"
+#include "UI/UIManager.h"
 #include "UI/Foundation/PXButtonBase.h"
 #include "Widgets/Misc/GameSettingPressAnyKey.h"
 #include "Widgets/Misc/KeyAlreadyBoundWarning.h"
@@ -38,16 +40,26 @@ void UPXSettingsListEntrySetting_KeyboardInput::NativeOnInitialized()
 
 void UPXSettingsListEntrySetting_KeyboardInput::HandlePrimaryKeyClicked()
 {
-	UGameSettingPressAnyKey* PressAnyKeyPanel = CastChecked<UGameSettingPressAnyKey>(
-		UCommonUIExtensions::PushContentToLayer_ForPlayer(GetOwningLocalPlayer(), PressAnyKeyLayer, PressAnyKeyPanelClass));
+	UWorld* World = GetOwningLocalPlayer()->GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+	
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
+	
+	UGameSettingPressAnyKey* PressAnyKeyPanel = CastChecked<UGameSettingPressAnyKey>(UIManager->PushUI(PressAnyKeyLayer, PressAnyKeyPanelClass));
 	PressAnyKeyPanel->OnKeySelected.AddUObject(this, &ThisClass::HandlePrimaryKeySelected, PressAnyKeyPanel);
 	PressAnyKeyPanel->OnKeySelectionCanceled.AddUObject(this, &ThisClass::HandleKeySelectionCanceled, PressAnyKeyPanel);
 }
 
 void UPXSettingsListEntrySetting_KeyboardInput::HandleSecondaryKeyClicked()
 {
-	UGameSettingPressAnyKey* PressAnyKeyPanel = CastChecked<UGameSettingPressAnyKey>(
-		UCommonUIExtensions::PushContentToLayer_ForPlayer(GetOwningLocalPlayer(), PressAnyKeyLayer, PressAnyKeyPanelClass));
+	UWorld* World = GetOwningLocalPlayer()->GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+	
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
+	
+	UGameSettingPressAnyKey* PressAnyKeyPanel = CastChecked<UGameSettingPressAnyKey>(UIManager->PushUI(PressAnyKeyLayer, PressAnyKeyPanelClass));
 	PressAnyKeyPanel->OnKeySelected.AddUObject(this, &ThisClass::HandleSecondaryKeySelected, PressAnyKeyPanel);
 	PressAnyKeyPanel->OnKeySelectionCanceled.AddUObject(this, &ThisClass::HandleKeySelectionCanceled, PressAnyKeyPanel);
 }

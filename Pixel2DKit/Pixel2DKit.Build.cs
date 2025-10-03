@@ -21,18 +21,30 @@ public class Pixel2DKit : ModuleRules
 			"ApplicationCore",
 			"Engine",  
 			"CommonUI",
-			"Niagara","GameplayTags",
-			"UMG","AIModule","DeveloperSettings",
-			"GameplayAbilities", "GameplayTasks", 
-			"QuicMessagingTransport", "LidarPointCloudRuntime", "PCG",
+			"Niagara",
+			"GameplayTags",
+			"UMG",
+			"AIModule",
+			"DeveloperSettings",
+			"GameplayAbilities", 
+			"GameplayTasks", 
+			"QuicMessagingTransport", 
+			"LidarPointCloudRuntime", 
+			"PCG",
 			// "SteamLeaderboardSubsystem",
-			"OnlineSubsystemSteam", "OnlineSubsystem", "OnlineSubsystemUtils",
+			"OnlineSubsystemSteam", 
+			"OnlineSubsystem", 
+			"OnlineSubsystemUtils",
 			"EnhancedInput",
 			"PaperZD", "Paper2D",
 			"NavigationSystem",
 			"UMGEditor", "GameplayAbilities",
 			"ModularGameplay",
-			"ModularGameplayActors", "GameFeatures", "GameSubtitles", "GameSettings"
+			"ModularGameplayActors", 
+			"GameFeatures", 
+			"GameSubtitles", 
+			"GameSettings"
+
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{

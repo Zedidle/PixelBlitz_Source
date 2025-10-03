@@ -123,8 +123,8 @@ void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _
 	UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset->CenterWordTipClass)
-
-	UUIManager* UIManager = World->GetSubsystem<UUIManager>();
+	
+	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
 
 	UIManager->OpenUI("CenterTip");

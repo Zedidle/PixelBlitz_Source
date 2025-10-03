@@ -361,16 +361,15 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 
 void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 {
-	if (bInRock)
+	if (InRockPercent > 0.0f)
 	{
 		UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_INROCK", "霸体"),
 			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.8, 0.8));
-		return;
 	}
 
 	if (bInvulnerable) return;
 
-	Repel = GetRepel(Repel, Instigator) * KnockBackMultiplier;
+	Repel = (1 - InRockPercent) * GetRepel(Repel, Instigator) * KnockBackMultiplier;
 	
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())
 	{

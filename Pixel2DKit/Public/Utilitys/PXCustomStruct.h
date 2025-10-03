@@ -69,7 +69,7 @@ enum EAbilityQuality : uint8
 {
 	Level1 UMETA(DisplayName = "白银"),
 	Level2 UMETA(DisplayName = "黄金"),
-	Level3 UMETA(DisplayName = "紫金")
+	Level3 UMETA(DisplayName = "传说")
 };
 #pragma endregion 
 

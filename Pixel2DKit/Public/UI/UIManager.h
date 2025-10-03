@@ -3,11 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonActivatableWidget.h"
 #include "GameplayTagContainer.h"
+#include "PXUIRoot.h"
 #include "Core/PXWorldSubsystem.h"
 #include "UIDefine.h"
 #include "Components/SlateWrapperTypes.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/PXCustomStruct.h"
+#include "Widgets/CommonActivatableWidgetContainer.h"
 #include "UIManager.generated.h"
 
 
@@ -60,7 +64,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool OpenUI(const FName UIType);
 	
-	
 	UFUNCTION(BlueprintCallable)
 	bool CloseUI(const FName UIType);
 
@@ -94,6 +97,35 @@ public:
 	
 	// UFUNCTION(BlueprintCallable)
 	// void HideItemTip();
+
+
+
+	template <typename ActivatableWidgetT = UCommonActivatableWidget>
+	ActivatableWidgetT* PushUI(FGameplayTag LayerName, UClass* ActivatableWidgetClass)
+	{
+		return PushWidgetToLayerStack<ActivatableWidgetT>(LayerName, ActivatableWidgetClass, [](ActivatableWidgetT&) {});
+	}
+
+	template <typename ActivatableWidgetT = UCommonActivatableWidget>
+	ActivatableWidgetT* PushWidgetToLayerStack(FGameplayTag LayerName, UClass* ActivatableWidgetClass, TFunctionRef<void(ActivatableWidgetT&)> InitInstanceFunc)
+	{
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(ActivatableWidgetClass, nullptr)
+		
+		if (!Root.IsValid())
+		{
+			InitRoot();
+		}
+
+		const auto& BPWidget = Root->PushWidgetToLayerStack(LayerName, ActivatableWidgetClass);
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BPWidget, nullptr)
+
+		WidgetMap.Add(BPWidget->GetFName(), BPWidget);
+		WidgetLayerMap.Add(BPWidget->GetFName(), LayerName);
+		
+		return BPWidget;
+	}
+
+
 	
 protected:
 	void RemoveUIFromRoot(UUserWidget* Widget, const FName& UIType, const FGameplayTag& Layer);

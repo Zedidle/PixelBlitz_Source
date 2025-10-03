@@ -37,3 +37,8 @@ DECLARE_STATS_GROUP(TEXT("RAGame"), STATGROUP_RAGame, STATCAT_Advanced);
 
 // 获取float最大值
 #define MAX_FLOAT std::numeric_limits<float>::max()
+
+
+
+// GAS
+#define REQUEST_GAMEPLAY_TAG(TagName) FGameplayTag::RequestGameplayTag((TagName))

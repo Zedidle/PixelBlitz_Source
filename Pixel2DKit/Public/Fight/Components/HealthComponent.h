@@ -51,7 +51,7 @@ public:
 	FTimerHandle FlashTimerHandle;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
-	bool bInRock = false; // 是否处于霸体状态
+	float InRockPercent = 0.0f; // 霸体抗性，抵御击退、击飞
 
 	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	FVector RepelResistance = FVector(10, 10, 10); // 各个方向的击退抵抗

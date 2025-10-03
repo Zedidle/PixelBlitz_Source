@@ -201,8 +201,8 @@ void UAbilityComponent::LoadAbility()
 	
 	// 霸体
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InRock");
-	HealthComponent->bInRock = EffectGameplayTags.Contains(Tag);
-	if (HealthComponent->bInRock)
+	HealthComponent->InRockPercent = EffectGameplayTags.Contains(Tag);
+	if (HealthComponent->InRockPercent > 0.0f)
 	{
 		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.InRock"));
 	}
