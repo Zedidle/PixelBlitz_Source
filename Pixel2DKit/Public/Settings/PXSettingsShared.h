@@ -347,20 +347,15 @@ private:
 	// Gamepad Sensitivity
 public:
 	UFUNCTION()
-	double GetMouseSensitivityX() const { return MouseSensitivityX; }
+	double GetViewPointSensitivityPitch() const { return ViewPointSensitivityPitch; }
 	UFUNCTION()
-	void SetMouseSensitivityX(double NewValue) { ChangeValueAndDirty(MouseSensitivityX, NewValue); ApplyInputSensitivity(); }
+	void SetViewPointSensitivityPitch(double NewValue) { ChangeValueAndDirty(ViewPointSensitivityPitch, NewValue); ApplyInputSensitivity(); }
 
 	UFUNCTION()
-	double GetMouseSensitivityY() const { return MouseSensitivityY; }
+	double GetViewPointSensitivityYaw() const { return ViewPointSensitivityYaw; }
 	UFUNCTION()
-	void SetMouseSensitivityY(double NewValue) { ChangeValueAndDirty(MouseSensitivityY, NewValue); ApplyInputSensitivity(); }
-
-	UFUNCTION()
-	double GetTargetingMultiplier() const { return TargetingMultiplier; }
-	UFUNCTION()
-	void SetTargetingMultiplier(double NewValue) { ChangeValueAndDirty(TargetingMultiplier, NewValue); ApplyInputSensitivity(); }
-
+	void SetViewPointSensitivityYaw(double NewValue) { ChangeValueAndDirty(ViewPointSensitivityYaw, NewValue); ApplyInputSensitivity(); }
+	
 	UFUNCTION()
 	bool GetInvertVerticalAxis() const { return bInvertVerticalAxis; }
 	UFUNCTION()
@@ -374,15 +369,12 @@ public:
 private:
 	/** Holds the mouse horizontal sensitivity */
 	UPROPERTY()
-	double MouseSensitivityX = 1.0;
+	double ViewPointSensitivityPitch = 1.0;
 
 	/** Holds the mouse vertical sensitivity */
 	UPROPERTY()
-	double MouseSensitivityY = 1.0;
+	double ViewPointSensitivityYaw = 1.0;
 
-	/** Multiplier applied while Aiming down sights. */
-	UPROPERTY()
-	double TargetingMultiplier = 0.5;
 
 	/** If true then the vertical look axis should be inverted */
 	UPROPERTY()

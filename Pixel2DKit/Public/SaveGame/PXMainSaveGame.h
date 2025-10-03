@@ -28,6 +28,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RemSkillPoints = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int RemRefreshPoints = 0;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FGameplayTag> ChosenAbilities;

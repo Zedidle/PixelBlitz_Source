@@ -122,7 +122,7 @@ public:
 		WidgetMap.Add(BPWidget->GetFName(), BPWidget);
 		WidgetLayerMap.Add(BPWidget->GetFName(), LayerName);
 		
-		return BPWidget;
+		return Cast<ActivatableWidgetT>(BPWidget);
 	}
 
 

@@ -31,4 +31,7 @@ class PIXEL2DKIT_API UPXGameDataAsset : public UDataAsset
     
     	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "GameplayFlow | Ability")	
     	int BasePerLevelSkillPointsGet = 2;
+
+		UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "GameplayFlow | Ability")	
+		int BasePerLevelSkillRefreshPointsGet = 2;
 };

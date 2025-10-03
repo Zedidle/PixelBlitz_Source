@@ -127,7 +127,7 @@ void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _
 	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
 
-	UIManager->OpenUI("CenterTip");
+	UIManager->PopupTip(_Tip.ToString());
 }
 
 FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)

@@ -193,7 +193,7 @@ void UPXSaveGameSubsystem::Main_TotalInit(TSubclassOf<UPrimaryDataAsset> Weather
 
 bool UPXSaveGameSubsystem::Main_Saved()
 {
-    return MainSaveGame->CurLevelName == "";
+    return !MainSaveGame->CurLevelName.IsNone();
 }
 
 void UPXSaveGameSubsystem::Main_AddResult(float Result)

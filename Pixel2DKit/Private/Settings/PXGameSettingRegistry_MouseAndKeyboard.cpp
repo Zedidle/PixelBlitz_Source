@@ -24,20 +24,20 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 
 	{
 		UGameSettingCollection* Sensitivity = NewObject<UGameSettingCollection>();
-		Sensitivity->SetDevName(TEXT("MouseSensitivityCollection"));
-		Sensitivity->SetDisplayName(LOCTEXT("MouseSensitivityCollection_Name", "Sensitivity"));
+		Sensitivity->SetDevName(TEXT("ViewPointSensitivityCollection"));
+		Sensitivity->SetDisplayName(LOCTEXT("ViewPointSensitivityCollection_Name", "视角控制"));
 		Screen->AddSetting(Sensitivity);
-
+		
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-			Setting->SetDevName(TEXT("MouseSensitivityYaw"));
-			Setting->SetDisplayName(LOCTEXT("MouseSensitivityYaw_Name", "X-Axis Sensitivity"));
-			Setting->SetDescriptionRichText(LOCTEXT("MouseSensitivityYaw_Description", "Sets the sensitivity of the mouse's horizontal (x) axis. With higher settings the camera will move faster when looking left and right with the mouse."));
+			Setting->SetDevName(TEXT("ViewPointSensitivityYaw"));
+			Setting->SetDisplayName(LOCTEXT("ViewPointSensitivityYaw_Name", "水平视角旋转灵敏度"));
+			Setting->SetDescriptionRichText(LOCTEXT("MouseSensitivityPitch_Desc", "设置水平方向上视角旋转的灵敏度，设置得越高会转得越快."));
 
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetMouseSensitivityX));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetMouseSensitivityX));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetMouseSensitivityX());
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetViewPointSensitivityYaw));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityYaw));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetViewPointSensitivityYaw());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
 			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
 			Setting->SetMinimumLimit(0.01);
@@ -45,16 +45,17 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 
 			Sensitivity->AddSetting(Setting);
 		}
+
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-			Setting->SetDevName(TEXT("MouseSensitivityPitch"));
-			Setting->SetDisplayName(LOCTEXT("MouseSensitivityPitch_Name", "Y-Axis Sensitivity"));
-			Setting->SetDescriptionRichText(LOCTEXT("MouseSensitivityPitch_Description", "Sets the sensitivity of the mouse's vertical (y) axis. With higher settings the camera will move faster when looking up and down with the mouse."));
+			Setting->SetDevName(TEXT("ViewPointSensitivityPitch"));
+			Setting->SetDisplayName(LOCTEXT("ViewPointSensitivityPitch_Name", "垂直视角旋转灵敏度"));
+			Setting->SetDescriptionRichText(LOCTEXT("ViewPointSensitivityPitch_Desc", "设置垂直方向上视角旋转的灵敏度，设置得越高会转得越快."));
 
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetMouseSensitivityY));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetMouseSensitivityY));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetMouseSensitivityY());
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetViewPointSensitivityPitch));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityPitch));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetViewPointSensitivityPitch());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
 			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
 			Setting->SetMinimumLimit(0.01);
@@ -62,29 +63,13 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 
 			Sensitivity->AddSetting(Setting);
 		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-			Setting->SetDevName(TEXT("MouseTargetingMultiplier"));
-			Setting->SetDisplayName(LOCTEXT("MouseTargetingMultiplier_Name", "Targeting Sensitivity"));
-			Setting->SetDescriptionRichText(LOCTEXT("MouseTargetingMultiplier_Description", "Sets the modifier for reducing mouse sensitivity when targeting. 100% will have no slow down when targeting. Lower settings will have more slow down when targeting."));
 
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetTargetingMultiplier));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetTargetingMultiplier));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetTargetingMultiplier());
-			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
-			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
-			Setting->SetMinimumLimit(0.01);
-			
-
-			Sensitivity->AddSetting(Setting);
-		}
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
 			Setting->SetDevName(TEXT("InvertVerticalAxis"));
-			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Name", "Invert Vertical Axis"));
-			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Description", "Enable the inversion of the vertical look axis."));
+			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Name", "垂直视角旋转反转"));
+			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Desc", "使用相反的垂直方向旋转."));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertVerticalAxis));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis));
@@ -96,14 +81,13 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
 			Setting->SetDevName(TEXT("InvertHorizontalAxis"));
-			Setting->SetDisplayName(LOCTEXT("InvertHorizontalAxis_Name", "Invert Horizontal Axis"));
-			Setting->SetDescriptionRichText(LOCTEXT("InvertHorizontalAxis_Description", "Enable the inversion of the Horizontal look axis."));
+			Setting->SetDisplayName(LOCTEXT("InvertHorizontalAxis_Name", "水平视角旋转反转"));
+			Setting->SetDescriptionRichText(LOCTEXT("InvertHorizontalAxis_Desc", "使用相反的水平方向旋转."));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertHorizontalAxis));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertHorizontalAxis));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis());
-
-
+			
 
 			Sensitivity->AddSetting(Setting);
 		}
@@ -129,7 +113,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 		auto GetOrCreateSettingCollection = [&CategoryToSettingCollection, &Screen](FText DisplayCategory) -> UGameSettingCollection*
 		{
 			static const FString DefaultDevName = TEXT("Default_KBM");
-			static const FText DefaultDevDisplayName = NSLOCTEXT("PXInputSettings", "PXInputDefaults", "默认");
+			static const FText DefaultDevDisplayName = NSLOCTEXT("PXInputSettings", "PXInputDefaults", "按键设置");
 
 			if (DisplayCategory.IsEmpty())
 			{

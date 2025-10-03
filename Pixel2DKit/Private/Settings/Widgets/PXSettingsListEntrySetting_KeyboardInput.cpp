@@ -17,7 +17,7 @@
 #define LOCTEXT_NAMESPACE "PXSettings"
 
 class UGameSetting;
-UE_DEFINE_GAMEPLAY_TAG_STATIC(PressAnyKeyLayer, "UI.Layer.Modal");
+UE_DEFINE_GAMEPLAY_TAG_STATIC(PressAnyKeyLayer, "UI.Layer.Default");
 
 void UPXSettingsListEntrySetting_KeyboardInput::SetSetting(UGameSetting* InSetting)
 {
@@ -46,9 +46,11 @@ void UPXSettingsListEntrySetting_KeyboardInput::HandlePrimaryKeyClicked()
 	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
 	
-	UGameSettingPressAnyKey* PressAnyKeyPanel = CastChecked<UGameSettingPressAnyKey>(UIManager->PushUI(PressAnyKeyLayer, PressAnyKeyPanelClass));
-	PressAnyKeyPanel->OnKeySelected.AddUObject(this, &ThisClass::HandlePrimaryKeySelected, PressAnyKeyPanel);
-	PressAnyKeyPanel->OnKeySelectionCanceled.AddUObject(this, &ThisClass::HandleKeySelectionCanceled, PressAnyKeyPanel);
+	if(UGameSettingPressAnyKey* PressAnyKeyPanel = UIManager->PushUI<UGameSettingPressAnyKey>(PressAnyKeyLayer, PressAnyKeyPanelClass))
+	{
+		PressAnyKeyPanel->OnKeySelected.AddUObject(this, &ThisClass::HandlePrimaryKeySelected, PressAnyKeyPanel);
+		PressAnyKeyPanel->OnKeySelectionCanceled.AddUObject(this, &ThisClass::HandleKeySelectionCanceled, PressAnyKeyPanel);
+	}
 }
 
 void UPXSettingsListEntrySetting_KeyboardInput::HandleSecondaryKeyClicked()
@@ -59,9 +61,11 @@ void UPXSettingsListEntrySetting_KeyboardInput::HandleSecondaryKeyClicked()
 	UUIManager* UIManager = UUIManager::GetSelfInstance(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
 	
-	UGameSettingPressAnyKey* PressAnyKeyPanel = CastChecked<UGameSettingPressAnyKey>(UIManager->PushUI(PressAnyKeyLayer, PressAnyKeyPanelClass));
-	PressAnyKeyPanel->OnKeySelected.AddUObject(this, &ThisClass::HandleSecondaryKeySelected, PressAnyKeyPanel);
-	PressAnyKeyPanel->OnKeySelectionCanceled.AddUObject(this, &ThisClass::HandleKeySelectionCanceled, PressAnyKeyPanel);
+	if(UGameSettingPressAnyKey* PressAnyKeyPanel = UIManager->PushUI<UGameSettingPressAnyKey>(PressAnyKeyLayer, PressAnyKeyPanelClass))
+	{
+		PressAnyKeyPanel->OnKeySelected.AddUObject(this, &ThisClass::HandleSecondaryKeySelected, PressAnyKeyPanel);
+		PressAnyKeyPanel->OnKeySelectionCanceled.AddUObject(this, &ThisClass::HandleKeySelectionCanceled, PressAnyKeyPanel);
+	}
 }
 
 void UPXSettingsListEntrySetting_KeyboardInput::HandlePrimaryKeySelected(FKey InKey, UGameSettingPressAnyKey* PressAnyKeyPanel)
@@ -108,8 +112,8 @@ void UPXSettingsListEntrySetting_KeyboardInput::ChangeBinding(int32 InKeyBindSlo
 		Args.Add(TEXT("InKey"), InKey.GetDisplayName());
 		Args.Add(TEXT("ActionNames"), FText::FromString(ActionNames));
 
-		KeyAlreadyBoundWarning->SetWarningText(FText::Format(LOCTEXT("WarningText", "{InKey} is already bound to {ActionNames} are you sure you want to rebind it?"), Args));
-		KeyAlreadyBoundWarning->SetCancelText(FText::Format(LOCTEXT("CancelText", "Press escape to cancel, or press {InKey} again to confirm rebinding."), Args));
+		KeyAlreadyBoundWarning->SetWarningText(FText::Format(LOCTEXT("WarningText", "{InKey} 已经绑定了 {ActionNames} 您确定要重新绑定吗？?"), Args));
+		KeyAlreadyBoundWarning->SetCancelText(FText::Format(LOCTEXT("CancelText", "按ESC取消，或再次按下{InKey}键确认重新绑定"), Args));
 
 		if (InKeyBindSlot == 1)
 		{
