@@ -32,7 +32,7 @@ void UTalentComponent::InitTalents()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	
+
 	for (const FGameplayTag& TalentTag: BasicBuildSaveGame->ChosenTalents)
 	{
 		// 获取对应的Talent结构

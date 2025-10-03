@@ -96,7 +96,7 @@ void UPXSettingKeyboardInput::OnInitialized()
 		{
 			if (Row->HasAnyMappings())
 			{
-				return FText::Format(LOCTEXT("DynamicDetails_KeyboardInputAction", "Bindings for {0}"), Row->Mappings.begin()->GetDisplayName());
+				return FText::Format(LOCTEXT("DynamicDetails_KeyboardInputAction", "为 {0} 绑定按键"), Row->Mappings.begin()->GetDisplayName());
 			}
 		}
 		return FText::GetEmpty();

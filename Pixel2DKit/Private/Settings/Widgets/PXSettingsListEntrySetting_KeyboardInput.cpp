@@ -99,9 +99,15 @@ void UPXSettingsListEntrySetting_KeyboardInput::ChangeBinding(int32 InKeyBindSlo
 	KeyboardInputSetting->GetAllMappedActionsFromKey(InKeyBindSlot, InKey, ActionsForKey);
 	if (!ActionsForKey.IsEmpty())
 	{
-		UKeyAlreadyBoundWarning* KeyAlreadyBoundWarning = CastChecked<UKeyAlreadyBoundWarning>(
-		UCommonUIExtensions::PushContentToLayer_ForPlayer(GetOwningLocalPlayer(), PressAnyKeyLayer, KeyAlreadyBoundWarningPanelClass));
-
+		UWorld* World = GetOwningLocalPlayer()->GetWorld();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+	
+		UUIManager* UIManager = UUIManager::GetSelfInstance(World);
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager)
+	
+		UKeyAlreadyBoundWarning* KeyAlreadyBoundWarning = UIManager->PushUI<UKeyAlreadyBoundWarning>(PressAnyKeyLayer, KeyAlreadyBoundWarningPanelClass);
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyAlreadyBoundWarning)
+		
 		FString ActionNames;
 		for (FName ActionName : ActionsForKey)
 		{
