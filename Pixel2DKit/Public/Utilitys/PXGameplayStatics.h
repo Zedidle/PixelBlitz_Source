@@ -8,6 +8,7 @@
 #include "PXGameplayStatics.generated.h"
 
 
+class UPXSettingsShared;
 class APXGameState;
 class APXPlayerController;
 
@@ -32,5 +33,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
 	static ABasePXCharacter* GetPlayerCharacter(const UObject* WorldContextObject, int32 PlayerIndex);
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static UPXLocalPlayer* GetLocalPlayer(const UObject* WorldContextObject, int32 PlayerIndex);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static UPXSettingsShared* GetSettingsShared(const UObject* WorldContextObject);
 };

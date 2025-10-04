@@ -33,6 +33,7 @@
 #include "Input/PXInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
+#include "Player/PXLocalPlayer.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/PXSettingsLocal.h"
 #include "Settings/PXSettingsShared.h"
@@ -275,6 +276,10 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 {
 	if (!GetCharacterMovement()) return;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
+
+	UPXSettingsShared* SettingsShared = UPXGameplayStatics::GetSettingsShared(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsShared)
+
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	
 	float d = FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal());
@@ -285,8 +290,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
-	ECameraFollowMode CameraFollowMode = GetDefault<UPXSettingsShared>()->GetCameraFollowMode();
-	switch (CameraFollowMode)
+	switch (SettingsShared->GetCameraFollowMode())
 	{
 	case ECameraFollowMode::Preview: // 镜头前瞻
 		{
@@ -1581,6 +1585,8 @@ void ABasePXCharacter::SetScale(const float targetValue)
 void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	if (!IsPlayerControlled()) return;
+	
 	UPXInputComponent* EnhancedInput = Cast<UPXInputComponent>(PlayerInputComponent);
 	if (!EnhancedInput) return;
 	if (DataAsset)
@@ -1594,10 +1600,12 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
-		EnhancedInput->BindActionByTagName("InputAction.ViewUP", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
-		EnhancedInput->BindActionByTagName("InputAction.ViewDown", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
-		EnhancedInput->BindActionByTagName("InputAction.ViewLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
-		EnhancedInput->BindActionByTagName("InputAction.ViewRight", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
+		// EnhancedInput->BindActionByTagName("InputAction.ViewUP", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
+		// EnhancedInput->BindActionByTagName("InputAction.ViewDown", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
+		// EnhancedInput->BindActionByTagName("InputAction.ViewLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
+		// EnhancedInput->BindActionByTagName("InputAction.ViewRight", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
+		EnhancedInput->BindActionByTagName("InputAction.ViewPitch", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
+		EnhancedInput->BindActionByTagName("InputAction.ViewYaw", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
 	}
 }
 

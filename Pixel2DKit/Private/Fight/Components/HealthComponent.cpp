@@ -13,13 +13,16 @@
 #include "AbilitySystemGlobals.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Controller/PXPlayerController.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
+#include "Player/PXLocalPlayer.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraShakeDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "PX"
 
@@ -329,8 +332,11 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
 	int ChangedValue = FMath::Abs(preHealth - CurrentHealth);
 	if (ChangedValue <= 0) return;
+
+	UPXSettingsShared* SettingsShared = UPXGameplayStatics::GetSettingsShared(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsShared);
 	
-	if (GetDefault<UPXSettingsShared>()->GetShowBloodVFX())
+	if (SettingsShared->GetShowBloodVFX())
 	{
 		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)

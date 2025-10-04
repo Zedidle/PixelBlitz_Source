@@ -6,6 +6,7 @@
 #include "Core/PXGameState.h"
 #include "Controller/PXPlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/PXLocalPlayer.h"
 
 UPXGameInstance* UPXGameplayStatics::GetGameInstance(const UObject* WorldContextObject)
 {
@@ -62,3 +63,26 @@ ABasePXCharacter* UPXGameplayStatics::GetPlayerCharacter(const UObject* WorldCon
 
 	return nullptr;
 }
+
+UPXLocalPlayer* UPXGameplayStatics::GetLocalPlayer(const UObject* WorldContextObject, int32 PlayerIndex)
+{
+	APXPlayerController* PC = GetPlayerController(WorldContextObject, 0);
+	if (PC)
+	{
+		return Cast<UPXLocalPlayer>(PC->GetLocalPlayer());
+	}
+
+	return nullptr;
+}
+
+UPXSettingsShared* UPXGameplayStatics::GetSettingsShared(const UObject* WorldContextObject)
+{
+	UPXLocalPlayer* LP = GetLocalPlayer(WorldContextObject, 0);
+	if (LP)
+	{
+		return LP->GetSharedSettings();
+	}
+
+	return nullptr;
+}
+
