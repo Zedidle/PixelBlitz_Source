@@ -7,6 +7,7 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/PXSettingsLocal.h"
 
 
 void UPXAudioSubsystem::Deinitialize()
@@ -21,13 +22,10 @@ void UPXAudioSubsystem::ReplayCurBGM()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CurBGM)
 	
-	UWorld* World = GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsLocal)
 	
-	UPXSettingSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetSettingData(World);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SG);
-	
-	if (SG->SoundSetting_ToggleAll)
+	if (SettingsLocal->GetOverallVolume() > 0)
 	{
 		CurBGM->Play();
 	}
@@ -40,9 +38,6 @@ void UPXAudioSubsystem::PlayBGM(USoundBase* Sound, float StartTime)
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
-	UPXSettingSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetSettingData(World);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SG);
-
 	if (CurBGM)
 	{
 		if (CurBGM->GetSound() == Sound) return;
@@ -53,14 +48,18 @@ void UPXAudioSubsystem::PlayBGM(USoundBase* Sound, float StartTime)
 		}
 	}
 
-	if (SG->SoundSetting_ToggleAll)
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsLocal)
+	
+	if (SettingsLocal->GetOverallVolume() > 0)
 	{
-		if (UAudioComponent* BGM = UGameplayStatics::SpawnSound2D(World, Sound, SG->SoundSetting_MusicValue, 1.0f, StartTime))
+		if (UAudioComponent* BGM = UGameplayStatics::SpawnSound2D(World, Sound, SettingsLocal->GetOverallVolume() * SettingsLocal->GetMusicVolume(), 1.0f, StartTime))
 		{
 			BGM->FadeIn(5,1, 0, EAudioFaderCurve::Linear);
 			CurBGM = BGM;
 		}
 	}
+
 }
 
 void UPXAudioSubsystem::CloseBGM()

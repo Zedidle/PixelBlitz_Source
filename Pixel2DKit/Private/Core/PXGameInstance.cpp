@@ -122,7 +122,7 @@ void UPXGameInstance::OnPlayerDead_Implementation(bool& End)
 
 	if (USoundCue* SC_OnDie = ResourceDataAsset->SC_OnDie.LoadSynchronous())
 	{
-		USoundFuncLib::PlaySound2D(SC_OnDie, 1.f);
+		USoundFuncLib::PlaySound2D(SC_OnDie);
 	}
 	
 	

@@ -10,6 +10,7 @@
 #include "SaveGame/PXSettingSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
+#include "Settings/PXSettingsLocal.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
 #include "Utilitys/SettingFuncLib.h"
@@ -47,31 +48,29 @@ void UPXSaveGameSubsystem::InitData_Setting()
     {
         SettingSaveGame = SaveGame;
 
-        if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
-        {
-            if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
-            {
-                if (UInputMappingContext* Keyboard_IMC = GameDataAsset->Keyboard_IMC.LoadSynchronous())
-                {
-                    Keyboard_IMC->UnmapAll();
-                    for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
-                    {
-                        Keyboard_IMC->MapKey(KM.Action, KM.Key);
-                    } 
-                }
-
-                if (UInputMappingContext* Gamepad_IMC = GameDataAsset->Gamepad_IMC.LoadSynchronous())
-                {
-                    Gamepad_IMC->UnmapAll();
-                    for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
-                    {
-                        Gamepad_IMC->MapKey(KM.Action, KM.Key);
-                    }
-                }
-            
-
-            }
-        }
+        // if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
+        // {
+        //     if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
+        //     {
+        //         if (UInputMappingContext* Keyboard_IMC = GameDataAsset->Keyboard_IMC.LoadSynchronous())
+        //         {
+        //             Keyboard_IMC->UnmapAll();
+        //             for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
+        //             {
+        //                 Keyboard_IMC->MapKey(KM.Action, KM.Key);
+        //             } 
+        //         }
+        //
+        //         if (UInputMappingContext* Gamepad_IMC = GameDataAsset->Gamepad_IMC.LoadSynchronous())
+        //         {
+        //             Gamepad_IMC->UnmapAll();
+        //             for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
+        //             {
+        //                 Gamepad_IMC->MapKey(KM.Action, KM.Key);
+        //             }
+        //         }
+        //     }
+        // }
     }
     else
     {
@@ -80,27 +79,28 @@ void UPXSaveGameSubsystem::InitData_Setting()
         
         
         // 按键存档
-        if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
-        {
-            if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
-            {
-                UInputMappingContext* Gamepad_IMC = Cast<UInputMappingContext>(GameDataAsset->Gamepad_IMC.Get());
-                UInputMappingContext* Keyboard_IMC = Cast<UInputMappingContext>(GameDataAsset->Keyboard_IMC.Get());
-            
-                SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping = Gamepad_IMC->GetMappings();
-                SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping = Keyboard_IMC->GetMappings();
-            }
-        }
+        // if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
+        // {
+        //     if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
+        //     {
+        //         UInputMappingContext* Gamepad_IMC = Cast<UInputMappingContext>(GameDataAsset->Gamepad_IMC.Get());
+        //         UInputMappingContext* Keyboard_IMC = Cast<UInputMappingContext>(GameDataAsset->Keyboard_IMC.Get());
+        //     
+        //         SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping = Gamepad_IMC->GetMappings();
+        //         SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping = Keyboard_IMC->GetMappings();
+        //     }
+        // }
 
         SaveSettingData();
     }
 
     // 第一次开游戏时，以及后续读档时
-    UGameUserSettings* UserSettings = UGameUserSettings::GetGameUserSettings();
-    UserSettings->SetScreenResolution(USettingFuncLib::GetScreenResolution(SettingSaveGame->VideoSetting_Resolution));
-    UserSettings->SetFullscreenMode(USettingFuncLib::GetWindowMode(SettingSaveGame->VideoSetting_ScreenMode));
-    UserSettings->ApplySettings(false);
-    
+    if (UPXSettingsLocal* SettingsLocal = UPXSettingsLocal::Get())
+    {
+        // SettingsLocal->SetScreenResolution(USettingFuncLib::GetScreenResolution(SettingSaveGame->VideoSetting_Resolution));
+        SettingsLocal->SetFullscreenMode(USettingFuncLib::GetWindowMode(SettingSaveGame->VideoSetting_ScreenMode));
+        SettingsLocal->ApplySettings(false);
+    }
 }
 
 void UPXSaveGameSubsystem::InitData_Achievements()

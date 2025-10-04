@@ -380,7 +380,7 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 		{
 			if (USoundCue* DieSound = DataAsset->DieSound.LoadSynchronous())
 			{
-				USoundFuncLib::PlaySoundAtLocation(DieSound, GetActorLocation(), 1.0f);
+				USoundFuncLib::PlaySoundAtLocation(DieSound, GetActorLocation());
 			}
 			if (UNiagaraSystem* NS_Die = DataAsset->NS_Die.LoadSynchronous())
 			{
@@ -418,7 +418,7 @@ void ABaseEnemy::OnHurt_Implementation(int RemainHP)
 	{
 		if (USoundCue* HurtSound = DataAsset->HurtSound.LoadSynchronous())
 		{
-			USoundFuncLib::PlaySoundAtLocation(HurtSound, GetActorLocation(), 1.0f);
+			USoundFuncLib::PlaySoundAtLocation(HurtSound, GetActorLocation());
 		}
 
 		if (UNiagaraSystem* NS_Hurt = DataAsset->NS_Hurt.LoadSynchronous())

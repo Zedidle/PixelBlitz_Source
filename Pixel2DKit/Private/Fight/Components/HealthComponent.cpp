@@ -15,6 +15,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "SaveGame/PXSettingSaveGame.h"
+#include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraShakeDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -328,9 +329,8 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
 	int ChangedValue = FMath::Abs(preHealth - CurrentHealth);
 	if (ChangedValue <= 0) return;
-
-	const UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld());
-	if (SettingSaveGame && SettingSaveGame->GameSetting_ShowBlood)
+	
+	if (GetDefault<UPXSettingsShared>()->GetShowBloodVFX())
 	{
 		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)

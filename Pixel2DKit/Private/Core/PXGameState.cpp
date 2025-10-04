@@ -128,24 +128,17 @@ UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, nullptr)
 
+	UDataTable* DT= DataTableSubsystem->GetWeatherData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DT, nullptr)
 
-	if (UDataTable* DT= DataTableSubsystem->GetWeatherData())
-	{
-		FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("GetWeather"));
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(WeatherData, nullptr);
-		if (UPXSettingSaveGame* SettingSaveGame = UPXSaveGameSubSystemFuncLib::GetSettingData(GetWorld()))
-		{
-			SettingSaveGame->GameSetting_WeatherType = UGameplayStatics::GetObjectClass(WeatherData->WeatherSetting);
-
-			WeatherName = WeatherData->WeatherName;
-			WeatherType = WeatherData->WeatherType;
-			WeatherEffect = WeatherData->WeatherEffect;
-
-			return WeatherData->WeatherSetting;
-		}
-	}
+	FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("APXGameState::SetWeather_Implementation"));
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(WeatherData, nullptr);
 	
-	return nullptr;
+	WeatherName = WeatherData->WeatherName;
+	WeatherType = WeatherData->WeatherType;
+	WeatherEffect = WeatherData->WeatherEffect;
+
+	return WeatherData->WeatherSetting;
 }
 
 void APXGameState::OnEnemyDie_Implementation(ABaseEnemy* Enemy)

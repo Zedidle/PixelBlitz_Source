@@ -6,32 +6,21 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/PXSettingsLocal.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 
-void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, float Volume)
+void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GEngine)
-
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 
-	UGameInstance* GameInstance = World->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
-
-	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsLocal)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGame)
+	if (SettingsLocal->GetOverallVolume() <= 0) return;
 
-	if (!SaveGame->SoundSetting_ToggleAll) return;
-
-	APXGameMode* GameMode = Cast<APXGameMode>(UGameplayStatics::GetGameMode(World));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameMode)
-
-	float _Volume = GameMode->SoundSetting_Arg_MusicBasicMulti * SaveGame->SoundSetting_VolumeValue * Volume;
-
+	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundBattleVolume();
 	
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
@@ -41,81 +30,51 @@ void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location, flo
 
 	if (ResourceDataAsset->Attenuation_Default)
 	{
-		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume, 1.0f, 0.0f, ResourceDataAsset->Attenuation_Default.Get());
+		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, Volume, 1.0f, 0.0f, ResourceDataAsset->Attenuation_Default.Get());
 	}
 	else
 	{
-		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, _Volume);
+		UGameplayStatics::PlaySoundAtLocation(World, Sound, Location, Volume);
 	}
 }
 
-void USoundFuncLib::PlaySound2D(USoundBase* Sound, float Volume)
+void USoundFuncLib::PlaySound2D(USoundBase* Sound)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GEngine)
-
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 
-	UGameInstance* GameInstance = World->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
-
-	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsLocal)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGame)
+	if (SettingsLocal->GetOverallVolume() <= 0) return;
 
-	if (!SaveGame->SoundSetting_ToggleAll) return;
+	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundBattleVolume();
 
-	APXGameMode* GameMode = Cast<APXGameMode>(UGameplayStatics::GetGameMode(World));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameMode)
-
-	float _Volume = GameMode->SoundSetting_Arg_VolumeBasicMulti * SaveGame->SoundSetting_VolumeValue * Volume;
-	UGameplayStatics::PlaySound2D(World, Sound, _Volume);
+	UGameplayStatics::PlaySound2D(World, Sound, Volume);
 }
 
-void USoundFuncLib::PlayUISound(USoundBase* Sound, float Volume)
+void USoundFuncLib::PlayUISound(USoundBase* Sound)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GEngine)
-
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 
-	UGameInstance* GameInstance = World->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
-
-	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsLocal)
 	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGame)
+	if (SettingsLocal->GetOverallVolume() <= 0) return;
 
-	if (!SaveGame->SoundSetting_ToggleAll) return;
-
-	float _Volume = SaveGame->SoundSetting_UIValue * SaveGame->SoundSetting_UIValue_BasicArg * Volume;
-	UGameplayStatics::PlaySound2D(World, Sound, _Volume);
+	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundUIVolume();
+	
+	UGameplayStatics::PlaySound2D(World, Sound, Volume);
 }
 
 float USoundFuncLib::GetCurVolumeValue()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GEngine, 0.0f)
-
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, 0.0f)
 
-	UGameInstance* GameInstance = World->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, 0.0f)
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SettingsLocal, 0.0f)
 
-	UPXSaveGameSubsystem* SaveGameSubsystem =  GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, 0.0f)
-	
-	UPXSettingSaveGame* SaveGame = SaveGameSubsystem->GetSettingData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGame, 0.0f)
-
-	if (!SaveGame->SoundSetting_ToggleAll) return 0.0f;
-
-	APXGameMode* GameMode = Cast<APXGameMode>(UGameplayStatics::GetGameMode(World));
-	if (!GameMode) return 1.0f;
-
-	return GameMode->SoundSetting_Arg_VolumeBasicMulti * SaveGame->SoundSetting_VolumeValue;
+	return SettingsLocal->GetOverallVolume();
 }

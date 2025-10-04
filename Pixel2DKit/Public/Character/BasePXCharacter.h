@@ -414,11 +414,14 @@ public:
 	void SetBlendYaw(float V);
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddBlendYaw(float V);
+	
+	void AddViewYaw(const FInputActionValue& Value);
+	
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddViewYaw(float V, bool bPlayerControl);
 	UFUNCTION(BlueprintCallable, Category = View)
-	void SetViewPitch(float V);
-	
+	void AddViewPitch(const FInputActionValue& Value);
+
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Game)
 	void PreReadyToStart();
 	

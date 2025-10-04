@@ -29,10 +29,13 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "GameFramework/PlayerStart.h"
 #include "GAS/PXASComponent.h"
+#include "GeometryCollection/GeometryCollectionParticlesData.h"
 #include "Input/PXInputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "SaveGame/PXSettingSaveGame.h"
+#include "Settings/PXSettingsLocal.h"
+#include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraShakeDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -282,40 +285,36 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 	
-	if (UPXSaveGameSubsystem* SettingSaveGame = GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>())
+	ECameraFollowMode CameraFollowMode = GetDefault<UPXSettingsShared>()->GetCameraFollowMode();
+	switch (CameraFollowMode)
 	{
-		if (UPXSettingSaveGame* SaveGame = SettingSaveGame->GetSettingData())
+	case ECameraFollowMode::Preview: // 镜头前瞻
 		{
-			switch (SaveGame->VideoSetting_CameraMode)
-			{
-			case 0: // 镜头前瞻
-				{
-					Velocity *= FrontViewFactor;
-					FVector Location = GetActorLocation() + Velocity;
-					// 偏移因子，如果玩家朝向镜头移动将会偏移得更多
-					float OffsetFactor = CharacterMoveToCamera ? 1 : 0.5;
+			Velocity *= FrontViewFactor;
+			FVector Location = GetActorLocation() + Velocity;
+			// 偏移因子，如果玩家朝向镜头移动将会偏移得更多
+			float OffsetFactor = CharacterMoveToCamera ? 1 : 0.5;
 
-					FVector BlendOffset = CurMoveCameraOffset * CurSpringArmLength / 300 * OffsetFactor;
-					BlendOffset = FMath::Lerp(BlendOffset, CurFightCameraOffset, 0.5);
-					
-					SpringArm->SetWorldLocation(Location + BlendOffset);
-					break;
-				}
-			case 1: // 镜头跟随
-				{
-					SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
-					FVector FightOffset = (CurMoveCameraOffset.IsNearlyZero(1) ? CurFightCameraOffset : CurMoveCameraOffset) * CurSpringArmLength / 280;
-					
-					SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
-					break;
-				}
-			default:
-				{
-					break;
-				}
-			}
+			FVector BlendOffset = CurMoveCameraOffset * CurSpringArmLength / 300 * OffsetFactor;
+			BlendOffset = FMath::Lerp(BlendOffset, CurFightCameraOffset, 0.5);
+			
+			SpringArm->SetWorldLocation(Location + BlendOffset);
+			break;
+		}
+	case  ECameraFollowMode::Behind: // 镜头跟随
+		{
+			SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
+			FVector FightOffset = (CurMoveCameraOffset.IsNearlyZero(1) ? CurFightCameraOffset : CurMoveCameraOffset) * CurSpringArmLength / 280;
+			
+			SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
+			break;
+		}
+	default:
+		{
+			break;
 		}
 	}
+
 	
 	// 攻击命中导致的视野下降
 	if (AttackHitComboNum > 0)
@@ -518,7 +517,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 
 	if (DataAsset && DataAsset->LandedSound)
 	{
-		USoundFuncLib::PlaySoundAtLocation(DataAsset->LandedSound.Get(), GetActorLocation(), 1.0f);
+		USoundFuncLib::PlaySoundAtLocation(DataAsset->LandedSound.Get(), GetActorLocation());
 	}
 	
 	SetLanding(true);
@@ -796,12 +795,11 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 	if (!bLanding) return;
 
 	PreFrameFalling = false;
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-[this]{
-			SetLanding(false,0);
-	});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		WeakThis->SetLanding(false, 0);
+	}, time);
 }
 
 void ABasePXCharacter::CheckNearDeath_Implementation()
@@ -850,7 +848,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 
 			if (ChangedHPPercent >= 0.02)
 			{
-				USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation(), 3.f);
+				USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation());
 				if (UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld()))
 				{
 					MainSaveGame->HurtTimes ++;
@@ -890,7 +888,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			}
 			if (USoundCue* SC_Revive = ResourceDataAsset->SC_Revive.LoadSynchronous())
 			{
-				USoundFuncLib::PlaySound2D(SC_Revive, 1.f);
+				USoundFuncLib::PlaySound2D(SC_Revive);
 			}
 			
 			if (APXPlayerController* PC = GetController<APXPlayerController>())
@@ -1033,6 +1031,14 @@ void ABasePXCharacter::EndNormalAttack()
 }
 
 
+void ABasePXCharacter::AddViewYaw(const FInputActionValue& Value)
+{
+	float AxisValue = Value.Get<float>();
+	if (AxisValue == 0) return;
+	
+	AddViewYaw( AxisValue, false);
+}
+
 void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 {
 	if (bPlayerControl)
@@ -1057,25 +1063,13 @@ void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 	}
 }
 
-void ABasePXCharacter::SetViewPitch(float V)
+void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 {
-	float Pitch = FMath::Clamp(UCommonFuncLib::DealDeltaTime(V) * 1.6 + CurBlendPitch, -50, 20);
+	float AxisValue = Value.Get<float>();
+	if (AxisValue == 0) return;
+	
+	float Pitch = FMath::Clamp(UCommonFuncLib::DealDeltaTime(AxisValue) * 1.6 + CurBlendPitch, -50, 20);
 	SetBlendPitch(Pitch);
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "SetViewPitch",
-	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this), Pitch]
-	{
-		if (WeakThis.IsValid())
-		{
-			UPXSaveGameSubsystem* SaveGameSubsystem = WeakThis->GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-
-			UPXSettingSaveGame* SettingSaveGame = SaveGameSubsystem->GetSettingData();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingSaveGame);
-
-			SettingSaveGame->GameSetting_ViewPitch = Pitch;
-			SaveGameSubsystem->SaveSettingData();
-		}
-	}, 0.5);
 }
 
 void ABasePXCharacter::PreReadyToStart_Implementation()
@@ -1600,7 +1594,10 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
-		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Completed,this, &ABasePXCharacter::JumpRelease);
+		EnhancedInput->BindActionByTagName("InputAction.ViewUP", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
+		EnhancedInput->BindActionByTagName("InputAction.ViewDown", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
+		EnhancedInput->BindActionByTagName("InputAction.ViewLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
+		EnhancedInput->BindActionByTagName("InputAction.ViewRight", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
 	}
 }
 

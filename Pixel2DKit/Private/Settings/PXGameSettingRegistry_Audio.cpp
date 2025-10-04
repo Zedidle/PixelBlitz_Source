@@ -45,8 +45,10 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeAudioSettings(UPXLocal
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetOverallVolume));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetOverallVolume));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetOverallVolume());
-			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-	
+
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
+			Setting->SetSourceRangeAndStep(TRange<double>(0, 5), 0.01);
+			
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 	
 			Volume->AddSetting(Setting);

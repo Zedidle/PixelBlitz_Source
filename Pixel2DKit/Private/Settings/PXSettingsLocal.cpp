@@ -340,6 +340,7 @@ UPXSettingsLocal::UPXSettingsLocal()
 
 	SetToDefaults();
 }
+
 PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 void UPXSettingsLocal::SetToDefaults()
@@ -885,7 +886,6 @@ float UPXSettingsLocal::GetOverallVolume() const
 
 void UPXSettingsLocal::SetOverallVolume(float InVolume)
 {
-	// Cache the incoming volume value
 	OverallVolume = InVolume;
 }
 
@@ -896,7 +896,6 @@ float UPXSettingsLocal::GetMusicVolume() const
 
 void UPXSettingsLocal::SetMusicVolume(float InVolume)
 {
-	// Cache the incoming volume value
 	MusicVolume = InVolume;
 }
 
@@ -907,7 +906,6 @@ float UPXSettingsLocal::GetSoundUIVolume() const
 
 void UPXSettingsLocal::SetSoundUIVolume(float InVolume)
 {
-	// Cache the incoming volume value
 	SoundUIVolume = InVolume;
 
 }
@@ -919,9 +917,8 @@ float UPXSettingsLocal::GetSoundBattleVolume() const
 
 void UPXSettingsLocal::SetSoundBattleVolume(float InVolume)
 {
-	
+	SoundBattleVolume = InVolume;
 }
-
 
 
 void UPXSettingsLocal::SetAudioOutputDeviceId(const FString& InAudioOutputDeviceId)

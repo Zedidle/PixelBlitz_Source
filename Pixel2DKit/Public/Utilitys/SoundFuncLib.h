@@ -18,13 +18,13 @@ class USoundFuncLib : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable, Category="Sound FuncLib")
-	static void PlaySoundAtLocation(USoundBase* Sound, FVector Location, float Volume = 1.0f);
+	static void PlaySoundAtLocation(USoundBase* Sound, FVector Location);
 
 	UFUNCTION(BlueprintCallable, Category="Sound FuncLib")
-	static void PlaySound2D(USoundBase* Sound, float Volume = 1.0f);
+	static void PlaySound2D(USoundBase* Sound);
 
 	UFUNCTION(BlueprintCallable, Category="Sound FuncLib")
-	static void PlayUISound(USoundBase* Sound, float Volume = 1.0f);
+	static void PlayUISound(USoundBase* Sound);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Sound FuncLib")
 	static float GetCurVolumeValue();

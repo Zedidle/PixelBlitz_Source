@@ -15,6 +15,10 @@ class PIXEL2DKIT_API UEnemyDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText EnemyName;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UDataTable> EnemyLevelDataTable;
 

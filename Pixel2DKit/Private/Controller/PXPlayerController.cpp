@@ -44,21 +44,23 @@ void APXPlayerController::OnCharacterControl(bool On)
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Subsystem);
 
+	FModifyContextOptions Options;
+	Options.bNotifyUserSettings = true;
 	
 	CharacterControlling = On;
 	if (On)
 	{
-		Subsystem->AddMappingContext(IMC_GamePad, 1);
-		Subsystem->AddMappingContext(IMC_KeyBoard, 1);
+		// Subsystem->AddMappingContext(IMC_GamePad, 1, Options);
+		Subsystem->AddMappingContext(IMC_KeyBoard, 1, Options);
 	}
 	else
 	{
-		Subsystem->RemoveMappingContext(IMC_GamePad);
+		// Subsystem->RemoveMappingContext(IMC_GamePad);
 		Subsystem->RemoveMappingContext(IMC_KeyBoard);
 	}
 }
 
-UInputMappingContext* APXPlayerController::GetCurrentIMC()
-{
-	return GamePadControlling ? IMC_GamePad : IMC_KeyBoard;
-}
+// UInputMappingContext* APXPlayerController::GetCurrentIMC()
+// {
+// 	return GamePadControlling ? IMC_GamePad : IMC_KeyBoard;
+// }

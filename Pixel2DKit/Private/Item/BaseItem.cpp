@@ -37,7 +37,7 @@ void ABaseItem::Use_Implementation()
 {
 	if (USoundCue* SoundCue = Data.UseSound.LoadSynchronous())
 	{
-		USoundFuncLib::PlaySoundAtLocation(SoundCue, GetActorLocation(), 1.0f);
+		USoundFuncLib::PlaySoundAtLocation(SoundCue, GetActorLocation());
 	}
 }
 
