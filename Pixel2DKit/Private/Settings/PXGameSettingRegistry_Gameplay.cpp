@@ -42,8 +42,23 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 	{
 		UGameSettingCollection* GameplayTextCollection = NewObject<UGameSettingCollection>();
 		GameplayTextCollection->SetDevName(TEXT("GameplayTextCollection"));
-		GameplayTextCollection->SetDisplayName(LOCTEXT("GameplayTextCollection_Name", "文本"));
+		GameplayTextCollection->SetDisplayName(LOCTEXT("GameplayTextCollection_Name", "文本与UI"));
 		Screen->AddSetting(GameplayTextCollection);
+
+		{
+			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
+			Setting->SetDevName(TEXT("GameplayText_ShowHP"));
+			Setting->SetDisplayName(LOCTEXT("GameplayText_ShowHP_Name", "显示小怪生命值"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayText_ShowHP_Desc", "显示小怪生命值血条的开关."));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetShowHP));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetShowHP));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetShowHP());
+
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+
+			GameplayTextCollection->AddSetting(Setting);
+		}
 		
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
