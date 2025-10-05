@@ -28,14 +28,15 @@ void UTimerSubsystem::Deinitialize()
 
 void UTimerSubsystem::SetDelay(TFunction<void()>&& Callback, float DelayDuration)
 {
+	if (DelayDuration <= 0.0f) return;
+	
 	UWorld* World = GetWorld();
 	if (!World) return;
-	
+
 	FTimerDelegate Delegate;
 	Delegate.BindLambda(
-		[this, Callback = MoveTemp(Callback)]() mutable
+		[Callback = MoveTemp(Callback)]() mutable
 		{
-			// 先移除记录
 			Callback();
 		}
 	);
@@ -52,9 +53,8 @@ void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& C
 	
 	FTimerDelegate Delegate;
 	Delegate.BindLambda(
-		[this, Callback = MoveTemp(Callback)]() mutable
+		[Callback = MoveTemp(Callback)]() mutable
 		{
-			// 先移除记录
 			Callback();
 		}
 	);
@@ -77,20 +77,23 @@ void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& C
 
 void UTimerSubsystem::SetRetriggerableDelay(const FName& TimerName, TFunction<void()>&& Callback, float DelayDuration)
 {
+	if (DelayDuration <= 0.0f) return;
+	
 	UWorld* World = GetWorld();
 	if (!World) return;
 
 	CancelDelay(TimerName);
 
+	TWeakObjectPtr<UTimerSubsystem> WeakThis(this);
 	FTimerDelegate Delegate;
 	Delegate.BindLambda(
-		[this, TimerName, Callback = MoveTemp(Callback)]() mutable
+		[WeakThis, TimerName, Callback = MoveTemp(Callback)]() mutable
 		{
-			// 先移除记录
+			if (!WeakThis.IsValid()) return;
+			
 			FTimerHandle Handle;
-			if (ActiveTimers.RemoveAndCopyValue(TimerName, Handle))
+			if (WeakThis->ActiveTimers.RemoveAndCopyValue(TimerName, Handle))
 			{
-				// 执行回调（使用移动后的Callback）
 				Callback();
 			}
 		}
@@ -105,6 +108,8 @@ void UTimerSubsystem::SetRetriggerableDelay(const FName& TimerName, TFunction<vo
 
 void UTimerSubsystem::CancelDelay(FName TimerName)
 {
+	check(IsInGameThread());
+	
 	if (FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{
 		UWorld* World = GetWorld();
@@ -137,4 +142,39 @@ float UTimerSubsystem::GetRemainingTime(FName TimerName) const
 		}
 	}
 	return -1.0f;
+}
+
+
+void UTimerSubsystem::PauseDelay(FName TimerName)
+{
+	if (FTimerHandle* Handle = ActiveTimers.Find(TimerName))
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->GetTimerManager().PauseTimer(*Handle);
+		}
+	}
+}
+
+void UTimerSubsystem::UnPauseDelay(FName TimerName)
+{
+	if (FTimerHandle* Handle = ActiveTimers.Find(TimerName))
+	{
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->GetTimerManager().UnPauseTimer(*Handle);
+		}
+	}
+}
+
+bool UTimerSubsystem::IsDelayPaused(FName TimerName) const
+{
+	if (const FTimerHandle* Handle = ActiveTimers.Find(TimerName))
+	{
+		UWorld* World = GetWorld();
+		return World && World->GetTimerManager().IsTimerPaused(*Handle);
+	}
+	return false;
 }

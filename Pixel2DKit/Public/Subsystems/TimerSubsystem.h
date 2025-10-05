@@ -120,6 +120,15 @@ public:
 	bool IsDelayActive(FName TimerName) const;
 
 	float GetRemainingTime(FName TimerName) const;
+
+
+	// 暂停指定的定时器
+	void PauseDelay(FName TimerName);
+	// 恢复指定的定时器
+	void UnPauseDelay(FName TimerName);
+	// 检查定时器是否处于暂停状态
+	bool IsDelayPaused(FName TimerName) const;
+	
 };
 
 
