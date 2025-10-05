@@ -5,6 +5,7 @@
 #include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
 #include "Controller/PXPlayerController.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXLocalPlayer.h"
 
@@ -84,5 +85,30 @@ UPXSettingsShared* UPXGameplayStatics::GetSettingsShared(const UObject* WorldCon
 	}
 
 	return nullptr;
+}
+
+bool UPXGameplayStatics::IsChosenTalent(const UObject* WorldContextObject, FGameplayTag Tag)
+{
+	if (UPXBasicBuildSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject))
+	{
+		return SG->ChosenTalents.Contains(Tag);		
+	}
+	return false;
+}
+
+void UPXGameplayStatics::ChoiceTalent(const UObject* WorldContextObject, FGameplayTag Tag)
+{
+	if (UPXBasicBuildSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject))
+	{
+		SG->ChosenTalents.AddUnique(Tag);		
+	}
+}
+
+void UPXGameplayStatics::RemoveChosenTalent(const UObject* WorldContextObject, FGameplayTag Tag)
+{
+	if (UPXBasicBuildSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject))
+	{
+		SG->ChosenTalents.Remove(Tag);		
+	}
 }
 

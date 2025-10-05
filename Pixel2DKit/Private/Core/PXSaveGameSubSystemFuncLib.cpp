@@ -5,7 +5,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Kismet/GameplayStatics.h"
 
-UPXSaveGameSubsystem* UPXSaveGameSubSystemFuncLib::GetSaveGameSubsystem(UObject* WorldContext)
+UPXSaveGameSubsystem* UPXSaveGameSubSystemFuncLib::GetSaveGameSubsystem(const UObject* WorldContext)
 {
 	if (!WorldContext) return nullptr;
 	
@@ -20,7 +20,7 @@ UPXSaveGameSubsystem* UPXSaveGameSubSystemFuncLib::GetSaveGameSubsystem(UObject*
 	return nullptr;
 }
 
-UPXMainSaveGame* UPXSaveGameSubSystemFuncLib::GetMainData(UObject* WorldContext)
+UPXMainSaveGame* UPXSaveGameSubSystemFuncLib::GetMainData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -29,7 +29,7 @@ UPXMainSaveGame* UPXSaveGameSubSystemFuncLib::GetMainData(UObject* WorldContext)
 	return nullptr;
 }
 
-void UPXSaveGameSubSystemFuncLib::SaveMainData(UObject* WorldContext)
+void UPXSaveGameSubSystemFuncLib::SaveMainData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -37,7 +37,7 @@ void UPXSaveGameSubSystemFuncLib::SaveMainData(UObject* WorldContext)
 	}
 }
 
-UPXBasicBuildSaveGame* UPXSaveGameSubSystemFuncLib::GetBasicBuildData(UObject* WorldContext)
+UPXBasicBuildSaveGame* UPXSaveGameSubSystemFuncLib::GetBasicBuildData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -46,7 +46,7 @@ UPXBasicBuildSaveGame* UPXSaveGameSubSystemFuncLib::GetBasicBuildData(UObject* W
 	return nullptr;
 }
 
-void UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(UObject* WorldContext)
+void UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -54,7 +54,7 @@ void UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(UObject* WorldContext)
 	}
 }
 
-UPXAchievementsSaveGame* UPXSaveGameSubSystemFuncLib::GetAchievementsData(UObject* WorldContext)
+UPXAchievementsSaveGame* UPXSaveGameSubSystemFuncLib::GetAchievementsData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -63,7 +63,7 @@ UPXAchievementsSaveGame* UPXSaveGameSubSystemFuncLib::GetAchievementsData(UObjec
 	return nullptr;
 }
 
-void UPXSaveGameSubSystemFuncLib::SaveAchievementsData(UObject* WorldContext)
+void UPXSaveGameSubSystemFuncLib::SaveAchievementsData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -71,7 +71,7 @@ void UPXSaveGameSubSystemFuncLib::SaveAchievementsData(UObject* WorldContext)
 	}
 }
 
-UPXSettingSaveGame* UPXSaveGameSubSystemFuncLib::GetSettingData(UObject* WorldContext)
+UPXSettingSaveGame* UPXSaveGameSubSystemFuncLib::GetSettingData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -80,7 +80,7 @@ UPXSettingSaveGame* UPXSaveGameSubSystemFuncLib::GetSettingData(UObject* WorldCo
 	return nullptr;
 }
 
-void UPXSaveGameSubSystemFuncLib::SaveSettingData(UObject* WorldContext)
+void UPXSaveGameSubSystemFuncLib::SaveSettingData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -88,7 +88,7 @@ void UPXSaveGameSubSystemFuncLib::SaveSettingData(UObject* WorldContext)
 	}
 }
 
-UPXShopSaveGame* UPXSaveGameSubSystemFuncLib::GetShopData(UObject* WorldContext)
+UPXShopSaveGame* UPXSaveGameSubSystemFuncLib::GetShopData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -97,7 +97,7 @@ UPXShopSaveGame* UPXSaveGameSubSystemFuncLib::GetShopData(UObject* WorldContext)
 	return nullptr;
 }
 
-void UPXSaveGameSubSystemFuncLib::SaveShopData(UObject* WorldContext)
+void UPXSaveGameSubSystemFuncLib::SaveShopData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -105,7 +105,7 @@ void UPXSaveGameSubSystemFuncLib::SaveShopData(UObject* WorldContext)
 	}
 }
 
-UPXTalentsSaveGame* UPXSaveGameSubSystemFuncLib::GetTalentsData(UObject* WorldContext)
+UPXTalentsSaveGame* UPXSaveGameSubSystemFuncLib::GetTalentsData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{
@@ -114,7 +114,7 @@ UPXTalentsSaveGame* UPXSaveGameSubSystemFuncLib::GetTalentsData(UObject* WorldCo
 	return nullptr;
 }
 
-void UPXSaveGameSubSystemFuncLib::SaveTalentsData(UObject* WorldContext)
+void UPXSaveGameSubSystemFuncLib::SaveTalentsData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
 	{

@@ -13,38 +13,38 @@ class UPXSaveGameSubSystemFuncLib : public UObject
 	
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXSaveGameSubsystem* GetSaveGameSubsystem(UObject* WorldContext);
+	static UPXSaveGameSubsystem* GetSaveGameSubsystem(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXMainSaveGame* GetMainData(UObject* WorldContext);
+	static UPXMainSaveGame* GetMainData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveMainData(UObject* WorldContext);
+	static void SaveMainData(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXBasicBuildSaveGame* GetBasicBuildData(UObject* WorldContext);
+	static UPXBasicBuildSaveGame* GetBasicBuildData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveBasicBuildData(UObject* WorldContext);
-
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXAchievementsSaveGame* GetAchievementsData(UObject* WorldContext);
-	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveAchievementsData(UObject* WorldContext);
+	static void SaveBasicBuildData(const UObject* WorldContext);
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXSettingSaveGame* GetSettingData(UObject* WorldContext);
+	static UPXAchievementsSaveGame* GetAchievementsData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveSettingData(UObject* WorldContext);
+	static void SaveAchievementsData(const UObject* WorldContext);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
+	static UPXSettingSaveGame* GetSettingData(const UObject* WorldContext);
+	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
+	static void SaveSettingData(const UObject* WorldContext);
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXShopSaveGame* GetShopData(UObject* WorldContext);
+	static UPXShopSaveGame* GetShopData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveShopData(UObject* WorldContext);
+	static void SaveShopData(const UObject* WorldContext);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXTalentsSaveGame* GetTalentsData(UObject* WorldContext);
+	static UPXTalentsSaveGame* GetTalentsData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveTalentsData(UObject* WorldContext);
+	static void SaveTalentsData(const UObject* WorldContext);
 };

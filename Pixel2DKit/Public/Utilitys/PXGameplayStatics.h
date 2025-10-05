@@ -8,6 +8,7 @@
 #include "PXGameplayStatics.generated.h"
 
 
+class UPXLocalPlayer;
 class UPXSettingsShared;
 class APXGameState;
 class APXPlayerController;
@@ -39,4 +40,25 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
 	static UPXSettingsShared* GetSettingsShared(const UObject* WorldContextObject);
+
+
+
+
+
+
+#pragma region Gameplay Talent
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="PXGameplayStatics | Talent", meta=(WorldContext="WorldContextObject"))
+	static bool IsChosenTalent(const UObject* WorldContextObject, FGameplayTag Tag);
+
+	UFUNCTION(BlueprintCallable, Category="PXGameplayStatics | Talent", meta=(WorldContext="WorldContextObject"))
+	static void ChoiceTalent(const UObject* WorldContextObject, FGameplayTag Tag);
+
+	UFUNCTION(BlueprintCallable, Category="PXGameplayStatics | Talent", meta=(WorldContext="WorldContextObject"))
+	static void RemoveChosenTalent(const UObject* WorldContextObject, FGameplayTag Tag);
+#pragma endregion
+
+
+
+
+	
 };
