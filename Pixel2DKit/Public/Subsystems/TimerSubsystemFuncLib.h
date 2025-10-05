@@ -30,11 +30,11 @@ public:
     }
     
     template<typename Callable>
-    static void SetDelayLoop(UObject* WorldContext, const FName& TimerName, Callable&& Callback, float InRate, float SustainTime = 0.f)
+    static void SetDelayLoop(UObject* WorldContext, const FName& TimerName, Callable&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1)
     {
         if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
         {
-            Subsystem->SetDelayLoop(TimerName, MoveTemp(Callback), InRate, SustainTime);
+            Subsystem->SetDelayLoop(TimerName, MoveTemp(Callback), InRate, SustainTime, LoopTimes);
         }
     }
 

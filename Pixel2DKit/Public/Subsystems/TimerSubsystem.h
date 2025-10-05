@@ -17,22 +17,8 @@ class PIXEL2DKIT_API UTimerSubsystem : public UGameInstanceSubsystem
 
 	// 存储所有活动的计时器
 	TMap<FName, FTimerHandle> ActiveTimers;
-	
-	struct FTimerKey
-	{
-		FName Name;
-		TWeakObjectPtr<UObject> Owner;
-        
-		friend bool operator==(const FTimerKey& A, const FTimerKey& B)
-		{
-			return A.Name == B.Name && A.Owner == B.Owner;
-		}
-        
-		friend uint32 GetTypeHash(const FTimerKey& Key)
-		{
-			return HashCombine(GetTypeHash(Key.Name), GetTypeHash(Key.Owner));
-		}
-	};
+	TMap<FName, int> RemLoopTimes;
+
 	
 public:
 	// 初始化子系统
@@ -44,7 +30,7 @@ public:
 
 	void SetDelay(TFunction<void()>&& Callback, float DelayDuration);
 
-	void SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime = 0.f);
+	void SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1);
 	
 	template<typename T>
 	void SetDelay(T* Object, FTimerDelegate::TMethodPtr<T> Function, float DelayDuration)

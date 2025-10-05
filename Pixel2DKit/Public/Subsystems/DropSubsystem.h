@@ -42,10 +42,6 @@ class PIXEL2DKIT_API UDropSubsystem : public UGameInstanceSubsystem
 
 	UPROPERTY()
 	TObjectPtr<UDataTable> ItemDataTable;
-	TArray<FTimerHandle> TimerHandles;
-	TArray<int32> TimerHandle_Times;
-	
-
 	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override

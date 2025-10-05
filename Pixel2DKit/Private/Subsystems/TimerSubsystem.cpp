@@ -44,24 +44,35 @@ void UTimerSubsystem::SetDelay(TFunction<void()>&& Callback, float DelayDuration
 	World->GetTimerManager().SetTimer(Handle, Delegate, DelayDuration, false);
 }
 
-void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime)
+void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime, int LoopTimes)
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
 	
 	CancelDelay(TimerName);
-	
+
 	FTimerDelegate Delegate;
 	Delegate.BindLambda(
-		[Callback = MoveTemp(Callback)]() mutable
+		[TimerName, WeakThis = TWeakObjectPtr<ThisClass>(this), Callback = MoveTemp(Callback)]() mutable
 		{
+			if (!WeakThis.IsValid()) return;
 			Callback();
+
+			if (WeakThis->RemLoopTimes.Contains(TimerName))
+			{
+				if (--WeakThis->RemLoopTimes[TimerName] == 0)
+				{
+					WeakThis->CancelDelay(TimerName);
+				}
+			}
 		}
 	);
+	
 	FTimerHandle Handle;
 	World->GetTimerManager().SetTimer(Handle, Delegate, InRate, true);
 	ActiveTimers.Add(TimerName, Handle);
-
+	RemLoopTimes.Add(TimerName, LoopTimes);
+	
 	if (SustainTime > 0.0f)
 	{
 		SetDelay([WeakThis=TWeakObjectPtr<UTimerSubsystem>(this), TimerName]
