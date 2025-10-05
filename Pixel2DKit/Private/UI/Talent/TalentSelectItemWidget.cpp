@@ -7,6 +7,7 @@
 #include "DelayAction.h"
 #include "MeshAttributes.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/SizeBoxSlot.h"
@@ -48,21 +49,26 @@ void UTalentSelectItemWidget::Event_OnHovered()
 		if (TalentTipWidget)
 		{
 			TalentTipWidget->SetTalentData(TalentData);
-			TalentTipWidget->AddToViewport(100);
-
 			if (GEngine && GEngine->GameViewport)
 			{
-				FVector2D ViewportSize;
-				GEngine->GameViewport->GetViewportSize(ViewportSize);
 			
 				FGeometry Geometry = GetCachedGeometry();
 				FVector2D AbsolutePosition = Geometry.GetAbsolutePosition();
 				FVector2D ViewportPos, PixelPos;
 				USlateBlueprintLibrary::AbsoluteToViewport(this, AbsolutePosition, PixelPos, ViewportPos);
-				ViewportPos.X += TipOffset.X;
-				ViewportPos.Y = FMath::Min(ViewportSize.Y + TipOffset.Y, ViewportPos.Y);
+				
+				FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(this);
+				float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(this);
+				FVector2D RealViewportSize = ViewportSize / ViewportScale;
+
+				ViewportPos.X += TipOffset.X / ViewportScale;
+				ViewportPos.Y = FMath::Min(RealViewportSize.Y + TipOffset.Y / ViewportScale, RealViewportSize.Y);
+				
 				TalentTipWidget->SetPositionInViewport(ViewportPos);
 			}
+
+			TalentTipWidget->AddToViewport(100);
+
 		}
 	}
 }
