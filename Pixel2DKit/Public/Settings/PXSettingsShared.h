@@ -295,6 +295,12 @@ private:
 #pragma region Gameplay Settings
 
 public:
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool GetShowHP() const { return bShowHP; }
+	UFUNCTION()
+	void SetShowHP(bool Value) { ChangeValueAndDirty(bShowHP, Value); }
+	
 	UFUNCTION()
 	bool GetShowDamageText() const { return bShowDamageText; }
 	UFUNCTION()
@@ -324,6 +330,10 @@ public:
 	void ApplyGameplayOptions();
 
 private:
+
+	UPROPERTY()
+	bool bShowHP = true;
+	
 	UPROPERTY()
 	bool bShowDamageText = true;
 
