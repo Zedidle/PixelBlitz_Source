@@ -7,6 +7,7 @@
 #include "UI/UIEventCenter.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/TextBlock.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 
 
 void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
@@ -41,10 +42,7 @@ void UCommonTipWidget::RemoveSelf()
 	PlayAnimOut();
 	
 	UWorld* World = GetWorld();
-	if(World == nullptr)
-	{
-		return;
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
 	if(ShowTipTimerHandle.IsValid())
 	{
