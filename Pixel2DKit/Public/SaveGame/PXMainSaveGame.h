@@ -75,9 +75,6 @@ public:
 	TEnumAsByte<EStyleType> StyleType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UPrimaryDataAsset> CurWeatherType;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurCharacterName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

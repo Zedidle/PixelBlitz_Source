@@ -19,7 +19,6 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-
 	void InitData_Main();
 	void InitData_BasicBuild();
 	void InitData_Setting();
@@ -47,6 +46,10 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 	
 public:
 
+
+
+
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	
 	int UserIndex = 0;
@@ -62,8 +65,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "SaveGame | Main")
 	bool Main_HasChoiceAbility();
 
+
+	// EStyleType StyleType 这个配置应该改为全局设置保存，开始时读取即可
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Main")
-	void Main_TotalInit(TSubclassOf<UPrimaryDataAsset> WeatherType, EStyleType StyleType);
+	void Main_TotalInit();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "SaveGame | Main")
 	bool Main_Saved();

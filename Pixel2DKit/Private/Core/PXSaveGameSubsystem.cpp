@@ -182,13 +182,11 @@ bool UPXSaveGameSubsystem::Main_HasChoiceAbility()
     return MainSaveGame->CurLevelToChoiceAbility ==  MainSaveGame->CurLevelName;
 }
 
-void UPXSaveGameSubsystem::Main_TotalInit(TSubclassOf<UPrimaryDataAsset> WeatherType, EStyleType StyleType)
+void UPXSaveGameSubsystem::Main_TotalInit()
 {
     UPXMainSaveGame* OldSaveGame = MainSaveGame;
     MainSaveGame = NewObject<UPXMainSaveGame>(this);
     MainSaveGame->CurCharacterName = OldSaveGame->CurCharacterName;
-    MainSaveGame->CurWeatherType = WeatherType;
-    MainSaveGame->StyleType = StyleType;
 }
 
 bool UPXSaveGameSubsystem::Main_Saved()

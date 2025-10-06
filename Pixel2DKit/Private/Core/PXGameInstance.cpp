@@ -4,14 +4,42 @@
 #include "Core/PXGameInstance.h"
 
 #include "Core/PXSaveGameSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Sound/SoundCue.h"
+#include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/SoundFuncLib.h"
 
 class UCustomResourceSettings;
+
+
+
+void UPXGameInstance::StartNewGame()
+{
+	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXSG)
+
+	UDataTableSubsystem* DataTableSubsystem = GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	UDataTable* LevelData = DataTableSubsystem->GetDataTable("LevelData");
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(LevelData)
+	
+	PXSG->Main_TotalInit();
+	PXSG->GetMainData()->RemLevels = LevelData->GetRowNames();
+	PXSG->SaveMainData();
+	PXSG->SaveBasicBuildData();
+
+	StartGame();
+}
+
+void UPXGameInstance::StartGame()
+{
+	UGameplayStatics::OpenLevel(GetWorld(), "L_Main");
+}
 
 FName UPXGameInstance::GetCurLevelName(bool Continue)
 {

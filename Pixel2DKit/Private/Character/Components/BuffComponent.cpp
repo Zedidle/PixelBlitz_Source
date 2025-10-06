@@ -256,8 +256,6 @@ void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Gamepl
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
-		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectRemoved Tag: %s"), *Tag.ToString()));
-		
 		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
 		{
 			AddBuffByTag(Tag);

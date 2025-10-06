@@ -50,6 +50,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
 	APlayerRespawnPoint* PlayerRespawnPoint;
 
+
+	
+	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0), FRotator StartRotation= FRotator(0, 0,0));
 

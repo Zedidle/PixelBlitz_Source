@@ -6,6 +6,7 @@
 #include "Core/PXGameInstance.h"
 #include "Controller/PXPlayerController.h"
 #include "Components/CapsuleComponent.h"
+#include "Core/PXSaveGameSubsystem.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,6 +14,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
+#include "Subsystems/DataTableSubsystem.h"
 
 
 void APXGameMode::BeginPlay()
@@ -39,6 +41,8 @@ void APXGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	OnStartLevelLoaded.RemoveAll(this);
 }
+
+
 
 void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator StartRotation)
 {

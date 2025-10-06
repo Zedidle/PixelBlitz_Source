@@ -21,6 +21,13 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Game")
 	bool bGameStarted = false;
+
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void StartNewGame();
+
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void StartGame();
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Game")
 	FName GetCurLevelName(bool Continue);

@@ -133,6 +133,13 @@ void UUIManager::OnWorldBeginPlay(UWorld& InWorld)
 
 bool UUIManager::OpenUI(const FName UIType)
 {
+	if(WidgetMap.Find(UIType))
+	{
+		ShowUI(UIType);
+		return true;
+	}
+
+	
 	const auto& ConfigDataPtr = ConfigDataMap.Find(UIType);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(ConfigDataPtr, false)
 
@@ -142,11 +149,6 @@ bool UUIManager::OpenUI(const FName UIType)
 	if (Root.IsValid() == false)
 	{
 		InitRoot();
-	}
-
-	if(WidgetMap.Find(UIType))
-	{
-		CloseUI(UIType);
 	}
 
 	const auto& BPWidget = Root->PushWidgetToLayerStack(ConfigDataPtr->LayerTag, UIBPClass);

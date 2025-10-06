@@ -1600,10 +1600,6 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
-		// EnhancedInput->BindActionByTagName("InputAction.ViewUP", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
-		// EnhancedInput->BindActionByTagName("InputAction.ViewDown", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
-		// EnhancedInput->BindActionByTagName("InputAction.ViewLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
-		// EnhancedInput->BindActionByTagName("InputAction.ViewRight", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
 		EnhancedInput->BindActionByTagName("InputAction.ViewPitch", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
 		EnhancedInput->BindActionByTagName("InputAction.ViewYaw", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
 	}

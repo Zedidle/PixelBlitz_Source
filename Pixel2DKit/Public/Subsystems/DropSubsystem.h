@@ -55,6 +55,6 @@ public:
 	
 	
 	UFUNCTION(BlueprintCallable, Category="DropSubsystem")
-	void SpawnItems(const FDrop& DropData, const FVector& SpawnLocation, float SpawnFrequency = 0.2f);
+	void SpawnItems(const FDrop& DropData, const FVector& SpawnLocation);
 	
 };

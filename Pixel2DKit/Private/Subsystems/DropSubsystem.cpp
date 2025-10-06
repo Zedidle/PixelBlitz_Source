@@ -5,6 +5,7 @@
 #include "Item/BaseItem.h"
 #include "Engine/DataTable.h"
 #include "Engine/DeveloperSettings.h"
+#include "Item/BaseInteractableItem.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
@@ -22,7 +23,7 @@ void UDropSubsystem::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocation, float SpawnFrequency)
+void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocation)
 {
 	if (DropData.Items.IsEmpty()) return ;
 	
@@ -47,8 +48,13 @@ void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocat
 			if (FItemData* ItemData = WeakThis->ItemDataTable->FindRow<FItemData>(ItemName, TEXT("DropSystem GetItemDataByName")))
 			{
 				// 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("UDropSubsystem ABaseItem Spawn Success, %d"), __LINE__));
-				WeakThis->GetWorld()->SpawnActor<ABaseItem>(ItemData->SpawnItemClass, SpawnLocation, FRotator(0, 0, 0));
+				ABaseInteractableItem* Item = WeakThis->GetWorld()->SpawnActor<ABaseInteractableItem>(ItemData->SpawnItemClass,
+									SpawnLocation, FRotator(0, 0, 0));
+				if (Item)
+				{
+					Item->SetVelocityOnSpawn(DropData.SpawnRandRotate, DropData.SpawnSpeed);
+				}
 			}
-	}, SpawnFrequency, -1, DropData.DropTotalNum);
+	}, DropData.SpawnFrequency, -1, DropData.DropTotalNum);
 
 }

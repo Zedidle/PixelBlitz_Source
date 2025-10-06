@@ -31,7 +31,10 @@ public:
 	FString Version = "v0.5.2.6.1";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool IsDemo = true;	
+	bool IsDemo = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsTesting = true;
 };
 
 #pragma endregion
@@ -81,6 +84,16 @@ struct FDrop
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	float SpawnRandRotate = 20.0f;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	float SpawnSpeed = 200.0f;
+	
+	// 物品生成的间隔
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	float SpawnFrequency = 0.2;
+	
 	// 物品及对应概率比率
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	TMap<FName, int> Items; 
