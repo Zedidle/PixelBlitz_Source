@@ -6,6 +6,7 @@
 #include "UI/UIEventCenter.h"
 #include "Components/ScrollBox.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 
 
 void UCommonTipContainerWidget::NativeConstruct()
@@ -14,7 +15,7 @@ void UCommonTipContainerWidget::NativeConstruct()
 
 	if (UUIEventCenter* UIEventCenter = UUIEventCenter::Get(this))
 	{
-		UIEventCenter->OnCommonTipRemove.AddDynamic(this, &UCommonTipContainerWidget::OnCommonTipRemove);
+		UIEventCenter->OnCommonTipAnimOutEnd.AddDynamic(this, &UCommonTipContainerWidget::OnCommonTipRemoveAll);
 	}
 }
 
@@ -22,7 +23,7 @@ void UCommonTipContainerWidget::NativeDestruct()
 {
 	if (UUIEventCenter* UIEventCenter = UUIEventCenter::Get(this))
 	{
-		UIEventCenter->OnCommonTipRemove.RemoveDynamic(this, &UCommonTipContainerWidget::OnCommonTipRemove);
+		UIEventCenter->OnCommonTipAnimOutEnd.RemoveDynamic(this, &UCommonTipContainerWidget::OnCommonTipRemoveAll);
 	}
 	
 	Super::NativeDestruct();
@@ -56,17 +57,6 @@ void UCommonTipContainerWidget::RemoveTip()
 		UCommonTipWidget* CommonTipWidget = CacheTipQueue[0];
 		if(IsValid(CommonTipWidget))
 		{
-			UWorld* World = GetWorld();
-			if(World == nullptr)
-			{
-				return;
-			}
-
-			if(CommonTipWidget->ShowTipTimerHandle.IsValid())
-			{
-				World->GetTimerManager().ClearTimer(CommonTipWidget->ShowTipTimerHandle);
-			}
-			
 			CommonTipWidget->RemoveFromParent();
 		}
 
@@ -74,26 +64,31 @@ void UCommonTipContainerWidget::RemoveTip()
 	}
 }
 
-void UCommonTipContainerWidget::OnCommonTipRemove(UCommonTipWidget* TipWidget)
+void UCommonTipContainerWidget::OnCommonTipRemoveAll(float NewEndTime)
 {
-	if(CacheTipQueue.Find(TipWidget))
-	{
-		if(IsValid(TipWidget))
-		{
-			UWorld* World = GetWorld();
-			if(World == nullptr)
-			{
-				return;
-			}
+	if (CurEndTime > NewEndTime) return;
 
-			if(TipWidget->ShowTipTimerHandle.IsValid())
-			{
-				World->GetTimerManager().ClearTimer(TipWidget->ShowTipTimerHandle);
-			}
-			
-			TipWidget->RemoveFromParent();
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	CurEndTime = NewEndTime;
+
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "UCommonTipContainerWidget::OnCommonTipRemoveAll",
+	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+
+		if (WeakThis->CacheTipQueue.IsEmpty()) return;
+
+		for (auto& Tip : WeakThis->CacheTipQueue)
+		{
+			if (!Tip) continue;
+
+			Tip->RemoveFromParent();
 		}
 
-		CacheTipQueue.Remove(TipWidget);
-	}
+		WeakThis->CacheTipQueue.Empty();
+		
+	}, NewEndTime - World->TimeSeconds);
 }
+

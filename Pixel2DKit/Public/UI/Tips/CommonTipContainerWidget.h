@@ -6,6 +6,7 @@
 #include "CommonActivatableWidget.h"
 #include "CommonTipContainerWidget.generated.h"
 
+class UCommonTipWidget;
 /**
  * 
  */
@@ -13,6 +14,9 @@ UCLASS()
 class PIXEL2DKIT_API UCommonTipContainerWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()
+
+	float CurEndTime;
+	
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -24,7 +28,7 @@ public:
 	void RemoveTip();
 
 	UFUNCTION()
-	void OnCommonTipRemove(UCommonTipWidget* TipWidget);
+	void OnCommonTipRemoveAll(float NewEndTime);
 
 	UPROPERTY(BlueprintReadWrite, meta=(BindWidgetOptional))
 	class UScrollBox* ScrollBox_Tips;

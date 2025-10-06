@@ -44,11 +44,7 @@ public:
 	float OnHurtInvulnerableDelay = 0.15;  
 	float InvulnerableDuration = 0.5; // 无敌帧时间
 
-	float PreHurtTime = 0; // 上次受到伤害的时间
 	bool bFlashing = false; // 是否在受伤闪烁
-	FLinearColor FlashColor = FLinearColor::Red; // 闪烁颜色
-	float FlashDuration = 1;
-	FTimerHandle FlashTimerHandle;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	float InRockPercent = 0.0f; // 霸体抗性，抵御击退、击飞
@@ -61,10 +57,6 @@ public:
 	
 	float KnockBackMultiplier = 1.f; // 受力缩放
 	float MinPowerRepelForceValue = 300.f; // 强效击退触发的阈值
-
-	TMap<FGameplayTag, int> Tag2EffectHealthPoint; // 每秒的生命值影响
-	FTimerHandle TimerHandle_EffectBySeconds;
-
 	
 	int CalAcceptDamage(int InDamage, AActor* Maker);
 	void OnHurtInvulnerable();
@@ -88,7 +80,7 @@ public:
 	void InvulnerableForDuration(float duration);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
-	void FlashForDuration(FLinearColor color = FLinearColor(0.9, 0.1, 0.1, 0.6), float duration = 1, bool force = false) ;
+	void FlashForDuration(FLinearColor FlashColor = FLinearColor(0.9, 0.1, 0.1, 0.6), int FlashTimes = 2, float FlashRate = 0.15f) ;
 
 	
 	UFUNCTION(BlueprintCallable, Category="Health")

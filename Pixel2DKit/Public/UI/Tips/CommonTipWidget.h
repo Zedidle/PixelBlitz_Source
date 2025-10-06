@@ -16,12 +16,6 @@ public:
 	void SetContent(const FString& InContent, float InTime);
 
 	UFUNCTION()
-	void OnTipPlayAnimOutEnd();
-
-	UFUNCTION()
-	void RemoveSelf();
-
-	UFUNCTION()
 	void PlayAnimIn();
 
 	UFUNCTION()
@@ -35,8 +29,4 @@ public:
 
 	UPROPERTY(Transient, meta=(BindWidgetAnimOptional))
 	UWidgetAnimation* Anim_out;
-
-	FTimerHandle ShowTipTimerHandle;
-
-	float CacheShowTipTime;
 };

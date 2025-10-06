@@ -64,39 +64,23 @@ void UHealthComponent::InvulnerableForDuration(float duration)
 	}, duration);
 }
 
-void UHealthComponent::FlashForDuration(FLinearColor color, float duration, bool force) 
+void UHealthComponent::FlashForDuration(FLinearColor FlashColor, int FlashTimes, float FlashRate) 
 {
-	if (bInvulnerable && !force) return;
 	UWorld* World = GetWorld();
 	if (!World) return;
 	
-	FlashColor = color;
-	PreHurtTime = World->GetTimeSeconds();
-	FlashDuration = duration;
-
-	FName TimerName = FName(GetName() + "FlashForDuration");
+	FName TimerName = FName("UHealthComponent::FlashForDuration" + FGuid::NewGuid().ToString());
 	UTimerSubsystemFuncLib::SetDelayLoop(World, TimerName,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this), TimerName, World]
+		[WeakThis = TWeakObjectPtr<ThisClass>(this), FlashColor]
 		{
-			if (!World) return;
-			if (!WeakThis.IsValid() || !WeakThis->GetOwner())
-			{
-				UTimerSubsystemFuncLib::CancelDelay(World, TimerName);
-				return;
-			}
+			if (!WeakThis.IsValid()) return;
+			
 			UPaperFlipbookComponent* PF = WeakThis->GetOwner()->GetComponentByClass<UPaperFlipbookComponent>();
 			if (!PF) return;
 			
-			if (World->GetTimeSeconds() - WeakThis->PreHurtTime > WeakThis->FlashDuration)
-			{
-				PF->SetSpriteColor(FLinearColor::White);
-				UTimerSubsystemFuncLib::CancelDelay(World, TimerName);
-				return;
-			}
-
 			WeakThis->bFlashing = !WeakThis->bFlashing;
-			PF->SetSpriteColor(WeakThis->bFlashing ? WeakThis->FlashColor : FLinearColor::White);
-		}, 0.2);
+			PF->SetSpriteColor(WeakThis->bFlashing ? FlashColor : FLinearColor::White);
+		}, FlashRate, -1, FlashTimes * 2);
 }
 
 FVector UHealthComponent::GetRepel(FVector IncomeRepel, const AActor* Instigator) const
@@ -224,16 +208,8 @@ void UHealthComponent::BeginPlay()
 void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	UWorld* world = GetWorld();
-	if (!IsValid(world)) return;
-	if (TimerHandle_EffectBySeconds.IsValid() && world->GetTimerManager().IsTimerActive(TimerHandle_EffectBySeconds))
-	{
-		world->GetTimerManager().ClearTimer(TimerHandle_EffectBySeconds);
-	}
-	if (FlashTimerHandle.IsValid() && world->GetTimerManager().IsTimerActive(FlashTimerHandle))
-	{
-		world->GetTimerManager().ClearTimer(FlashTimerHandle);
-	}
+
+
 	OnHPChanged.RemoveAll(this);
 }
 

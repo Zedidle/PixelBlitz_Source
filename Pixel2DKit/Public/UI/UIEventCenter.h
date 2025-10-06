@@ -50,8 +50,8 @@ public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStopPlaceBuilding);
 	FOnStopPlaceBuilding OnStopPlaceBuilding;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCommonTipRemove, UCommonTipWidget*, Tip);
-	FOnCommonTipRemove OnCommonTipRemove;
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCommonTipAnimOutEnd, float, EndTime);
+	FOnCommonTipAnimOutEnd OnCommonTipAnimOutEnd;
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSelectMenuListChange);
 	FOnSelectMenuListChange OnSelectMenuListChange;

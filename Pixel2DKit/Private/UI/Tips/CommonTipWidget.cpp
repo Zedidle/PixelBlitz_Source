@@ -2,12 +2,11 @@
 
 
 #include "UI/Tips/CommonTipWidget.h"
-
-
 #include "UI/UIEventCenter.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/TextBlock.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 
 
 void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
@@ -17,46 +16,28 @@ void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
 		Text_Content->SetText(FText::FromString(InContent));
 	}
 
-	CacheShowTipTime = InTime;
-
 	UWorld* World = GetWorld();
-	if(World == nullptr)
-	{
-		return;
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 
-	World->GetTimerManager().SetTimer(ShowTipTimerHandle, this, &UCommonTipWidget::RemoveSelf, CacheShowTipTime, false, CacheShowTipTime);
 	PlayAnimIn();
-}
+	
+	UTimerSubsystemFuncLib::SetDelay(World, [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		WeakThis->PlayAnimOut();
+	}, InTime);
 
-void UCommonTipWidget::OnTipPlayAnimOutEnd()
-{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Anim_out)
+	float AnimOutPlayTime = Anim_out->GetEndTime() - Anim_out->GetStartTime();
+	
 	if (UUIEventCenter* UIEventCenter = UUIEventCenter::Get(this))
 	{
-		UIEventCenter->OnCommonTipRemove.Broadcast(this);
+		float NewEndTime = World->TimeSeconds + AnimOutPlayTime + InTime;
+		UIEventCenter->OnCommonTipAnimOutEnd.Broadcast( NewEndTime );
 	}
 }
 
-void UCommonTipWidget::RemoveSelf()
-{
-	PlayAnimOut();
-	
-	UWorld* World = GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
-	if(ShowTipTimerHandle.IsValid())
-	{
-		World->GetTimerManager().ClearTimer(ShowTipTimerHandle);
-	}
-
-	if(Anim_out == nullptr)
-	{
-		return;
-	}
-
-	float AnimOutPlayTime = Anim_out->GetEndTime() - Anim_out->GetStartTime();
-	World->GetTimerManager().SetTimer(ShowTipTimerHandle, this, &UCommonTipWidget::OnTipPlayAnimOutEnd, AnimOutPlayTime, false, AnimOutPlayTime);
-}
 
 void UCommonTipWidget::PlayAnimIn()
 {
