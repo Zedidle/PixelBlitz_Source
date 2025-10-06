@@ -62,7 +62,10 @@ UUserWidget* UUIManager::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const 
 	{
 		if (SimpleWidgetArray.IsValidIndex(SimpleWidgetArray.Num()-1))
 		{
-			SimpleWidgetArray[SimpleWidgetArray.Num()-1]->SetVisibility(ESlateVisibility::Collapsed);
+			if (UUserWidget* Widget = SimpleWidgetArray[SimpleWidgetArray.Num()-1])
+			{
+				Widget->SetVisibility(ESlateVisibility::Collapsed);
+			}
 		}
 	}
 	
@@ -295,7 +298,7 @@ void UUIManager::InitRoot()
 			Root = Cast<UPXUIRoot>(UIRoot);
 			if (!Root.Get()->IsInViewport())
 			{
-				Root.Get()->AddToViewport();
+				Root.Get()->AddToViewport(100);
 				Root.Get()->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			}
 		}

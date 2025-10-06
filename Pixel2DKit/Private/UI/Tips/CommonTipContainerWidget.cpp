@@ -5,6 +5,7 @@
 #include "UI/Tips/CommonTipWidget.h"
 #include "UI/UIEventCenter.h"
 #include "Components/ScrollBox.h"
+#include "Pixel2DKit/Pixel2DKit.h"
 
 
 void UCommonTipContainerWidget::NativeConstruct()
@@ -29,26 +30,16 @@ void UCommonTipContainerWidget::NativeDestruct()
 
 void UCommonTipContainerWidget::AddTip(const FString& Content, float Time)
 {
-	if(ScrollBox_Tips == nullptr)
-	{
-		return;
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ScrollBox_Tips)
 
 	APlayerController* OwningPlayer = GetOwningPlayer();
-	if(OwningPlayer == nullptr)
-	{
-		return;
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningPlayer)
 
 	UCommonTipWidget* NewCommonTipWidget = CreateWidget<UCommonTipWidget>(OwningPlayer, CommonTipClass);
-	if(NewCommonTipWidget == nullptr)
-	{
-		return;
-	}
-
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(NewCommonTipWidget)
+	
 	NewCommonTipWidget->SetContent(Content, Time);
 	ScrollBox_Tips->AddChild(NewCommonTipWidget);
-	
 
 	while(CacheTipQueue.Num() >= MaxShowCommonTip)
 	{

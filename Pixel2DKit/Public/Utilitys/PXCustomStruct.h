@@ -201,14 +201,18 @@ struct FCharacterAttribute
 	int MaxEP;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int BasicAttackValue = 5;
+	int BasicAttackValue;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int BasicRepelValue = 20;
+	int BasicRepelValue;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float MaxWalkSpeed;
 
+	// 技能的快速移动速度
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float BasicDashSpeed;
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float MaxAcceleration;
 
@@ -225,13 +229,13 @@ struct FCharacterAttribute
 	float RepelResistPercent;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	int32 BasicMaxJumpCount = 0;
+	int32 BasicMaxJumpCount;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	float BasicJumpMaxHoldTime = 0.0f;
+	float BasicJumpMaxHoldTime;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	float BasicAttackInterval = 0.0f;
+	float BasicAttackInterval;
 };
 
 USTRUCT(BlueprintType)
