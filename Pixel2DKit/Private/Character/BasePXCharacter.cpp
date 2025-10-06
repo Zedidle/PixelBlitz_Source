@@ -1614,7 +1614,7 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
 
-	FGameplayTag Tag = REQUEST_GAMEPLAY_TAG("AbilitySet.Brake");
+	FGameplayTag Tag = TAG("AbilitySet.Brake");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向

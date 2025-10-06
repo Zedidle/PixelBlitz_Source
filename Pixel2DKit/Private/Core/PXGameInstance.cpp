@@ -11,6 +11,7 @@
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 
 class UCustomResourceSettings;
@@ -54,36 +55,36 @@ FName UPXGameInstance::GetCurLevelName(bool Continue)
 	{
 		return MainSaveGame->CurLevelName;
 	}
+
+	if (MainSaveGame->RemLevels.Num() == 0) return "";
+	
+	if (MainSaveGame->RemLevels.Num() == 1)
+	{
+		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
+	}
 	else
 	{
-		if (MainSaveGame->RemLevels.Num() == 0) return "";
-		
-		if (MainSaveGame->RemLevels.Num() == 1)
+		const FString s0 = UKismetStringLibrary::GetSubstring(MainSaveGame->RemLevels[0].ToString(), 1, 1);
+		float v0 = FCString::Atod(*s0);
+
+		const FString s1 = UKismetStringLibrary::GetSubstring(MainSaveGame->RemLevels[1].ToString(), 1, 1);
+		float v1 = FCString::Atod(*s1);
+
+		float r = v0 / (v0 + v1);
+		if (FMath::FRand() > r)
 		{
 			MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
 		}
 		else
 		{
-			const FString s0 = UKismetStringLibrary::GetSubstring(MainSaveGame->RemLevels[0].ToString(), 1, 1);
-			float v0 = FCString::Atod(*s0);
-
-			const FString s1 = UKismetStringLibrary::GetSubstring(MainSaveGame->RemLevels[1].ToString(), 1, 1);
-			float v1 = FCString::Atod(*s1);
-
-			float r = v0 / (v0 + v1);
-			if (FMath::FRand() > r)
-			{
-				MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
-			}
-			else
-			{
-				MainSaveGame->CurLevelName = MainSaveGame->RemLevels[1];
-			}
+			MainSaveGame->CurLevelName = MainSaveGame->RemLevels[1];
 		}
-
-		MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
-		return MainSaveGame->CurLevelName;
 	}
+	
+	MainSaveGame->CurLevel++;
+	MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
+	return MainSaveGame->CurLevelName;
+	
 }
 
 FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
@@ -94,18 +95,17 @@ FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	if (!MainSaveGame) return FName();
 	
-	if (MainSaveGame->RemLevels.Num() == 0) return "";
-	
+	if (MainSaveGame->RemLevels.Num() == 0) return FName();
+
+	if (Next || MainSaveGame->CurLevelName.IsNone())
+	{
+		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
+		MainSaveGame->CurLevel++;
+	}
+
 	if (Next)
 	{
-		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
 		MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
-		return MainSaveGame->CurLevelName;
-	}
-	
-	if (MainSaveGame->CurLevelName == FName("None"))
-	{
-		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
 	}
 	
 	return MainSaveGame->CurLevelName;	

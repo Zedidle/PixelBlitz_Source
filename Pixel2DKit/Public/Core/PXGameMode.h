@@ -68,6 +68,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void HandleLevelUnloaded();
+	
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void PrepareForRole();
 
 	
 #pragma endregion 

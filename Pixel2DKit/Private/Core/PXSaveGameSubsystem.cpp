@@ -187,6 +187,7 @@ void UPXSaveGameSubsystem::Main_TotalInit()
     UPXMainSaveGame* OldSaveGame = MainSaveGame;
     MainSaveGame = NewObject<UPXMainSaveGame>(this);
     MainSaveGame->CurCharacterName = OldSaveGame->CurCharacterName;
+    MainSaveGame->CurLevelName = FName();
 }
 
 bool UPXSaveGameSubsystem::Main_Saved()

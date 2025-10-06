@@ -84,5 +84,8 @@ public:
 	FName CurLevelName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurLevel;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FName> RemLevels;
 };

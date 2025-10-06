@@ -41,4 +41,4 @@ DECLARE_STATS_GROUP(TEXT("RAGame"), STATGROUP_RAGame, STATCAT_Advanced);
 
 
 // GAS
-#define REQUEST_GAMEPLAY_TAG(TagName) FGameplayTag::RequestGameplayTag((TagName))
+#define TAG(TagName) FGameplayTag::RequestGameplayTag((TagName))

@@ -288,6 +288,8 @@ void UTalentComponent::LoadTalents()
 
 	// 不灭
 	MakeImmortalPower(true);
+
+
 	
 }
 

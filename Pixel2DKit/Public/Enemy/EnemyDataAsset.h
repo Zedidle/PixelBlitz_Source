@@ -38,17 +38,14 @@ public:
 	TArray<FGameplayTag> ActionFieldsCanAttack = {
 		FGameplayTag::RequestGameplayTag("ActionField.East.Near"),
 		FGameplayTag::RequestGameplayTag("ActionField.East.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.East.Remote"),
 		FGameplayTag::RequestGameplayTag("ActionField.East.Far"),
 		FGameplayTag::RequestGameplayTag("ActionField.West.Near"),
 		FGameplayTag::RequestGameplayTag("ActionField.West.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.West.Remote"),
 		FGameplayTag::RequestGameplayTag("ActionField.West.Far"),
 		FGameplayTag::RequestGameplayTag("ActionField.South.Near"),
 		FGameplayTag::RequestGameplayTag("ActionField.South.Mid"),
 		FGameplayTag::RequestGameplayTag("ActionField.North.Near"),
 		FGameplayTag::RequestGameplayTag("ActionField.North.Mid"),
-		FGameplayTag::RequestGameplayTag("ActionField.North.Remote"),
 		FGameplayTag::RequestGameplayTag("ActionField.North.Far")
 	};
 
