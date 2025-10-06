@@ -46,6 +46,4 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Game)
 	void OnCharacterControl(bool On);
 
-	// UFUNCTION(BlueprintCallable, BlueprintPure, Category = Game)
-	// UInputMappingContext* GetCurrentIMC();
 };
