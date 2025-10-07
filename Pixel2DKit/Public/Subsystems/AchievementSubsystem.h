@@ -82,5 +82,5 @@ public:
 	void Achievement_Completion(float UseTime, bool bClearAllEnemy, bool bPickupAllGolds, int DieTimes, int HurtTimes);
 
 	UFUNCTION(BlueprintCallable, Category = "AchievementSubsystem")
-	void Achievement_LevelPass();
+	void Achievement_LevelTransition();
 };

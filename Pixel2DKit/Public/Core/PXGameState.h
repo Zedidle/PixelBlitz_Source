@@ -76,6 +76,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
 	TEnumAsByte<EDayTimeType> DayTimeType;
 	
+	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
+	float TimeOfDay;
+	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
 	FName CurWeatherIndex;
 
@@ -98,9 +101,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
 	void RandomWeather();
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
+	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
 	void PassDayTime(float Time, bool DirectSet, float TransitionDuration = 3, FName _ForceWeatherIndex = FName("None"));
-
+	UFUNCTION(BlueprintImplementableEvent, Category = "GameState | Weather", DisplayName="OnPassDayTime")
+	void BP_OnPassDayTime(float NewTime, float TransitionDuration = 3);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
 	UPrimaryDataAsset* SetWeather(FName WeatherRowName);
@@ -109,10 +113,13 @@ public:
 	void OnEnemyDie(ABaseEnemy* Enemy);
 
 
-	UFUNCTION(BlueprintCallable, Category = "GameState | Currency")
-	void DealGolds();
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | GameplayFlow")
+	UFUNCTION(BlueprintNativeEvent, Category = "GameState | Currency")
+	void DealStatics();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "GameState | Currency")
+	void DealUI();
+
+	UFUNCTION(BlueprintCallable, Category = "GameState | GameplayFlow")
 	void ToNextLevel();
 	
 };

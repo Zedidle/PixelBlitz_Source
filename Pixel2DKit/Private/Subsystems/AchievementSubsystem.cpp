@@ -157,7 +157,7 @@ void UAchievementSubsystem::Achievement_Completion(float UseTime, bool bClearAll
 	}
 }
 
-void UAchievementSubsystem::Achievement_LevelPass()
+void UAchievementSubsystem::Achievement_LevelTransition()
 {
 	ABasePXCharacter* PxCharacter = UPXGameplayStatics::GetPlayerCharacter(GetGameInstance()->GetWorld(), 0);
 

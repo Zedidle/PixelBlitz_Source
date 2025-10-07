@@ -7,6 +7,7 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
@@ -35,8 +36,7 @@ void APXGameState::EventOnDayTimeTypeChanged_Implementation()
 		RandomWeather();
 	}
 
-	UWeatherSubsystem* WeatherSubsystem = GetGameInstance()->GetSubsystem<UWeatherSubsystem>();
-	if (WeatherSubsystem)
+	if (UWeatherSubsystem* WeatherSubsystem = GetGameInstance()->GetSubsystem<UWeatherSubsystem>())
 	{
 		WeatherSubsystem->MakeWeatherEffect();
 	}
@@ -72,26 +72,18 @@ void APXGameState::RandomWeather()
 	SetWeather(CurWeatherIndex);
 }
 
-void APXGameState::PassDayTime_Implementation(float Time, bool DirectSet, float TransitionDuration,
-	FName _ForceWeatherIndex)
+void APXGameState::DealUI_Implementation()
 {
-	if (_ForceWeatherIndex.IsValid())
-	{
-		ForceWeatherIndex = _ForceWeatherIndex;
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
-		{
-			if (WeakThis.IsValid())
-			{
-				WeakThis->ForceWeatherIndex = FName("");
-			}
-		}, TransitionDuration + 0.5);
-	}
 }
 
-void APXGameState::DealGolds()
+void APXGameState::DealStatics_Implementation()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+	
 	UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 
@@ -105,16 +97,41 @@ void APXGameState::DealGolds()
 	BasicBuildSaveGame->RemainGoldNum += MainSaveGame->JustPickedGolds;
 	TalentSaveGame->TotalPickupGolds += MainSaveGame->JustPickedGolds;
 	MainSaveGame->JustPickedGolds = 0;
+
+	if (UAchievementSubsystem* AchievementSubsystem = GameInstance->GetSubsystem<UAchievementSubsystem>())
+	{
+		AchievementSubsystem->Achievement_LevelTransition();
+	}
 	
 }
 
-void APXGameState::ToNextLevel_Implementation()
+void APXGameState::PassDayTime(float Time, bool DirectSet, float TransitionDuration, FName _ForceWeatherIndex)
+{
+	if (_ForceWeatherIndex.IsValid())
+	{
+		ForceWeatherIndex = _ForceWeatherIndex;
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		{
+			if (WeakThis.IsValid())
+			{
+				WeakThis->ForceWeatherIndex = FName("");
+			}
+		}, TransitionDuration + 0.5);
+	}
+	
+	TimeOfDay = DirectSet ? TimeOfDay + Time : Time;
+	BP_OnPassDayTime(TimeOfDay, TransitionDuration);
+}
+
+
+void APXGameState::ToNextLevel()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
 	
-	DealGolds();
+	DealStatics();
+	DealUI();
 	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
 	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
 	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
