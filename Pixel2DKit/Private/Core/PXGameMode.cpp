@@ -40,13 +40,13 @@ void APXGameMode::BeginPlay()
 	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
 	{
 		LoadLevel(GameInstance->GetCurLevelName_Simple(true));
+		TryStartCurLevel();
 	}
 }
 
 void APXGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	OnStartLevelLoaded.RemoveAll(this);
 }
 
 
@@ -85,6 +85,8 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator Sta
 	CurLevelName = LevelName;
 
 	IsLevelLoaded = false;
+	IsLevelStarted = false;
+	
 	bool LoadLevelSuccess;
 	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(), LevelName.ToString(), StartLocation, StartRotation,
 		LoadLevelSuccess);
@@ -95,61 +97,43 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator Sta
 	}
 }
 
-void APXGameMode::StartCurLevel()
+void APXGameMode::TryStartCurLevel()
 {
 	if (IsLevelLoaded)
 	{
 		OnStartLevelSuccess();
 	}
 
-	if (!OnStartLevelLoaded.IsAlreadyBound(this, &ThisClass::OnStartLevelSuccess))
-	{
-		OnStartLevelLoaded.AddDynamic(this, &ThisClass::OnStartLevelSuccess);
-	}
+	IsLevelStarted = true;
 }
 
 void APXGameMode::OnStartLevelSuccess_Implementation()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CurLevelInstance);
-
-	OnStartLevelLoaded.RemoveDynamic(this, &ThisClass::OnStartLevelSuccess);
 	
 	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
 	{
 		PC->OnCharacterControl(false);
 	}
+
+	ClearPreLevel();
+}
+
+void APXGameMode::ClearPreLevel_Implementation()
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	if (PreLevelName.IsNone()) return;
 	
 	TArray<AActor*> Actors;
 	UGameplayStatics::GetAllActorsOfClassWithTag(World, AActor::StaticClass(), PreLevelName, Actors);
 	for (AActor* Actor : Actors)
 	{
 		Actor->SetActorEnableCollision(false);
-		Actor->SetLifeSpan(FMath::RandRange(2, 3));
+		Actor->SetLifeSpan(FMath::RandRange(4, 5));
 	}
-}
-
-void APXGameMode::UnloadCurLevel()
-{
-	if (CurLevelInstance)
-	{
-		// 设置卸载参数
-		CurLevelInstance->SetShouldBeLoaded(false);
-		CurLevelInstance->SetShouldBeVisible(false);
-    
-		// 可选：设置卸载完成回调
-		CurLevelInstance->OnLevelUnloaded.AddDynamic(this, &ThisClass::HandleLevelUnloaded);
-    
-		// 强制立即卸载
-		GetWorld()->FlushLevelStreaming();
-	}
-}
-
-void APXGameMode::HandleLevelUnloaded()
-{
-	UE_LOG(LogTemp, Log, TEXT("Dynamic level unloaded successfully"));
-	CurLevelInstance = nullptr;
 }
 
 void APXGameMode::PrepareForRole()
@@ -198,7 +182,7 @@ void APXGameMode::NavRebuild()
 	NavSys->Build();
 }
 
-void APXGameMode::OnLevelLoaded_Implementation()
+void APXGameMode::OnLevelLoaded()
 {
 	if (CurLevelInstance && CurLevelInstance->GetLoadedLevel())
 	{
@@ -211,7 +195,10 @@ void APXGameMode::OnLevelLoaded_Implementation()
 				Actor->Tags.Add(CurLevelName);
 			}
 		}
-		OnStartLevelLoaded.Broadcast();
+		if (IsLevelStarted)
+		{
+			OnStartLevelSuccess();
+		}
 	}
 }
 

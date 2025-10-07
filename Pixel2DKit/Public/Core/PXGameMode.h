@@ -31,6 +31,7 @@ class PIXEL2DKIT_API APXGameMode : public AGameMode
 	ULevelStreamingDynamic* CurLevelInstance;
 
 	bool IsLevelLoaded = false;
+	bool IsLevelStarted = false;
 
 
 	
@@ -41,33 +42,24 @@ protected:
 
 	
 public:
-
-
-	UPROPERTY(BlueprintAssignable)
-	FOnLevelLoadedSignature OnStartLevelLoaded;
 	
 #pragma region GameplayFlow
 	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
 	APlayerRespawnPoint* PlayerRespawnPoint;
 
-
-	
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0), FRotator StartRotation= FRotator(0, 0,0));
 
-	// 延迟加载效果
+	// 尝试开始当前关卡
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void StartCurLevel();
-
+	void TryStartCurLevel();
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=GameplayFlow)
 	void OnStartLevelSuccess();
-	
-	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void UnloadCurLevel();
-	
-	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void HandleLevelUnloaded();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=GameplayFlow)
+	void ClearPreLevel();
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void PrepareForRole();
@@ -95,7 +87,7 @@ public:
 	void NavRebuild();
 #pragma endregion
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION()
 	void OnLevelLoaded();
 	
 };
