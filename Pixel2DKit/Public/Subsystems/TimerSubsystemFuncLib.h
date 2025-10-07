@@ -58,7 +58,7 @@ public:
     }
 
     template<typename T, typename Callable>
-    static void SetDelayLoopSafe(UObject* WorldContext, const FName& TimerName, T* Object, Callable&& Callback, float InRate)
+    static void SetDelayLoopSafe(UObject* WorldContext, const FName& TimerName, T* Object, Callable&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1)
     {
         if (!Object) return;
         
@@ -71,7 +71,7 @@ public:
                    (Object->*Callback)();
                 }
             },
-            InRate
+            InRate, SustainTime, LoopTimes
         );
     }
 

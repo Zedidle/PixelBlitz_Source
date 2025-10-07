@@ -40,19 +40,24 @@ class UHealthComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+
+	// 因为掉落地面死亡
+	UPROPERTY(BlueprintReadWrite, Category = "Health")
+	bool DieByFalling = false;
+	
 	// 受到伤害后的一段时候才会触发无敌帧，支持短时间内的连击，后续考虑拉长并多段连击，攻击命中后会续时
 	float OnHurtInvulnerableDelay = 0.15;  
 	float InvulnerableDuration = 0.5; // 无敌帧时间
 
 	bool bFlashing = false; // 是否在受伤闪烁
 	
-	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, Category = "Health")
 	float InRockPercent = 0.0f; // 霸体抗性，抵御击退、击飞
 
-	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, Category = "Health")
 	FVector RepelResistance = FVector(10, 10, 10); // 各个方向的击退抵抗
 
-	UPROPERTY(BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadWrite, Category = "Health")
 	float RepelResistancePercent = 0.f; // 最终结算时的击退削减百分比
 	
 	float KnockBackMultiplier = 1.f; // 受力缩放

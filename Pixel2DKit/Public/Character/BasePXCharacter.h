@@ -116,8 +116,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 										public IAbilitySystemInterface, public IInteract_Interface
 {
 	GENERATED_BODY()
-
-
+	
 	void LoadData();
 	
 	float FallingStartTime;

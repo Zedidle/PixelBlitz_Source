@@ -20,7 +20,7 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent, public IBuff_Inter
 	GENERATED_BODY()
 
 	UPROPERTY()
-	AActor* Owner;
+	ACharacter* Owner;
 	
 	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Speed;
 	TMap<FGameplayTag, float> Tag2BuffEndTime_Speed;
@@ -65,7 +65,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	float EffectedPercent_Sight;
 
-	FTimerHandle TimerHandle_CheckBuffEnd;
+	FName TimerName_CheckBuffEnd;
 	UFUNCTION()
 	void CheckBuffExpire();
 	

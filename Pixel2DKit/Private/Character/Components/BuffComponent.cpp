@@ -15,6 +15,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/DebugFuncLab.h"
@@ -43,7 +44,6 @@ void UBuffComponent::InitData()
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 
-	
 	UDataTable* DataTable = DataTableSubsystem->GetBuffOnWidgetData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable);
 
@@ -110,20 +110,22 @@ void UBuffComponent::CheckBuffExpire()
 void UBuffComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	InitData();
-	
-	if (BuffStateWidgetClass)
-	{
-		if (UWorld* World = GetWorld())
-		{
-			BuffStateWidget = Cast<UBuffStateWidget>(CreateWidget(World, BuffStateWidgetClass));
-			BuffStateWidget->AddToViewport(100);
-		}
-	}
-
 	Owner = Cast<ABasePXCharacter>(GetOwner());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner);
+	
+	if (Owner->GetController()->IsLocalPlayerController())
+	{
+		InitData();
+	
+		if (BuffStateWidgetClass)
+		{
+			if (UWorld* World = GetWorld())
+			{
+				BuffStateWidget = Cast<UBuffStateWidget>(CreateWidget(World, BuffStateWidgetClass));
+				BuffStateWidget->AddToViewport(100);
+			}
+		}
+	}
 
 	if (IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Owner))
 	{
@@ -132,25 +134,14 @@ void UBuffComponent::BeginPlay()
 		AbilitySystemComponent->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
 		AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
 	}
-	
-	
-	if (GetWorld())
-	{
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle_CheckBuffEnd,
-		this, &UBuffComponent::CheckBuffExpire,0.1, true);
-	}
 
+	TimerName_CheckBuffEnd = FName("BuffComponent" + FGuid::NewGuid().ToString());
+	UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckBuffEnd, this, &UBuffComponent::CheckBuffExpire, 0.1, true);
 }
 
 void UBuffComponent::EndPlay()
 {
-	if (TimerHandle_CheckBuffEnd.IsValid())
-	{
-		if (GetWorld())
-		{
-			GetWorld()->GetTimerManager().ClearTimer(TimerHandle_CheckBuffEnd);
-		}
-	}
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckBuffEnd);
 }
 
 
@@ -429,26 +420,24 @@ int32 UBuffComponent::Buff_CalInitDamage_Implementation(int32 InDamage)
 void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
 	bool Permanent)
 {
-	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
-	if (!GetOwner()) return;
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
-	if (!Character) return;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	
-	if (Character->GetController()->IsLocalController())
+	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
+	
+	
+	// 显示到界面
+	if (IsValid(BuffStateWidget))
 	{
-		// 显示部分
-		if (IsValid(BuffStateWidget))
+		if (Permanent)
 		{
-			if (Permanent)
-			{
-				BuffStateWidget->BuffPermanent(Tag, BuffName, TextColor);
-			}
-			else
-			{
-				BuffStateWidget->BuffIn(Tag, BuffName, TextColor);
-			}
+			BuffStateWidget->BuffPermanent(Tag, BuffName, TextColor);
+		}
+		else
+		{
+			BuffStateWidget->BuffIn(Tag, BuffName, TextColor);
 		}
 	}
+	
 	
 }
 

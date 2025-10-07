@@ -871,8 +871,8 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 	else
 	{
 		Execute_OnDie(this);
-
-		if (HereReviveTimes > 0)
+		
+		if (HereReviveTimes > 0 && !HealthComponent->DieByFalling)
 		{
 			// 原地复活
 			HereReviveTimes --;
@@ -975,6 +975,8 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				}
 			}
 		}
+
+		HealthComponent->DieByFalling = false;
 	}
 }
 
