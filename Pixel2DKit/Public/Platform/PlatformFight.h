@@ -16,12 +16,16 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 {
 	GENERATED_BODY()
 
+	
 	float InRangeA = 0.0f;
 	float OutRangeB = -0.36f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = true))
 	float FightCameraOffsetFactor = 0.7f;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = true))
+	float ViewRotateFactor = 0.15f;
+	
 public:
 
 	UPROPERTY(BlueprintReadWrite)

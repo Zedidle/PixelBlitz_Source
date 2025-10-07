@@ -59,8 +59,9 @@ void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
 {
 	PXCharacter = Character;
 	if (Character == nullptr) return;
-	
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "UEnemyAIComponent::SetPixelCharacter"),
+
+	FName TimerName = FName(GetReadableName() + "_SetPixelCharacter");
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
 	{
 		if (!WeakThis.IsValid()) return;

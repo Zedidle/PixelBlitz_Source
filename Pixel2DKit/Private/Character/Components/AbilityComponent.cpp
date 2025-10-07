@@ -129,9 +129,9 @@ void UAbilityComponent::LoadAbility()
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	for (auto Index : TempTestAbilities)
+	for (auto& Tag : TempTestAbilities)
 	{
-		TakeEffectAbilities.AddUnique(Index);
+		TakeEffectAbilities.AddUnique(Tag);
 	}
 	
 	for (auto Tag : TakeEffectAbilities)
@@ -201,9 +201,9 @@ void UAbilityComponent::LoadAbility()
 	
 	// 霸体
 	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InRock");
-	HealthComponent->InRockPercent = EffectGameplayTags.Contains(Tag);
-	if (HealthComponent->InRockPercent > 0.0f)
+	if (EffectGameplayTags.Contains(Tag))
 	{
+		HealthComponent->InRockPercent = EffectGameplayTags[Tag];
 		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.InRock"));
 	}
 

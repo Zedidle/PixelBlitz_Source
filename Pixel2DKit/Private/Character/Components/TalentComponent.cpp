@@ -465,8 +465,8 @@ void UTalentComponent::MakeMiracleWalker()
 
 	if (!EffectGameplayTags.Contains(DamagePlusTag) || !EffectGameplayTags.Contains(IntervalTag)) return;
 
-	
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "MakeMiracleWalker",
+	FName TimerName = FName(GetReadableName() + "_MakeMiracleWalker");
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 		[WeakThis = TWeakObjectPtr<ThisClass>(this), DamagePlusTag, MiracleWalkerTag]
 		{
 			if (!WeakThis.IsValid()) return;

@@ -9,6 +9,7 @@
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Utilitys/DebugFuncLab.h"
 
 
 UFightComponent::UFightComponent(const FObjectInitializer& ObjectInitializer)
@@ -71,6 +72,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 				if (UHealthComponent* HealthComponent = HitActor->GetComponentByClass<UHealthComponent>())
 				{
 					UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, CurHitEffect, hit.ImpactPoint);
+					UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("FightComponent.Tick Hit: %s"), *HitActor->GetName()));
 					HealthComponent->DecreaseHP(CurMeleeDamage, CurKnockbackForceMelee, Owner);
 					IFight_Interface::Execute_OnAttackHiting(Owner);
 				}

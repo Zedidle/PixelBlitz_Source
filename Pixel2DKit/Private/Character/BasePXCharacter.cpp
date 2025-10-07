@@ -737,7 +737,8 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "OutOfControl",
+	FName TimerName = FName(GetActorNameOrLabel() + "_OutOfControl");
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]{
 			if (WeakThis.IsValid())
 			{
@@ -870,8 +871,6 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 	}
 	else
 	{
-		Execute_OnDie(this);
-		
 		if (HereReviveTimes > 0 && !HealthComponent->DieByFalling)
 		{
 			// 原地复活
@@ -919,6 +918,9 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		{
 			bool GameEnd = false;
 			GameInstance->OnPlayerDead(GameEnd);
+			
+			Execute_OnDie(this);
+
 			if (GameEnd)
 			{
 				// 游戏结束
@@ -1052,8 +1054,9 @@ void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 	if (bPlayerControl)
 	{
 		bViewYawChangingByPlayerControl = true;
-		AddBlendYaw(UCommonFuncLib::DealDeltaTime(V) * 1.6);	
-		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "AddViewYaw",
+		AddBlendYaw(UCommonFuncLib::DealDeltaTime(V) * 1.6);
+		FName TimerName = FName(GetActorNameOrLabel() + "_AddViewYaw");
+		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 			[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
 			{
 				if (WeakThis.IsValid())

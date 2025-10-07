@@ -22,6 +22,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "PX"
@@ -46,7 +47,10 @@ int UHealthComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 
 void UHealthComponent::OnHurtInvulnerable()
 {
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), FName(GetName() + "OnHurtInvulnerable"),
+	SetInvulnerable(false);
+	FName TimerName = FName( GetReadableName()+ "_OnHurtInvulnerable");
+	
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 [WeakThis = TWeakObjectPtr<ThisClass>(this)]
 	{
 		if (!WeakThis.IsValid()) return;
@@ -56,11 +60,11 @@ void UHealthComponent::OnHurtInvulnerable()
 
 void UHealthComponent::InvulnerableForDuration(float duration)
 {
-	bInvulnerable = true;
+	SetInvulnerable(true);
 	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
 	{
 		if (!WeakThis.IsValid()) return;
-		WeakThis->bInvulnerable = false;
+		WeakThis->SetInvulnerable(false);
 	}, duration);
 }
 
