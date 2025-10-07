@@ -24,7 +24,7 @@ class PIXEL2DKIT_API ABaseInteractableItem : public ABaseItem
 	float SimGravity = -980;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
-	float Elastic  = 0.5;
+	float Elastic  = 0.3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
 	float GroundHeightCheck = 20.f;

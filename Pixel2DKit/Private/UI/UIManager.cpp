@@ -64,7 +64,10 @@ UUserWidget* UUIManager::ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const 
 		{
 			if (UUserWidget* Widget = SimpleWidgetArray[SimpleWidgetArray.Num()-1])
 			{
-				Widget->SetVisibility(ESlateVisibility::Collapsed);
+				if (IsValid(Widget))
+				{
+					Widget->SetVisibility(ESlateVisibility::Collapsed);
+				}
 			}
 		}
 	}
@@ -186,6 +189,9 @@ bool UUIManager::CloseUI(const FName UIType)
 	const auto& WidgetPtr = WidgetMap.Find(UIType);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(WidgetPtr, false)
 	RemoveUIFromRoot(*WidgetPtr, UIType, ConfigDataPtr->LayerTag);
+
+	WidgetMap.Remove(UIType);
+	WidgetLayerMap.Remove(UIType);
 
 	if(WidgetMap.Num() <= 0)
 	{

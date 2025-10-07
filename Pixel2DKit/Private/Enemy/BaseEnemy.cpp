@@ -545,6 +545,8 @@ bool ABaseEnemy::Dash_Implementation()
 
 void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage)
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Maker)
+	
 	OutDamage = InDamage;
 	int SurDamage = InDamage;
 

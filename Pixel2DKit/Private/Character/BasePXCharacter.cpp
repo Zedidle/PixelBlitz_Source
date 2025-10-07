@@ -1206,10 +1206,6 @@ AActor* ABasePXCharacter::GetTarget_Implementation()
 
 void ABasePXCharacter::OnAttackHiting_Implementation()
 {
-	if (bDashing)
-	{
-		AttackHitDashing++;
-	}
 	AttackHitComboNum++;
 	if (AttackHitTimerHandle.IsValid())
 	{

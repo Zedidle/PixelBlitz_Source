@@ -116,6 +116,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 										public IAbilitySystemInterface, public IInteract_Interface
 {
 	GENERATED_BODY()
+
 	
 	void LoadData();
 	
@@ -133,7 +134,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	
 public:
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	class UPXCharacterDataAsset* DataAsset;
 	
 	UPROPERTY(BlueprintAssignable)
@@ -171,8 +172,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	int PerfectDodgeTimes = 0;
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	int AttackHitDashing = 0; // 冲刺中命中
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Talent)
 	int HereReviveTimes = 0;

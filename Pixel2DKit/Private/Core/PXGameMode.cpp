@@ -126,7 +126,7 @@ void APXGameMode::OnStartLevelSuccess_Implementation()
 	for (AActor* Actor : Actors)
 	{
 		Actor->SetActorEnableCollision(false);
-		Actor->SetLifeSpan(FMath::RandRange(0.05, 0.2));
+		Actor->SetLifeSpan(FMath::RandRange(2, 3));
 	}
 }
 

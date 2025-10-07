@@ -22,7 +22,10 @@ class PIXEL2DKIT_API UUIManager : public UPXWorldSubsystem
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
 	TMap<TSubclassOf<UUserWidget>, UUserWidget*> SimpleWidgetMap;
+	
+	UPROPERTY()
 	TArray<UUserWidget*> SimpleWidgetArray;
 	
 public:

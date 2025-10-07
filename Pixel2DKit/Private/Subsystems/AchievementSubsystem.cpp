@@ -168,11 +168,6 @@ void UAchievementSubsystem::Achievement_LevelPass()
 		CompleteAchievement("8");
 	}
 
-	if (PxCharacter->AttackHitDashing >= 20)
-	{
-		CompleteAchievement("9");
-	}
-
 	if (PxCharacter->HasOneHealthPoint)
 	{
 		CompleteAchievement("18");
