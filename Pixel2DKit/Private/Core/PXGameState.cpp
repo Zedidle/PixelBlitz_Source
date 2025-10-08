@@ -2,16 +2,22 @@
 
 
 #include "Core/PXGameState.h"
+
+#include "EngineUtils.h"
+#include "Controller/PXPlayerController.h"
 #include "Core/PXGameInstance.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
+#include "Enemy/EnemySpawner.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Platform/PlatformFight.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 void APXGameState::BeginPlay()
 {
@@ -135,6 +141,44 @@ void APXGameState::ToNextLevel()
 	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
 	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
 	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
+}
+
+void APXGameState::OnGameStart()
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+
+	UGameInstance* GameInstance = GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+
+	for (AEnemySpawner* Enemy : TActorRange<AEnemySpawner>(World)) {
+		if (IsValid(Enemy)) {
+			Enemy->SpawnEnemy();
+		}
+	}
+
+	for (APlatformFight* PlatformFlight : TActorRange<APlatformFight>(World)) {
+		if (IsValid(PlatformFlight)) {
+			PlatformFlight->RegisterEnemies();
+		}
+	}
+
+	if (UWeatherSubsystem* WeatherSubsystem = GameInstance->GetSubsystem<UWeatherSubsystem>())
+	{
+		WeatherSubsystem->MakeWeatherEffect();
+	}
+
+	if (UPXSaveGameSubsystem* PXSaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>())
+	{
+		PXSaveGameSubsystem->Main_SyncLevel();
+	}
+
+	if (APXPlayerController* PC = UPXGameplayStatics::GetPlayerController(World))
+	{
+		PC->OnGameStart();
+	}
+	
+	BP_OnGameStart();
 }
 
 UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)

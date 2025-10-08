@@ -40,4 +40,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	ABaseEnemy* SpawnEnemy();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	ABaseEnemy* GetSelfEnemy();
 };

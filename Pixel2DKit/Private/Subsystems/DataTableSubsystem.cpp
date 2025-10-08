@@ -121,9 +121,28 @@ const FWeaponData* UDataTableSubsystem::GetWeaponDataByTag(const FGameplayTag& W
 		LoadWeaponData();
 	}
 	
-	if (WeaponData.Contains(WeaponTag))
+	return WeaponData.Find(WeaponTag);
+}
+
+void UDataTableSubsystem::LoadLevelData()
+{
+	UDataTable* DataTable = GetDataTable("LevelData");
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	TArray<FName> Rownames = DataTable->GetRowNames();
+	for (auto& Row : Rownames)
 	{
-		return &WeaponData[WeaponTag];
+		FLevelData* Data = DataTable->FindRow<FLevelData>(Row, "UDataTableSettings::LoadWeaponData");
+		LevelData.Add(Data->LevelInstanceName, *Data);
 	}
-	return nullptr;
+}
+
+const FLevelData* UDataTableSubsystem::GetLevelDataByName(const FName& LevelInstanceName)
+{
+	if (!LevelData.Contains(LevelInstanceName))
+	{
+		LoadLevelData();
+	}
+
+	return LevelData.Find(LevelInstanceName);
 }

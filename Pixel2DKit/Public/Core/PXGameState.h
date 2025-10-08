@@ -121,7 +121,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "GameState | GameplayFlow")
 	void ToNextLevel();
-	
+
+	UFUNCTION(BlueprintCallable, Category = "GameState | GameplayFlow")
+	void OnGameStart();
+	UFUNCTION(BlueprintImplementableEvent, Category = "GameState | GameplayFlow", DisplayName = "OnGameStart")
+	void BP_OnGameStart();
 };
 
 

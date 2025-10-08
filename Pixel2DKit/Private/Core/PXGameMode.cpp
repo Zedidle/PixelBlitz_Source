@@ -11,7 +11,6 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "GameFramework/PlayerStart.h"
-#include "Interfaces/Fight_Interface.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
@@ -19,6 +18,7 @@
 #include "Settings/Config/PXGameDataAsset.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Subsystems/PXAudioSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "UI/UIManager.h"
 #include "Utilitys/PXGameplayStatics.h"
@@ -51,7 +51,7 @@ void APXGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 
 
-void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator StartRotation)
+void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 {
 	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
 	{
@@ -88,7 +88,8 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, FRotator Sta
 	IsLevelStarted = false;
 	
 	bool LoadLevelSuccess;
-	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(), LevelName.ToString(), StartLocation, StartRotation,
+	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(),
+		LevelName.ToString(), StartLocation, FRotator(0, 0,0),
 		LoadLevelSuccess);
 	if (LoadLevelSuccess && LoadedLevel)
 	{
@@ -111,10 +112,25 @@ void APXGameMode::OnStartLevelSuccess_Implementation()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+
+	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
+	
 	
 	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
 	{
 		PC->OnCharacterControl(false);
+	}
+
+	if (const FLevelData* Data = DataTableSubsystem->GetLevelDataByName(CurLevelName))
+	{
+		AudioSubsystem->PlayBGM(Data->BGM.LoadSynchronous());
 	}
 
 	ClearPreLevel();

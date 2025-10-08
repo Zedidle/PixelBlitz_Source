@@ -31,9 +31,15 @@ void APXPlayerController::OnGameStart()
 {
 	GameAlreadyStart = true;
 	OnCharacterControl(true);
-	if (ABasePXCharacter* PxCharacter = Cast<ABasePXCharacter>(GetPawn()))
+
+	SetShowMouseCursor(false);
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	
+	if (PXCharacter)
 	{
-		PxCharacter->ReadyToStart();
+		PXCharacter->ReadyToStart();
+		// PXCharacter->EnableInput(this);
 	}
 }
 

@@ -30,20 +30,34 @@ public:
 	static APXGameState* GetGameState(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
-	static APXPlayerController* GetPlayerController(const UObject* WorldContextObject, int32 PlayerIndex);
+	static APXPlayerController* GetPlayerController(const UObject* WorldContextObject, int32 PlayerIndex = 0);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
-	static ABasePXCharacter* GetPlayerCharacter(const UObject* WorldContextObject, int32 PlayerIndex);
+	static ABasePXCharacter* GetPlayerCharacter(const UObject* WorldContextObject, int32 PlayerIndex = 0);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
-	static UPXLocalPlayer* GetLocalPlayer(const UObject* WorldContextObject, int32 PlayerIndex);
+	static UPXLocalPlayer* GetLocalPlayer(const UObject* WorldContextObject, int32 PlayerIndex = 0);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
 	static UPXSettingsShared* GetSettingsShared(const UObject* WorldContextObject);
 
 
+	template <typename T>
+	static void GetAllActorsOfClass(const UObject* WorldContextObject, TSubclassOf<T> ActorClass, TArray<T*>& OutArray)
+	{
+		OutArray.Reset();
 
-
+		if (ActorClass)
+		{
+			if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+			{
+				for (TActorIterator<T> It(World, ActorClass); It; ++It)
+				{
+					OutArray.Add(*It);
+				}
+			}
+		}
+	}
 
 
 #pragma region Gameplay Talent

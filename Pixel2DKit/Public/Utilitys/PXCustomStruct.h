@@ -410,9 +410,12 @@ struct FLevelData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	TSoftObjectPtr<USoundWave> BGM;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	FName LevelInstanceName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	FText LevelName;
+	FText LevelDisplayName;
 };
 #pragma endregion
 

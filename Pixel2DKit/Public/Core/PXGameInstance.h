@@ -33,6 +33,11 @@ public:
 	FName GetCurLevelName(bool Continue);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Game")
 	FName GetCurLevelName_Simple(bool Next);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Game")
+	FName GetCurLevelNameByNum(int Num);
+
+
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Game")
 	void GetTotalUseTime(float& usetime, bool& newrecord);

@@ -40,11 +40,6 @@ protected:
 	TMap<FName, TObjectPtr<UDataTable>> DataTableMap;
 
 
-
-
-
-
-
 public:
 	
 	TObjectPtr<UDataTable> GetUIData(){ return GetDataTable("UIConfig"); }
@@ -82,12 +77,16 @@ public:
 	FTalent GetTalentDataByTag(const FGameplayTag& TalentTag);
 	
 	
-	
 	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
 	void LoadWeaponData() ;
 	TObjectPtr<UDataTable> GetWeaponData()  { return GetDataTable("Weapon"); }
 	const FWeaponData* GetWeaponDataByTag(const FGameplayTag& WeaponTag) ;
+
 	
+	mutable TMap<FName, FLevelData> LevelData;
+	void LoadLevelData();
+	const FLevelData* GetLevelDataByName(const FName& LevelInstanceName) ;
+
 	
 };
 

@@ -78,7 +78,7 @@ void APlatformFight::RegisterEnemies_Implementation()
 	for (auto spawner : EnemySpawners)
 	{
 		if (!IsValid(spawner)) continue;
-		if (ABaseEnemy* enemy = spawner->SpawnEnemy())
+		if (ABaseEnemy* enemy = spawner->GetSelfEnemy())
 		{
 			enemy->OnEnemyDie.AddDynamic(this, &APlatformFight::OnEnemyDie);
 			Enemies.Add(enemy);

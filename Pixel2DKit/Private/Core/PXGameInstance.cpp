@@ -30,7 +30,14 @@ void UPXGameInstance::StartNewGame()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(LevelData)
 	
 	PXSG->Main_TotalInit();
-	PXSG->GetMainData()->RemLevels = LevelData->GetRowNames();
+
+	PXSG->GetMainData()->RemLevels.Empty();
+	TArray<FLevelData> LevelDataArray = DataTableSubsystem->GetRowMap<FLevelData>(LevelData);
+	for (auto& D : LevelDataArray)
+	{
+		PXSG->GetMainData()->RemLevels.Add(D.LevelInstanceName);
+	}
+	
 	PXSG->SaveMainData();
 	PXSG->SaveBasicBuildData();
 
@@ -100,15 +107,39 @@ FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
 	if (Next || MainSaveGame->CurLevelName.IsNone())
 	{
 		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
-		MainSaveGame->CurLevel++;
 	}
 
 	if (Next)
 	{
+		MainSaveGame->CurLevel++;
 		MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
 	}
 	
 	return MainSaveGame->CurLevelName;	
+}
+
+FName UPXGameInstance::GetCurLevelNameByNum(int Num)
+{
+	UPXSaveGameSubsystem* SaveGameSubsystem = GetSubsystem<UPXSaveGameSubsystem>();
+	if (!SaveGameSubsystem) return FName();
+
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
+	if (!MainSaveGame) return FName();
+
+	FName NewLevelName = FName();
+	
+	for (auto& LevelName : MainSaveGame->RemLevels)
+	{
+		if (LevelName.ToString().Contains( FString::FromInt(Num) ))
+		{
+			MainSaveGame->CurLevel++;
+			NewLevelName = LevelName;
+			break;
+		}
+	}
+	
+	MainSaveGame->RemLevels.Remove(NewLevelName);
+	return NewLevelName;
 }
 
 void UPXGameInstance::GetTotalUseTime(float& usetime, bool& newrecord)

@@ -57,3 +57,12 @@ ABaseEnemy* AEnemySpawner::SpawnEnemy()
 	return nullptr;
 }
 
+ABaseEnemy* AEnemySpawner::GetSelfEnemy()
+{
+	if (IsValid(SelfEnemy))
+	{
+		return SelfEnemy;
+	}
+	return SpawnEnemy();
+}
+

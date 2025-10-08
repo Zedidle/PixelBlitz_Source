@@ -5,10 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "Player/PlayerRespawnPoint.h"
-#include "Utilitys/PXCustomStruct.h"
 
 #include "PXGameMode.generated.h"
-
 
 
 class APlayerRespawnPoint;
@@ -33,7 +31,6 @@ class PIXEL2DKIT_API APXGameMode : public AGameMode
 	bool IsLevelLoaded = false;
 	bool IsLevelStarted = false;
 
-
 	
 protected:
 	
@@ -47,9 +44,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
 	APlayerRespawnPoint* PlayerRespawnPoint;
 
-	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0), FRotator StartRotation= FRotator(0, 0,0));
+	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0));
 
 	// 尝试开始当前关卡
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
@@ -67,9 +63,6 @@ public:
 	
 #pragma endregion 
 
-
-
-	
 
 	
 #pragma region Sound Setting
