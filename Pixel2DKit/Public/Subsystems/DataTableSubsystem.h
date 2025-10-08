@@ -45,11 +45,13 @@ public:
 	TObjectPtr<UDataTable> GetUIData(){ return GetDataTable("UIConfig"); }
 	TObjectPtr<UDataTable> GetCharacterData() { return GetDataTable("CharacterData"); }
 	TObjectPtr<UDataTable> GetItemData() { return GetDataTable( "ItemData"); }
-	TObjectPtr<UDataTable> GetBuffOnWidgetData() { return GetDataTable("BuffOnWidget"); }
 	TObjectPtr<UDataTable> GetAchievementData() { return GetDataTable("Achievement"); }
 	TObjectPtr<UDataTable> GetLevelWeatherRateData()  { return GetDataTable("LevelWeatherRate"); }
 	TObjectPtr<UDataTable> GetWeatherData()  { return GetDataTable("Weather"); }
-	
+
+
+
+
 	
 	mutable TMap<FGameplayTag, FAbility> AbilityData;
 	void LoadAbilityData();
@@ -68,7 +70,6 @@ public:
 		return Result;
 	}
 
-
 	
 	mutable TMap<FGameplayTag, FTalent> TalentData;
 	TObjectPtr<UDataTable> GetTalentData() { return GetDataTable("Talent"); }
@@ -79,7 +80,6 @@ public:
 	
 	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
 	void LoadWeaponData() ;
-	TObjectPtr<UDataTable> GetWeaponData()  { return GetDataTable("Weapon"); }
 	const FWeaponData* GetWeaponDataByTag(const FGameplayTag& WeaponTag) ;
 
 	
@@ -87,7 +87,16 @@ public:
 	void LoadLevelData();
 	const FLevelData* GetLevelDataByName(const FName& LevelInstanceName) ;
 
+
+	mutable TMap<FName, FDrop> DropTableData;
+	void LoadDropTableData();
+	const FDrop* GetDropDataByName(const FName& DropID) ;
 	
+
+	mutable TMap<FGameplayTag, FBuffOnWidget> Tag2BuffOnWidgetData;
+	void LoadBuffOnWidgetData();
+	const FBuffOnWidget* GetBuffOnWidgetDataByTag(const FGameplayTag& Tag) ;
+
 };
 
 

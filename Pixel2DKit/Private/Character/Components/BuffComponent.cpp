@@ -10,6 +10,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/BasePXCharacter.h"
+#include "Core/PXGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
@@ -19,6 +20,7 @@
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/DebugFuncLab.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "PX"
 
@@ -43,23 +45,8 @@ void UBuffComponent::InitData()
 
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
-
-	UDataTable* DataTable = DataTableSubsystem->GetBuffOnWidgetData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable);
-
-	TArray<FBuffOnWidget*> Rows;
-	DataTable->GetAllRows<FBuffOnWidget>(TEXT("GetBuffRownameByTag ALL"), Rows);
-	if (Rows.Num() >= 0)
-	{
-		for (auto* Row : Rows)
-		{
-			if (Row && Row->Tag.IsValid())
-			{
-				Tag2BuffOnWidgetData.Add(Row->Tag, *Row);
-			}
-		}
-	}
-
+	
+	
 
 	// 其它 Data 
 	
@@ -225,18 +212,24 @@ void UBuffComponent::SetBuffStateWidgetVisibility(ESlateVisibility InVisibility)
 void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySystemComponent,
                                              const FGameplayEffectSpec& GameplayEffectSpec, FActiveGameplayEffectHandle Handle)
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	UPXGameInstance* GameInstance = UPXGameplayStatics::GetGameInstance(Owner->GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
 	const FGameplayTagContainer GameplayTagContainer = GameplayEffectSpec.GetDynamicAssetTags();
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
 		// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectApplied Tag: %s"), *Tag.ToString()));
 
-		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		if (!Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff"))) continue;
+
+		if (DataTableSubsystem->GetBuffOnWidgetDataByTag(Tag))
 		{
-			if(Tag2BuffOnWidgetData.Contains(Tag))
-			{
-				Execute_RemoveBuff(this, Tag, true);
-			}
+			Execute_RemoveBuff(this, Tag, true);
 		}
 	}
 }
@@ -487,12 +480,18 @@ float UBuffComponent::GetSlowDownResistancePercent_Implementation()
 void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 {
 	if (!Tag.IsValid()) return;
+
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	UPXGameInstance* GameInstance = UPXGameplayStatics::GetGameInstance(Owner->GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	const FBuffOnWidget* Data = DataTableSubsystem->GetBuffOnWidgetDataByTag(Tag);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Data)
 	
-	if(!Tag2BuffOnWidgetData.Contains(Tag)) return;
-	
-	FText BuffName = GetBuffNameByTag(Tag);
-	FBuffOnWidget Data = Tag2BuffOnWidgetData[Tag];
-	IBuff_Interface::Execute_AddBuff(this, Tag, BuffName.ToString(), Data.Color, Data.Permanent);
+	IBuff_Interface::Execute_AddBuff(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
 }
 
 void UBuffComponent::ExpireBuff(FGameplayTag Tag)

@@ -49,7 +49,7 @@ void UDataTableSubsystem::LoadAbilityData()
 		TArray<FName> Rownames = DataTable->GetRowNames();
 		for (auto& Row : Rownames)
 		{
-			FAbility* Data = DataTable->FindRow<FAbility>(Row, "UDataTableSettings::LoadAbilityData");
+			FAbility* Data = DataTable->FindRow<FAbility>(Row, "LoadAbilityData");
 			if (AbilityData.Contains(Data->AbilityTag))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Loading Ability Data, 技能Tag重复：%s"), *Data->AbilityTag.ToString());
@@ -86,7 +86,7 @@ void UDataTableSubsystem::LoadTalentData()
 	TArray<FName> Rownames = DataTable->GetRowNames();
 	for (auto& Row : Rownames)
 	{
-		FTalent* Data = DataTable->FindRow<FTalent>(Row, "UDataTableSettings::LoadTalentData");
+		FTalent* Data = DataTable->FindRow<FTalent>(Row, "LoadTalentData");
 		TalentData.Add(Data->TalentTag, *Data);
 	}
 }
@@ -103,13 +103,13 @@ FTalent UDataTableSubsystem::GetTalentDataByTag(const FGameplayTag& TalentTag)
 
 void UDataTableSubsystem::LoadWeaponData()
 {
-	UDataTable* DataTable = GetWeaponData();
+	UDataTable* DataTable = GetDataTable("Weapon");
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
 	
 	TArray<FName> Rownames = DataTable->GetRowNames();
 	for (auto& Row : Rownames)
 	{
-		FWeaponData* Data = DataTable->FindRow<FWeaponData>(Row, "UDataTableSettings::LoadWeaponData");
+		FWeaponData* Data = DataTable->FindRow<FWeaponData>(Row, "LoadWeaponData");
 		WeaponData.Add(Data->WeaponTag, *Data);
 	}
 }
@@ -132,7 +132,7 @@ void UDataTableSubsystem::LoadLevelData()
 	TArray<FName> Rownames = DataTable->GetRowNames();
 	for (auto& Row : Rownames)
 	{
-		FLevelData* Data = DataTable->FindRow<FLevelData>(Row, "UDataTableSettings::LoadWeaponData");
+		FLevelData* Data = DataTable->FindRow<FLevelData>(Row, "LoadLevelData");
 		LevelData.Add(Data->LevelInstanceName, *Data);
 	}
 }
@@ -145,4 +145,50 @@ const FLevelData* UDataTableSubsystem::GetLevelDataByName(const FName& LevelInst
 	}
 
 	return LevelData.Find(LevelInstanceName);
+}
+
+void UDataTableSubsystem::LoadDropTableData()
+{
+	UDataTable* DataTable = GetDataTable("DropTable");
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	TArray<FName> Rownames = DataTable->GetRowNames();
+	for (auto& Row : Rownames)
+	{
+		FDrop* Data = DataTable->FindRow<FDrop>(Row, "LoadDropTableData");
+		DropTableData.Add(Data->DropID, *Data);
+	}
+}
+
+const FDrop* UDataTableSubsystem::GetDropDataByName(const FName& DropID)
+{
+	if (!DropTableData.Contains(DropID))
+	{
+		LoadDropTableData();
+	}
+
+	return DropTableData.Find(DropID);
+}
+
+void UDataTableSubsystem::LoadBuffOnWidgetData()
+{	
+	UDataTable* DataTable = GetDataTable("BuffOnWidget");
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	TArray<FName> Rownames = DataTable->GetRowNames();
+	for (auto& Row : Rownames)
+	{
+		FBuffOnWidget* Data = DataTable->FindRow<FBuffOnWidget>(Row, "LoadBuffOnWidgetData");
+		Tag2BuffOnWidgetData.Add(Data->Tag, *Data);
+	}
+}
+
+const FBuffOnWidget* UDataTableSubsystem::GetBuffOnWidgetDataByTag(const FGameplayTag& Tag)
+{
+	if (!Tag2BuffOnWidgetData.Contains(Tag))
+	{
+		LoadBuffOnWidgetData();
+	}
+
+	return Tag2BuffOnWidgetData.Find(Tag);
 }

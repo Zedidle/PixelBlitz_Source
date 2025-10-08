@@ -29,10 +29,6 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent, public IBuff_Inter
 	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Sight;
 	TMap<FGameplayTag, float> Tag2BuffEndTime_Sight;
 
-
-	UPROPERTY()
-	TMap<FGameplayTag, FBuffOnWidget> Tag2BuffOnWidgetData;
-
 	UPROPERTY()
 	TMap<FGameplayTag, UNiagaraComponent*> Tag2Niagara;
 	
@@ -105,9 +101,6 @@ public:
 
 	UFUNCTION()
 	void OnGameplayEffectRemoved(const FActiveGameplayEffect& GameplayEffect);
-
-	UFUNCTION()
-	FText GetBuffNameByTag(FGameplayTag Tag);
 	
 #pragma region IBuff_Interface
 	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
@@ -132,15 +125,6 @@ public:
 	
 };
 
-inline FText UBuffComponent::GetBuffNameByTag(FGameplayTag Tag)
-{
-	if (Tag2BuffOnWidgetData.Contains(Tag))
-	{
-		return Tag2BuffOnWidgetData[Tag].BuffName;
-	}
-	
-	return FText();
-}
 
 inline void UBuffComponent::RemoveBuff_EffectAll(FGameplayTag Tag)
 {
