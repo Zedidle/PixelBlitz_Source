@@ -117,7 +117,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 {
 	GENERATED_BODY()
 
-	
+	UFUNCTION(BlueprintCallable)
 	void LoadData();
 	
 	float FallingStartTime;

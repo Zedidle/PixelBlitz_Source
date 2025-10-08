@@ -23,22 +23,29 @@ void ABasePlatform::BeginPlay()
 	// 初始随机
 	FloatDistance = FloatDistance * (1.0f + FMath::RandRange(DistanceRandomRatio * -1.0f, DistanceRandomRatio));
 
-	GetRootComponent()->SetMobility(EMovable);
+	SetMobility(bDefaultFloat ? EComponentMobility::Type::Movable : EComponentMobility::Type::Static);
 }
 
 // Called every frame
 void ABasePlatform::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	Tick_DefaultFloat();
+}
 
-	UWorld* World = GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+void ABasePlatform::SetDefaultFloat(bool V)
+{
+	bDefaultFloat = V;
+}
 
-	if (EMovable == EComponentMobility::Movable)
-	{
-		FVector DeltaLocation = FloatDirection * FloatDistance * FMath::Sin(World->GetDeltaSeconds() * FloatSpeedPeriod);
-		FHitResult* OutSweepHitResult = nullptr;
-		AddActorWorldOffset(DeltaLocation, false, OutSweepHitResult, ETeleportType::None);
-	}
+void ABasePlatform::SetMobility(EComponentMobility::Type V)
+{
+	GetRootComponent()->SetMobility(V);
+	SetActorTickEnabled(V == EComponentMobility::Movable);		
+}
+
+void ABasePlatform::OnPlayerLand_Implementation()
+{
 }
 

@@ -69,10 +69,10 @@ void APXGameState::RandomWeather()
 	if (UDataTable* Data= DataTableSubsystem->GetLevelWeatherRateData())
 	{
 		FName LevelName = GameInstance->GetCurLevelName(true);
-		FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData"));
-
-		// 概率计算
-		UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
+		if (FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData")))
+		{
+			UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
+		}
 	}
 	
 	SetWeather(CurWeatherIndex);
