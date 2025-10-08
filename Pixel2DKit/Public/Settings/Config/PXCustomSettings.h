@@ -6,6 +6,7 @@
 
 #include "PXCustomSettings.generated.h"
 
+class UDevelopConfigDataAsset;
 class UPXWidgetsDataAsset;
 class UPXSkillsDataAsset;
 class UPXResourceDataAsset;
@@ -19,6 +20,10 @@ class PIXEL2DKIT_API UPXCustomSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
+
+	UPROPERTY(Config, BlueprintReadOnly, EditAnywhere)
+	TSoftObjectPtr<UDevelopConfigDataAsset> DevelopConfig;
+	
 	UPROPERTY(Config, BlueprintReadOnly, EditAnywhere)
 	TSoftObjectPtr<UPXGameDataAsset> GameDataAsset;
 	

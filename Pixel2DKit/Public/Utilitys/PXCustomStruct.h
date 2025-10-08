@@ -23,7 +23,7 @@ class PIXEL2DKIT_API UPXCustomStruct : public UObject
 #pragma region UConfigDataAsset
 
 UCLASS(Blueprintable)
-class PIXEL2DKIT_API UConfigDataAsset : public UDataAsset
+class PIXEL2DKIT_API UDevelopConfigDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 public:
@@ -33,8 +33,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsDemo = true;
 
+	// 是否处于测试状态
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool IsTesting = true;
+
+	// 是否加载测试地图 L_Test
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bLoadTestMap = false;
 };
 
 #pragma endregion
@@ -284,9 +289,6 @@ struct FCharacterData : public FTableRowBase
 	// 头像
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
 	TSoftObjectPtr<UTexture2D> Profile;
-
-	// UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
-	// FCharacterAttribute CharacterAttribute;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
 	FCharacterEstimate CharacterEstimate;

@@ -39,7 +39,19 @@ void APXGameMode::BeginPlay()
 
 	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
 	{
-		LoadLevel(GameInstance->GetCurLevelName_Simple(true));
+
+		FName LevelName = GameInstance->GetCurLevelName_Simple(true);
+		#if WITH_EDITOR
+		if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
+		{
+			UDevelopConfigDataAsset* DevelopConfig = Settings->DevelopConfig.LoadSynchronous();
+			if (DevelopConfig && DevelopConfig->bLoadTestMap)
+			{
+				LevelName = FName("L_Test");
+			}
+		}
+		#endif
+		LoadLevel(LevelName);
 		TryStartCurLevel();
 	}
 }
