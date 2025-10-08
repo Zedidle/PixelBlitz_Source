@@ -66,7 +66,13 @@ struct FEnemyData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	FDrop Drop;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FName DropID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	TMap<FName, int> DropID_Rate;
+ 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	FVector2D AttackRange = {20, 60};
 

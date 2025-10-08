@@ -314,7 +314,7 @@ void ABaseEnemy::OnDie_Implementation()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
 	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
-	DropSubsystem->SpawnItems(DropData, GetActorLocation());
+	DropSubsystem->SpawnItems(EnemyData.DropID_Rate, GetActorLocation());
 
 	if (PawnSensingComponent)
 	{

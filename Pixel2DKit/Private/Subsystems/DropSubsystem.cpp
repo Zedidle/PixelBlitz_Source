@@ -23,15 +23,18 @@ void UDropSubsystem::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocation)
+void UDropSubsystem::SpawnItems(const FName& DropID, const FVector& SpawnLocation)
 {
-	if (DropData.Items.IsEmpty()) return ;
-	
 	UGameInstance* GameInstance = GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
 
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	const FDrop* DropData = DataTableSubsystem->GetDropDataByName(DropID);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DropData)
+	
+	if (DropData->Items.IsEmpty()) return ;
 
 	ItemDataTable = DataTableSubsystem->GetItemData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ItemDataTable)
@@ -44,7 +47,7 @@ void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocat
 			if (!WeakThis.IsValid()) return;
 				
 			FName ItemName;
-			UCommonFuncLib::CalRandomMap(DropData.Items, ItemName);
+			UCommonFuncLib::CalRandomMap(DropData->Items, ItemName);
 			if (FItemData* ItemData = WeakThis->ItemDataTable->FindRow<FItemData>(ItemName, TEXT("DropSystem GetItemDataByName")))
 			{
 				// 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("UDropSubsystem ABaseItem Spawn Success, %d"), __LINE__));
@@ -52,9 +55,17 @@ void UDropSubsystem::SpawnItems(const FDrop& DropData, const FVector& SpawnLocat
 									SpawnLocation, FRotator(0, 0, 0));
 				if (Item)
 				{
-					Item->SetVelocityOnSpawn(DropData.SpawnRandRotate, DropData.SpawnSpeed);
+					Item->SetVelocityOnSpawn(DropData->SpawnRandRotate, DropData->SpawnSpeed);
 				}
 			}
-	}, DropData.SpawnFrequency, -1, DropData.DropTotalNum);
+	}, DropData->SpawnFrequency, -1, DropData->DropTotalNum);
 
+}
+
+void UDropSubsystem::SpawnItems(const TMap<FName, int>& DropID_Rate, const FVector& SpawnLocation)
+{
+	FName DropID;
+	UCommonFuncLib::CalRandomMap(DropID_Rate, DropID);
+	
+	SpawnItems(DropID, SpawnLocation);
 }

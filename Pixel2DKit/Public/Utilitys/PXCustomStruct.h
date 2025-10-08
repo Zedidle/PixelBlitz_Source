@@ -80,10 +80,16 @@ enum EAbilityQuality : uint8
 
 #pragma region FDrop
 USTRUCT(BlueprintType)
-struct FDrop
+struct FDrop : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	FName DropID;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	FText DropDesc;
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	float SpawnRandRotate = 20.0f;
 

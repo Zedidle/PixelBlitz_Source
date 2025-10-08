@@ -7,6 +7,7 @@
 #include "Engine/DataTable.h"
 #include "DropSubsystem.generated.h"
 
+struct FDrop;
 class ABaseItem;
 
 USTRUCT(BlueprintType)
@@ -19,6 +20,9 @@ struct FItemData: public FTableRowBase
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	FText ItemDisplayName;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
+	FText ItemDesc;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Drop")
 	TSubclassOf<ABaseItem> SpawnItemClass;
@@ -55,6 +59,8 @@ public:
 	
 	
 	UFUNCTION(BlueprintCallable, Category="DropSubsystem")
-	void SpawnItems(const FDrop& DropData, const FVector& SpawnLocation);
+	void SpawnItems(const FName& DropID, const FVector& SpawnLocation);
+
+	void SpawnItems(const TMap<FName, int>& DropID_Rate, const FVector& SpawnLocation);
 	
 };
