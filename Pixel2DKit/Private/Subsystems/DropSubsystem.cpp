@@ -11,6 +11,7 @@
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXCustomStruct.h"
+#include "Utilitys/SoundFuncLib.h"
 
 
 void UDropSubsystem::Deinitialize()
@@ -56,6 +57,10 @@ void UDropSubsystem::SpawnItems(const FName& DropID, const FVector& SpawnLocatio
 				if (Item)
 				{
 					Item->SetVelocityOnSpawn(DropData->SpawnRandRotate, DropData->SpawnSpeed);
+					if (USoundBase* Sound = ItemData->SoundOnDrop.LoadSynchronous())
+					{
+						USoundFuncLib::PlaySoundAtLocation(Sound, SpawnLocation);
+					}
 				}
 			}
 	}, DropData->SpawnFrequency, -1, DropData->DropTotalNum);

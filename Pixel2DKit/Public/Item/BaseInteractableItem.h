@@ -36,13 +36,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = InteractableItem)
-	USoundBase* Sound_OnSpawn;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = InteractableItem)
 	USoundBase* Sound_OnInteract;
-
 	
 	
 	

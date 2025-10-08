@@ -22,17 +22,11 @@ void ABaseInteractableItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
 	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis=TWeakObjectPtr<ThisClass>(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetActorEnableCollision(true);
 	}, 1);
-
-	if (Sound_OnSpawn)
-	{
-		USoundFuncLib::PlaySoundAtLocation(Sound_OnSpawn, GetActorLocation());
-	}
 }
 
 // Called every frame

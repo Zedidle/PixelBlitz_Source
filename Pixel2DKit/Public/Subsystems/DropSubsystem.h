@@ -29,6 +29,9 @@ struct FItemData: public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TSoftObjectPtr<USoundCue> UseSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSoftObjectPtr<USoundBase> SoundOnDrop;
 };
 
 
