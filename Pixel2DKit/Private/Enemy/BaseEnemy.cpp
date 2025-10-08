@@ -185,7 +185,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	HealthComponent->ModifyMaxHP(EnemyData.HP, EStatChange::Reset, true);
 	SetActorScale3D(FVector(EnemyData.BodyScale));
-	DropData = EnemyData.Drop;
+
 	LoadLookDeterrence(EnemyData.LookDeterrence);
 
 	CurAttackDamage = EnemyData.AttackDamage;

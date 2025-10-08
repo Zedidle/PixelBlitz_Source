@@ -65,12 +65,6 @@ struct FEnemyData : public FTableRowBase
 	float LostEnemyTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FDrop Drop;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FName DropID;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	TMap<FName, int> DropID_Rate;
  	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
@@ -160,9 +154,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;
-	
-	UPROPERTY()
-	FDrop DropData;
 
 	int32 CurAttackDamage = 10;
 	FVector CurAttackRepel = FVector(50,50,100);
