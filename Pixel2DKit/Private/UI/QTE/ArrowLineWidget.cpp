@@ -203,6 +203,16 @@ void UArrowLineWidget::UpdateWidget()
 	}	
 }
 
+void UArrowLineWidget::SetStartActor(AActor* Actor)
+{
+	StartActor = Actor;
+}
+
+void UArrowLineWidget::SetEndActor(AActor* Actor)
+{
+	EndActor = Actor;
+}
+
 void UArrowLineWidget::InitializeData(AActor* _StartActor, AActor* _EndActor, bool _TwoWay, int _MaxArrowBodyNum,
                                       float _MaxDistance, FLinearColor _Color, float _LifeSpan, FVector2D _BodySize, FVector2D _HeadSize, FVector _StartOffset)
 {

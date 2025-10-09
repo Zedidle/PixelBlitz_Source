@@ -48,6 +48,8 @@ class PIXEL2DKIT_API UArrowLineWidget : public UUserWidget
 	FVector StartOffset = FVector::Zero();
 
 
+	void SetHide(bool bHide);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -78,6 +80,12 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn=true))
 	AActor* EndActor;
+
+	UFUNCTION(BlueprintCallable)
+	void SetStartActor(AActor* Actor);
+
+	UFUNCTION(BlueprintCallable)
+	void SetEndActor(AActor* Actor);
 	
 	UFUNCTION(BlueprintCallable)
 	void InitializeData(AActor* _StartActor, AActor* _EndActor, bool _TwoWay = true, int _MaxArrowBodyNum = 10,
@@ -89,6 +97,4 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveArrowLine();
 	
-	UFUNCTION()
-	void SetHide(bool bHide);
 };

@@ -340,7 +340,11 @@ void ABaseEnemy::OnDie_Implementation()
 	{
 		GS->OnEnemyDie(this);
 	}
-	
+
+	if (GetSprite())
+	{
+		GetSprite()->SetSpriteColor(FLinearColor::Gray);
+	}
 	OnEnemyDie.Broadcast(this);
 }
 
@@ -831,7 +835,6 @@ void ABaseEnemy::ActionAtPlayerSouthRemote_Implementation(float Distance)
 
 void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
-	if (GetIsAttacking()) return;
 	if (!Execute_IsAlive(this)) return;
 	if (!IsValid(PXCharacter)) return;
 
