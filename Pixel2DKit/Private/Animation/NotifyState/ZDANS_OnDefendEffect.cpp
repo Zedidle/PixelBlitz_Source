@@ -16,7 +16,7 @@ void UZDANS_OnDefendEffect::OnNotifyBegin_Implementation(UPaperZDAnimInstance* O
 	{
 		if (PaperZDCharacter->Implements<UFight_Interface>())
 		{
-			IFight_Interface::Execute_OnAnimVulnerableBegin(PaperZDCharacter);
+			IFight_Interface::Execute_OnDefendEffectBegin(PaperZDCharacter);
 		}
 	}
 }
@@ -30,7 +30,7 @@ void UZDANS_OnDefendEffect::OnNotifyEnd_Implementation(UPaperZDAnimInstance* Own
 	{
 		if (PaperZDCharacter->Implements<UFight_Interface>())
 		{
-			IFight_Interface::Execute_OnAnimVulnerableBegin(PaperZDCharacter);
+			IFight_Interface::Execute_OnDefendEffectEnd(PaperZDCharacter);
 		}
 	}
 }

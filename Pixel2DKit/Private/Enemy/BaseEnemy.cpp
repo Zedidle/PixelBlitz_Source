@@ -565,6 +565,12 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 			SurDamage = SurDamage * (1 + Result);
 		}
 	}
+
+	// 暂时默认防御减半伤害
+	if (bInDefendState)
+	{
+		SurDamage *= 0.5;
+	}
 	
 	OutDamage = SurDamage;
 }
