@@ -30,6 +30,7 @@
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
 
 
@@ -846,62 +847,72 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	R = UKismetMathLibrary::FindLookAtRotation (L, GetActorLocation());
 
 	
-	FVector PlayerForward = PixelCharacter->GetRightVectorWithBlendYaw();
-	FVector PlayerToSelf = (GetActorLocation() - PixelCharacter->GetActorLocation()).GetSafeNormal2D();
-	float c = PlayerForward.Dot(PlayerToSelf);
-	float d = FMath::Acos(c) * 180 / PI;
+	FVector Dir_PlayerRight = PixelCharacter->GetRightVectorWithBlendYaw();
+	FVector Dir_PlayerToSelf = (PixelCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
 
-	float z = PlayerForward.Cross(PlayerToSelf).Z;
+	DrawDebugLine( GetWorld(), GetActorLocation(), GetActorLocation() + Dir_PlayerRight * 100.f, FColor::White );
+	DrawDebugLine( GetWorld(), GetActorLocation(), GetActorLocation() + Dir_PlayerToSelf * 100.f, FColor::White );
+
+	float DotValue = Dir_PlayerRight.Dot(Dir_PlayerToSelf);
+	float Degree = FMath::Acos(DotValue) * 180 / PI;
+	
+	// UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("Degree:  %f"), Degree));
+
+	float CrossZ = Dir_PlayerRight.Cross(Dir_PlayerToSelf).Z;
 	
 	float yaw = f + R.Yaw - 90;
 
-	// 判断怪物是否在玩家的东侧或西侧
-	FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
-	if (!ActionField.IsValid()) return;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAIComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAIComponent->PXCharacter)
 	
-	if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.East")))
+	EWorldDirection RelativeDirection_PlayerToSelf = USpaceFuncLib::ActorAtActorWorldDirection(EnemyAIComponent->PXCharacter, this, EnemyAIComponent->PXCharacter->CurBlendYaw);
+	// UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("RelativeDirection_PlayerToSelf:  %d"), RelativeDirection_PlayerToSelf));
+
+	if (RelativeDirection_PlayerToSelf == East)
 	{
-		if (z > 0)
+		if (CrossZ > 0)
 		{
-			SetActorRotation(FRotator(0, yaw + d, 0));
+			SetActorRotation(FRotator(0, yaw + Degree, 0));
 		}
 		else
 		{
-			SetActorRotation(FRotator(0, yaw - d, 0));
+			SetActorRotation(FRotator(0, yaw - Degree, 0));
 		}
 	}
-	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.West")))
+	else if (RelativeDirection_PlayerToSelf == West)
 	{
-		if (z > 0)
+		// UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("ActionField.West , %f"), yaw + Degree + 180));
+
+		if (CrossZ > 0)
 		{
-			SetActorRotation(FRotator(0, yaw + d + 180, 0));
+			SetActorRotation(FRotator(0, yaw + Degree + 180, 0));
 		}
 		else
 		{
-			SetActorRotation(FRotator(0, yaw - d + 180, 0));
+			SetActorRotation(FRotator(0, yaw - Degree + 180, 0));
 		}
 
 	}
-	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.North")))
+	else if (RelativeDirection_PlayerToSelf == North)
 	{
 		if (PlayerAtRight)
 		{
-			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw + 45, 0));
-		}
-		else
-		{
-			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw + 135, 0));
-		}
-	}
-	else if (ActionField.MatchesTag(FGameplayTag::RequestGameplayTag("ActionField.South")))
-	{
-		if (PlayerAtRight)
-		{
-			SetActorRotation(FRotator(0,PixelCharacter->CurBlendYaw - 45, 0));
+			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw - 45, 0));
 		}
 		else
 		{
 			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw - 135, 0));
+		}
+	}
+	else if (RelativeDirection_PlayerToSelf == South)
+	{
+		if (PlayerAtRight)
+		{
+			SetActorRotation(FRotator(0,PixelCharacter->CurBlendYaw + 45, 0));
+		}
+		else
+		{
+			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw + 135, 0));
 		}
 	}
 	

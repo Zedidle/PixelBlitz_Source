@@ -49,7 +49,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool ActorAtActorUP(AActor* A, AActor* B);
 
-	// 计算两个Actor之间世界相对方位
+	// 计算A相对于B的世界方位
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static EWorldDirection ActorAtActorWorldDirection(AActor* A, AActor* B, const float OffsetRotation = 0);
 

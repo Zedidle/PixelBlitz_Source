@@ -82,14 +82,15 @@ EWorldDirection USpaceFuncLib::ActorAtActorWorldDirection(AActor* A, AActor* B, 
 	if (!A || !B) return East;
 
 	FVector BasicDir = FRotator(0, OffsetRotation, 0).RotateVector(FVector(1,0,0));
-	FVector dir = (A->GetActorLocation() - B->GetActorLocation()).GetSafeNormal2D();
+	FVector Dir_BtoA = (A->GetActorLocation() - B->GetActorLocation()).GetSafeNormal2D();
 	
-	float d_east = dir.Dot(BasicDir);
-	float d_west = dir.Dot(-BasicDir);
+	float d_east = Dir_BtoA.Dot(BasicDir);
+	float d_west = -d_east;
 
-	if (d_east >= FMath::Cos(45.0f)) return East;
-	if (d_west >= FMath::Cos(45.0f)) return West;
-	if (dir.Cross(BasicDir).Z < 0) return South;
+	float Cos45Deg = FMath::Cos(FMath::DegreesToRadians(45.0f));
+	if (d_east >= Cos45Deg) return East;
+	if (d_west >= Cos45Deg) return West;
+	if (Dir_BtoA.Cross(BasicDir).Z < 0) return South;
 
 	return North;
 }
