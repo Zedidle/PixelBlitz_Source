@@ -871,6 +871,9 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 	}
 	else
 	{
+		bInAttackEffect = false;
+		SetAttackAnimToggle(false);
+		
 		if (HereReviveTimes > 0 && !HealthComponent->DieByFalling)
 		{
 			// 原地复活

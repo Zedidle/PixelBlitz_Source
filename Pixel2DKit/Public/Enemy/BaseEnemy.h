@@ -301,6 +301,8 @@ public:
 	virtual float GetAttackInterval_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;
 	virtual FVector GetAttackRepel_Implementation() override;
+	virtual void OnAnimVulnerableBegin_Implementation() override;
+	virtual void OnAnimVulnerableEnd_Implementation() override;
 #pragma endregion
 	
 #pragma region ActionFields

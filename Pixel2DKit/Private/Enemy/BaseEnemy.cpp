@@ -271,6 +271,9 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	
 	AttributeSet = CreateDefaultSubobject<UPXEnemyAttributeSet>(TEXT("AttributeSetBase"));
 
+	AutoPossessAI(EAutoPossessAI::PlacedInWorldOrSpawned);
+	
+
 }
 
 void ABaseEnemy::Initialize_Implementation(FName Level)
@@ -323,7 +326,7 @@ void ABaseEnemy::OnDie_Implementation()
 
 	if (GetCapsuleComponent())
 	{
-		GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PlayerPawn, ECollisionResponse::ECR_Overlap);
 	}
 	
 	SetInAttackEffect(false);
@@ -404,10 +407,7 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 		{
 			GetSprite()->SetLooping(false);
 		}
-		if (GetCapsuleComponent())
-		{
-			GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PlayerPawn, ECollisionResponse::ECR_Ignore);
-		}
+
 	}
 }
 
@@ -698,6 +698,22 @@ int ABaseEnemy::GetAttackDamage_Implementation()
 FVector ABaseEnemy::GetAttackRepel_Implementation()
 {
 	return CurAttackRepel;
+}
+
+void ABaseEnemy::OnAnimVulnerableBegin_Implementation()
+{
+	if (HealthComponent)
+	{
+		HealthComponent->SetInvulnerable(true);
+	}
+}
+
+void ABaseEnemy::OnAnimVulnerableEnd_Implementation()
+{
+	if (HealthComponent)
+	{
+		HealthComponent->SetInvulnerable(false);
+	}
 }
 
 void ABaseEnemy::Jump()

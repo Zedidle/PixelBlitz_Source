@@ -28,8 +28,7 @@ class PIXEL2DKIT_API UFightComponent : public UActorComponent
 	UPROPERTY()
 	FVector CurKnockbackForceMelee;
 
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTagContainer EnemyTags;
+
 
 	UPROPERTY()
 	UNiagaraSystem* CurHitEffect;
@@ -42,6 +41,8 @@ public:
 	// Sets default values for this component's properties
 	UFightComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTagContainer EnemyTags;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components | Fight")
 	float MeleeAttackRadius = 10.f;
