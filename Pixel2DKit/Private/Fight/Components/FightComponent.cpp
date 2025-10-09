@@ -52,12 +52,12 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 		
 		for (auto& name : SocketNames)
 		{
-			FVector end = CurSceneComponent->GetSocketLocation(name);
+			FVector CurLocation = CurSceneComponent->GetSocketLocation(name);
 
 			TArray<FHitResult> OutHits;
-			UKismetSystemLibrary::SphereTraceMulti(World, PreLocation, end, MeleeAttackRadius,
+			UKismetSystemLibrary::SphereTraceMulti(World, PreLocation, CurLocation, MeleeAttackRadius,
 				ETraceTypeQuery::TraceTypeQuery2, false, MeleeAttackActorsIgnore,
-				EDrawDebugTrace::None, OutHits, true, FLinearColor::Red,
+				EDrawDebugTrace::ForDuration, OutHits, true, FLinearColor::Red,
 				FLinearColor::Green, 1);
 			if (OutHits.IsEmpty()) return;
 			for (auto& hit : OutHits)
@@ -77,6 +77,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 					IFight_Interface::Execute_OnAttackHiting(Owner);
 				}
 			}
+			PreLocation = CurLocation;
 		}
 	}
 	else

@@ -593,6 +593,11 @@ int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 	return iniDamage;
 }
 
+void ABaseEnemy::OnDefendingHitEffect_Implementation()
+{
+	SetDefendHurt(false);
+}
+
 void ABaseEnemy::OnAnimDieEnd_Implementation()
 {
 
@@ -617,12 +622,13 @@ void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 
 void ABaseEnemy::OnDefendEffectBegin_Implementation()
 {
-	IFight_Interface::OnDefendEffectBegin_Implementation();
+	SetInDefendState(true);
+	SetDefendStart(false);
 }
 
 void ABaseEnemy::OnDefendEffectEnd_Implementation()
 {
-	IFight_Interface::OnDefendEffectEnd_Implementation();
+	SetInDefendState(false);
 }
 
 void ABaseEnemy::OnAttackEffectBegin_Implementation()

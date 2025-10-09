@@ -235,10 +235,15 @@ float USpaceFuncLib::CalAngle2D(FVector2D A, FVector2D B)
 
 ABaseEnemy* USpaceFuncLib::FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
 {
-	return FindActorInRangeClosest<ABaseEnemy>(WorldContextObject, A, TSubclassOf<ABaseEnemy>(ABaseEnemy::StaticClass()), InRange);
+	return FindActorInRangeClosest<ABaseEnemy>(WorldContextObject, A, InRange);
 }
 
 ABaseEnemy* USpaceFuncLib::FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
 {
-	return FindActorInRangeFarthest<ABaseEnemy>(WorldContextObject, A, TSubclassOf<ABaseEnemy>(ABaseEnemy::StaticClass()), InRange);
+	return FindActorInRangeFarthest<ABaseEnemy>(WorldContextObject, A, InRange);
+}
+
+ABaseEnemy* USpaceFuncLib::FindEnemyInRangeRandomOne(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
+{
+	return FindActorInRangeRandomOne<ABaseEnemy>(WorldContextObject, A, InRange);
 }

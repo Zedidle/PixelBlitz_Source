@@ -33,14 +33,15 @@ void ABaseInteractableItem::BeginPlay()
 void ABaseInteractableItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!bSimPhysical || FMath::Abs(CurSimVelocity.Z) < 1)
+	if (!bSimPhysical)
 	{
 		CurSimVelocity = { 0,0,0};
 		SetActorTickEnabled(false);
 		return;
 	}
 
-	if (IsOnGround())
+	float HighUP;
+	if (IsOnGround(HighUP))
 	{
 		if (CurSimVelocity.Z < -5)
 		{
@@ -48,6 +49,11 @@ void ABaseInteractableItem::Tick(float DeltaTime)
 			CurSimVelocity.Z *= -Elastic;
 			CurSimVelocity.X *= Elastic;
 			CurSimVelocity.Y *= Elastic;
+		}
+		else
+		{
+			AddActorWorldOffset(FVector(0,0,HighUP));
+			return;
 		}
 	}
 	else
@@ -73,6 +79,15 @@ void ABaseInteractableItem::SetVelocityOnSpawn(float RandomRotateAngle, float Sp
 	CurSimVelocity = FRotator(Pitch, 0, Roll).RotateVector(NewVelocity);
 }
 
+void ABaseInteractableItem::SetSimPhysical(bool V)
+{
+	bSimPhysical = V;
+	if (bSimPhysical)
+	{
+		SetActorTickEnabled(true);
+	}
+}
+
 void ABaseInteractableItem::OnInteractEffect_Implementation(AActor* OtherActor)
 {
 	if (Sound_OnInteract)
@@ -82,7 +97,7 @@ void ABaseInteractableItem::OnInteractEffect_Implementation(AActor* OtherActor)
 	
 }
 
-bool ABaseInteractableItem::IsOnGround_Implementation()
+bool ABaseInteractableItem::IsOnGround_Implementation(float& HighUP)
 {
 	UWorld* World = GetWorld();
 	if (!World) return false;
@@ -95,6 +110,8 @@ bool ABaseInteractableItem::IsOnGround_Implementation()
 	bool bHit = UKismetSystemLibrary::LineTraceSingle(World, StartLocation, EndLocation,
 		TraceTypeQuery1, false, ActorsToIgnore, EDrawDebugTrace::None, Hit,true);
 
+	HighUP = Hit.Location.Z - EndLocation.Z;
+	
 	return bHit;
 }
 

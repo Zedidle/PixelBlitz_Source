@@ -44,7 +44,7 @@ public:
 
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Components | Fight")
-	float MeleeAttackRadius = 15.f;
+	float MeleeAttackRadius = 10.f;
 	
 
 protected:

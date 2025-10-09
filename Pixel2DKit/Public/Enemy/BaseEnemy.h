@@ -89,7 +89,7 @@ class ABasePXCharacter;
 
 
 
-UCLASS()
+UCLASS(Abstract)
 class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IBuff_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
@@ -286,6 +286,7 @@ public:
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual int DamagePlus_Implementation(int InDamage, AActor* Receiver) override;
 	virtual int OnDefendingHit_Implementation(int iniDamage) override;
+	virtual void OnDefendingHitEffect_Implementation() override;
 	virtual void OnDie_Implementation() override;
 	virtual void OnAnimDieEnd_Implementation() override;
 	virtual void OnRemoteAttackEffect_Implementation() override;

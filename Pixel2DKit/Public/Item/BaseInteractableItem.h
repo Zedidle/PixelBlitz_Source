@@ -49,8 +49,11 @@ public:
 	UFUNCTION()
 	void SetVelocityOnSpawn(float RandomRotateAngle = 20, float Speed = 200);
 
+	UFUNCTION()
+	void SetSimPhysical(bool V);
+	
 	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = InteractableItem)
-	bool IsOnGround();
+	bool IsOnGround(float& HighUP);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = InteractableItem)
 	void OnInteractEffect(AActor* OtherActor);
