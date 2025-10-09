@@ -98,7 +98,7 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	TEnumAsByte<ECollisionChannel> ECC_PlayerPawn; 
 	
 	UPROPERTY()
-	ABasePXCharacter* PixelCharacter;
+	ABasePXCharacter* PXCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	UEnemyDataAsset* DataAsset;

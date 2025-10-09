@@ -38,17 +38,17 @@
 
 AActor* ABaseEnemy::GetPixelCharacter()
 {
-	return Cast<AActor>(PixelCharacter);
+	return Cast<AActor>(PXCharacter);
 }
 
 bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 {
 	if (Character == nullptr)
 	{
-		PixelCharacter = nullptr;
+		PXCharacter = nullptr;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->SetPixelCharacter(PixelCharacter);
+			EnemyAIComponent->SetPixelCharacter(PXCharacter);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
@@ -59,14 +59,14 @@ bool ABaseEnemy::SetPixelCharacter(AActor* Character)
 	
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(Character))
 	{
-		PixelCharacter = C;
+		PXCharacter = C;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->SetPixelCharacter(PixelCharacter);
+			EnemyAIComponent->SetPixelCharacter(PXCharacter);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
-			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PixelCharacter);
+			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PXCharacter);
 		}
 		return true;
 	}
@@ -165,9 +165,9 @@ void ABaseEnemy::SetJumping(const bool V, const float time)
 
 float ABaseEnemy::GetDistanceToPlayer() const
 {
-	if (IsValid(PixelCharacter))
+	if (IsValid(PXCharacter))
 	{
-		return (PixelCharacter->GetActorLocation() - GetActorLocation()).Size();
+		return (PXCharacter->GetActorLocation() - GetActorLocation()).Size();
 	}
 	return 99999;
 }
@@ -476,7 +476,7 @@ bool ABaseEnemy::IsAlive_Implementation()
 
 AActor* ABaseEnemy::GetTarget_Implementation()
 {
-	return PixelCharacter;
+	return PXCharacter;
 }
 
 
@@ -531,8 +531,8 @@ void ABaseEnemy::OnAttack_Implementation()
 
 bool ABaseEnemy::CanAttack_Implementation()
 {
-	if (!IsValid(PixelCharacter)) return false;
-	if (!Execute_IsAlive(PixelCharacter)) return false;
+	if (!IsValid(PXCharacter)) return false;
+	if (!Execute_IsAlive(PXCharacter)) return false;
 	
 	return !bDead && !bInAttackState;
 }
@@ -833,89 +833,36 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
 	if (GetIsAttacking()) return;
 	if (!Execute_IsAlive(this)) return;
-	if (!IsValid(PixelCharacter)) return;
+	if (!IsValid(PXCharacter)) return;
 
-	UWorld* World = GetWorld();
-	if (!IsValid(World)) return;
+	bool PlayerAtRight = USpaceFuncLib::ActorAtActorRight(PXCharacter,this);
 
-	bool PlayerAtRight = USpaceFuncLib::ActorAtActorRight(PixelCharacter,this);
-	float f =  PlayerAtRight ? 180 : 0;
-
-	FVector L;
-	FRotator R; // 凑数，后面修改
-	UGameplayStatics::GetPlayerCameraManager(World, 0 )->GetActorEyesViewPoint(L,R);
-	R = UKismetMathLibrary::FindLookAtRotation (L, GetActorLocation());
-
-	
-	FVector Dir_PlayerRight = PixelCharacter->GetRightVectorWithBlendYaw();
-	FVector Dir_PlayerToSelf = (PixelCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
-
-	DrawDebugLine( GetWorld(), GetActorLocation(), GetActorLocation() + Dir_PlayerRight * 100.f, FColor::White );
-	DrawDebugLine( GetWorld(), GetActorLocation(), GetActorLocation() + Dir_PlayerToSelf * 100.f, FColor::White );
+	FVector Dir_PlayerRight = PXCharacter->GetRightVectorWithBlendYaw();
+	FVector Dir_PlayerToSelf = (PXCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
 
 	float DotValue = Dir_PlayerRight.Dot(Dir_PlayerToSelf);
 	float Degree = FMath::Acos(DotValue) * 180 / PI;
-	
-	// UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("Degree:  %f"), Degree));
 
 	float CrossZ = Dir_PlayerRight.Cross(Dir_PlayerToSelf).Z;
-	
-	float yaw = f + R.Yaw - 90;
 
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAIComponent)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAIComponent->PXCharacter)
-	
-	EWorldDirection RelativeDirection_PlayerToSelf = USpaceFuncLib::ActorAtActorWorldDirection(EnemyAIComponent->PXCharacter, this, EnemyAIComponent->PXCharacter->CurBlendYaw);
-	// UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("RelativeDirection_PlayerToSelf:  %d"), RelativeDirection_PlayerToSelf));
+	EWorldDirection RelativeDirection_PlayerToSelf = USpaceFuncLib::ActorAtActorWorldDirection(EnemyAIComponent->PXCharacter, this, PXCharacter->CurBlendYaw);
 
-	if (RelativeDirection_PlayerToSelf == East)
+	float InYaw;
+	if (RelativeDirection_PlayerToSelf == North)
 	{
-		if (CrossZ > 0)
-		{
-			SetActorRotation(FRotator(0, yaw + Degree, 0));
-		}
-		else
-		{
-			SetActorRotation(FRotator(0, yaw - Degree, 0));
-		}
-	}
-	else if (RelativeDirection_PlayerToSelf == West)
-	{
-		// UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("ActionField.West , %f"), yaw + Degree + 180));
-
-		if (CrossZ > 0)
-		{
-			SetActorRotation(FRotator(0, yaw + Degree + 180, 0));
-		}
-		else
-		{
-			SetActorRotation(FRotator(0, yaw - Degree + 180, 0));
-		}
-
-	}
-	else if (RelativeDirection_PlayerToSelf == North)
-	{
-		if (PlayerAtRight)
-		{
-			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw - 45, 0));
-		}
-		else
-		{
-			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw - 135, 0));
-		}
+		InYaw = PlayerAtRight ? PXCharacter->CurBlendYaw - 45 : PXCharacter->CurBlendYaw - 135;
 	}
 	else if (RelativeDirection_PlayerToSelf == South)
 	{
-		if (PlayerAtRight)
-		{
-			SetActorRotation(FRotator(0,PixelCharacter->CurBlendYaw + 45, 0));
-		}
-		else
-		{
-			SetActorRotation(FRotator(0, PixelCharacter->CurBlendYaw + 135, 0));
-		}
+		InYaw = PlayerAtRight ? PXCharacter->CurBlendYaw + 45 : PXCharacter->CurBlendYaw + 135;
+	}
+	else
+	{
+		// 东 或 西
+		InYaw = CrossZ > 0 ? PXCharacter->CurBlendYaw + Degree : PXCharacter->CurBlendYaw - Degree;
 	}
 	
+	SetActorRotation(FRotator(0, InYaw, 0));
 }
 
 void ABaseEnemy::Tick(float DeltaSeconds)
@@ -926,7 +873,7 @@ void ABaseEnemy::Tick(float DeltaSeconds)
 	// 目前只有 HealthWidget
 	if (UWidgetComponent* Widget = FindComponentByClass<UWidgetComponent>())
 	{
-		Widget->SetVisibility(IsValid(PixelCharacter));
+		Widget->SetVisibility(IsValid(PXCharacter));
 	}
 	
 }
