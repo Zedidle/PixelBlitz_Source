@@ -10,6 +10,8 @@
 #include "PXUIRoot.generated.h"
 
 
+class UPXActivatableWidget;
+
 USTRUCT(BlueprintType)
 struct FActivatableWidgetStackToRegister
 {

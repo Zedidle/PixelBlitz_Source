@@ -15,11 +15,17 @@ class PIXEL2DKIT_API UPXSettingScreen : public UGameSettingScreen
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FName UIName = "Settings";
+
+
+	
 protected:
 	virtual void NativeOnInitialized() override;
 	virtual UGameSettingRegistry* CreateRegistry() override;
 
-	void HandleBackAction();
+	virtual bool NativeOnHandleBackAction() override;
+
 	void HandleApplyAction();
 	void HandleCancelChangesAction();
 

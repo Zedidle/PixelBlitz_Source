@@ -9,6 +9,8 @@
 #include "Core/PXWorldSubsystem.h"
 #include "UIDefine.h"
 #include "Components/SlateWrapperTypes.h"
+#include "Foundation/PXActionWidget.h"
+#include "Foundation/PXActivatableWidget.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
@@ -138,7 +140,7 @@ protected:
 	TMap<FName, FUIConfigData> ConfigDataMap;
 	
 	UPROPERTY()
-	TMap<FName, UUserWidget*> WidgetMap;
+	TMap<FName, UCommonActivatableWidget*> WidgetMap;
 
 	TMap<FName, FGameplayTag> WidgetLayerMap;
 	

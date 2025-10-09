@@ -47,7 +47,14 @@ void APXGameMode::BeginPlay()
 			UDevelopConfigDataAsset* DevelopConfig = Settings->DevelopConfig.LoadSynchronous();
 			if (DevelopConfig && DevelopConfig->bLoadTestMap)
 			{
-				LevelName = FName("L_Test");
+				if (DevelopConfig->TestMap.IsValid())
+				{
+					LevelName = *DevelopConfig->TestMap.GetAssetName();
+				}
+				else
+				{
+					LevelName = FName("L_Test");
+				}
 			}
 		}
 		#endif

@@ -160,6 +160,11 @@ bool UUIManager::OpenUI(const FName UIType)
 	const auto& BPWidget = Root->PushWidgetToLayerStack(ConfigDataPtr->LayerTag, UIBPClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BPWidget, false)
 
+	if (UPXActivatableWidget* PXWidget = Cast<UPXActivatableWidget>(BPWidget))
+	{
+		PXWidget->SetUIName(UIType);
+	}
+	
 	WidgetMap.Add(UIType, BPWidget);
 
 	WidgetLayerMap.Add(UIType, ConfigDataPtr->LayerTag);

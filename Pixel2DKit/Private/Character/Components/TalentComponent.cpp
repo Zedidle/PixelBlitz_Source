@@ -193,14 +193,14 @@ void UTalentComponent::LoadTalents()
 	FGameplayTag TalentTag;
 
 	// 起死回生 / 被怪物击杀的复活次数
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.ReviveTimesPlus");
+	TalentTag = TAG("TalentSet.ReviveTimesPlus");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->HereReviveTimes += FMath::RoundToInt(EffectGameplayTags[TalentTag]);
 	}
 
 	// 基础移动速度
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.SpeedPlusPercent");
+	TalentTag = TAG("TalentSet.SpeedPlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->MaxWalkSpeed = PXCharacter->MaxWalkSpeed * (1 + EffectGameplayTags[TalentTag]);
@@ -211,7 +211,7 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 基础跳跃高度
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.BasicJumpHeightPlusPercent");
+	TalentTag = TAG("TalentSet.BasicJumpHeightPlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->JumpZVelocity = PXCharacter->JumpZVelocity * (1 + EffectGameplayTags[TalentTag]);
@@ -222,7 +222,7 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 基础冲刺距离
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.DashDistancePlusPercent");
+	TalentTag = TAG("TalentSet.DashDistancePlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->BasicDashSpeed = PXCharacter->BasicDashSpeed * (1 + EffectGameplayTags[TalentTag]);
@@ -230,19 +230,19 @@ void UTalentComponent::LoadTalents()
 
 
 	// 视野
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.SightPlusPercent");
+	TalentTag = TAG("TalentSet.SightPlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		if (PXCharacter->BuffComponent->Implements<UBuff_Interface>())
 		{
 			IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
-				FGameplayTag::RequestGameplayTag("Buff.Talent.EagleEye"), EffectGameplayTags[TalentTag], 0, 999);
+				TAG("Buff.Talent.EagleEye"), EffectGameplayTags[TalentTag], 0, 999);
 		}
 	}
 	
 
 	// 最大生命值
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxHPPlus");
+	TalentTag = TAG("TalentSet.MaxHPPlus");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		if (PXCharacter->HealthComponent)
@@ -252,7 +252,7 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 最大体力值
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.MaxEPPlus");
+	TalentTag = TAG("TalentSet.MaxEPPlus");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		if (UEnergyComponent* EnergyComponent = PXCharacter->EnergyComponent)
@@ -265,14 +265,14 @@ void UTalentComponent::LoadTalents()
 	MakeMiracleWalker();
 
 	// 体型 / 蚁人
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.BodySizePlusPercent");
+	TalentTag = TAG("TalentSet.BodySizePlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		PXCharacter->SetScale(1 + EffectGameplayTags[TalentTag]);
 	}
 	
 	// 热身
-	TalentTag = FGameplayTag::RequestGameplayTag("TalentSet.Warmup.AttackDamagePlusPercent");
+	TalentTag = TAG("TalentSet.Warmup.AttackDamagePlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Talent_WarmingUP",
@@ -280,7 +280,7 @@ void UTalentComponent::LoadTalents()
 	}
 
 	// 摇摆拳
-	TalentTag = FGameplayTag::RequestGameplayTag("Buff.Talent.SwingFist");
+	TalentTag = TAG("Buff.Talent.SwingFist");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
 		MakeSwingFistPower();
@@ -326,7 +326,7 @@ void UTalentComponent::OnBuffCalDamage()
 	// 清楚热身运动
 	if (WarmUP_Power > 0)
 	{
-		IBuff_Interface::Execute_RemoveBuff(PXCharacter, FGameplayTag::RequestGameplayTag("Buff.Talent.Warmup"), true);
+		IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.Warmup"), true);
 		WarmUP_Power = 0 ;
 		WarmUP_MoveDistance = 0;
 		OwnerPreLocation = PXCharacter->GetActorLocation();
@@ -335,8 +335,8 @@ void UTalentComponent::OnBuffCalDamage()
 	MakeMiracleWalker();
 	MakeImmortalPower(false);
 
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, FGameplayTag::RequestGameplayTag("Buff.Talent.StaticPower"), true);
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, FGameplayTag::RequestGameplayTag("Buff.Talent.DodgeStrike"), true);
+	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.StaticPower"), true);
+	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.DodgeStrike"), true);
 	
 }
 
@@ -347,10 +347,10 @@ void UTalentComponent::OnDashEnd()
 
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	// 闪避突袭
-	FGameplayTag DamagePlus_AfterDashTag = FGameplayTag::RequestGameplayTag("TalentSet.DamagePlus_AfterDash");
+	FGameplayTag DamagePlus_AfterDashTag = TAG("TalentSet.DamagePlus_AfterDash");
 	if (EffectGameplayTags.Contains(DamagePlus_AfterDashTag))
 	{
-		FGameplayTag Tag = FGameplayTag::RequestGameplayTag("Buff.Talent.DodgeStrike");
+		FGameplayTag Tag = TAG("Buff.Talent.DodgeStrike");
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, Tag, 0.0f,
 			EffectGameplayTags[DamagePlus_AfterDashTag], 999.0f
 		);
@@ -371,7 +371,7 @@ int UTalentComponent::GetAttackDamagePlus()
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 
 	int LocalPlus = 0;
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
+	FGameplayTag Tag = TAG("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->HealthComponent->GetCurrentHP()) ;
@@ -390,8 +390,8 @@ void UTalentComponent::MoveWarmingUP()
 	WarmUP_MoveDistance += FVector::Distance(PXCharacter->GetActorLocation(), OwnerPreLocation);
 	OwnerPreLocation = PXCharacter->GetActorLocation();
 
-	FGameplayTag MoveDistancePerLevelTag = FGameplayTag::RequestGameplayTag("TalentSet.Warmup.MoveDistancePerLevel");
-	FGameplayTag AttackDamagePlusPercentTag = FGameplayTag::RequestGameplayTag("TalentSet.Warmup.AttackDamagePlusPercent");
+	FGameplayTag MoveDistancePerLevelTag = TAG("TalentSet.Warmup.MoveDistancePerLevel");
+	FGameplayTag AttackDamagePlusPercentTag = TAG("TalentSet.Warmup.AttackDamagePlusPercent");
 
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
@@ -407,7 +407,7 @@ void UTalentComponent::MoveWarmingUP()
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	float PlusPowerPercent = WarmUP_Power * EffectGameplayTags[AttackDamagePlusPercentTag];
-	FGameplayTag WarmUP_Tag = FGameplayTag::RequestGameplayTag("Buff.Talent.Warmup");
+	FGameplayTag WarmUP_Tag = TAG("Buff.Talent.Warmup");
 	
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
 	
@@ -421,8 +421,8 @@ void UTalentComponent::MakeSwingFistPower()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	FGameplayTag DecreaseTag = FGameplayTag::RequestGameplayTag("TalentSet.SwingPunch.AttackDamage_DecreasePercent");
-	FGameplayTag IncreaseTag = FGameplayTag::RequestGameplayTag("TalentSet.SwingPunch.AttackDamage_IncreasePercent");
+	FGameplayTag DecreaseTag = TAG("TalentSet.SwingPunch.AttackDamage_DecreasePercent");
+	FGameplayTag IncreaseTag = TAG("TalentSet.SwingPunch.AttackDamage_IncreasePercent");
 
 	if (!EffectGameplayTags.Contains(DecreaseTag) || !EffectGameplayTags.Contains(IncreaseTag)) return;
 
@@ -432,7 +432,7 @@ void UTalentComponent::MakeSwingFistPower()
 
 	SwingFistPower = !SwingFistPower;
 	
-	FGameplayTag SwingFistTag = FGameplayTag::RequestGameplayTag("Buff.Talent.SwingFist");
+	FGameplayTag SwingFistTag = TAG("Buff.Talent.SwingFist");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
 
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
@@ -456,11 +456,11 @@ void UTalentComponent::MakeMiracleWalker()
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
-	FGameplayTag MiracleWalkerTag = FGameplayTag::RequestGameplayTag("Buff.Talent.MiracleWalker");
+	FGameplayTag MiracleWalkerTag = TAG("Buff.Talent.MiracleWalker");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
 
-	FGameplayTag DamagePlusTag = FGameplayTag::RequestGameplayTag("TalentSet.MiracleWalker.DamagePlus");
-	FGameplayTag IntervalTag = FGameplayTag::RequestGameplayTag("TalentSet.MiracleWalker.Interval");
+	FGameplayTag DamagePlusTag = TAG("TalentSet.MiracleWalker.DamagePlus");
+	FGameplayTag IntervalTag = TAG("TalentSet.MiracleWalker.Interval");
 
 
 	if (!EffectGameplayTags.Contains(DamagePlusTag) || !EffectGameplayTags.Contains(IntervalTag)) return;
@@ -493,9 +493,9 @@ void UTalentComponent::MakeImmortalPower(bool First)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->HealthComponent)
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
-	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.AttackDamagePlusOnMaxHPPercent");
-	FGameplayTag IntervalTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.Interval");
-	FGameplayTag MaxHPPlusAfterAttackTag = FGameplayTag::RequestGameplayTag("TalentSet.Immortal.MaxHPPlusAfterAttack");
+	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("TalentSet.Immortal.AttackDamagePlusOnMaxHPPercent");
+	FGameplayTag IntervalTag = TAG("TalentSet.Immortal.Interval");
+	FGameplayTag MaxHPPlusAfterAttackTag = TAG("TalentSet.Immortal.MaxHPPlusAfterAttack");
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
@@ -503,7 +503,7 @@ void UTalentComponent::MakeImmortalPower(bool First)
 		!EffectGameplayTags.Contains(IntervalTag) ||
 		!EffectGameplayTags.Contains(MaxHPPlusAfterAttackTag)
 	) return;
-	FGameplayTag ImmortalPowerTag = FGameplayTag::RequestGameplayTag("Buff.Talent.ImmortalPower");
+	FGameplayTag ImmortalPowerTag = TAG("Buff.Talent.ImmortalPower");
 
 	if (First || PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{

@@ -6,6 +6,7 @@
 #include "Input/CommonUIInputTypes.h"
 #include "Player/PXLocalPlayer.h"
 #include "Settings/PXGameSettingRegistry.h"
+#include "UI/UIManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PXSettingScreen)
 
@@ -15,7 +16,7 @@ void UPXSettingScreen::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	BackHandle = RegisterUIActionBinding(FBindUIActionArgs(BackInputActionData, true, FSimpleDelegate::CreateUObject(this, &ThisClass::HandleBackAction)));
+	// BackHandle = RegisterUIActionBinding(FBindUIActionArgs(BackInputActionData, true, FSimpleDelegate::CreateUObject(this, &ThisClass::HandleBackAction)));
 	ApplyHandle = RegisterUIActionBinding(FBindUIActionArgs(ApplyInputActionData, true, FSimpleDelegate::CreateUObject(this, &ThisClass::HandleApplyAction)));
 	CancelChangesHandle = RegisterUIActionBinding(FBindUIActionArgs(CancelChangesInputActionData, true, FSimpleDelegate::CreateUObject(this, &ThisClass::HandleCancelChangesAction)));
 }
@@ -32,16 +33,18 @@ UGameSettingRegistry* UPXSettingScreen::CreateRegistry()
 	return NewRegistry;
 }
 
-void UPXSettingScreen::HandleBackAction()
+bool UPXSettingScreen::NativeOnHandleBackAction()
 {
 	if (AttemptToPopNavigation())
 	{
-		return;
+		return false;
 	}
 
 	ApplyChanges();
-
-	DeactivateWidget();
+	
+	UUIManager* UIManager = UUIManager::GetSelfInstance(this);
+	UIManager->CloseUI(UIName);
+	return true;
 }
 
 void UPXSettingScreen::HandleApplyAction()

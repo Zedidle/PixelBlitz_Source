@@ -46,9 +46,9 @@ void APlatformFight::Tick(float DeltaTime)
 	TmpCenterLocation = TmpCenterLocation / TmpNum;
 	FVector PlayerLocation = PXCharacter->GetActorLocation();
 	FVector DirLength = TmpCenterLocation - PlayerLocation;
+	float DistanceCenterToPlayer = DirLength.Size();
 
-
-	float FightCameraOffsetPoint = DirLength.Size() / PXCharacter->CurSpringArmLength;
+	float FightCameraOffsetPoint = FMath::Pow(DistanceCenterToPlayer, 0.8) / PXCharacter->CurSpringArmLength;
 	PXCharacter->TargetFightCameraOffset = FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint;
 
 	
@@ -58,7 +58,6 @@ void APlatformFight::Tick(float DeltaTime)
 	CameraManager->GetActorEyesViewPoint(EyeViewPoint, _);
 	
 	FVector CenterToViewPoint =  TmpCenterLocation - EyeViewPoint;
-	float DistanceCenterToPlayer = DirLength.Size();
 	float cal2 = PXCharacter->CurSpringArmLength + FMath::GetMappedRangeValueClamped(FVector2D(InRangeA, PXCharacter->CurSpringArmLength * 0.7),
 		FVector2D(0.0f, 100.0f), DistanceCenterToPlayer);
 

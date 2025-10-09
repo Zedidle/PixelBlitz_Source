@@ -321,6 +321,10 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 		}
 	}
 
+	TArray<FVector> OffsetValues;
+	CameraOffsets.GenerateValueArray(OffsetValues);
+	
+	
 	
 	// 攻击命中导致的视野下降
 	if (AttackHitComboNum > 0)
@@ -342,7 +346,9 @@ void ABasePXCharacter::Tick_CalCameraOffset()
 
 	if (RemMoveCameraOffset.Size() > 0.1)
 	{
-		FVector DeltaMoveCameraOffset = RemMoveCameraOffset * World->GetDeltaSeconds() * 2.5;
+		// 战斗镜头偏移速度，后续加到设置
+		float CameraOffsetSpeed = 2.5;
+		FVector DeltaMoveCameraOffset = RemMoveCameraOffset * World->GetDeltaSeconds() * CameraOffsetSpeed;
 		SpringArm->AddWorldOffset(DeltaMoveCameraOffset);
 		CurMoveCameraOffset += DeltaMoveCameraOffset;
 		RemMoveCameraOffset -= DeltaMoveCameraOffset;
@@ -351,9 +357,24 @@ void ABasePXCharacter::Tick_CalCameraOffset()
 	CurFightCameraOffset = FMath::Lerp(CurFightCameraOffset, TargetFightCameraOffset, FightCameraOffsetSpeedFactor);
 }
 
-void ABasePXCharacter::SetFightCameraOffset(FVector Offset)
+void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset)
 {
-	
+	if (CameraOffsets.Contains(OffsetName))
+	{
+		CameraOffsets[OffsetName] = Offset;
+	}
+	else
+	{
+		CameraOffsets.Add(OffsetName, Offset);
+	}
+}
+
+void ABasePXCharacter::RemoveCameraOffset(FName OffsetName)
+{
+	if (CameraOffsets.Contains(OffsetName))
+	{
+		CameraOffsets.Remove(OffsetName);
+	}
 }
 
 

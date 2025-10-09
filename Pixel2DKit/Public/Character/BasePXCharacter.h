@@ -192,8 +192,12 @@ public:
 	virtual void Tick_SpringArmMotivation();
 	virtual void Tick_CalCameraOffset();
 
-	void SetFightCameraOffset(FVector Offset);
-
+	TMap<FName, FVector> CameraOffsets;
+	UFUNCTION(BlueprintCallable)
+	void AddCameraOffset(FName OffsetName, FVector Offset);
+	
+	UFUNCTION(BlueprintCallable)
+	void RemoveCameraOffset(FName OffsetName);
 	
 	void SetLanding(const bool V, const float time = 0.1f);
 

@@ -40,6 +40,11 @@ public:
 	// 是否加载测试地图 L_Test
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bLoadTestMap = false;
+
+	// 勾选 bLoadTestMap 后，进行测试，如果不选择，则默认测试 L_Test
+	UPROPERTY(EditAnywhere, Category=DefaultTestMap, meta=(AllowedClasses="/Script/Engine.World"))
+	FSoftObjectPath TestMap;
+
 };
 
 #pragma endregion

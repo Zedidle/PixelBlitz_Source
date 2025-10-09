@@ -39,13 +39,13 @@ FGameplayTagContainer UAbilityComponent::CreateGameplayTagContainer(FName TagNam
 	if (WithChildren)
 	{
 		FGameplayTagContainer AbilityTagsChildren = UGameplayTagsManager::Get().
-			RequestGameplayTagChildren(FGameplayTag::RequestGameplayTag(TagName));
+			RequestGameplayTagChildren(TAG(TagName));
 
-		AbilityTagsChildren.AddTag(FGameplayTag::RequestGameplayTag(TagName));
+		AbilityTagsChildren.AddTag(TAG(TagName));
 		return AbilityTagsChildren;
 	}
 
-	return FGameplayTagContainer(FGameplayTag::RequestGameplayTag(TagName));
+	return FGameplayTagContainer(TAG(TagName));
 }
 
 // Called when the game starts
@@ -166,7 +166,7 @@ void UAbilityComponent::LoadAbility()
 	FGameplayTagContainer Tags;
 
 	// 空中移动的控制
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AirMoveEffectAddPercent");
+	Tag = TAG("AbilitySet.AirMoveEffectAddPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTags[Tag]);
@@ -174,25 +174,25 @@ void UAbilityComponent::LoadAbility()
 
 
 	// 跳跃上升时间
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.JumpMaxHoldTimePlus");
+	Tag = TAG("AbilitySet.JumpMaxHoldTimePlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTags[Tag];
 	}
 	
 	// 附加跳跃次数
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.MaxJumpCountPlus");
+	Tag = TAG("AbilitySet.MaxJumpCountPlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		PXCharacter->CurMaxJumpCount = PXCharacter->CurMaxJumpCount + EffectGameplayTags[Tag];
 	}
 	
 	// EP恢复加快
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.EPRecoverLevel");
+	Tag = TAG("AbilitySet.EPRecoverLevel");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		TArray<FActiveGameplayEffectHandle> Handles = CachedASC->GetActiveEffectsWithAllTags(
-						FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.RecoverEP")));
+						FGameplayTagContainer(TAG("Ability.RecoverEP")));
 		for (auto& Handle : Handles)
 		{
 			CachedASC->SetActiveGameplayEffectLevel(Handle, EffectGameplayTags[Tag]);
@@ -200,33 +200,33 @@ void UAbilityComponent::LoadAbility()
 	}
 	
 	// 霸体
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InRock");
+	Tag = TAG("AbilitySet.InRock");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		HealthComponent->InRockPercent = EffectGameplayTags[Tag];
-		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.InRock"));
+		BuffComponent->AddBuffByTag(TAG("Buff.Ability.InRock"));
 	}
 
 	// 空击
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.InAir.DamagePlus");
+	Tag = TAG("AbilitySet.InAir.DamagePlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.AirFight"));
+		BuffComponent->AddBuffByTag(TAG("Buff.Ability.AirFight"));
 	}
 	
 
 	// 天手力
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.SkyHandPower.Cooldown");
+	Tag = TAG("AbilitySet.SkyHandPower.Cooldown");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.SkyHandPower"));
+		BuffComponent->AddBuffByTag(TAG("Buff.Ability.SkyHandPower"));
 	}
 	
 	// 移形换影
-	Tag = FGameplayTag::RequestGameplayTag("AbilitySet.Mobiliarbus.Cooldown");
+	Tag = TAG("AbilitySet.Mobiliarbus.Cooldown");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		BuffComponent->AddBuffByTag(FGameplayTag::RequestGameplayTag("Buff.Ability.Mobiliarbus"));
+		BuffComponent->AddBuffByTag(TAG("Buff.Ability.Mobiliarbus"));
 	}
 
 
@@ -368,7 +368,7 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset->InputConfig)
 
 	const auto& ActionMap = PXCharacter->DataAsset->InputConfig->ActionMap;
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName);
+	FGameplayTag Tag = TAG(TagName);
 	if (!ActionMap.Contains(Tag) || Action_Jump != ActionMap[Tag])
 	{
 		Keep = true;
