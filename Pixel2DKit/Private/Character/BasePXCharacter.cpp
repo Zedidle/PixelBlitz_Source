@@ -748,6 +748,25 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	);
 }
 
+FVector ABasePXCharacter::CalSkillVelocity(float DashSpeed)
+{
+	if (DashSpeed <= 0) return FVector(0);
+	
+	FVector Velocity = DashSpeed * GetDashDirection();
+
+	if (GetCharacterMovement())
+	{
+		FVector MovementVelocity = GetCharacterMovement()->Velocity;
+		Velocity.X += MovementVelocity.X;
+		Velocity.Y += MovementVelocity.Y;
+		Velocity.Z += MovementVelocity.Z * 0.1;
+	}
+
+	Velocity *= GetEffectGameplayTag(TAG("AbilitySet.DashDistancePlusPercent")) + 1;
+
+	return Velocity;
+}
+
 void ABasePXCharacter::SetDead(bool V)
 {
 	bDead = V;

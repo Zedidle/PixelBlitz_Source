@@ -447,6 +447,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OutOfControl(float SustainTime);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector CalSkillVelocity(float DashSpeed);
 	
 #pragma region Animation
 	UFUNCTION(BlueprintCallable, Category = Movement)

@@ -271,8 +271,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	
 	AttributeSet = CreateDefaultSubobject<UPXEnemyAttributeSet>(TEXT("AttributeSetBase"));
 
-	AutoPossessAI(EAutoPossessAI::PlacedInWorldOrSpawned);
-	
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 }
 
