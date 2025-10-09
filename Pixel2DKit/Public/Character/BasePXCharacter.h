@@ -145,17 +145,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float VelocityRepelFactor = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float FightCameraOffsetSpeedFactor = 0.05;
-	UPROPERTY(BlueprintReadWrite)
-	FVector CurFightCameraOffset = FVector(0.0f);
-	UPROPERTY(BlueprintReadWrite)
-	FVector TargetFightCameraOffset = FVector(0.0f);
-	
-	UPROPERTY(BlueprintReadWrite)
-	FVector CurMoveCameraOffset = FVector(0.0f);
-	UPROPERTY(BlueprintReadWrite)
-	FVector RemMoveCameraOffset = FVector(0.0f);
 
 	FTimerHandle ScaleTimerHandle;
 	FTimerHandle AttackHitTimerHandle;
@@ -190,9 +179,13 @@ public:
 	virtual void Tick_SaveFallingStartTime();
 	virtual void Tick_SpriteRotation(); // 漂移式偏转
 	virtual void Tick_SpringArmMotivation();
-	virtual void Tick_CalCameraOffset();
 
-	TMap<FName, FVector> CameraOffsets;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float CameraOffsetSpeedFactor = 0.04;
+	
+	FVector CurCameraOffset;
+	TMap<FName, FVector> CameraOffsetMap;
 	UFUNCTION(BlueprintCallable)
 	void AddCameraOffset(FName OffsetName, FVector Offset);
 	
@@ -265,7 +258,9 @@ public:
 #pragma endregion
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
-	FVector FrontViewFactor = {0.1, 0.1, 0.05};
+	FVector FrontViewFactor = {0.5, 0.5, 0.1};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
+	FVector FollowViewFactor = {-0.2, -0.2, -0.1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
 	FVector SpringArmMotivationVelocityPowFactor = {1.0f, 1.0f, 1.0f};
 	
@@ -334,9 +329,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = View)
 	FVector GetVectorFaceToCamera();
-
-	UFUNCTION(BlueprintCallable, Category = View)
-	void AddCameraOffset(const FVector& V);
+	
 
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	int CurJumpCount = 0;

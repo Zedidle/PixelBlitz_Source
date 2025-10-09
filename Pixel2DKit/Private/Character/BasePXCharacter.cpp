@@ -46,6 +46,7 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "Utilitys/UserWidgetFuncLib.h"
@@ -285,46 +286,51 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	
 	float d = FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal());
-	bool CharacterMoveToCamera = d > 0;
 	
 	// 镜头偏转
 	float pitch = FMath::Clamp(d,-0.3, 0.5) * -15 + CurBlendPitch;
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
-	
-	switch (SettingsShared->GetCameraFollowMode())
-	{
-	case ECameraFollowMode::Preview: // 镜头前瞻
-		{
-			Velocity *= FrontViewFactor;
-			FVector Location = GetActorLocation() + Velocity;
-			// 偏移因子，如果玩家朝向镜头移动将会偏移得更多
-			float OffsetFactor = CharacterMoveToCamera ? 1 : 0.5;
 
-			FVector BlendOffset = CurMoveCameraOffset * CurSpringArmLength / 300 * OffsetFactor;
-			BlendOffset = FMath::Lerp(BlendOffset, CurFightCameraOffset, 0.5);
-			
-			SpringArm->SetWorldLocation(Location + BlendOffset);
-			break;
-		}
-	case  ECameraFollowMode::Behind: // 镜头跟随
+
+	// 镜头偏移
+	if (Velocity.Size() > 0)
+	{
+		switch (SettingsShared->GetCameraFollowMode())
 		{
-			SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.7) / 5.5 + 1;
-			FVector FightOffset = (CurMoveCameraOffset.IsNearlyZero(1) ? CurFightCameraOffset : CurMoveCameraOffset) * CurSpringArmLength / 280;
-			
-			SpringArm->SetWorldLocation(GetActorLocation() + FightOffset);
-			break;
+		case ECameraFollowMode::Preview: // 镜头前瞻
+			{
+				Velocity *= FrontViewFactor;
+				// 偏移因子，如果玩家朝向镜头移动将会偏移得更多 ? 
+				// 假设视角是90°
+				FVector Offset = Velocity.GetSafeNormal() * FMath::Min(Velocity.Size(), CurSpringArmLength / 2);
+				AddCameraOffset(FName("Move"), Offset);
+				break;
+			}
+		case  ECameraFollowMode::Behind: // 镜头跟随
+			{
+				SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.5) / 5 + 1;
+				Velocity *= FollowViewFactor;
+				AddCameraOffset(FName("Move"), Velocity);
+				break;
+			}
 		}
-	default:
-		{
-			break;
-		}
+	}
+	else
+	{
+		RemoveCameraOffset(FName("Move"));
 	}
 
 	TArray<FVector> OffsetValues;
-	CameraOffsets.GenerateValueArray(OffsetValues);
+	CameraOffsetMap.GenerateValueArray(OffsetValues);
+
+	FVector NewTargetCameraOffset;
+	UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset);
 	
+	CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, CameraOffsetSpeedFactor);
 	
+	SpringArm->SetWorldLocation(GetActorLocation() + CurCameraOffset);
+
 	
 	// 攻击命中导致的视野下降
 	if (AttackHitComboNum > 0)
@@ -338,42 +344,23 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	}
 }
 
-void ABasePXCharacter::Tick_CalCameraOffset()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
-	UWorld* World = GetWorld();
-	if (!IsValid(World)) return;
-
-	if (RemMoveCameraOffset.Size() > 0.1)
-	{
-		// 战斗镜头偏移速度，后续加到设置
-		float CameraOffsetSpeed = 2.5;
-		FVector DeltaMoveCameraOffset = RemMoveCameraOffset * World->GetDeltaSeconds() * CameraOffsetSpeed;
-		SpringArm->AddWorldOffset(DeltaMoveCameraOffset);
-		CurMoveCameraOffset += DeltaMoveCameraOffset;
-		RemMoveCameraOffset -= DeltaMoveCameraOffset;
-	}
-
-	CurFightCameraOffset = FMath::Lerp(CurFightCameraOffset, TargetFightCameraOffset, FightCameraOffsetSpeedFactor);
-}
-
 void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset)
 {
-	if (CameraOffsets.Contains(OffsetName))
+	if (CameraOffsetMap.Contains(OffsetName))
 	{
-		CameraOffsets[OffsetName] = Offset;
+		CameraOffsetMap[OffsetName] = Offset;
 	}
 	else
 	{
-		CameraOffsets.Add(OffsetName, Offset);
+		CameraOffsetMap.Add(OffsetName, Offset);
 	}
 }
 
 void ABasePXCharacter::RemoveCameraOffset(FName OffsetName)
 {
-	if (CameraOffsets.Contains(OffsetName))
+	if (CameraOffsetMap.Contains(OffsetName))
 	{
-		CameraOffsets.Remove(OffsetName);
+		CameraOffsetMap.Remove(OffsetName);
 	}
 }
 
@@ -703,10 +690,6 @@ FVector ABasePXCharacter::GetVectorFaceToCamera()
 	return FRotator(0, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
 }
 
-void ABasePXCharacter::AddCameraOffset(const FVector& V)
-{
-	RemMoveCameraOffset += V;
-}
 
 bool ABasePXCharacter::GetIsAttacking()
 {
@@ -731,21 +714,17 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	{
 		TempOffset = CameraOffset;
 	}
-	AddCameraOffset(TempOffset);
-	CameraOffsetForBulletTime += TempOffset;
+	AddCameraOffset(FName("BulletTime"), TempOffset);
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
 	UTimerSubsystemFuncLib::SetDelay(GetWorld(), 
 	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this), TempOffset]
 		{
-			if (WeakThis.IsValid())
-			{
-				WeakThis->AddCameraOffset(-TempOffset);
-				WeakThis->CameraOffsetForBulletTime -= TempOffset;
-				UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
-			}
-		}, SustainTime
-	);
+			if (!WeakThis.IsValid()) return;
+		
+			WeakThis->RemoveCameraOffset(FName("BulletTime"));
+			UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
+		}, SustainTime);
 }
 
 void ABasePXCharacter::OutOfControl(float SustainTime)
@@ -1164,7 +1143,6 @@ void ABasePXCharacter::Tick(float DeltaSeconds)
 	Tick_SaveFallingStartTime();
 	Tick_SpriteRotation();
 	Tick_SpringArmMotivation();
-	Tick_CalCameraOffset();
 	
 	if (IsValid(GetCharacterMovement()))
 	{

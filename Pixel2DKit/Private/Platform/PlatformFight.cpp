@@ -15,7 +15,7 @@ void APlatformFight::Tick(float DeltaTime)
 	
 	if (Enemies.IsEmpty())
 	{
-		PXCharacter->TargetFightCameraOffset = FVector::ZeroVector;
+		PXCharacter->RemoveCameraOffset(FName("PlatformFight"));
 		return;
 	}
 	int32 TmpNum = 0;
@@ -38,7 +38,7 @@ void APlatformFight::Tick(float DeltaTime)
 
 	if (TmpNum == 0)
 	{
-		PXCharacter->TargetFightCameraOffset = FVector::ZeroVector;
+		PXCharacter->RemoveCameraOffset(FName("PlatformFight"));
 		return;
 	}
 
@@ -49,8 +49,7 @@ void APlatformFight::Tick(float DeltaTime)
 	float DistanceCenterToPlayer = DirLength.Size();
 
 	float FightCameraOffsetPoint = FMath::Pow(DistanceCenterToPlayer, 0.8) / PXCharacter->CurSpringArmLength;
-	PXCharacter->TargetFightCameraOffset = FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint;
-
+	PXCharacter->AddCameraOffset(FName("PlatformFight"), FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint);
 	
 	// 设置镜头偏转
 	APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
@@ -108,8 +107,8 @@ void APlatformFight::FightEnd_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	
+	PXCharacter->RemoveCameraOffset(FName("PlatformFight"));
 
-	PXCharacter->TargetFightCameraOffset = FVector::ZeroVector;
 	PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::FightEnd);
 	PXCharacter = nullptr;
 

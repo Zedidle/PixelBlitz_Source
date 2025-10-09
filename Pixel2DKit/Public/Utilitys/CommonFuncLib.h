@@ -70,6 +70,11 @@ public:
 	static bool CalRandMap_Int(const TMap<int, int32>& M, int& Result);
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Math")
 	static bool CalRandMap_Vector2D(const TMap<FVector2D, int32>& M, FVector2D& Result);
+
+
+	template<typename T>
+	static bool CalAverageByArray(const TArray<T>& Array, T& Result);
+	
 };
 
 template <typename T>
@@ -96,4 +101,19 @@ bool UCommonFuncLib::CalRandomMap(const TMap<T, int32>& M, T& Result)
 		}
 	}
 	return false;
+}
+
+template <typename T>
+bool UCommonFuncLib::CalAverageByArray(const TArray<T>& Array, T& Result)
+{
+	if (Array.IsEmpty()) return false;
+	
+	T TmpValue;
+	for (const auto& Item : Array)
+	{
+		TmpValue += Item;
+	}
+
+	Result = TmpValue / Array.Num();
+	return true;
 }
