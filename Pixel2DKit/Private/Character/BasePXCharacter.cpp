@@ -325,10 +325,14 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	CameraOffsetMap.GenerateValueArray(OffsetValues);
 
 	FVector NewTargetCameraOffset;
-	UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset);
-	
-	CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, CameraOffsetSpeedFactor);
-	
+	if (UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset))
+	{
+		CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, CameraOffsetSpeedFactor);
+	}
+	else
+	{
+		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), CameraOffsetSpeedFactor);
+	}
 	SpringArm->SetWorldLocation(GetActorLocation() + CurCameraOffset);
 
 	
