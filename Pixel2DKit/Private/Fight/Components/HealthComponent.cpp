@@ -333,19 +333,21 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 		}
 		else
 		{
-			if (UNiagaraSystem* NS_HitBlood = ResourceDataAsset->NS_HitBlood.LoadSynchronous())
+			if (Maker)
 			{
-				UNiagaraComponent* NSEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood, Owner->GetActorLocation());
-				NSEffect->SetVariableVec3(FName("Dir"), (Owner->GetActorLocation() - Maker->GetActorLocation()).GetSafeNormal()) ;
+				if (UNiagaraSystem* NS_HitBlood = ResourceDataAsset->NS_HitBlood.LoadSynchronous())
+				{
+					UNiagaraComponent* NSEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_HitBlood, Owner->GetActorLocation());
+					NSEffect->SetVariableVec3(FName("Dir"), (Owner->GetActorLocation() - Maker->GetActorLocation()).GetSafeNormal()) ;
+				}
 			}
 		}
-		
 	}
 	
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
 }
 
-void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
+void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 {
 	if (InRockPercent > 0.0f)
 	{
@@ -355,7 +357,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Instigator)
 
 	if (bInvulnerable) return;
 
-	Repel = (1 - InRockPercent) * GetRepel(Repel, Instigator) * KnockBackMultiplier;
+	Repel = (1 - InRockPercent) * GetRepel(Repel, Maker) * KnockBackMultiplier;
 	
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())
 	{

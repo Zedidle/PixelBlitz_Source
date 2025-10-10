@@ -47,6 +47,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0));
 
+	UFUNCTION(BlueprintNativeEvent, Category=GameplayFlow)
+	void DissolvePreLevel(const FName& LevelName, FVector NewLevelLocation);
+	
 	// 尝试开始当前关卡
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void TryStartCurLevel();

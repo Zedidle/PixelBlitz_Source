@@ -99,10 +99,15 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 	{
 		CurLevelInstance->OnLevelLoaded.RemoveDynamic(this, &ThisClass::OnLevelLoaded);
 	}
-	
+
 	PreLevelName = CurLevelName;
 	CurLevelName = LevelName;
 
+	if (!PreLevelName.IsNone())
+	{
+		DissolvePreLevel(PreLevelName, StartLocation);
+	}
+	
 	IsLevelLoaded = false;
 	IsLevelStarted = false;
 	
@@ -115,6 +120,11 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 		CurLevelInstance = LoadedLevel;
 		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
 	}
+}
+
+void APXGameMode::DissolvePreLevel_Implementation(const FName& LevelName, FVector NewLevelLocation)
+{
+	
 }
 
 void APXGameMode::TryStartCurLevel()

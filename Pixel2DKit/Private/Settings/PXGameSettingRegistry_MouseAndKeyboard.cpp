@@ -60,24 +60,9 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
 			Setting->SetMinimumLimit(0.01);
 			
-
 			Sensitivity->AddSetting(Setting);
 		}
 
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
-			Setting->SetDevName(TEXT("InvertVerticalAxis"));
-			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Name", "垂直视角旋转反转"));
-			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Desc", "使用相反的垂直方向旋转."));
-
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertVerticalAxis));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis());
-
-			Sensitivity->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
 			Setting->SetDevName(TEXT("InvertHorizontalAxis"));
@@ -91,7 +76,19 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 
 			Sensitivity->AddSetting(Setting);
 		}
-		//----------------------------------------------------------------------------------
+		
+		{
+			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
+			Setting->SetDevName(TEXT("InvertVerticalAxis"));
+			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Name", "垂直视角旋转反转"));
+			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Desc", "使用相反的垂直方向旋转."));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertVerticalAxis));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis());
+
+			Sensitivity->AddSetting(Setting);
+		}
 	}
 	
 	{

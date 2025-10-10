@@ -1069,7 +1069,7 @@ void ABasePXCharacter::AddViewYaw(const FInputActionValue& Value)
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
 	
-	AddViewYaw( AxisValue, false);
+	AddViewYaw(AxisValue, false);
 }
 
 void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
@@ -1077,7 +1077,11 @@ void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 	if (bPlayerControl)
 	{
 		bViewYawChangingByPlayerControl = true;
-		AddBlendYaw(UCommonFuncLib::DealDeltaTime(V) * 1.6);
+		
+		AddBlendYaw(
+			GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis() *
+			UCommonFuncLib::DealDeltaTime(V) * GetDefault<UPXSettingsShared>()->GetViewPointSensitivityYaw());
+		
 		FName TimerName = FName(GetActorNameOrLabel() + "_AddViewYaw");
 		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 			[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
@@ -1101,8 +1105,11 @@ void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
+
+	float Pitch = FMath::Clamp(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis() *
+		UCommonFuncLib::DealDeltaTime(AxisValue) *
+		GetDefault<UPXSettingsShared>()->GetViewPointSensitivityPitch() + CurBlendPitch, -45, 15);
 	
-	float Pitch = FMath::Clamp(UCommonFuncLib::DealDeltaTime(AxisValue) * 1.6 + CurBlendPitch, -50, 20);
 	SetBlendPitch(Pitch);
 }
 

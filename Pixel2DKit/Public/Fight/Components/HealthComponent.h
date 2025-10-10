@@ -123,7 +123,7 @@ public:
 	virtual void IncreaseHP(int32 value, AActor* Instigator);
 	
 	UFUNCTION(BlueprintCallable, Category="HealthComponent | Movement")
-	void KnockBack(FVector Repel, AActor* Instigator);
+	void KnockBack(FVector Repel, AActor* Maker);
 
 	
 		
