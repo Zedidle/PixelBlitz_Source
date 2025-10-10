@@ -298,8 +298,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	if (Velocity.Size() > 0)
 	{
 		// 朝向 / 反向 摄像机的偏移削减比例
-		float DeOffsetPercent = FMath::GetMappedRangeValueClamped(
-			FVector2D{0.f, 1.0f}, {0.f, 0.3f}, FMath::Abs(Dot_VelocityToCamera));
+		float DeOffsetPercent = 0.3 * FMath::Abs(Dot_VelocityToCamera);
 		Velocity *= 1 - DeOffsetPercent;
 
 		switch (SettingsShared->GetCameraFollowMode())
