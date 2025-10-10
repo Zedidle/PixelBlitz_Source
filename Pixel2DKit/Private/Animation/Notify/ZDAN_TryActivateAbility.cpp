@@ -5,13 +5,12 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
+#include "PaperZDAnimInstance.h"
 #include "GAS/PXASComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 
-void UZDAN_TryActivateAbility::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDAN_TryActivateAbility::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnReceiveNotify_Implementation(OwningInstance);
-
 	if (!AbilityTag.IsValid()) return;
 	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance);

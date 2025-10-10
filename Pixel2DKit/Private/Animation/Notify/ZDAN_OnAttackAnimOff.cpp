@@ -5,11 +5,9 @@
 #include "Animation/BasePXAnimInstance.h"
 #include "Character/BasePXCharacter.h"
 #include "Enemy/BaseEnemy.h"
-#include "Subsystems/PXAnimSubsystem.h"
 
-void UZDAN_OnAttackAnimOff::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDAN_OnAttackAnimOff::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnReceiveNotify_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 
 	if (APaperZDCharacter* PaperZDCharacter = OwningInstance->GetPaperCharacter())

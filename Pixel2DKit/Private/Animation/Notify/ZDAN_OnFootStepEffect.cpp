@@ -7,6 +7,7 @@
 #include "PaperZDCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "NiagaraComponent.h"
+#include "PaperZDAnimInstance.h"
 #include "Core/PXGameState.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -16,9 +17,8 @@
 class UPXCustomSettings;
 class UNiagaraComponent;
 
-void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDAN_OnFootStepEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnReceiveNotify_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();

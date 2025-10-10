@@ -23,5 +23,5 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	USoundBase* Sound;
 	
-	virtual void OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance = nullptr) override;
+	void OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance = nullptr) const;
 };

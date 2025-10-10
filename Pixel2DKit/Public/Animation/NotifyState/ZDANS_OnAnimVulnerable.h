@@ -14,6 +14,7 @@ class PIXEL2DKIT_API UZDANS_OnAnimVulnerable : public UPaperZDAnimNotifyState
 {
 	GENERATED_BODY()
 public:
-	virtual void OnNotifyBegin_Implementation(UPaperZDAnimInstance* OwningInstance) override;
-	virtual void OnNotifyEnd_Implementation(UPaperZDAnimInstance* OwningInstance) override;
+
+	void OnNotifyBegin_Implementation(UPaperZDAnimInstance* OwningInstance) const;
+	void OnNotifyEnd_Implementation(UPaperZDAnimInstance* OwningInstance) const;
 };

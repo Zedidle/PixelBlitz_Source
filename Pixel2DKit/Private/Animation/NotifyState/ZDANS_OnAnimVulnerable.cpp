@@ -1,14 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Animation/NotifyState/ZDANS_OnAnimVulnerable.h"
-
+#include "PaperZDAnimInstance.h"
 #include "PaperZDCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 
-void UZDANS_OnAnimVulnerable::OnNotifyBegin_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDANS_OnAnimVulnerable::OnNotifyBegin_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnNotifyBegin_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 
 	if (APaperZDCharacter* PaperZDCharacter = OwningInstance->GetPaperCharacter())
@@ -20,9 +19,8 @@ void UZDANS_OnAnimVulnerable::OnNotifyBegin_Implementation(UPaperZDAnimInstance*
 	}
 }
 
-void UZDANS_OnAnimVulnerable::OnNotifyEnd_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDANS_OnAnimVulnerable::OnNotifyEnd_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnNotifyEnd_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 
 	if (APaperZDCharacter* PaperZDCharacter = OwningInstance->GetPaperCharacter())

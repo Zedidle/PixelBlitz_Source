@@ -3,13 +3,13 @@
 
 #include "Animation/Notify/ZDAN_OnSoundPlay.h"
 
+#include "PaperZDAnimInstance.h"
 #include "PaperZDCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Utilitys/SoundFuncLib.h"
 
-void UZDAN_OnSoundPlay::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDAN_OnSoundPlay::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnReceiveNotify_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Sound)
 	

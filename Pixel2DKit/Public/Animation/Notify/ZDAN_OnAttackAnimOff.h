@@ -16,5 +16,5 @@ class PIXEL2DKIT_API UZDAN_OnAttackAnimOff : public UPaperZDAnimNotify
 
 
 public:
-	virtual void OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance = nullptr) override;
+	void OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance = nullptr) const;
 };

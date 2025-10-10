@@ -2,15 +2,16 @@
 
 
 #include "Animation/Notify/ZDAN_OnRemoteAttackEffect.h"
+
+#include "PaperZDAnimInstance.h"
 #include "PaperZDCharacter.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 
 class UFight_Interface;
 
-void UZDAN_OnRemoteAttackEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance)
+void UZDAN_OnRemoteAttackEffect::OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance) const
 {
-	Super::OnReceiveNotify_Implementation(OwningInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningInstance)
 
 	if (APaperZDCharacter* PaperZDCharacter = OwningInstance->GetPaperCharacter())
