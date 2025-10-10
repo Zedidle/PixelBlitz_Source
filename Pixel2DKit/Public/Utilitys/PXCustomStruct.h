@@ -52,7 +52,7 @@ public:
 
 #pragma region EWeather
 UENUM(BlueprintType)
-enum EWeather : uint8
+enum class EWeather : uint8
 {
 	Overcast UMETA(DisplayName = "阴"),
 	Fog UMETA(DisplayName = "雾"),
@@ -78,7 +78,7 @@ enum class EStyleType : uint8
 
 #pragma region EAbilityQuality
 UENUM(BlueprintType)
-enum EAbilityQuality : uint8
+enum class EAbilityQuality : uint8
 {
 	Level1 UMETA(DisplayName = "白银"),
 	Level2 UMETA(DisplayName = "黄金"),
@@ -129,11 +129,11 @@ struct FAbility: public FTableRowBase
 
 	// 是否已经禁用
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	bool Enable;
+	bool Enable = true;
 
 	// 是否默认未解锁
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	bool DefaultLock;
+	bool DefaultLock = false;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FGameplayTag AbilityTag;
@@ -152,7 +152,7 @@ struct FAbility: public FTableRowBase
 
 	// 技能品阶
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	TEnumAsByte<EAbilityQuality> AbilityQuality;
+	EAbilityQuality AbilityQuality = EAbilityQuality::Level1;
 
 	// 唯一的技能的前一级，学习后会替换
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
@@ -189,10 +189,10 @@ struct FBuffValueEffect
 	FBuffValueEffect(float Percent, float Value): EffectedPercent(Percent), EffectedValue(Value){}
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedPercent;
+	float EffectedPercent = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedValue;
+	float EffectedValue = 0.0f;
 
 };
 
@@ -208,50 +208,50 @@ struct FCharacterAttribute
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float SpringArmLengthSight;
+	float SpringArmLengthSight = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int MaxHP;
+	int MaxHP = 0;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int MaxEP;
+	int MaxEP = 0;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int BasicAttackValue;
+	int BasicAttackValue = 0;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int BasicRepelValue;
+	int BasicRepelValue = 0;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float MaxWalkSpeed;
+	float MaxWalkSpeed = 0.0f;
 
 	// 技能的快速移动速度
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float BasicDashSpeed;
+	float BasicDashSpeed = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float MaxAcceleration;
+	float MaxAcceleration = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float JumpZVelocity;
+	float JumpZVelocity = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float GravityScale;
+	float GravityScale = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float BasicAirControl;
+	float BasicAirControl = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float RepelResistPercent;
+	float RepelResistPercent = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	int32 BasicMaxJumpCount;
+	int32 BasicMaxJumpCount = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	float BasicJumpMaxHoldTime;
+	float BasicJumpMaxHoldTime = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	float BasicAttackInterval;
+	float BasicAttackInterval = 0.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -276,7 +276,7 @@ struct FCharacterData : public FTableRowBase
 
 	// 是否可用
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
-	bool Enable;
+	bool Enable = true;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterData")
 	FText CharacterName;
@@ -315,10 +315,10 @@ struct FBuffOnWidget : public FTableRowBase
 	FGameplayTag Tag;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
-	FLinearColor Color;
+	FLinearColor Color = FLinearColor::White;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="BuffOnWidget")
-	bool Permanent;
+	bool Permanent = false;
 	
 };
 
@@ -332,7 +332,7 @@ struct FTalent: public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
-	bool DefaultLock;
+	bool DefaultLock = false;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	FGameplayTag TalentTag;
@@ -438,9 +438,10 @@ USTRUCT(BlueprintType)
 struct FNPCDialogues : public FTableRowBase
 {
 	GENERATED_BODY()
-	
+
+	// 一秒10个字符
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	float TalkSpeed;
+	float TalkSpeed = 0.1f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	FText FirstTalk;

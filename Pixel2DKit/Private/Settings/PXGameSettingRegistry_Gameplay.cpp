@@ -16,7 +16,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("GameplayCollection"));
-	Screen->SetDisplayName(LOCTEXT("GameplayCollection_Name", "游戏内容"));
+	Screen->SetDisplayName(LOCTEXT("GameplayCollection_Name", "游戏"));
 	Screen->Initialize(InLocalPlayer);
 
 	{

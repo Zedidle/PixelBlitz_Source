@@ -99,6 +99,7 @@ void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
 	if (Enemies.IsEmpty())
 	{
 		FightEnd();
+		SetActorEnableCollision(false);
 	}
 
 }
@@ -159,6 +160,9 @@ bool APlatformFight::ActivateFight_Implementation(bool bActivate)
 void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
+
+	if (Enemies.IsEmpty()) return;
+	
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
 	{
 		SetActorTickEnabled(true);

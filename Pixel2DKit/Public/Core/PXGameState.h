@@ -39,7 +39,7 @@ struct FWeather: public FTableRowBase
 	FText WeatherName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	TEnumAsByte<EWeather> WeatherType;
+	EWeather WeatherType = EWeather::Sunny;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
 	UPrimaryDataAsset* WeatherSetting;
@@ -86,7 +86,7 @@ public:
 	FText WeatherName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather")
-	TEnumAsByte<EWeather> WeatherType;
+	EWeather WeatherType;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
 	FWeatherEffectData WeatherEffect;

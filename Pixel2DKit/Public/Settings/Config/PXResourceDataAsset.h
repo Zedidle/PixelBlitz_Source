@@ -8,10 +8,7 @@
 
 class APlayerRespawnPoint;
 class UNiagaraSystem;
-enum EWeather : uint8;
-/**
- * 
- */
+
 UCLASS(BlueprintType)
 class PIXEL2DKIT_API UPXResourceDataAsset : public UDataAsset
 {

@@ -61,7 +61,7 @@ void UPXSettingValueDiscreteDynamic_AudioOutputDevice::OnAudioOutputDevicesObtai
 		}
 	}
 
-	OptionDisplayTexts[0] = FText::Format(LOCTEXT("DefaultAudioOutputDevice", "Default Output - {0}"), FText::FromString(SystemDefaultDeviceName));
+	OptionDisplayTexts[0] = FText::Format(LOCTEXT("DefaultAudioOutputDevice", "默认输出 - {0}"), FText::FromString(SystemDefaultDeviceName));
 	SetDefaultValueFromString(TEXT(""));
 	RefreshEditableState();
 

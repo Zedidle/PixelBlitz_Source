@@ -26,43 +26,43 @@ struct FEnemyData : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 Level;
+	int32 Level = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 HP;
+	int32 HP = 20;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float BodyScale;
+	float BodyScale = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 AttackDamage;
+	int32 AttackDamage = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float AttackInterval;
+	float AttackInterval = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float MoveSpeed;
+	float MoveSpeed = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float MoveAcceleration;
+	float MoveAcceleration = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 LookDeterrence;
+	int32 LookDeterrence = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 AttackComplexity;
+	int32 AttackComplexity = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FVector AttackKnockbackForce;
+	FVector AttackKnockbackForce = FVector(200, 100, 50);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FVector RepelResistance;
+	FVector RepelResistance = FVector(20);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float SightRadius;
+	float SightRadius = 300.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float LostEnemyTime;
+	float LostEnemyTime = 5.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	TMap<FName, int> DropID_Rate;

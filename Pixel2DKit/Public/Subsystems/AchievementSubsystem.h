@@ -35,10 +35,10 @@ struct FAchievement: public FTableRowBase
 	FText AchievementDesc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
-	EAchievementType Type;
+	EAchievementType Type = EAchievementType::Usual;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
-	int CompleteNum; 
+	int CompleteNum = 0;
 };
 
 UCLASS()
