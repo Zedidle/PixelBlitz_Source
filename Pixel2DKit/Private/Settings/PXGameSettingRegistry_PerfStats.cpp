@@ -20,8 +20,8 @@ void UPXGameSettingRegistry::AddPerformanceStatPage(UGameSettingCollection* Perf
 
 		UGameSettingCollectionPage* StatsPage = NewObject<UGameSettingCollectionPage>();
 		StatsPage->SetDevName(TEXT("PerfStatsPage"));
-		StatsPage->SetDisplayName(LOCTEXT("PerfStatsPage_Name", "Performance Stats"));
-		StatsPage->SetDescriptionRichText(LOCTEXT("PerfStatsPage_Description", "Configure the display of performance statistics."));
+		StatsPage->SetDisplayName(LOCTEXT("PerfStatsPage_Name", "性能统计"));
+		StatsPage->SetDescriptionRichText(LOCTEXT("PerfStatsPage_Description", "显示配置性能统计信息"));
 		StatsPage->SetNavigationText(LOCTEXT("PerfStatsPage_Navigation", "Edit"));
 
 		StatsPage->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -33,71 +33,71 @@ void UPXGameSettingRegistry::AddPerformanceStatPage(UGameSettingCollection* Perf
 		{
 			UGameSettingCollection* StatCategory_Performance = NewObject<UGameSettingCollection>();
 			StatCategory_Performance->SetDevName(TEXT("StatCategory_Performance"));
-			StatCategory_Performance->SetDisplayName(LOCTEXT("StatCategory_Performance_Name", "Performance"));
+			StatCategory_Performance->SetDisplayName(LOCTEXT("StatCategory_Performance_Name", "性能"));
 			StatsPage->AddSetting(StatCategory_Performance);
 
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::ClientFPS);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_ClientFPS", "Client FPS"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_ClientFPS", "Client frame rate (higher is better)"));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_ClientFPS", "客户端帧率"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_ClientFPS", "本地设备每秒渲染的画面帧数，直接影响游戏流畅度（越高越好）。"));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::ServerFPS);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_ServerFPS", "Server FPS"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_ServerFPS", "Server frame rate"));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_ServerFPS", "服务端帧率"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_ServerFPS", "服务器每秒更新和同步游戏状态的次数，影响多人在线游戏的实时性和同步效果"));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::FrameTime);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime", "Frame Time"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime", "The total frame time."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime", "帧时"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime", "完成一整帧画面所有处理所花费的总时间."));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::IdleTime);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_IdleTime", "Idle Time"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_IdleTime", "The amount of time spent waiting idle for frame pacing."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_IdleTime", "空闲时间"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_IdleTime", "用于帧调度的空闲等待时间."));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::FrameTime_GameThread);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_GameThread", "CPU Game Time"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_GameThread", "The amount of time spent on the main game thread."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_GameThread", "CPU游戏线程时间"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_GameThread", "主游戏线程耗时."));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::FrameTime_RenderThread);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_RenderThread", "CPU Render Time"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_RenderThread", "The amount of time spent on the rendering thread."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_RenderThread", "CPU渲染线程时间"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_RenderThread", "渲染线程耗时."));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::FrameTime_RHIThread);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_RHIThread", "CPU RHI Time"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_RHIThread", "The amount of time spent on the Render Hardware Interface thread."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_RHIThread", "CPU RHI 时间"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_RHIThread", "CPU RHI（渲染硬件接口）线程时间."));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::FrameTime_GPU);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_GPU", "GPU Render Time"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_GPU", "The amount of time spent on the GPU."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_FrameTime_GPU", "GPU 耗时"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_FrameTime_GPU", "GPU 渲染耗时."));
 				StatCategory_Performance->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
@@ -108,63 +108,63 @@ void UPXGameSettingRegistry::AddPerformanceStatPage(UGameSettingCollection* Perf
 		{
 			UGameSettingCollection* StatCategory_Network = NewObject<UGameSettingCollection>();
 			StatCategory_Network->SetDevName(TEXT("StatCategory_Network"));
-			StatCategory_Network->SetDisplayName(LOCTEXT("StatCategory_Network_Name", "Network"));
+			StatCategory_Network->SetDisplayName(LOCTEXT("StatCategory_Network_Name", "网络"));
 			StatsPage->AddSetting(StatCategory_Network);
 
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::Ping);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_Ping", "Ping"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_Ping", "The roundtrip latency of your connection to the server."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_Ping", "延迟"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_Ping", "您连接到服务器的往返延迟。"));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::PacketLoss_Incoming);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketLoss_Incoming", "Incoming Packet Loss"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketLoss_Incoming", "The percentage of incoming packets lost."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketLoss_Incoming", "收包丢失率"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketLoss_Incoming", "接收数据包的丢失率"));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::PacketLoss_Outgoing);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketLoss_Outgoing", "Outgoing Packet Loss"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketLoss_Outgoing", "The percentage of outgoing packets lost."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketLoss_Outgoing", "发包丢失率"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketLoss_Outgoing", "发送数据包的丢失率"));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::PacketRate_Incoming);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketRate_Incoming", "Incoming Packet Rate"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketRate_Incoming", "Rate of incoming packets (per second)"));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketRate_Incoming", "入包率"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketRate_Incoming", "传入数据包速率（每秒）"));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::PacketRate_Outgoing);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketRate_Outgoing", "Outgoing Packet Rate"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketRate_Outgoing", "Rate of outgoing packets (per second)"));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketRate_Outgoing", "出包率"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketRate_Outgoing", "发送数据包速率（每秒）"));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::PacketSize_Incoming);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketSize_Incoming", "Incoming Packet Size"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketSize_Incoming", "The average size (in bytes) of packets recieved in the last second."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketSize_Incoming", "收包大小"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketSize_Incoming", "上一秒接收数据包的平均大小（字节）."));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------
 			{
 				UPXSettingValueDiscrete_PerfStat* Setting = NewObject<UPXSettingValueDiscrete_PerfStat>();
 				Setting->SetStat(EPXDisplayablePerformanceStat::PacketSize_Outgoing);
-				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketSize_Outgoing", "Outgoing Packet Size"));
-				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketSize_Outgoing", "The average size (in bytes) of packets sent in the last second."));
+				Setting->SetDisplayName(LOCTEXT("PerfStat_PacketSize_Outgoing", "发包大小"));
+				Setting->SetDescriptionRichText(LOCTEXT("PerfStatDescription_PacketSize_Outgoing", "上一秒发送数据包的平均大小（字节）."));
 				StatCategory_Network->AddSetting(Setting);
 			}
 			//----------------------------------------------------------------------------------

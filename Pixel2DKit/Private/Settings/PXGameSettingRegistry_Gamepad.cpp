@@ -20,7 +20,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("GamepadCollection"));
-	Screen->SetDisplayName(LOCTEXT("GamepadCollection_Name", "Gamepad"));
+	Screen->SetDisplayName(LOCTEXT("GamepadCollection_Name", "手柄"));
 	Screen->Initialize(InLocalPlayer);
 
 	// Hardware
@@ -28,15 +28,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 	{
 		UGameSettingCollection* Hardware = NewObject<UGameSettingCollection>();
 		Hardware->SetDevName(TEXT("HardwareCollection"));
-		Hardware->SetDisplayName(LOCTEXT("HardwareCollection_Name", "Hardware"));
+		Hardware->SetDisplayName(LOCTEXT("HardwareCollection_Name", "设备"));
 		Screen->AddSetting(Hardware);
 			
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic* Setting = NewObject<UGameSettingValueDiscreteDynamic>();
 			Setting->SetDevName(TEXT("ControllerHardware"));
-			Setting->SetDisplayName(LOCTEXT("ControllerHardware_Name", "Controller Hardware"));
-			Setting->SetDescriptionRichText(LOCTEXT("ControllerHardware_Description", "The type of controller you're using."));
+			Setting->SetDisplayName(LOCTEXT("ControllerHardware_Name", "控制器设备"));
+			Setting->SetDescriptionRichText(LOCTEXT("ControllerHardware_Description", "你正在使用的控制器类型"));
 			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetControllerPlatform));
 			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetControllerPlatform));
 			
@@ -77,8 +77,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
 			Setting->SetDevName(TEXT("GamepadVibration"));
-			Setting->SetDisplayName(LOCTEXT("GamepadVibration_Name", "Vibration"));
-			Setting->SetDescriptionRichText(LOCTEXT("GamepadVibration_Description", "Turns controller vibration on/off."));
+			Setting->SetDisplayName(LOCTEXT("GamepadVibration_Name", "震动"));
+			Setting->SetDescriptionRichText(LOCTEXT("GamepadVibration_Description", "手柄震动开关"));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetForceFeedbackEnabled));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetForceFeedbackEnabled));
@@ -90,8 +90,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
 			Setting->SetDevName(TEXT("InvertVerticalAxis_Gamepad"));
-			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Gamepad_Name", "Invert Vertical Axis"));
-			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Gamepad_Description", "Enable the inversion of the vertical look axis."));
+			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Gamepad_Name", "反转垂直旋转"));
+			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Gamepad_Description", "是否反转垂直方向上的视角旋转"));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertVerticalAxis));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis));
@@ -103,8 +103,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 		{
 			UGameSettingValueDiscreteDynamic_Bool* Setting = NewObject<UGameSettingValueDiscreteDynamic_Bool>();
 			Setting->SetDevName(TEXT("InvertHorizontalAxis_Gamepad"));
-			Setting->SetDisplayName(LOCTEXT("InvertHorizontalAxis_Gamepad_Name", "Invert Horizontal Axis"));
-			Setting->SetDescriptionRichText(LOCTEXT("InvertHorizontalAxis_Gamepad_Description", "Enable the inversion of the Horizontal look axis."));
+			Setting->SetDisplayName(LOCTEXT("InvertHorizontalAxis_Gamepad_Name", "反转水平旋转"));
+			Setting->SetDescriptionRichText(LOCTEXT("InvertHorizontalAxis_Gamepad_Description", "是否反转水平方向上的视角旋转."));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertHorizontalAxis));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertHorizontalAxis));
@@ -119,7 +119,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 	{
 		UGameSettingCollection* GamepadBinding = NewObject<UGameSettingCollection>();
 		GamepadBinding->SetDevName(TEXT("GamepadBindingCollection"));
-		GamepadBinding->SetDisplayName(LOCTEXT("GamepadBindingCollection_Name", "Controls"));
+		GamepadBinding->SetDisplayName(LOCTEXT("GamepadBindingCollection_Name", "控制设置"));
 		Screen->AddSetting(GamepadBinding);
 	}
 
@@ -128,29 +128,29 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 	{
 		UGameSettingCollection* BasicSensitivity = NewObject<UGameSettingCollection>();
 		BasicSensitivity->SetDevName(TEXT("BasicSensitivityCollection"));
-		BasicSensitivity->SetDisplayName(LOCTEXT("BasicSensitivityCollection_Name", "Sensitivity"));
+		BasicSensitivity->SetDisplayName(LOCTEXT("BasicSensitivityCollection_Name", "灵敏度"));
 		Screen->AddSetting(BasicSensitivity);
 
 		const FText EGamepadSensitivityText[] = {
 			FText::GetEmpty(),
-			LOCTEXT("EFortGamepadSensitivity_Slow", "1 (Slow)"),
-			LOCTEXT("EFortGamepadSensitivity_SlowPlus", "2 (Slow+)"),
-			LOCTEXT("EFortGamepadSensitivity_SlowPlusPlus", "3 (Slow++)"),
-			LOCTEXT("EFortGamepadSensitivity_Normal", "4 (Normal)"),
-			LOCTEXT("EFortGamepadSensitivity_NormalPlus", "5 (Normal+)"),
-			LOCTEXT("EFortGamepadSensitivity_NormalPlusPlus", "6 (Normal++)"),
-			LOCTEXT("EFortGamepadSensitivity_Fast", "7 (Fast)"),
-			LOCTEXT("EFortGamepadSensitivity_FastPlus", "8 (Fast+)"),
-			LOCTEXT("EFortGamepadSensitivity_FastPlusPlus", "9 (Fast++)"),
-			LOCTEXT("EFortGamepadSensitivity_Insane", "10 (Insane)"),
+			LOCTEXT("EFortGamepadSensitivity_Slow", "1 (慢)"),
+			LOCTEXT("EFortGamepadSensitivity_SlowPlus", "2 (慢+)"),
+			LOCTEXT("EFortGamepadSensitivity_SlowPlusPlus", "3 (慢++)"),
+			LOCTEXT("EFortGamepadSensitivity_Normal", "4 (正常)"),
+			LOCTEXT("EFortGamepadSensitivity_NormalPlus", "5 (正常+)"),
+			LOCTEXT("EFortGamepadSensitivity_NormalPlusPlus", "6 (正常++)"),
+			LOCTEXT("EFortGamepadSensitivity_Fast", "7 (快)"),
+			LOCTEXT("EFortGamepadSensitivity_FastPlus", "8 (快+)"),
+			LOCTEXT("EFortGamepadSensitivity_FastPlusPlus", "9 (快++)"),
+			LOCTEXT("EFortGamepadSensitivity_Insane", "10 (非常快)"),
 		};
 		
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
 			Setting->SetDevName(TEXT("LookSensitivityPreset"));
-			Setting->SetDisplayName(LOCTEXT("LookSensitivityPreset_Name", "Look Sensitivity"));
-			Setting->SetDescriptionRichText(LOCTEXT("LookSensitivityPreset_Description", "How quickly your view rotates."));
+			Setting->SetDisplayName(LOCTEXT("LookSensitivityPreset_Name", "视角灵敏度"));
+			Setting->SetDescriptionRichText(LOCTEXT("LookSensitivityPreset_Description", "视角的旋转速度"));
 			
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadLookSensitivityPreset));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetLookSensitivityPreset));
@@ -163,25 +163,6 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 			
 			BasicSensitivity->AddSetting(Setting);
 		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-			Setting->SetDevName(TEXT("LookSensitivityPresetAds"));
-			Setting->SetDisplayName(LOCTEXT("LookSensitivityPresetAds_Name", "Aim Sensitivity (ADS)"));
-			Setting->SetDescriptionRichText(LOCTEXT("LookSensitivityPresetAds_Description", "How quickly your view rotates while aiming down sights (ADS)."));
-			
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadTargetingSensitivityPreset));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadTargetingSensitivityPreset));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetGamepadTargetingSensitivityPreset());
-
-			for (int32 PresetIndex = 1; PresetIndex < (int32)EPXGamepadSensitivity::MAX; PresetIndex++)
-			{
-				Setting->AddEnumOption(static_cast<EPXGamepadSensitivity>(PresetIndex), EGamepadSensitivityText[PresetIndex]);
-			}
-
-			BasicSensitivity->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
 	}
 
 	// Dead Zone
@@ -189,15 +170,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 	{
 		UGameSettingCollection* DeadZone = NewObject<UGameSettingCollection>();
 		DeadZone->SetDevName(TEXT("DeadZoneCollection"));
-		DeadZone->SetDisplayName(LOCTEXT("DeadZoneCollection_Name", "Controller DeadZone"));
+		DeadZone->SetDisplayName(LOCTEXT("DeadZoneCollection_Name", "控制器死区"));
 		Screen->AddSetting(DeadZone);
 
 		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
 			Setting->SetDevName(TEXT("MoveStickDeadZone"));
-			Setting->SetDisplayName(LOCTEXT("MoveStickDeadZone_Name", "Left Stick DeadZone"));
-			Setting->SetDescriptionRichText(LOCTEXT("MoveStickDeadZone_Description", "Increase or decrease the area surrounding the stick that we ignore input from.  Setting this value too low may result in the character continuing to move even after removing your finger from the stick."));
+			Setting->SetDisplayName(LOCTEXT("MoveStickDeadZone_Name", "左摇杆死区"));
+			Setting->SetDescriptionRichText(LOCTEXT("MoveStickDeadZone_Description", "增加或减小摇杆周围不会识别输入的区域范围。若将该数值设置得过低，可能导致手指离开摇杆后角色仍持续移动。"));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadMoveStickDeadZone));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadMoveStickDeadZone));
@@ -212,8 +193,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 		{
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
 			Setting->SetDevName(TEXT("LookStickDeadZone"));
-			Setting->SetDisplayName(LOCTEXT("LookStickDeadZone_Name", "Right Stick DeadZone"));
-			Setting->SetDescriptionRichText(LOCTEXT("LookStickDeadZone_Description", "Increase or decrease the area surrounding the stick that we ignore input from.  Setting this value too low may result in the camera continuing to move even after removing your finger from the stick."));
+			Setting->SetDisplayName(LOCTEXT("LookStickDeadZone_Name", "右摇杆死区"));
+			Setting->SetDescriptionRichText(LOCTEXT("LookStickDeadZone_Description", "调整摇杆周围不被识别输入的死区范围。若将该值设置得过低，可能导致手指离开摇杆后相机视角仍继续移动。"));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadLookStickDeadZone));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadLookStickDeadZone));

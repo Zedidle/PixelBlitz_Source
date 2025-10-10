@@ -9,6 +9,7 @@
 #include "Engine/DataAsset.h"
 #include "EnemyDataAsset.generated.h"
 
+class USoundCue;
 
 UCLASS(Blueprintable)
 class PIXEL2DKIT_API UEnemyDataAsset : public UDataAsset

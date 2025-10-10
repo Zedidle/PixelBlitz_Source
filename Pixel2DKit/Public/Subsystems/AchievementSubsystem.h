@@ -35,7 +35,7 @@ struct FAchievement: public FTableRowBase
 	FText AchievementDesc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
-	TEnumAsByte<EAchievementType> Type;
+	EAchievementType Type;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievement")
 	int CompleteNum; 

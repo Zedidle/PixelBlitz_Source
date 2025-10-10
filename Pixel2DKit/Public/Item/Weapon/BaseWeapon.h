@@ -56,9 +56,9 @@ inline int ABaseWeapon::GetWeaponDamage() const
 inline void ABaseWeapon::Use_Implementation()
 {
 	Super::Use_Implementation();
-	if (USoundCue* SoundCue = Data.UseSound.LoadSynchronous())
+	if (USoundCue* UseSound = Data.UseSound.LoadSynchronous())
 	{
-		USoundFuncLib::PlaySoundAtLocation(SoundCue, GetActorLocation());
+		USoundFuncLib::PlaySoundAtLocation(UseSound, GetActorLocation());
 	}
 
 	if (Data.UseCameraShake)

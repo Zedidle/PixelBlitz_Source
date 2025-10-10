@@ -4,7 +4,6 @@
 #include "Settings/CustomSettings/PXSettingValueDiscrete_MobileFPSType.h"
 #include "Settings/CustomSettings/PXSettingValueDiscrete_OverallQuality.h"
 #include "Settings/CustomSettings/PXSettingValueDiscrete_Resolution.h"
-#include "DataSource/GameSettingDataSource.h"
 #include "EditCondition/WhenCondition.h"
 #include "EditCondition/WhenPlatformHasTrait.h"
 #include "EditCondition/WhenPlayingAsPrimaryPlayer.h"

@@ -46,8 +46,8 @@ void UPXSettingValueDiscrete_Language::OnApply()
 	{
 		Messaging->ShowConfirmation(
 			UCommonGameDialogDescriptor::CreateConfirmationOk(
-			LOCTEXT("WarningLanguage_Title", "Language Changed"),
-			LOCTEXT("WarningLanguage_Message", "You will need to restart the game completely for all language related changes to take effect.")
+			LOCTEXT("WarningLanguage_Title", "切换语言"),
+			LOCTEXT("WarningLanguage_Message", "您需要完全重启游戏才能使所有与语言相关的更改生效。")
 			)
 		);
 	}
@@ -141,7 +141,7 @@ TArray<FText> UPXSettingValueDiscrete_Language::GetDiscreteOptions() const
 			if (ensure(SystemDefaultCulture))
 			{
 				const FString& DefaultCultureDisplayName = SystemDefaultCulture->GetDisplayName();
-				FText LocalizedSystemDefault = FText::Format(LOCTEXT("SystemDefaultLanguage", "System Default ({0})"), FText::FromString(DefaultCultureDisplayName));
+				FText LocalizedSystemDefault = FText::Format(LOCTEXT("SystemDefaultLanguage", "系统默认 ({0})"), FText::FromString(DefaultCultureDisplayName));
 
 				Options.Add(MoveTemp(LocalizedSystemDefault));
 			}

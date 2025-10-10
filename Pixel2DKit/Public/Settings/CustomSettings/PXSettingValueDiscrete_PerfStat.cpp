@@ -81,10 +81,10 @@ void UPXSettingValueDiscrete_PerfStat::OnInitialized()
 {
 	Super::OnInitialized();
 
-	AddMode(LOCTEXT("PerfStatDisplayMode_None", "None"), EPXStatDisplayMode::Hidden);
-	AddMode(LOCTEXT("PerfStatDisplayMode_TextOnly", "Text Only"), EPXStatDisplayMode::TextOnly);
-	AddMode(LOCTEXT("PerfStatDisplayMode_GraphOnly", "Graph Only"), EPXStatDisplayMode::GraphOnly);
-	AddMode(LOCTEXT("PerfStatDisplayMode_TextAndGraph", "Text and Graph"), EPXStatDisplayMode::TextAndGraph);
+	AddMode(LOCTEXT("PerfStatDisplayMode_None", "无"), EPXStatDisplayMode::Hidden);
+	AddMode(LOCTEXT("PerfStatDisplayMode_TextOnly", "只有文本"), EPXStatDisplayMode::TextOnly);
+	AddMode(LOCTEXT("PerfStatDisplayMode_GraphOnly", "只有图形"), EPXStatDisplayMode::GraphOnly);
+	AddMode(LOCTEXT("PerfStatDisplayMode_TextAndGraph", "图形和文本"), EPXStatDisplayMode::TextAndGraph);
 }
 
 void UPXSettingValueDiscrete_PerfStat::StoreInitial()

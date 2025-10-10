@@ -38,7 +38,6 @@ public class Pixel2DKit : ModuleRules
 			"EnhancedInput",
 			"PaperZD", "Paper2D",
 			"NavigationSystem",
-			"UMGEditor", 
 			"GameplayAbilities",
 			"ModularGameplay",
 			"ModularGameplayActors", 
@@ -75,7 +74,9 @@ public class Pixel2DKit : ModuleRules
 		PrivateDependencyModuleNames.Add("OnlineSubsystemSteam");
 		PrivateDependencyModuleNames.AddRange( new string[]
 		{
-			"QuicMessagingTransport", "NiagaraEditor", "QuicMessagingTransport", "LidarPointCloudRuntime", "OpenSubdiv"
+			"QuicMessagingTransport", 
+			"LidarPointCloudRuntime", 
+			"OpenSubdiv"
 		});
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true

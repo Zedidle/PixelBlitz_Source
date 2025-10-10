@@ -28,12 +28,12 @@ void UPXSettingValueDiscrete_OverallQuality::OnInitialized()
 	AddOptionIfPossible(3, LOCTEXT("VideoQualityOverall_Epic", "最高"));
 
 	OptionsWithCustom = Options;
-	OptionsWithCustom.Add(LOCTEXT("VideoQualityOverall_Custom", "Custom"));
+	OptionsWithCustom.Add(LOCTEXT("VideoQualityOverall_Custom", "自定义"));
 
 	const int32 LowestQualityWithFrameRateLimit = UserSettings->GetLowestQualityWithFrameRateLimit();
 	if (Options.IsValidIndex(LowestQualityWithFrameRateLimit))
-	{
-		SetWarningRichText(FText::Format(LOCTEXT("OverallQuality_Mobile_ImpactsFramerate", "<strong>Note: Changing the Quality setting to {0} or higher might limit your framerate.</>"), Options[LowestQualityWithFrameRateLimit]));
+	{                                       
+		SetWarningRichText(FText::Format(LOCTEXT("OverallQuality_Mobile_ImpactsFramerate", "<strong>注意：将画质设置调整为 {0} 或更高可能会限制您的帧率。</>"), Options[LowestQualityWithFrameRateLimit]));
 	}
 }
 

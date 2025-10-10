@@ -132,8 +132,9 @@ void UBuffComponent::BeginPlay()
 	UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckBuffEnd, this, &UBuffComponent::CheckBuffExpire, 0.1, true);
 }
 
-void UBuffComponent::EndPlay()
+void UBuffComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	Super::EndPlay(EndPlayReason);
 	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckBuffEnd);
 	if (BuffStateWidget)
 	{

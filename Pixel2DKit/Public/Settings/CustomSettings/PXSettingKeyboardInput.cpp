@@ -17,7 +17,7 @@ class ULocalPlayer;
 
 namespace PX::ErrorMessages
 {
-	static const FText UnknownMappingName = LOCTEXT("PXErrors_UnknownMappingName", "Unknown Mapping");
+	static const FText UnknownMappingName = LOCTEXT("PXErrors_UnknownMappingName", "未知映射");
 }
 
 

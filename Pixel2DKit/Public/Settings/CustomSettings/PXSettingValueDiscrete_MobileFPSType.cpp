@@ -31,7 +31,7 @@ void UPXSettingValueDiscrete_MobileFPSType::OnInitialized()
 	const int32 FirstFrameRateWithQualityLimit = UserSettings->GetFirstFrameRateWithQualityLimit();
 	if (FirstFrameRateWithQualityLimit > 0)
 	{
-		SetWarningRichText(FText::Format(LOCTEXT("MobileFPSType_Note", "<strong>Note: Changing the framerate setting to {0} or higher might lower your Quality Presets.</>"), MakeLimitString(FirstFrameRateWithQualityLimit)));
+		SetWarningRichText(FText::Format(LOCTEXT("MobileFPSType_Note", "<strong>注意：将帧率设置调整为 {0} 或更高可能会降低您的画质预设等级.</>"), MakeLimitString(FirstFrameRateWithQualityLimit)));
 	}
 }
 

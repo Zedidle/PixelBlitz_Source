@@ -17,8 +17,8 @@ UPXSettingAction_SafeZoneEditor::UPXSettingAction_SafeZoneEditor()
 {
 	SafeZoneValueSetting = NewObject<UPXSettingValueScalarDynamic_SafeZoneValue>();
 	SafeZoneValueSetting->SetDevName(TEXT("SafeZoneValue"));
-	SafeZoneValueSetting->SetDisplayName(LOCTEXT("SafeZoneValue_Name", "Safe Zone Value"));
-	SafeZoneValueSetting->SetDescriptionRichText(LOCTEXT("SafeZoneValue_Description", "The safezone area percentage."));
+	SafeZoneValueSetting->SetDisplayName(LOCTEXT("SafeZoneValue_Name", "安全区域值"));
+	SafeZoneValueSetting->SetDescriptionRichText(LOCTEXT("SafeZoneValue_Description", "安全区域的范围百分比."));
 	SafeZoneValueSetting->SetDefaultValue(0.0f);
 	SafeZoneValueSetting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSafeZone));
 	SafeZoneValueSetting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSafeZone));

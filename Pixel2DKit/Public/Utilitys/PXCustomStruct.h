@@ -9,7 +9,7 @@
 #include "Fight/Skills/BaseSkill.h"
 #include "PXCustomStruct.generated.h"
 
-
+class USoundCue;
 class ABasePXCharacter;
 
 UCLASS()

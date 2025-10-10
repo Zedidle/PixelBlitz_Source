@@ -74,7 +74,7 @@ public:
 	void EventOnDayTimeTypeChanged();
 
 	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
-	TEnumAsByte<EDayTimeType> DayTimeType;
+	EDayTimeType DayTimeType;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
 	float TimeOfDay;

@@ -84,8 +84,8 @@ FReply UPXBrightnessEditor::NativeOnMouseWheel(const FGeometry& InGeometry, cons
 
 void UPXBrightnessEditor::HandleInputModeChanged(ECommonInputType InInputType)
 {
-	const FText KeyName = InInputType == ECommonInputType::Gamepad ? LOCTEXT("SafeZone_KeyToPress_Gamepad", "Left Stick") : LOCTEXT("SafeZone_KeyToPress_Mouse", "Mouse Wheel");
-	RichText_Default->SetText(FText::Format(LOCTEXT("BrightnessAdjustInstructions", "Use <text color=\"FFFFFFFF\" fontface=\"black\">{0}</> to adjust the brightness"), KeyName));
+	const FText KeyName = InInputType == ECommonInputType::Gamepad ? LOCTEXT("SafeZone_KeyToPress_Gamepad", "左摇杆") : LOCTEXT("SafeZone_KeyToPress_Mouse", "鼠标滚轮");
+	RichText_Default->SetText(FText::Format(LOCTEXT("BrightnessAdjustInstructions", "使用 <text color=\"FFFFFFFF\" fontface=\"black\">{0}</> 来调整亮度"), KeyName));
 }
 
 void UPXBrightnessEditor::HandleBackClicked()

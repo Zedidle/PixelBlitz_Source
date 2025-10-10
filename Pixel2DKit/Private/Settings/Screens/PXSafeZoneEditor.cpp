@@ -83,8 +83,8 @@ FReply UPXSafeZoneEditor::NativeOnMouseWheel(const FGeometry& InGeometry, const 
 
 void UPXSafeZoneEditor::HandleInputModeChanged(ECommonInputType InInputType)
 {
-	const FText KeyName = InInputType == ECommonInputType::Gamepad ? LOCTEXT("SafeZone_KeyToPress_Gamepad", "Left Stick") : LOCTEXT("SafeZone_KeyToPress_Mouse", "Mouse Wheel");
-	RichText_Default->SetText(FText::Format(LOCTEXT("SafeZoneEditorInstructions", "Use <text color=\"FFFFFFFF\" fontface=\"black\">{0}</> to adjust the corners so it lines up with the edges of your display."), KeyName));
+	const FText KeyName = InInputType == ECommonInputType::Gamepad ? LOCTEXT("SafeZone_KeyToPress_Gamepad", "左摇杆") : LOCTEXT("SafeZone_KeyToPress_Mouse", "鼠标滚轮");
+	RichText_Default->SetText(FText::Format(LOCTEXT("SafeZoneEditorInstructions", "使用 <text color=\"FFFFFFFF\" fontface=\"black\">{0}</> 来调整四个角的位置，使其与显示屏的边缘对齐。"), KeyName));
 }
 
 void UPXSafeZoneEditor::HandleBackClicked()

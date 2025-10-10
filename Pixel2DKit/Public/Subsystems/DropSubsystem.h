@@ -9,6 +9,8 @@
 
 struct FDrop;
 class ABaseItem;
+class USoundCue;
+class USoundBase;
 
 USTRUCT(BlueprintType)
 struct FItemData: public FTableRowBase
