@@ -411,7 +411,6 @@ public:
 	void AddBlendYaw(float V);
 	
 	void AddViewYaw(const FInputActionValue& Value);
-	
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddViewYaw(float V, bool bPlayerControl);
 	UFUNCTION(BlueprintCallable, Category = View)

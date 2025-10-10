@@ -1069,7 +1069,7 @@ void ABasePXCharacter::AddViewYaw(const FInputActionValue& Value)
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
 	
-	AddViewYaw(AxisValue, false);
+	AddViewYaw(AxisValue, true);
 }
 
 void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
@@ -1077,10 +1077,14 @@ void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 	if (bPlayerControl)
 	{
 		bViewYawChangingByPlayerControl = true;
+
+		UPXSettingsShared* Settings = UPXGameplayStatics::GetSettingsShared(GetWorld());
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
 		
-		AddBlendYaw(
-			GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis() *
-			UCommonFuncLib::DealDeltaTime(V) * GetDefault<UPXSettingsShared>()->GetViewPointSensitivityYaw());
+		int Invert = Settings->GetInvertHorizontalAxis() ? -1 : 1;
+		float Sensitivity = Settings->GetViewPointSensitivityYaw();
+
+		AddBlendYaw( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(V));
 		
 		FName TimerName = FName(GetActorNameOrLabel() + "_AddViewYaw");
 		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
@@ -1105,10 +1109,14 @@ void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
-
-	float Pitch = FMath::Clamp(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis() *
-		UCommonFuncLib::DealDeltaTime(AxisValue) *
-		GetDefault<UPXSettingsShared>()->GetViewPointSensitivityPitch() + CurBlendPitch, -45, 15);
+	
+	UPXSettingsShared* Settings = UPXGameplayStatics::GetSettingsShared(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+	
+	int Invert = Settings->GetInvertVerticalAxis() ? -1 : 1;
+	float Sensitivity = Settings->GetViewPointSensitivityPitch();
+	
+	float Pitch = FMath::Clamp( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue) + CurBlendPitch, -45, 15);
 	
 	SetBlendPitch(Pitch);
 }
