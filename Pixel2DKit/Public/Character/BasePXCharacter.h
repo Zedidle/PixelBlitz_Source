@@ -258,9 +258,9 @@ public:
 #pragma endregion
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
-	FVector FrontViewFactor = {0.5, 0.5, 0.1};
+	FVector FrontViewFactor = {0.4, 0.4, 0.1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
-	FVector FollowViewFactor = {-0.2, -0.2, -0.1};
+	FVector FollowViewFactor = {-0.2, -0.5, -0.1};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
 	FVector SpringArmMotivationVelocityPowFactor = {1.0f, 1.0f, 1.0f};
 	

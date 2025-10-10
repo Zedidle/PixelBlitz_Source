@@ -286,10 +286,10 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	
-	float d = FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal());
+	float Dot_VelocityToCamera = FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal());
 	
 	// 镜头偏转
-	float pitch = FMath::Clamp(d,-0.3, 0.5) * -15 + CurBlendPitch;
+	float pitch = FMath::Clamp(Dot_VelocityToCamera,-0.3, 0.5) * -15 + CurBlendPitch;
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 
@@ -297,22 +297,33 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	// 镜头偏移
 	if (Velocity.Size() > 0)
 	{
+		// 朝向 / 反向 摄像机的偏移削减比例
+		float DeOffsetPercent = FMath::GetMappedRangeValueClamped(
+			FVector2D{0.f, 1.0f}, {0.f, 0.3f}, FMath::Abs(Dot_VelocityToCamera));
+		Velocity *= 1 - DeOffsetPercent;
+
 		switch (SettingsShared->GetCameraFollowMode())
 		{
 		case ECameraFollowMode::Preview: // 镜头前瞻
 			{
 				Velocity *= FrontViewFactor;
-				// 偏移因子，如果玩家朝向镜头移动将会偏移得更多 ? 
+				// 设置
+				float PreviewCameraFactor = 0.9;
+				float VelocitySize = FMath::Pow(Velocity.Size(), PreviewCameraFactor);
 				// 假设视角是90°
-				FVector Offset = Velocity.GetSafeNormal() * FMath::Min(Velocity.Size(), CurSpringArmLength / 2);
+				FVector Offset = Velocity.GetSafeNormal() * FMath::Min(VelocitySize, CurSpringArmLength / 3);
 				AddCameraOffset(FName("Move"), Offset);
 				break;
 			}
 		case  ECameraFollowMode::Behind: // 镜头跟随
 			{
-				SpringArm->CameraLagSpeed = FMath::Pow(Velocity.Length(), 0.5) / 5 + 1;
 				Velocity *= FollowViewFactor;
-				AddCameraOffset(FName("Move"), Velocity);
+				// 设置
+				float FollowCameraFactor = 0.8;
+				float VelocitySize = FMath::Pow(Velocity.Size(), FollowCameraFactor);
+				SpringArm->CameraLagSpeed = VelocitySize / 6 + 1;
+				FVector Offset = Velocity.GetSafeNormal() * VelocitySize;
+				AddCameraOffset(FName("Move"), Offset);
 				break;
 			}
 		}
