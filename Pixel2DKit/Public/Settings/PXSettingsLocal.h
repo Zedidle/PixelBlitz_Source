@@ -252,11 +252,15 @@ public:
 	/** Apply just the quality scalability settings */
 	void ApplyScalabilitySettings();
 
+
+
+	void UpdateBGMVolume();
+
 	UFUNCTION()
 	float GetOverallVolume() const;
 	UFUNCTION()
 	void SetOverallVolume(float InVolume);
-
+	
 	UFUNCTION()
 	float GetMusicVolume() const;
 	UFUNCTION()

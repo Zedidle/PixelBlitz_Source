@@ -21,6 +21,7 @@
 #include "Development/PXPlatformEmulationSettings.h"
 #include "Input/PXMappableConfigPair.h"
 #include "Performance/PXPerformanceSettings.h"
+#include "Subsystems/PXAudioSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PXSettingsLocal)
 
@@ -879,6 +880,20 @@ void UPXSettingsLocal::ApplyScalabilitySettings()
 	Scalability::SetQualityLevels(ScalabilityQuality);
 }
 
+void UPXSettingsLocal::UpdateBGMVolume()
+{
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	UGameInstance* GameInstance = World->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+	
+	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
+
+	AudioSubsystem->SetBGMVolume(GetOverallVolume() * GetMusicVolume());
+}
+
 float UPXSettingsLocal::GetOverallVolume() const
 {
 	return OverallVolume;
@@ -887,6 +902,7 @@ float UPXSettingsLocal::GetOverallVolume() const
 void UPXSettingsLocal::SetOverallVolume(float InVolume)
 {
 	OverallVolume = InVolume;
+	UpdateBGMVolume();
 }
 
 float UPXSettingsLocal::GetMusicVolume() const
@@ -897,6 +913,7 @@ float UPXSettingsLocal::GetMusicVolume() const
 void UPXSettingsLocal::SetMusicVolume(float InVolume)
 {
 	MusicVolume = InVolume;
+	UpdateBGMVolume();
 }
 
 float UPXSettingsLocal::GetSoundUIVolume() const
