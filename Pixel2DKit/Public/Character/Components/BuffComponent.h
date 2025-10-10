@@ -36,6 +36,8 @@ public:
 	// Sets default values for this component's properties
 	UBuffComponent();
 
+	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+
 	UFUNCTION()
 	void InitData();
 	

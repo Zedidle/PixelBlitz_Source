@@ -36,6 +36,12 @@ UBuffComponent::UBuffComponent()
 	// ...
 }
 
+void UBuffComponent::DestroyComponent(bool bPromoteChildren)
+{
+	Super::DestroyComponent(bPromoteChildren);
+
+}
+
 void UBuffComponent::InitData()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
@@ -129,6 +135,10 @@ void UBuffComponent::BeginPlay()
 void UBuffComponent::EndPlay()
 {
 	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckBuffEnd);
+	if (BuffStateWidget)
+	{
+		BuffStateWidget->RemoveFromParent();
+	}
 }
 
 

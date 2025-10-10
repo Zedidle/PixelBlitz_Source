@@ -45,6 +45,7 @@
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
+#include "UI/UIManager.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
@@ -945,26 +946,20 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			bool GameEnd = false;
 			GameInstance->OnPlayerDead(GameEnd);
 			
-			Execute_OnDie(this);
-
 			if (GameEnd)
 			{
 				// 游戏结束
-				UWidgetLayoutLibrary::RemoveAllWidgets(GetWorld());
-
-				const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-				CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-
-				const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous();
-				CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WidgetsDataAsset)
-
-				if (WidgetsDataAsset->NearDeathWidgetClass)
-				{
-					UUserWidgetFuncLib::AddWidget(WidgetsDataAsset->NearDeathWidgetClass, ESlateVisibility::Visible, false);
-				}
 				if (APXPlayerController* PC = GetController<APXPlayerController>())
 				{
 					PC->OnCharacterControl(false);
+				}
+				if (PlayerStatusWidget)
+				{
+					PlayerStatusWidget->RemoveFromParent();
+				}
+				if (BuffComponent)
+				{
+					BuffComponent->DestroyComponent();
 				}
 				if (HealthComponent)
 				{
@@ -1002,6 +997,8 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 					}, DataAsset->ReviveDelayTime);
 				}
 			}
+
+			Execute_OnDie(this);
 		}
 
 		HealthComponent->DieByFalling = false;
