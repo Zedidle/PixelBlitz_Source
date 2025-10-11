@@ -5,8 +5,6 @@
 // #include "PXLogChannels.h"
 // #include "PXGameplayTags.h"
 #include "System/PXGameData.h"
-#include "AbilitySystemGlobals.h"
-#include "Character/PXPawnData.h"
 #include "Misc/App.h"
 #include "Stats/StatsMisc.h"
 #include "Engine/Engine.h"

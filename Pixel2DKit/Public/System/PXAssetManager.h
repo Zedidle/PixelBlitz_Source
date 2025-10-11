@@ -5,13 +5,12 @@
 #include "CoreMinimal.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
+#include "Character/PXPawnData.h"
 #include "PXAssetManager.generated.h"
 
 
 class UPrimaryDataAsset;
-
 class UPXGameData;
-class UPXPawnData;
 
 struct FPXBundles
 {

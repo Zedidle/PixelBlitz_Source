@@ -125,6 +125,11 @@ public:
 	void OnGameStart();
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameState | GameplayFlow", DisplayName = "OnGameStart")
 	void BP_OnGameStart();
+
+	// 竞速计时器
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | GameplayFlow")
+	void StartRaceTimer(bool Start);
+	
 };
 
 

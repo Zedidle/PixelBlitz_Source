@@ -19,7 +19,7 @@ public:
 	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<UNiagaraSystem>> WeatherTypeToNiagara;
 
 	UPROPERTY( EditAnywhere, Category = "Custom | FootStep")
-	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<USoundBase>> WeatherTypeToSound;
+	TMap<EWeather, TSoftObjectPtr<USoundBase>> WeatherTypeToSound;
 
 	UPROPERTY( EditAnywhere, Category = "Custom | Audio")
 	TSoftObjectPtr<USoundAttenuation> Attenuation_Default;

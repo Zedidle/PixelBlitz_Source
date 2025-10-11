@@ -17,7 +17,8 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameplayFlow)
 	FVector LocationOffset = FVector(0, 0, 100);
-	
+
+	UFUNCTION(BlueprintCallable)
 	void SetLocation(const FVector& L) { SetActorLocation(L + LocationOffset); }
 	
 protected:

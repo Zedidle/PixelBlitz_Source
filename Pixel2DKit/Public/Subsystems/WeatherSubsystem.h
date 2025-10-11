@@ -28,7 +28,7 @@ public:
 	FBuffValueEffect NightEffect = {-0.05, -20.0f};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<TEnumAsByte<EDayTimeType>, FGameplayTag> DayTimeType2BuffTag;	
+	TMap<EDayTimeType, FGameplayTag> DayTimeType2BuffTag;	
 };
 
 

@@ -181,6 +181,11 @@ void APXGameState::OnGameStart()
 	BP_OnGameStart();
 }
 
+void APXGameState::StartRaceTimer_Implementation(bool Start)
+{
+	
+}
+
 UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
 {
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();

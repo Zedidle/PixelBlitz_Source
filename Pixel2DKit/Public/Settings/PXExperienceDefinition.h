@@ -3,10 +3,10 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
+#include "Character/PXPawnData.h"
 #include "PXExperienceDefinition.generated.h"
 
 class UGameFeatureAction;
-class UPXPawnData;
 class UPXExperienceActionSet;
 
 UCLASS(BlueprintType, Const)

@@ -10,7 +10,7 @@
 class UGameplayEffect;
 
 UCLASS(BlueprintType, Const, Meta = (DisplayName = "PX Game Data", ShortTooltip = "Data asset containing global game data."))
-class PIXEL2DKIT_API UPXGameData : public UPrimaryDataAsset
+class UPXGameData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
