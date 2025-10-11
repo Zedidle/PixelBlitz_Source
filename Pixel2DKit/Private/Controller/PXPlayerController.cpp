@@ -58,10 +58,20 @@ void APXPlayerController::OnCharacterControl(bool On)
 	{
 		Subsystem->AddMappingContext(IMC_GamePad, 1, Options);
 		Subsystem->AddMappingContext(IMC_KeyBoard, 1, Options);
+		FInputModeGameOnly InputMode;
+		SetInputMode(InputMode);
 	}
 	else
 	{
 		Subsystem->RemoveMappingContext(IMC_GamePad);
 		Subsystem->RemoveMappingContext(IMC_KeyBoard);
+		FInputModeUIOnly InputMode;
+		SetInputMode(InputMode);
 	}
+	FlushPressedKeys();
+}
+
+bool APXPlayerController::CanPause()
+{
+	return CharacterControlling && GameAlreadyStart;
 }

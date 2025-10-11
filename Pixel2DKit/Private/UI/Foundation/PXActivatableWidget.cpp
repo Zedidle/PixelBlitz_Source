@@ -2,8 +2,12 @@
 
 
 #include "UI/Foundation/PXActivatableWidget.h"
-
+#include "Editor/WidgetCompilerLog.h"
 #include "UI/UIManager.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(PXActivatableWidget)
+
+#define LOCTEXT_NAMESPACE "PX"
 
 void UPXActivatableWidget::NativeConstruct()
 {
@@ -21,10 +25,36 @@ bool UPXActivatableWidget::NativeOnHandleBackAction()
 	{
 		if (!BP_OnHandleBackAction())
 		{
-			UUIManager* UIManager = UUIManager::GetSelfInstance(this);
-			UIManager->CloseUI(UIName);
+			Close();
 		}
 		return true;
 	}
 	return false;
 }
+void UPXActivatableWidget::Close()
+{
+	UUIManager* UIManager = UUIManager::GetSelfInstance(this);
+	if (UIManager)
+	{
+		UIManager->CloseUI(UIName);
+	}
+}
+
+TOptional<FUIInputConfig> UPXActivatableWidget::GetDesiredInputConfig() const
+{
+	switch (InputConfig)
+	{
+	case EPXWidgetInputMode::GameAndMenu:
+		return FUIInputConfig(ECommonInputMode::All, GameMouseCaptureMode);
+	case EPXWidgetInputMode::Game:
+		return FUIInputConfig(ECommonInputMode::Game, GameMouseCaptureMode);
+	case EPXWidgetInputMode::Menu:
+		return FUIInputConfig(ECommonInputMode::Menu, EMouseCaptureMode::NoCapture);
+	case EPXWidgetInputMode::Default:
+	default:
+		return TOptional<FUIInputConfig>();
+	}
+}
+
+
+#undef LOCTEXT_NAMESPACE

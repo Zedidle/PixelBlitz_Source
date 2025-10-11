@@ -52,14 +52,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")
 	static FKey GetActionKey(UInputAction* IA, bool IsGamePad);
-
-
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")
-	static bool IsGamePadControlling();
-
-	UFUNCTION(BlueprintCallable, Category="Common | Input")
-	static void SetGamePadControlling(bool On);
 
 	template<typename T>
 	static bool CalRandomMap(const TMap<T, int32>& M, T& Result);

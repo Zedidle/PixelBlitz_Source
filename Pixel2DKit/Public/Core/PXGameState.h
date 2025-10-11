@@ -69,7 +69,6 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
-	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
 	void EventOnDayTimeTypeChanged();
 

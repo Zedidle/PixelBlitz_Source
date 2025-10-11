@@ -157,28 +157,6 @@ FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)
 	return FKey();
 }
 
-bool UCommonFuncLib::IsGamePadControlling()
-{
-	UWorld* World = GEngine->GetCurrentPlayWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, false);
-	
-	APXPlayerController* Controller = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Controller, false);
-
-	return Controller->GamePadControlling;
-	
-}
-
-void UCommonFuncLib::SetGamePadControlling(bool On)
-{
-	UWorld* World = GEngine->GetCurrentPlayWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-	
-	APXPlayerController* Controller = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Controller);
-
-	Controller->GamePadControlling = On;
-}
 
 bool UCommonFuncLib::CalRandMap_Float(const TMap<float, int32>& M, float& Result)
 {

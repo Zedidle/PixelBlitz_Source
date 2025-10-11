@@ -35,15 +35,15 @@ protected:
 public:
 	UPROPERTY(BlueprintReadOnly)
 	class ABasePXCharacter* PXCharacter = nullptr;
-	
-	// 是否处于手柄控制
-	UPROPERTY(BlueprintReadOnly)
-	bool GamePadControlling = false;
 
 	UFUNCTION(BlueprintCallable, Category = Game)
 	void OnGameStart();
 
 	UFUNCTION(BlueprintCallable, Category = Game)
 	void OnCharacterControl(bool On);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Game)
+	bool CanPause();
 
+	
 };

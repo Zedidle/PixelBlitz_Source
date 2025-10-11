@@ -65,8 +65,8 @@ public class Pixel2DKit : ModuleRules
 			"GameSubtitles",
 			"AudioMixer",
 			"RHI",
-			"AudioModulation"
-
+			"AudioModulation",
+			"UIExtension"
 
 		});
 		

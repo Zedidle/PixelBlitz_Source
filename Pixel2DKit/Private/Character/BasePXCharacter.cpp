@@ -1199,7 +1199,7 @@ void ABasePXCharacter::ToStartPoint_Implementation()
 		{
 			if (GameMode->PlayerRespawnPoint)
 			{
-				GameMode->PlayerRespawnPoint->SetActorLocation(PlayerStart->GetActorLocation());
+				GameMode->PlayerRespawnPoint->SetLocation(PlayerStart->GetActorLocation());
 				SetActorLocation(PlayerStart->GetActorLocation());
 			}
 		}

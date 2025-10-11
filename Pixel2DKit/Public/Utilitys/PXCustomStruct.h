@@ -285,13 +285,13 @@ struct FCharacterEstimate
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterEstimate")
-	int Speed;
+	int Speed = 6;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterEstimate")
-	int Survival;
+	int Survival = 6;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterEstimate")
-	int Damage;
+	int Damage = 6;
 };
 
 USTRUCT(BlueprintType)

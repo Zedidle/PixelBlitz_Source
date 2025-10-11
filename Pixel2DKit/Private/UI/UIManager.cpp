@@ -202,7 +202,7 @@ bool UUIManager::CloseUI(const FName UIType)
 	{
 		if (APlayerController* SelfPC = UGameplayStatics::GetPlayerController(this, 0))
 		{
-			FInputModeGameOnly InputMode;
+			FInputModeGameAndUI InputMode;
 			SelfPC->SetInputMode(InputMode);
 		}
 	}

@@ -6,9 +6,18 @@
 #include "CommonActivatableWidget.h"
 #include "PXActivatableWidget.generated.h"
 
-/**
- * 
- */
+
+struct FUIInputConfig;
+
+UENUM(BlueprintType)
+enum class EPXWidgetInputMode : uint8
+{
+	Default,
+	GameAndMenu,
+	Game,
+	Menu
+};
+
 UCLASS()
 class PIXEL2DKIT_API UPXActivatableWidget : public UCommonActivatableWidget
 {
@@ -21,7 +30,6 @@ class PIXEL2DKIT_API UPXActivatableWidget : public UCommonActivatableWidget
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
 	virtual bool NativeOnHandleBackAction() override;
 
 
@@ -31,5 +39,17 @@ public:
 	UFUNCTION()
 	void SetUIName(FName Name){ UIName = Name; }
 
-	
+	UFUNCTION(BlueprintCallable)
+	void Close();
+
+	virtual TOptional<FUIInputConfig> GetDesiredInputConfig() const override;
+
+
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	EPXWidgetInputMode InputConfig = EPXWidgetInputMode::Default;
+
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	EMouseCaptureMode GameMouseCaptureMode = EMouseCaptureMode::CapturePermanently;
 };

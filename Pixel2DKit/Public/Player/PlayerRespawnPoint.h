@@ -14,7 +14,12 @@ class PIXEL2DKIT_API APlayerRespawnPoint : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APlayerRespawnPoint();
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=GameplayFlow)
+	FVector LocationOffset = FVector(0, 0, 100);
+	
+	void SetLocation(const FVector& L) { SetActorLocation(L + LocationOffset); }
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

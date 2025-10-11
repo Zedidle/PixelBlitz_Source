@@ -91,7 +91,7 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 		}
 		if (PlayerRespawnPoint)
 		{
-			PlayerRespawnPoint->SetActorLocation(PlayerStart->GetActorLocation());
+			PlayerRespawnPoint->SetLocation(PlayerStart->GetActorLocation());
 		}
 	}
 
