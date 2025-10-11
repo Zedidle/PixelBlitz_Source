@@ -11,7 +11,7 @@ class UPXWidgetsDataAsset;
 class UPXSkillsDataAsset;
 class UPXResourceDataAsset;
 class UPXDataTablesDataAsset;
-class UPXCameraShakeDataAsset;
+class UPXCameraResourceDataAsset;
 class UPXGameDataAsset;
 class UDataAsset;
 
@@ -28,7 +28,7 @@ public:
 	TSoftObjectPtr<UPXGameDataAsset> GameDataAsset;
 	
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
-	TSoftObjectPtr<UPXCameraShakeDataAsset> CameraShakeDataAsset;
+	TSoftObjectPtr<UPXCameraResourceDataAsset> CameraResourceDataAsset;
 
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXDataTablesDataAsset> DataTablesDataAsset;

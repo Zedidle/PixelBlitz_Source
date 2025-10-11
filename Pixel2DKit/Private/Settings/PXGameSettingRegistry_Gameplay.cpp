@@ -128,6 +128,68 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 
 			GameplayVFXCollection->AddSetting(Setting);
 		}
+
+		{
+			const FText EDrawStyleText[] = {
+				LOCTEXT("EStyleType_Normal", "正常"),
+				LOCTEXT("EStyleType_Cartoon", "卡通"),
+				LOCTEXT("EStyleType_Hero", "英雄"),
+				LOCTEXT("EStyleType_BlackWhite", "黑白")
+			};
+
+			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
+			Setting->SetDevName(TEXT("GameplayVFX_DrawStyle"));
+			Setting->SetDisplayName(LOCTEXT("GameplayVFX_DrawStyle_Name", "画风"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayVFX_DrawStyle_Desc", "切换不同的画风，可能会有焕然一新的感觉，是个值得的尝试！"));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetDrawStyle));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetDrawStyle));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetDrawStyle());
+
+			for (int32 PresetIndex = 0; PresetIndex < (int32)EStyleType::MAX; ++PresetIndex)
+			{
+				Setting->AddEnumOption(static_cast<EStyleType>(PresetIndex), EDrawStyleText[PresetIndex]);
+			}
+			
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+
+			GameplayVFXCollection->AddSetting(Setting);
+		}
+
+		{
+			const FText ECameraColorFilterText[] = {
+				LOCTEXT("ECameraColorFilter_None", "无"),
+				LOCTEXT("ECameraColorFilter_SkyBlue", "天青"),
+				LOCTEXT("ECameraColorFilter_Retro", "怀旧"),
+				LOCTEXT("ECameraColorFilter_Pink", "粉"),
+				LOCTEXT("ECameraColorFilter_MoonlitNight", "清辉夜凝"),
+				LOCTEXT("ECameraColorFilter_GrayWhite", "灰白"),
+				LOCTEXT("ECameraColorFilter_Ocean", "海水"),
+				LOCTEXT("ECameraColorFilter_Bright", "明亮"),
+				LOCTEXT("ECameraColorFilter_Twilight", "黄昏"),
+				LOCTEXT("ECameraColorFilter_Dawn", "清晨"),
+				LOCTEXT("ECameraColorFilter_FairyTale", "童话"),
+				LOCTEXT("ECameraColorFilter_Soft", "柔和")
+			};
+
+			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
+			Setting->SetDevName(TEXT("GameplayVFX_CameraColorFilter"));
+			Setting->SetDisplayName(LOCTEXT("GameplayVFX_CameraColorFilter_Name", "滤镜"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayVFX_CameraColorFilter_Desc", "给您的镜头打上一层滤镜，说不定别有风味！"));
+
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetCameraColorFilter));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetCameraColorFilter));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetCameraColorFilter());
+
+			for (int32 PresetIndex = 0; PresetIndex < (int32)ECameraColorFilter::MAX; ++PresetIndex)
+			{
+				Setting->AddEnumOption(static_cast<ECameraColorFilter>(PresetIndex), ECameraColorFilterText[PresetIndex]);
+			}
+			
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+
+			GameplayVFXCollection->AddSetting(Setting);
+		}
 	}
 
 	{

@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "PXCameraShakeDataAsset.generated.h"
+#include "Utilitys/PXCustomStruct.h"
+#include "PXCameraSourceDataAsset.generated.h"
 
 class UCameraShakeBase;
 
 UCLASS(BlueprintType)
-class PIXEL2DKIT_API UPXCameraShakeDataAsset : public UDataAsset
+class PIXEL2DKIT_API UPXCameraResourceDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
 	
@@ -40,5 +41,12 @@ public:
 	
 	UPROPERTY( EditAnywhere, Category = "CameraShake")
 	TSubclassOf<UCameraShakeBase> SwordAttackShortShake;
+
+
+	UPROPERTY( EditAnywhere, Category = "CameraFilter")
+	TMap<ECameraColorFilter, TSoftObjectPtr<UTexture>> CameraColorFilterMap;
+
+
+
 	
 };

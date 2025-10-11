@@ -71,23 +71,6 @@ void UPXSaveGameSubSystemFuncLib::SaveAchievementsData(const UObject* WorldConte
 	}
 }
 
-UPXSettingSaveGame* UPXSaveGameSubSystemFuncLib::GetSettingData(const UObject* WorldContext)
-{
-	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
-	{
-		return SaveGameSubsystem->GetSettingData();
-	}
-	return nullptr;
-}
-
-void UPXSaveGameSubSystemFuncLib::SaveSettingData(const UObject* WorldContext)
-{
-	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
-	{
-		SaveGameSubsystem->SaveSettingData();
-	}
-}
-
 UPXShopSaveGame* UPXSaveGameSubSystemFuncLib::GetShopData(const UObject* WorldContext)
 {
 	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))

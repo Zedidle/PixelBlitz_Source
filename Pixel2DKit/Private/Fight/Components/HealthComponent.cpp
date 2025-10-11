@@ -18,7 +18,7 @@
 #include "Player/PXLocalPlayer.h"
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/PXSettingsShared.h"
-#include "Settings/Config/PXCameraShakeDataAsset.h"
+#include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
@@ -375,7 +375,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 
 	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
-	UPXCameraShakeDataAsset* CameraShakeDataAsset = CustomSettings->CameraShakeDataAsset.LoadSynchronous();
+	UPXCameraResourceDataAsset* CameraShakeDataAsset = CustomSettings->CameraResourceDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CameraShakeDataAsset)
 
 	if (!GetOwner()->Implements<UFight_Interface>()) return;

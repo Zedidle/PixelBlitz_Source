@@ -21,7 +21,6 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 
 	void InitData_Main();
 	void InitData_BasicBuild();
-	void InitData_Setting();
 	void InitData_Achievements();
 	void InitData_Shop();
 	void InitData_Talents();
@@ -31,9 +30,6 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | BasicBuild", meta = (AllowPrivateAccess = "true"))
 	UPXBasicBuildSaveGame* BasicBuildSaveGame;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Setting", meta = (AllowPrivateAccess = "true"))
-	UPXSettingSaveGame* SettingSaveGame;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Achievements", meta = (AllowPrivateAccess = "true"))
 	UPXAchievementsSaveGame* AchievementsSaveGame;
@@ -81,7 +77,6 @@ public:
 
 #pragma endregion
 
-
 #pragma region BasicBuild
 	const FString SlotName_BasicBuild = "BasicBuild";
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | BasicBuild")
@@ -89,19 +84,6 @@ public:
 	UPXBasicBuildSaveGame* GetBasicBuildData();
 	
 #pragma endregion
-
-
-
-#pragma region Settings
-
-	const FString SlotName_Setting = "Setting";
-
-	UFUNCTION(BlueprintCallable, Category = "SaveGame | Setting")
-	void SaveSettingData();
-	UPXSettingSaveGame* GetSettingData();
-
-#pragma endregion 
-
 
 #pragma region Achievements
 

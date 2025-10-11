@@ -31,13 +31,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
 	static void SaveAchievementsData(const UObject* WorldContext);
 
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXSettingSaveGame* GetSettingData(const UObject* WorldContext);
-	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveSettingData(const UObject* WorldContext);
-
-	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
 	static UPXShopSaveGame* GetShopData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))

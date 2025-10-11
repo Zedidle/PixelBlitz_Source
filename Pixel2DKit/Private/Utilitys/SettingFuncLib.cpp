@@ -3,39 +3,23 @@
 
 #include "Utilitys/SettingFuncLib.h"
 
-#include "Kismet/KismetStringLibrary.h"
+#include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/Config/PXCameraSourceDataAsset.h"
+#include "Settings/Config/PXCustomSettings.h"
 
-FIntPoint USettingFuncLib::GetScreenResolution(int Index)
+
+UTexture* USettingFuncLib::GetCameraFilter(ECameraColorFilter Filter)
 {
-	TArray<FText> Options =  {
-		FText::FromString("1024x576"),
-		FText::FromString("1280x720"),
-		FText::FromString("1600x900"),
-		FText::FromString("1920x1080"),
-		FText::FromString("2560x1440"),
-		FText::FromString("3840x2160")
-	};
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Settings, nullptr);
+	
+	UPXCameraResourceDataAsset* DataAsset = Settings->CameraResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataAsset, nullptr);
 
-	if (Options.IsValidIndex(Index))
+	if (DataAsset->CameraColorFilterMap.Contains(Filter))
 	{
-		FString LeftS, RightS;
-		UKismetStringLibrary::Split( Options[Index].ToString(), "x", LeftS, RightS, ESearchCase::IgnoreCase, ESearchDir::FromStart);
-		return FIntPoint( FCString::Atoi(*LeftS), FCString::Atoi(*RightS));
+		return DataAsset->CameraColorFilterMap[Filter].LoadSynchronous();
 	}
-
-	return FIntPoint(1920, 1080);
-}
-
-TEnumAsByte<EWindowMode::Type> USettingFuncLib::GetWindowMode(int Index)
-{
-	TArray<TEnumAsByte<EWindowMode::Type>> Modes = {
-		EWindowMode::WindowedFullscreen,
-		EWindowMode::Windowed
-	};
-	if (Modes.IsValidIndex(Index))
-	{
-		return Modes[Index];
-	}
-	return EWindowMode::Type::NumWindowModes;
+	return nullptr;
 }
 

@@ -72,9 +72,34 @@ enum class EStyleType : uint8
 	Normal UMETA(DisplayName = "正常"),
 	Cartoon UMETA(DisplayName = "卡通"),
 	Hero UMETA(DisplayName = "英雄"),
-	Old UMETA(DisplayName = "黑白")
+	Old UMETA(DisplayName = "黑白"),
+	MAX UMETA(Hidden),
 };
 #pragma endregion
+
+
+#pragma region EStyleType
+UENUM(BlueprintType)
+enum class ECameraColorFilter : uint8
+{
+	None UMETA(DisplayName = "无"),
+	SkyBlue UMETA(DisplayName = "天青"),
+	Retro UMETA(DisplayName = "怀旧"),
+	Pink UMETA(DisplayName = "粉"),
+	MoonlitNight UMETA(DisplayName = "清辉夜凝"),
+	GrayWhite UMETA(DisplayName = "灰白"),
+	Ocean UMETA(DisplayName = "海水"),
+	Bright UMETA(DisplayName = "明亮"),
+	Twilight UMETA(DisplayName = "黄昏"),
+	Dawn UMETA(DisplayName = "清晨"),
+	FairyTale UMETA(DisplayName = "童话"),
+	Soft UMETA(DisplayName = "柔和"),
+	MAX UMETA(Hidden),
+};
+#pragma endregion
+
+
+
 
 #pragma region EAbilityQuality
 UENUM(BlueprintType)

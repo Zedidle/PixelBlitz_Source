@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PXCustomStruct.h"
 #include "UObject/NoExportTypes.h"
 #include "SettingFuncLib.generated.h"
 
@@ -15,9 +16,8 @@ class USettingFuncLib : public UObject
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category="Setting FuncLib")
-	static FIntPoint GetScreenResolution(int Index);
 
-	UFUNCTION(BlueprintCallable, Category="Setting FuncLib")
-	static TEnumAsByte<EWindowMode::Type> GetWindowMode(int Index);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Setting FuncLib")
+	static UTexture* GetCameraFilter(ECameraColorFilter Filter);
 };

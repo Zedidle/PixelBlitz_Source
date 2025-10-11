@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "SubtitleDisplayOptions.h"
 #include "GameFramework/SaveGame.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "PXSettingsShared.generated.h"
 
 class UObject;
@@ -321,6 +322,16 @@ public:
 	UFUNCTION()
 	void SetShowBloodVFX(bool Value) { ChangeValueAndDirty(bShowBloodVFX, Value); }
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	EStyleType GetDrawStyle() const { return DrawStyle; }
+	UFUNCTION()
+	void SetDrawStyle(EStyleType Value) { ChangeValueAndDirty(DrawStyle, Value); }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	ECameraColorFilter GetCameraColorFilter() const { return CameraColorFilter; }
+	UFUNCTION()
+	void SetCameraColorFilter(ECameraColorFilter Value) { ChangeValueAndDirty(CameraColorFilter, Value); }
+	
 	UFUNCTION()
 	ECameraFollowMode GetCameraFollowMode() const { return CameraFollowMode; }
 	UFUNCTION()
@@ -346,6 +357,12 @@ private:
 	UPROPERTY()
 	bool bShowBloodVFX = true;
 
+	UPROPERTY()
+	EStyleType DrawStyle = EStyleType::Normal;
+
+	UPROPERTY()
+	ECameraColorFilter CameraColorFilter = ECameraColorFilter::None;
+	
 	UPROPERTY()
 	ECameraFollowMode CameraFollowMode = ECameraFollowMode::Preview;
 	

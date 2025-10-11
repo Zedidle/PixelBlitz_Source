@@ -37,7 +37,7 @@
 #include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/PXSettingsLocal.h"
 #include "Settings/PXSettingsShared.h"
-#include "Settings/Config/PXCameraShakeDataAsset.h"
+#include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Settings/Config/PXWidgetsDataAsset.h"
@@ -556,7 +556,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 
 	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
 	{
-		if (UPXCameraShakeDataAsset* DA = CustomSettings->CameraShakeDataAsset.LoadSynchronous())
+		if (UPXCameraResourceDataAsset* DA = CustomSettings->CameraResourceDataAsset.LoadSynchronous())
 		{
 			UGameplayStatics::PlayWorldCameraShake(GetWorld(), DA->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
 		}

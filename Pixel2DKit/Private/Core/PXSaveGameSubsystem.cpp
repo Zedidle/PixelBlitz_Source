@@ -42,66 +42,6 @@ void UPXSaveGameSubsystem::InitData_BasicBuild()
     }
 }
 
-void UPXSaveGameSubsystem::InitData_Setting()
-{
-    if (UPXSettingSaveGame* SaveGame = Cast<UPXSettingSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
-    {
-        SettingSaveGame = SaveGame;
-
-        // if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
-        // {
-        //     if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
-        //     {
-        //         if (UInputMappingContext* Keyboard_IMC = GameDataAsset->Keyboard_IMC.LoadSynchronous())
-        //         {
-        //             Keyboard_IMC->UnmapAll();
-        //             for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping)
-        //             {
-        //                 Keyboard_IMC->MapKey(KM.Action, KM.Key);
-        //             } 
-        //         }
-        //
-        //         if (UInputMappingContext* Gamepad_IMC = GameDataAsset->Gamepad_IMC.LoadSynchronous())
-        //         {
-        //             Gamepad_IMC->UnmapAll();
-        //             for (FEnhancedActionKeyMapping KM : SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping)
-        //             {
-        //                 Gamepad_IMC->MapKey(KM.Action, KM.Key);
-        //             }
-        //         }
-        //     }
-        // }
-    }
-    else
-    {
-        SettingSaveGame = NewObject<UPXSettingSaveGame>(this);
-
-        
-        
-        // 按键存档
-        // if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
-        // {
-        //     if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
-        //     {
-        //         UInputMappingContext* Gamepad_IMC = Cast<UInputMappingContext>(GameDataAsset->Gamepad_IMC.Get());
-        //         UInputMappingContext* Keyboard_IMC = Cast<UInputMappingContext>(GameDataAsset->Keyboard_IMC.Get());
-        //     
-        //         SettingSaveGame->ControlSetting_CharacterControl_GamePad_Mapping = Gamepad_IMC->GetMappings();
-        //         SettingSaveGame->ControlSetting_CharacterControl_KeyBoard_Mapping = Keyboard_IMC->GetMappings();
-        //     }
-        // }
-
-        SaveSettingData();
-    }
-
-    // 第一次开游戏时，以及后续读档时
-    if (UPXSettingsLocal* SettingsLocal = UPXSettingsLocal::Get())
-    {
-        // SettingsLocal->SetScreenResolution(USettingFuncLib::GetScreenResolution(SettingSaveGame->VideoSetting_Resolution));
-        SettingsLocal->SetFullscreenMode(USettingFuncLib::GetWindowMode(SettingSaveGame->VideoSetting_ScreenMode));
-        SettingsLocal->ApplySettings(false);
-    }
-}
 
 void UPXSaveGameSubsystem::InitData_Achievements()
 {
@@ -147,7 +87,6 @@ void UPXSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
     InitData_Main();
     InitData_BasicBuild();
-    InitData_Setting();
     InitData_Achievements();
     InitData_Shop();
     InitData_Talents();
@@ -230,30 +169,6 @@ UPXBasicBuildSaveGame* UPXSaveGameSubsystem::GetBasicBuildData()
     return BasicBuildSaveGame;
 }
 
-void UPXSaveGameSubsystem::SaveSettingData()
-{
-    bool result = UGameplayStatics::SaveGameToSlot(SettingSaveGame, SlotName_Setting, UserIndex);
-    if (result)
-    {
-        UE_LOG(LogTemp,Log,TEXT("UPXSaveGameSubsystem::SaveSettingData Success ^ ^"))
-    }
-}
-
-UPXSettingSaveGame* UPXSaveGameSubsystem::GetSettingData()
-{
-    if (IsValid(SettingSaveGame)) return SettingSaveGame;
-
-    if (UPXSettingSaveGame* SaveGame = Cast<UPXSettingSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
-    {
-        SettingSaveGame = SaveGame;
-        return SettingSaveGame;
-    }
-
-    SettingSaveGame = NewObject<UPXSettingSaveGame>(this);
-    SaveSettingData();
-    return SettingSaveGame;
-}
-
 void UPXSaveGameSubsystem::SaveAchievementsData()
 {
     bool result = UGameplayStatics::SaveGameToSlot(AchievementsSaveGame, SlotName_Achievements, UserIndex);
@@ -267,7 +182,7 @@ UPXAchievementsSaveGame* UPXSaveGameSubsystem::GetAchievementsData()
 {
     if (IsValid(AchievementsSaveGame)) return AchievementsSaveGame;
     
-    if (UPXAchievementsSaveGame* SaveGame = Cast<UPXAchievementsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Setting, UserIndex)))
+    if (UPXAchievementsSaveGame* SaveGame = Cast<UPXAchievementsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Achievements, UserIndex)))
     {
         AchievementsSaveGame = SaveGame;
         return AchievementsSaveGame;

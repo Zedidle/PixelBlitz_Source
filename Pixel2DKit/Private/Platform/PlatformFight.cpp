@@ -99,7 +99,6 @@ void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
 	if (Enemies.IsEmpty())
 	{
 		FightEnd();
-		SetActorEnableCollision(false);
 	}
 
 }

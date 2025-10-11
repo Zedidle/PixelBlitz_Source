@@ -67,10 +67,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int TotalPerfectDodgeTimes;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<EStyleType> StyleType;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurCharacterName;
 
