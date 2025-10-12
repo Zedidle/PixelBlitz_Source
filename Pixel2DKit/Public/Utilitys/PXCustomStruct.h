@@ -51,7 +51,7 @@ public:
 
 
 #pragma region EWeather
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (ScriptName = "GameStatusWeather"))
 enum class EWeather : uint8
 {
 	Overcast UMETA(DisplayName = "阴"),

@@ -16,7 +16,7 @@ class PIXEL2DKIT_API UPXResourceDataAsset : public UDataAsset
 	
 public:
 	UPROPERTY( EditAnywhere, Category = "Custom | FootStep")
-	TMap<TEnumAsByte<EWeather>, TSoftObjectPtr<UNiagaraSystem>> WeatherTypeToNiagara;
+	TMap<EWeather, TSoftObjectPtr<UNiagaraSystem>> WeatherTypeToNiagara;
 
 	UPROPERTY( EditAnywhere, Category = "Custom | FootStep")
 	TMap<EWeather, TSoftObjectPtr<USoundBase>> WeatherTypeToSound;
