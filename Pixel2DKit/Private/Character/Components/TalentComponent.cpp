@@ -508,7 +508,7 @@ void UTalentComponent::MakeImmortalPower(bool First)
 	if (First || PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{
 		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
-	[WeakThis = TWeakObjectPtr<ThisClass>(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
+	[WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
 		{
 			if (!WeakThis.IsValid()) return;
 			if (!WeakThis->PXCharacter) return;
