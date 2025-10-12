@@ -23,6 +23,12 @@ void ABasePlatform::BeginPlay()
 	// 初始随机
 	FloatDistance = FloatDistance * (1.0f + FMath::RandRange(DistanceRandomRatio * -1.0f, DistanceRandomRatio));
 
+	TargetOffset = FloatDistance / 2 * FloatDirection.GetSafeNormal();
+	
+	SetActorLocation(StartLocation + TargetOffset);
+	
+	Period =  FloatPeriod / (2 * UE_PI);
+	
 	SetMobility(bDefaultFloat ? EComponentMobility::Type::Movable : EComponentMobility::Type::Static);
 }
 

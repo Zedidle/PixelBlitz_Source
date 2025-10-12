@@ -15,6 +15,10 @@ class PIXEL2DKIT_API ABasePlatform : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Platform", meta = (AllowPrivateAccess = "true"))
 	bool bDefaultFloat = true;
 	
+	FVector TargetOffset = FVector::ZeroVector;
+	FVector CurOffset = FVector::ZeroVector;
+	FVector PreOffset = FVector::ZeroVector;
+	float Period = 1.0f;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -38,7 +42,7 @@ public:
 	FVector StartLocation;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Platform", meta=(ExposeOnSpawn))
-	float FloatSpeedPeriod = 1.0;
+	float FloatPeriod = 1.0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Platform")
 	float DistanceRandomRatio = 0.1;
 
@@ -60,8 +64,9 @@ inline void ABasePlatform::Tick_DefaultFloat()
 	
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
-	
-	FVector DeltaLocation = FloatDirection * FloatDistance * FMath::Sin(World->TimeSeconds * FloatSpeedPeriod);
+
+	PreOffset = CurOffset;
+	CurOffset = TargetOffset * FMath::Sin(World->TimeSeconds / Period );
 	FHitResult* OutSweepHitResult = nullptr;
-	AddActorWorldOffset(DeltaLocation, false, OutSweepHitResult, ETeleportType::None);
+	AddActorWorldOffset(CurOffset - PreOffset, false, OutSweepHitResult, ETeleportType::None);
 }
