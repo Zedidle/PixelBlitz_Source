@@ -20,7 +20,7 @@ void USoundFuncLib::PlaySoundAtLocation(USoundBase* Sound, FVector Location)
 	
 	if (SettingsLocal->GetOverallVolume() <= 0) return;
 
-	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundBattleVolume();
+	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundFXVolume();
 	
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
@@ -48,7 +48,7 @@ void USoundFuncLib::PlaySound2D(USoundBase* Sound)
 	
 	if (SettingsLocal->GetOverallVolume() <= 0) return;
 
-	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundBattleVolume();
+	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundFXVolume();
 
 	UGameplayStatics::PlaySound2D(World, Sound, Volume);
 }

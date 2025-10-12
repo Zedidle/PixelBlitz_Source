@@ -92,9 +92,9 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeAudioSettings(UPXLocal
 			Setting->SetDisplayName(LOCTEXT("SoundEffectsBattleVolume_Name", "战斗效果音效"));
 			Setting->SetDescriptionRichText(LOCTEXT("SoundEffectsBattleVolume_Desc", "调节战斗音效的音量"));
 	
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundBattleVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundBattleVolume));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetSoundBattleVolume());
+			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundFXVolume));
+			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundFXVolume));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsLocal>()->GetSoundFXVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 	
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());

@@ -11,39 +11,41 @@ public class Pixel2DKit : ModuleRules
 	
         	PublicIncludePaths.AddRange(
 			new string[] {
-                Path.Combine(ModuleDirectory, "Public"),
-                Path.Combine(ModuleDirectory, "Public/Steam")
+				"Pixel2DKit"
 			}
 		);
 
 		PublicDependencyModuleNames.AddRange(new string[] { 
-			"Core", "CoreUObject", "InputCore",
+			"Core", 
+			"CoreUObject",
 			"ApplicationCore",
 			"Engine",  
-			"CommonUI",
-			"Niagara",
+			"PhysicsCore",
 			"GameplayTags",
-			"UMG",
-			"AIModule",
-			"DeveloperSettings",
-			"GameplayAbilities", 
 			"GameplayTasks", 
+			"GameplayAbilities", 
+			"AIModule",
+			"ModularGameplay",
+			"ModularGameplayActors", 
+			"DataRegistry",
+			"ReplicationGraph",
+			"GameFeatures", 
+			"SignificanceManager",
+			"CommonLoadingScreen",
+			"Niagara",
+			"ControlFlows",
+			"PropertyPath",
 			"QuicMessagingTransport", 
-			"LidarPointCloudRuntime", 
-			"PCG",
-			// "SteamLeaderboardSubsystem",
 			"OnlineSubsystemSteam", 
 			"OnlineSubsystem", 
 			"OnlineSubsystemUtils",
-			"EnhancedInput",
-			"PaperZD", "Paper2D",
+			"PaperZD", 
+			"Paper2D",
+			"WFCBaseOnActor",
 			"NavigationSystem",
-			"GameplayAbilities",
-			"ModularGameplay",
-			"ModularGameplayActors", 
-			"GameFeatures", 
 			"GameSubtitles", 
-			"GameSettings"
+			"GameSettings",
+			"AdvancedFadeObjects"
 
 		});
 
@@ -57,17 +59,29 @@ public class Pixel2DKit : ModuleRules
 		// Uncomment if you are using Slate UI
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"Slate", "SlateCore",
+			"InputCore",
+			"Slate", 
+			"SlateCore",
+			"RenderCore",
+			"DeveloperSettings",
+			"EnhancedInput",
+			"NetCore",
+			"RHI",
+			"Projects",
+			"Gauntlet",
+			"UMG",
+			"CommonUI",
 			"CommonInput",
 			"GameSettings",
 			"CommonGame",
 			"CommonUser",
 			"GameSubtitles",
 			"AudioMixer",
-			"RHI",
 			"AudioModulation",
-			"UIExtension"
-
+			"UIExtension",
+			"EngineSettings",
+			"DTLSHandlerComponent",
+			"Json"
 		});
 		
 		// Uncomment if you are using online features
@@ -75,7 +89,6 @@ public class Pixel2DKit : ModuleRules
 		PrivateDependencyModuleNames.AddRange( new string[]
 		{
 			"QuicMessagingTransport", 
-			"LidarPointCloudRuntime", 
 			"OpenSubdiv"
 		});
 

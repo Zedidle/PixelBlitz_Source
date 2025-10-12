@@ -232,7 +232,7 @@ void APXGameMode::OnLevelLoaded()
 	if (CurLevelInstance && CurLevelInstance->GetLoadedLevel())
 	{
 		IsLevelLoaded = true;
-		TArray<AActor*>& FoundActors = CurLevelInstance->GetLoadedLevel()->Actors;
+		TArray<TObjectPtr<AActor>>& FoundActors = CurLevelInstance->GetLoadedLevel()->Actors;
 		for (AActor* Actor : FoundActors)
 		{
 			if (Actor)

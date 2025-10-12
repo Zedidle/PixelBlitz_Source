@@ -1,31 +1,37 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Settings/PXSettingsLocal.h"
 #include "Engine/Engine.h"
-#include "EnhancedActionKeyMapping.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Engine/World.h"
 #include "Misc/App.h"
 #include "CommonInputSubsystem.h"
 #include "GenericPlatform/GenericPlatformFramePacer.h"
-#include "Player/PXLocalPlayer.h"
-#include "PlayerMappableInputConfig.h"
-#include "EnhancedInputSubsystems.h"
+#include "Performance/LatencyMarkerModule.h"
+#include "Performance/PXPerformanceStatTypes.h"
 #include "ICommonUIModule.h"
 #include "CommonUISettings.h"
+#include "SoundControlBusMix.h"
 #include "Widgets/Layout/SSafeZone.h"
+#include "Performance/PXPerformanceSettings.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
 #include "HAL/PlatformFramePacer.h"
 #include "Development/PXPlatformEmulationSettings.h"
-#include "Input/PXMappableConfigPair.h"
-#include "Performance/PXPerformanceSettings.h"
+#include "SoundControlBus.h"
+#include "AudioModulationStatics.h"
+#include "Pixel2DKit.h"
 #include "Subsystems/PXAudioSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PXSettingsLocal)
 
 UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Platform_Trait_BinauralSettingControlledByOS, "Platform.Trait.BinauralSettingControlledByOS");
+
+namespace PerfStatTags
+{
+	UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Platform_Trait_SupportsLatencyStats, "Platform.Trait.SupportsLatencyStats");
+	UE_DEFINE_GAMEPLAY_TAG_STATIC(TAG_Platform_Trait_SupportsLatencyMarkers, "Platform.Trait.SupportsLatencyMarkers");
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -331,7 +337,6 @@ namespace PXSettingsHelpers
 
 //////////////////////////////////////////////////////////////////////
 
-PRAGMA_DISABLE_DEPRECATION_WARNINGS
 UPXSettingsLocal::UPXSettingsLocal()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject) && FSlateApplication::IsInitialized())
@@ -339,14 +344,19 @@ UPXSettingsLocal::UPXSettingsLocal()
 		OnApplicationActivationStateChangedHandle = FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(this, &ThisClass::OnAppActivationStateChanged);
 	}
 
+	bEnableScalabilitySettings = UPXPlatformSpecificRenderingSettings::Get()->bSupportsGranularVideoQualitySettings;
+
 	SetToDefaults();
 }
-
-PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 void UPXSettingsLocal::SetToDefaults()
 {
 	Super::SetToDefaults();
+
+	bUseHeadphoneMode = false;
+	bUseHDRAudioMode = false;
+	bSoundControlBusMixLoaded = false;
+	bEnableLatencyTrackingStats = UPXSettingsLocal::DoesPlatformSupportLatencyTrackingStats();
 
 	const UPXPlatformSpecificRenderingSettings* PlatformSettings = UPXPlatformSpecificRenderingSettings::Get();
 	UserChosenDeviceProfileSuffix = PlatformSettings->DefaultDeviceProfileSuffix;
@@ -371,7 +381,12 @@ void UPXSettingsLocal::LoadSettings(bool bForceReload)
 		FrameRateLimit = 0.0f;
 	}
 
-	
+	// Enable HRTF if needed
+	bDesiredHeadphoneMode = bUseHeadphoneMode;
+	SetHeadphoneModeEnabled(bUseHeadphoneMode);
+
+	ApplyLatencyTrackingStatSetting();
+
 	DesiredUserChosenDeviceProfileSuffix = UserChosenDeviceProfileSuffix;
 
 	PXSettingsHelpers::FillScalabilitySettingsFromDeviceProfile(DeviceDefaultScalabilitySettings);
@@ -386,6 +401,8 @@ void UPXSettingsLocal::LoadSettings(bool bForceReload)
 void UPXSettingsLocal::ResetToCurrentSettings()
 {
 	Super::ResetToCurrentSettings();
+
+	bDesiredHeadphoneMode = bUseHeadphoneMode;
 
 	UserChosenDeviceProfileSuffix = DesiredUserChosenDeviceProfileSuffix;
 
@@ -567,6 +584,67 @@ void UPXSettingsLocal::SetPerfStatDisplayState(EPXDisplayablePerformanceStat Sta
 		DisplayStatList.FindOrAdd(Stat) = DisplayMode;
 	}
 	PerfStatSettingsChangedEvent.Broadcast();
+}
+
+bool UPXSettingsLocal::DoesPlatformSupportLatencyMarkers()
+{
+	return ICommonUIModule::GetSettings().GetPlatformTraits().HasTag(PerfStatTags::TAG_Platform_Trait_SupportsLatencyMarkers);
+}
+
+void UPXSettingsLocal::SetEnableLatencyFlashIndicators(const bool bNewVal)
+{
+	if (bNewVal != bEnableLatencyFlashIndicators)
+	{
+		bEnableLatencyFlashIndicators = bNewVal;
+		LatencyFlashInidicatorSettingsChangedEvent.Broadcast();
+	}	
+}
+
+void UPXSettingsLocal::SetEnableLatencyTrackingStats(const bool bNewVal)
+{
+	if (bNewVal != bEnableLatencyTrackingStats)
+	{
+		bEnableLatencyTrackingStats = bNewVal;
+
+		ApplyLatencyTrackingStatSetting();
+
+		LatencyStatIndicatorSettingsChangedEvent.Broadcast();
+	}
+}
+
+void UPXSettingsLocal::ApplyLatencyTrackingStatSetting()
+{
+	// Since this function will be called on load of the settings, we check if the slate app is initalized.
+	// If it isn't then we are not in a target which can even have latency stats (like a headless cooker) so we
+	// will exit early and do nothing.
+	if (!FSlateApplication::IsInitialized())
+	{
+		return;
+	}
+	
+	// Don't bother doing anything if the platform doesn't even support tracking stats.
+	if (!DoesPlatformSupportLatencyTrackingStats())
+	{
+		return;
+	}
+	
+	// Actually enable or disable the latency marker modules based on this setting
+	TArray<ILatencyMarkerModule*> LatencyMarkerModules = IModularFeatures::Get().GetModularFeatureImplementations<ILatencyMarkerModule>(ILatencyMarkerModule::GetModularFeatureName());
+	for (ILatencyMarkerModule* LatencyMarkerModule : LatencyMarkerModules)
+	{
+		LatencyMarkerModule->SetEnabled(bEnableLatencyTrackingStats);
+	}
+
+	UE_CLOG(!LatencyMarkerModules.IsEmpty(),
+		LogConsoleResponse,
+		Log,
+		TEXT("%s %d Latency Marker Module(s)"),
+		bEnableLatencyTrackingStats ? TEXT("Enabled") : TEXT("Disabled"), LatencyMarkerModules.Num());
+}
+
+bool UPXSettingsLocal::DoesPlatformSupportLatencyTrackingStats()
+{
+	return ICommonUIModule::GetSettings().GetPlatformTraits().HasTag(PerfStatTags::TAG_Platform_Trait_SupportsLatencyStats);
 }
 
 float UPXSettingsLocal::GetDisplayGamma() const
@@ -827,7 +905,29 @@ void UPXSettingsLocal::SetDesiredDeviceProfileQualitySuffix(const FString& InDes
 	DesiredUserChosenDeviceProfileSuffix = InDesiredSuffix;
 }
 
+void UPXSettingsLocal::SetHeadphoneModeEnabled(bool bEnabled)
+{
+	if (CanModifyHeadphoneModeEnabled())
+	{
+		static IConsoleVariable* BinauralSpatializationDisabledCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("au.DisableBinauralSpatialization"));
+		if (BinauralSpatializationDisabledCVar)
+		{
+			BinauralSpatializationDisabledCVar->Set(!bEnabled, ECVF_SetByGameSetting);
 
+			// Only save settings if the setting actually changed
+			if (bUseHeadphoneMode != bEnabled)
+			{
+				bUseHeadphoneMode = bEnabled;
+				SaveSettings();
+			}
+		}
+	}
+}
+
+bool UPXSettingsLocal::IsHeadphoneModeEnabled() const
+{
+	return bUseHeadphoneMode;
+}
 
 bool UPXSettingsLocal::CanModifyHeadphoneModeEnabled() const
 {
@@ -839,11 +939,32 @@ bool UPXSettingsLocal::CanModifyHeadphoneModeEnabled() const
 	return bHRTFOptionAvailable && !bBinauralSettingControlledByOS;
 }
 
+bool UPXSettingsLocal::IsHDRAudioModeEnabled() const
+{
+	return bUseHDRAudioMode;
+}
+
+void UPXSettingsLocal::SetHDRAudioModeEnabled(bool bEnabled)
+{
+	bUseHDRAudioMode = bEnabled;
+
+	if (GEngine)
+	{
+		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
+		{
+		// 	if (UPXAudioMixEffectsSubsystem* PXAudioMixEffectsSubsystem = World->GetSubsystem<UPXAudioMixEffectsSubsystem>())
+		// 	{
+		// 		PXAudioMixEffectsSubsystem->ApplyDynamicRangeEffectsChains(bEnabled);
+		// 	}
+		}
+	}
+}
 
 bool UPXSettingsLocal::CanRunAutoBenchmark() const
 {
-	const UPXPlatformSpecificRenderingSettings* PlatformSettings = UPXPlatformSpecificRenderingSettings::Get();
-	return PlatformSettings->bSupportsAutomaticVideoQualityBenchmark;
+	// const UPXPlatformSpecificRenderingSettings* PlatformSettings = UPXPlatformSpecificRenderingSettings::Get();
+	// return PlatformSettings->bSupportsAutomaticVideoQualityBenchmark;
+	return false;
 }
 
 bool UPXSettingsLocal::ShouldRunAutoBenchmarkAtStartup() const
@@ -868,6 +989,7 @@ void UPXSettingsLocal::RunAutoBenchmark(bool bSaveImmediately)
 	
 	// Always apply, optionally save
 	ApplyScalabilitySettings();
+	ApplyLatencyTrackingStatSetting();
 
 	if (bSaveImmediately)
 	{
@@ -880,8 +1002,35 @@ void UPXSettingsLocal::ApplyScalabilitySettings()
 	Scalability::SetQualityLevels(ScalabilityQuality);
 }
 
-void UPXSettingsLocal::UpdateBGMVolume()
+float UPXSettingsLocal::GetOverallVolume() const
 {
+	return OverallVolume;
+}
+
+void UPXSettingsLocal::SetOverallVolume(float InVolume)
+{
+	// Cache the incoming volume value
+	OverallVolume = InVolume;
+
+	// Check to see if references to the control buses and control bus mixes have been loaded yet
+	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// Ensure it's been loaded before continuing
+	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+
+	// Locate the locally cached bus and set the volume on it
+	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Overall")))
+	{
+		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+		{
+			SetVolumeForControlBus(ControlBusPtr, OverallVolume);
+		}
+	}
+
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
@@ -894,17 +1043,6 @@ void UPXSettingsLocal::UpdateBGMVolume()
 	AudioSubsystem->SetBGMVolume(GetOverallVolume() * GetMusicVolume());
 }
 
-float UPXSettingsLocal::GetOverallVolume() const
-{
-	return OverallVolume;
-}
-
-void UPXSettingsLocal::SetOverallVolume(float InVolume)
-{
-	OverallVolume = InVolume;
-	UpdateBGMVolume();
-}
-
 float UPXSettingsLocal::GetMusicVolume() const
 {
 	return MusicVolume;
@@ -912,8 +1050,38 @@ float UPXSettingsLocal::GetMusicVolume() const
 
 void UPXSettingsLocal::SetMusicVolume(float InVolume)
 {
+	// Cache the incoming volume value
 	MusicVolume = InVolume;
-	UpdateBGMVolume();
+
+	// Check to see if references to the control buses and control bus mixes have been loaded yet
+	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// Ensure it's been loaded before continuing
+	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+
+	// Locate the locally cached bus and set the volume on it
+	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Music")))
+	{
+		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+		{
+			SetVolumeForControlBus(ControlBusPtr, MusicVolume);
+		}
+	}
+
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	UGameInstance* GameInstance = World->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+	
+	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
+
+	AudioSubsystem->SetBGMVolume(GetOverallVolume() * GetMusicVolume());
 }
 
 float UPXSettingsLocal::GetSoundUIVolume() const
@@ -924,19 +1092,134 @@ float UPXSettingsLocal::GetSoundUIVolume() const
 void UPXSettingsLocal::SetSoundUIVolume(float InVolume)
 {
 	SoundUIVolume = InVolume;
-
 }
 
-float UPXSettingsLocal::GetSoundBattleVolume() const
+float UPXSettingsLocal::GetSoundFXVolume() const
 {
-	return SoundBattleVolume;
+	return SoundFXVolume;
 }
 
-void UPXSettingsLocal::SetSoundBattleVolume(float InVolume)
+void UPXSettingsLocal::SetSoundFXVolume(float InVolume)
 {
-	SoundBattleVolume = InVolume;
+	// Cache the incoming volume value
+	SoundFXVolume = InVolume;
+
+	// Check to see if references to the control buses and control bus mixes have been loaded yet
+	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// Ensure it's been loaded before continuing
+	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+
+	// Locate the locally cached bus and set the volume on it
+	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("SoundFX")))
+	{
+		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+		{
+			SetVolumeForControlBus(ControlBusPtr, SoundFXVolume);
+		}
+	}
 }
 
+float UPXSettingsLocal::GetDialogueVolume() const
+{
+	return DialogueVolume;
+}
+
+void UPXSettingsLocal::SetDialogueVolume(float InVolume)
+{
+	// Cache the incoming volume value
+	DialogueVolume = InVolume;
+
+	// Check to see if references to the control buses and control bus mixes have been loaded yet
+	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// Ensure it's been loaded before continuing
+	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+
+	// Locate the locally cached bus and set the volume on it
+	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Dialogue")))
+	{
+		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+		{
+			SetVolumeForControlBus(ControlBusPtr, DialogueVolume);
+		}
+	}
+}
+
+float UPXSettingsLocal::GetVoiceChatVolume() const
+{
+	return VoiceChatVolume;
+}
+
+void UPXSettingsLocal::SetVoiceChatVolume(float InVolume)
+{
+	// Cache the incoming volume value
+	VoiceChatVolume = InVolume;
+
+	// Check to see if references to the control buses and control bus mixes have been loaded yet
+	// Will likely need to be loaded if this function is the first time a setter has been called from the UI
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// Ensure it's been loaded before continuing
+	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+
+	// Locate the locally cached bus and set the volume on it
+	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("VoiceChat")))
+	{
+		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+		{
+			SetVolumeForControlBus(ControlBusPtr, VoiceChatVolume);
+		}
+	}
+}
+
+void UPXSettingsLocal::SetVolumeForControlBus(USoundControlBus* InSoundControlBus, float InVolume)
+{
+	// Check to see if references to the control buses and control bus mixes have been loaded yet
+	// Will likely need to be loaded if this function is the first time a setter has been called
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// Ensure it's been loaded before continuing
+	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+
+	// Assuming everything has been loaded correctly, we retrieve the world and use AudioModulationStatics to update the Control Bus Volume values and
+	// apply the settings to the cached User Control Bus Mix
+	if (GEngine && InSoundControlBus && bSoundControlBusMixLoaded)
+	{
+			if (const UWorld* AudioWorld = GEngine->GetCurrentPlayWorld())
+			{
+				ensureMsgf(ControlBusMix, TEXT("Control Bus Mix failed to load."));
+
+				// Create and set the Control Bus Mix Stage Parameters
+				FSoundControlBusMixStage UpdatedControlBusMixStage;
+				UpdatedControlBusMixStage.Bus = InSoundControlBus;
+				UpdatedControlBusMixStage.Value.TargetValue = InVolume;
+				UpdatedControlBusMixStage.Value.AttackTime = 0.01f;
+				UpdatedControlBusMixStage.Value.ReleaseTime = 0.01f;
+
+				// Add the Control Bus Mix Stage to an Array as the UpdateMix function requires
+				TArray<FSoundControlBusMixStage> UpdatedMixStageArray;
+				UpdatedMixStageArray.Add(UpdatedControlBusMixStage);
+
+				// Modify the matching bus Mix Stage parameters on the User Control Bus Mix
+				UAudioModulationStatics::UpdateMix(AudioWorld, ControlBusMix, UpdatedMixStageArray);
+			}
+	}
+}
 
 void UPXSettingsLocal::SetAudioOutputDeviceId(const FString& InAudioOutputDeviceId)
 {
@@ -949,18 +1232,69 @@ void UPXSettingsLocal::ApplySafeZoneScale()
 	SSafeZone::SetGlobalSafeZoneScale(GetSafeZone());
 }
 
-
-
 void UPXSettingsLocal::ApplyNonResolutionSettings()
 {
 	Super::ApplyNonResolutionSettings();
-	
+
+	// Check if Control Bus Mix references have been loaded,
+	// Might be false if applying non resolution settings without touching any of the setters from UI
+	if (!bSoundControlBusMixLoaded)
+	{
+		LoadUserControlBusMix();
+	}
+
+	// In this section, update each Control Bus to the currently cached UI settings
+	{
+		if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Overall")))
+		{
+			if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+			{
+				SetVolumeForControlBus(ControlBusPtr, OverallVolume);
+			}
+		}
+
+		if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Music")))
+		{
+			if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+			{
+				SetVolumeForControlBus(ControlBusPtr, MusicVolume);
+			}
+		}
+
+		if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("SoundFX")))
+		{
+			if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+			{
+				SetVolumeForControlBus(ControlBusPtr, SoundFXVolume);
+			}
+		}
+
+		if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Dialogue")))
+		{
+			if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+			{
+				SetVolumeForControlBus(ControlBusPtr, DialogueVolume);
+			}
+		}
+
+		if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("VoiceChat")))
+		{
+			if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+			{
+				SetVolumeForControlBus(ControlBusPtr, VoiceChatVolume);
+			}
+		}
+	}
 
 	if (UCommonInputSubsystem* InputSubsystem = UCommonInputSubsystem::Get(GetTypedOuter<ULocalPlayer>()))
 	{
 		InputSubsystem->SetGamepadInputType(ControllerPlatform);
 	}
 
+	if (bUseHeadphoneMode != bDesiredHeadphoneMode)
+	{
+		SetHeadphoneModeEnabled(bDesiredHeadphoneMode);
+	}
 	
 	if (DesiredUserChosenDeviceProfileSuffix != UserChosenDeviceProfileSuffix)
 	{
@@ -1034,167 +1368,119 @@ FName UPXSettingsLocal::GetControllerPlatform() const
 	return ControllerPlatform;
 }
 
-PRAGMA_DISABLE_DEPRECATION_WARNINGS
-
-void UPXSettingsLocal::RegisterInputConfig(ECommonInputType Type, const UPlayerMappableInputConfig* NewConfig, const bool bIsActive)
+void UPXSettingsLocal::LoadUserControlBusMix()
 {
-	if (NewConfig)
+	if (GEngine)
 	{
-		const int32 ExistingConfigIdx = RegisteredInputConfigs.IndexOfByPredicate( [&NewConfig](const FLoadedMappableConfigPair& Pair) { return Pair.Config == NewConfig; } );
-		if (ExistingConfigIdx == INDEX_NONE)
+		if (const UWorld* World = GEngine->GetCurrentPlayWorld())
 		{
-			const int32 NumAdded = RegisteredInputConfigs.Add(FLoadedMappableConfigPair(NewConfig, Type, bIsActive));
-			if (NumAdded != INDEX_NONE)
-			{
-				OnInputConfigRegistered.Broadcast(RegisteredInputConfigs[NumAdded]);
-			}	
+			// if (const UPXAudioSettings* PXAudioSettings = GetDefault<UPXAudioSettings>())
+			// {
+			// 	USoundControlBus* OverallControlBus = nullptr;
+			// 	USoundControlBus* MusicControlBus = nullptr;
+			// 	USoundControlBus* SoundFXControlBus = nullptr;
+			// 	USoundControlBus* DialogueControlBus = nullptr;
+			// 	USoundControlBus* VoiceChatControlBus = nullptr;
+			//
+			// 	ControlBusMap.Empty();
+			//
+			// 	if (UObject* ObjPath = PXAudioSettings->OverallVolumeControlBus.TryLoad())
+			// 	{
+			// 		if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
+			// 		{
+			// 			OverallControlBus = SoundControlBus;
+			// 			ControlBusMap.Add(TEXT("Overall"), OverallControlBus);
+			// 		}
+			// 		else
+			// 		{
+			// 			ensureMsgf(SoundControlBus, TEXT("Overall Control Bus reference missing from PX Audio Settings."));
+			// 		}
+			// 	}
+			//
+			// 	if (UObject* ObjPath = PXAudioSettings->MusicVolumeControlBus.TryLoad())
+			// 	{
+			// 		if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
+			// 		{
+			// 			MusicControlBus = SoundControlBus;
+			// 			ControlBusMap.Add(TEXT("Music"), MusicControlBus);
+			// 		}
+			// 		else
+			// 		{
+			// 			ensureMsgf(SoundControlBus, TEXT("Music Control Bus reference missing from PX Audio Settings."));
+			// 		}
+			// 	}
+			//
+			// 	if (UObject* ObjPath = PXAudioSettings->SoundFXVolumeControlBus.TryLoad())
+			// 	{
+			// 		if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
+			// 		{
+			// 			SoundFXControlBus = SoundControlBus;
+			// 			ControlBusMap.Add(TEXT("SoundFX"), SoundFXControlBus);
+			// 		}
+			// 		else
+			// 		{
+			// 			ensureMsgf(SoundControlBus, TEXT("SoundFX Control Bus reference missing from PX Audio Settings."));
+			// 		}
+			// 	}
+			//
+			// 	if (UObject* ObjPath = PXAudioSettings->DialogueVolumeControlBus.TryLoad())
+			// 	{
+			// 		if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
+			// 		{
+			// 			DialogueControlBus = SoundControlBus;
+			// 			ControlBusMap.Add(TEXT("Dialogue"), DialogueControlBus);
+			// 		}
+			// 		else
+			// 		{
+			// 			ensureMsgf(SoundControlBus, TEXT("Dialogue Control Bus reference missing from PX Audio Settings."));
+			// 		}
+			// 	}
+			//
+			// 	if (UObject* ObjPath = PXAudioSettings->VoiceChatVolumeControlBus.TryLoad())
+			// 	{
+			// 		if (USoundControlBus* SoundControlBus = Cast<USoundControlBus>(ObjPath))
+			// 		{
+			// 			VoiceChatControlBus = SoundControlBus;
+			// 			ControlBusMap.Add(TEXT("VoiceChat"), VoiceChatControlBus);
+			// 		}
+			// 		else
+			// 		{
+			// 			ensureMsgf(SoundControlBus, TEXT("VoiceChat Control Bus reference missing from PX Audio Settings."));
+			// 		}
+			// 	}
+			//
+			// 	if (UObject* ObjPath = PXAudioSettings->UserSettingsControlBusMix.TryLoad())
+			// 	{
+			// 		if (USoundControlBusMix* SoundControlBusMix = Cast<USoundControlBusMix>(ObjPath))
+			// 		{
+			// 			ControlBusMix = SoundControlBusMix;
+			//
+			// 			const FSoundControlBusMixStage OverallControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, OverallControlBus, OverallVolume);
+			// 			const FSoundControlBusMixStage MusicControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, MusicControlBus, MusicVolume);
+			// 			const FSoundControlBusMixStage SoundFXControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, SoundFXControlBus, SoundFXVolume);
+			// 			const FSoundControlBusMixStage DialogueControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, DialogueControlBus, DialogueVolume);
+			// 			const FSoundControlBusMixStage VoiceChatControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, VoiceChatControlBus, VoiceChatVolume);
+			//
+			// 			TArray<FSoundControlBusMixStage> ControlBusMixStageArray;
+			// 			ControlBusMixStageArray.Add(OverallControlBusMixStage);
+			// 			ControlBusMixStageArray.Add(MusicControlBusMixStage);
+			// 			ControlBusMixStageArray.Add(SoundFXControlBusMixStage);
+			// 			ControlBusMixStageArray.Add(DialogueControlBusMixStage);
+			// 			ControlBusMixStageArray.Add(VoiceChatControlBusMixStage);
+			//
+			// 			UAudioModulationStatics::UpdateMix(World, ControlBusMix, ControlBusMixStageArray);
+			//
+			// 			bSoundControlBusMixLoaded = true;
+			// 		}
+			// 		else
+			// 		{
+			// 			ensureMsgf(SoundControlBusMix, TEXT("User Settings Control Bus Mix reference missing from PX Audio Settings."));
+			// 		}
+			// 	}
+			// }
 		}
 	}
 }
-
-int32 UPXSettingsLocal::UnregisterInputConfig(const UPlayerMappableInputConfig* ConfigToRemove)
-{
-	if (ConfigToRemove)
-	{
-		const int32 Index = RegisteredInputConfigs.IndexOfByPredicate( [&ConfigToRemove](const FLoadedMappableConfigPair& Pair) { return Pair.Config == ConfigToRemove; } );
-		if (Index != INDEX_NONE)
-		{
-			RegisteredInputConfigs.RemoveAt(Index);
-			return 1;
-		}
-			
-	}
-	return INDEX_NONE;
-}
-
-const UPlayerMappableInputConfig* UPXSettingsLocal::GetInputConfigByName(FName ConfigName) const
-{
-	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
-	{
-		if (Pair.Config->GetConfigName() == ConfigName)
-		{
-			return Pair.Config;
-		}
-	}
-	return nullptr;
-}
-
-void UPXSettingsLocal::GetRegisteredInputConfigsOfType(ECommonInputType Type, TArray<FLoadedMappableConfigPair>& OutArray) const
-{
-	OutArray.Empty();
-
-	// If "Count" is passed in then 
-	if (Type == ECommonInputType::Count)
-	{
-		OutArray = RegisteredInputConfigs;
-		return;
-	}
-	
-	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
-	{
-		if (Pair.Type == Type)
-		{
-			OutArray.Emplace(Pair);
-		}
-	}
-}
-
-void UPXSettingsLocal::GetAllMappingNamesFromKey(const FKey InKey, TArray<FName>& OutActionNames)
-{
-	if (InKey == EKeys::Invalid)
-	{
-		return;
-	}
-
-	// adding any names of actions that are bound to that key
-	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
-	{
-		if (Pair.Type == ECommonInputType::MouseAndKeyboard)
-		{
-			for (const FEnhancedActionKeyMapping& Mapping : Pair.Config->GetPlayerMappableKeys())
-			{
-				FName MappingName(Mapping.GetDisplayName().ToString());
-				FName ActionName = Mapping.GetMappingName();
-				// make sure it isn't custom bound as well
-				if (const FKey* MappingKey = CustomKeyboardConfig.Find(ActionName))
-				{
-					if (*MappingKey == InKey)
-					{
-						OutActionNames.Add(MappingName);
-					}
-				}
-				else
-				{
-					if (Mapping.Key == InKey)
-					{
-						OutActionNames.Add(MappingName);
-					}
-				}
-			}
-		}
-	}
-}
-
-void UPXSettingsLocal::AddOrUpdateCustomKeyboardBindings(const FName MappingName, const FKey NewKey, UPXLocalPlayer* LocalPlayer)
-{
-	if (MappingName == NAME_None)
-	{
-		return;
-	}
-	
-	if (InputConfigName != TEXT("Custom"))
-	{
-		// Copy Presets.
-		if (const UPlayerMappableInputConfig* DefaultConfig = GetInputConfigByName(TEXT("Default")))
-		{
-			for (const FEnhancedActionKeyMapping& Mapping : DefaultConfig->GetPlayerMappableKeys())
-			{
-				// Make sure that the mapping has a valid name, its possible to have an empty name
-				// if someone has marked a mapping as "Player Mappable" but deleted the default field value
-				if (Mapping.GetMappingName() != NAME_None)
-				{
-					CustomKeyboardConfig.Add(Mapping.GetMappingName(), Mapping.Key);
-				}
-			}
-		}
-		
-		InputConfigName = TEXT("Custom");
-	} 
-
-	if (FKey* ExistingMapping = CustomKeyboardConfig.Find(MappingName))
-	{
-		// Change the key to the new one
-		CustomKeyboardConfig[MappingName] = NewKey;
-	}
-	else
-	{
-		CustomKeyboardConfig.Add(MappingName, NewKey);
-	}
-
-	// Tell the enhanced input subsystem for this local player that we should remap some input! Woo
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-	{
-		Subsystem->AddPlayerMappedKeyInSlot(MappingName, NewKey);
-	}
-}
-
-void UPXSettingsLocal::ResetKeybindingToDefault(const FName MappingName, UPXLocalPlayer* LocalPlayer)
-{
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-	{
-		Subsystem->RemoveAllPlayerMappedKeysForMapping(MappingName);
-	}
-}
-
-void UPXSettingsLocal::ResetKeybindingsToDefault(UPXLocalPlayer* LocalPlayer)
-{
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-	{
-		Subsystem->RemoveAllPlayerMappedKeys();
-	}
-}
-
-PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 void UPXSettingsLocal::OnAppActivationStateChanged(bool bIsActive)
 {
@@ -1335,6 +1621,13 @@ void UPXSettingsLocal::UpdateGameModeDeviceProfileAndFps()
 					{
 						UE_LOG(LogConsoleResponse, Log, TEXT("Overriding device profile to %s"), *ActualProfileToApply);
 						Manager.SetOverrideDeviceProfile(NewDeviceProfile);
+
+						if (!bEnableScalabilitySettings)
+						{
+							// We don't support persistence of the scalability settings but at least we may
+							// provide up to date values if anybody queries them using the settings API.
+							ScalabilityQuality = Scalability::GetQualityLevels();
+						}
 					}
 				}
 			}

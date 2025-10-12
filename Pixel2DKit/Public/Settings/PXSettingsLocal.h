@@ -1,23 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
-#include "CoreMinimal.h"
 #include "GameFramework/GameUserSettings.h"
-#include "Performance/PXPerformanceStatTypes.h"
-#include "Input/PXMappableConfigPair.h"
 #include "InputCoreTypes.h"
+
 #include "PXSettingsLocal.generated.h"
 
-
-struct FLoadedMappableConfigPair;
 enum class ECommonInputType : uint8;
 enum class EPXDisplayablePerformanceStat : uint8;
 enum class EPXStatDisplayMode : uint8;
 
 class UPXLocalPlayer;
 class UObject;
-class UPlayerMappableInputConfig;
 class USoundControlBus;
 class USoundControlBusMix;
 struct FFrame;
@@ -34,12 +27,14 @@ struct FPXScalabilitySnapshot
 	bool bHasOverrides = false;
 };
 
+/**
+ * UPXSettingsLocal
+ */
 UCLASS()
-class PIXEL2DKIT_API UPXSettingsLocal : public UGameUserSettings
+class UPXSettingsLocal : public UGameUserSettings
 {
 	GENERATED_BODY()
 
-	
 public:
 
 	UPXSettingsLocal();
@@ -87,13 +82,53 @@ public:
 	DECLARE_EVENT(UPXSettingsLocal, FPerfStatSettingsChanged);
 	FPerfStatSettingsChanged& OnPerfStatDisplayStateChanged() { return PerfStatSettingsChangedEvent; }
 
+	// Latency flash indicators
+	static bool DoesPlatformSupportLatencyMarkers();
+	
+	DECLARE_EVENT(UPXSettingsLocal, FLatencyFlashInidicatorSettingChanged);
+	UFUNCTION()
+	void SetEnableLatencyFlashIndicators(const bool bNewVal);
+	UFUNCTION()
+	bool GetEnableLatencyFlashIndicators() const { return bEnableLatencyFlashIndicators; }
+	FLatencyFlashInidicatorSettingChanged& OnLatencyFlashInidicatorSettingsChangedEvent() { return LatencyFlashInidicatorSettingsChangedEvent; }
+
+	// Latency tracking stats
+	static bool DoesPlatformSupportLatencyTrackingStats();
+	
+	DECLARE_EVENT(UPXSettingsLocal, FLatencyStatEnabledSettingChanged);
+	FLatencyStatEnabledSettingChanged& OnLatencyStatIndicatorSettingsChangedEvent() { return LatencyStatIndicatorSettingsChangedEvent; }
+	
+	UFUNCTION()
+	void SetEnableLatencyTrackingStats(const bool bNewVal);
+	UFUNCTION()
+	bool GetEnableLatencyTrackingStats() const { return bEnableLatencyTrackingStats; }
+
 private:
+
+	void ApplyLatencyTrackingStatSetting();
+	
 	// List of stats to display in the HUD
 	UPROPERTY(Config)
 	TMap<EPXDisplayablePerformanceStat, EPXStatDisplayMode> DisplayStatList;
 
 	// Event for display stat widget containers to bind to
 	FPerfStatSettingsChanged PerfStatSettingsChangedEvent;
+
+	// If true, enable latency flash markers which can be used to measure input latency.
+	UPROPERTY(Config)
+	bool bEnableLatencyFlashIndicators = false;
+
+	// Event for when the latency flash indicator setting had changed for player input to bind to.
+	FLatencyFlashInidicatorSettingChanged LatencyFlashInidicatorSettingsChangedEvent;
+
+	// Event for when the latency stats being toggled on or off has changed
+	FLatencyStatEnabledSettingChanged LatencyStatIndicatorSettingsChangedEvent;
+
+	// If true, then the game will track latency stats via ILatencyMarkerModule modules.
+	// This enables you to view some more latency oriented performance stats.
+	// The default value is set to true if the platform supports it, false otherwise.
+	UPROPERTY(Config)
+	bool bEnableLatencyTrackingStats;
 
 	//////////////////////////////////////////////////////////////////
 	// Brightness/Gamma
@@ -231,10 +266,40 @@ public:
 	FAudioDeviceChanged OnAudioOutputDeviceChanged;
 
 public:
+	/** Returns if we're using headphone mode (HRTF) **/
+	UFUNCTION()
+	bool IsHeadphoneModeEnabled() const;
+
+	/** Enables or disables headphone mode (HRTF) - NOTE this setting will be overruled if au.DisableBinauralSpatialization is set */
+	UFUNCTION()
+	void SetHeadphoneModeEnabled(bool bEnabled);
 
 	/** Returns if we can enable/disable headphone mode (i.e., if it's not forced on or off by the platform) */
 	UFUNCTION()
 	bool CanModifyHeadphoneModeEnabled() const;
+
+public:
+	/** Whether we *want* to use headphone mode (HRTF); may or may not actually be applied **/
+	UPROPERTY(Transient)
+	bool bDesiredHeadphoneMode;
+
+private:
+	/** Whether to use headphone mode (HRTF) **/
+	UPROPERTY(config)
+	bool bUseHeadphoneMode;
+
+public:
+	/** Returns if we're using High Dynamic Range Audio mode (HDR Audio) **/
+	UFUNCTION()
+	bool IsHDRAudioModeEnabled() const;
+
+	/** Enables or disables High Dynamic Range Audio mode (HDR Audio) */
+	UFUNCTION()
+	void SetHDRAudioModeEnabled(bool bEnabled);
+
+	/** Whether to use High Dynamic Range Audio mode (HDR Audio) **/
+	UPROPERTY(config)
+	bool bUseHDRAudioMode;
 
 public:
 	/** Returns true if this platform can run the auto benchmark */
@@ -252,15 +317,11 @@ public:
 	/** Apply just the quality scalability settings */
 	void ApplyScalabilitySettings();
 
-
-
-	void UpdateBGMVolume();
-
 	UFUNCTION()
 	float GetOverallVolume() const;
 	UFUNCTION()
 	void SetOverallVolume(float InVolume);
-	
+
 	UFUNCTION()
 	float GetMusicVolume() const;
 	UFUNCTION()
@@ -272,10 +333,19 @@ public:
 	void SetSoundUIVolume(float InVolume);
 	
 	UFUNCTION()
-	float GetSoundBattleVolume() const;
+	float GetSoundFXVolume() const;
 	UFUNCTION()
-	void SetSoundBattleVolume(float InVolume);
+	void SetSoundFXVolume(float InVolume);
 
+	UFUNCTION()
+	float GetDialogueVolume() const;
+	UFUNCTION()
+	void SetDialogueVolume(float InVolume);
+
+	UFUNCTION()
+	float GetVoiceChatVolume() const;
+	UFUNCTION()
+	void SetVoiceChatVolume(float InVolume);
 
 	//////////////////////////////////////////////////////////////////
 	// Audio - Sound
@@ -306,8 +376,13 @@ public:
 	void SetSafeZone(float Value) { SafeZoneScale = Value; ApplySafeZoneScale(); }
 
 	void ApplySafeZoneScale();
+private:
+	void SetVolumeForControlBus(USoundControlBus* InSoundControlBus, float InVolume);
 
-
+	//////////////////////////////////////////////////////////////////
+	// Keybindings
+public:
+	
 	// Sets the controller representation to use, a single platform might support multiple kinds of controllers.  For
 	// example, Win64 games could be played with both an XBox or Playstation controller.
 	UFUNCTION()
@@ -315,87 +390,8 @@ public:
 	UFUNCTION()
 	FName GetControllerPlatform() const;
 
-	PRAGMA_DISABLE_DEPRECATION_WARNINGS
-
-	class UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings") FInputConfigDelegate;	
-	DECLARE_EVENT_OneParam(UPXSettingsLocal, FInputConfigDelegate, const FLoadedMappableConfigPair& /*Config*/);
-
-	/** Delegate called when a new input config has been registered */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	FInputConfigDelegate OnInputConfigRegistered;
-
-	/** Delegate called when a registered input config has been activated */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	FInputConfigDelegate OnInputConfigActivated;
-	
-	/** Delegate called when a registered input config has been deactivate */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	FInputConfigDelegate OnInputConfigDeactivated;
-	
-	/** Register the given input config with the settings to make it available to the player. */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	void RegisterInputConfig(ECommonInputType Type, const UPlayerMappableInputConfig* NewConfig, const bool bIsActive);
-	
-	/** Unregister the given input config. Returns the number of configs removed. */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	int32 UnregisterInputConfig(const UPlayerMappableInputConfig* ConfigToRemove);
-
-	/** Get an input config with a certain name. If the config doesn't exist then nullptr will be returned. */
-	UFUNCTION(BlueprintCallable)
-	const UPlayerMappableInputConfig* GetInputConfigByName(FName ConfigName) const;
-
-	/** Get all currently registered input configs */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	const TArray<FLoadedMappableConfigPair>& GetAllRegisteredInputConfigs() const { return RegisteredInputConfigs; }
-
-	/**
-	 * Get all registered input configs that match the input type.
-	 * 
-	 * @param Type		The type of config to get, ECommonInputType::Count will include all configs.
-	 * @param OutArray	Array to be populated with the current registered input configs that match the type
-	 */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	void GetRegisteredInputConfigsOfType(ECommonInputType Type, OUT TArray<FLoadedMappableConfigPair>& OutArray) const;
-
-	/**
-	 * Returns the display name of any actions with that key bound to it
-	 * 
-	 * @param InKey The key to check for current mappings of
-	 * @param OutActionNames Array to store display names of actions of bound keys
-	 */
-	UE_DEPRECATED(5.3, "GetAllMappingNamesFromKey has been deprecated in favor of Enhanced Input User Settings")
-	void GetAllMappingNamesFromKey(const FKey InKey, TArray<FName>& OutActionNames);
-
-	/**
-	 * Maps the given keyboard setting to the new key
-	 * 
-	 * @param MappingName	The name of the FPlayerMappableKeyOptions that you would like to change
-	 * @param NewKey		The new key to bind this option to
-	 * @param LocalPlayer   local player to reset the keybinding on
-	 */
-	UE_DEPRECATED(5.3, "AddOrUpdateCustomKeyboardBindings has been deprecated in favor of Enhanced Input User Settings")
-	void AddOrUpdateCustomKeyboardBindings(const FName MappingName, const FKey NewKey, UPXLocalPlayer* LocalPlayer);
-
-	/**
-	 * Resets keybinding to its default value in its input mapping context 
-	 * 
-	 * @param MappingName	The name of the FPlayerMappableKeyOptions that you would like to change
-	 * @param LocalPlayer   local player to reset the keybinding on
-	 */
-	UE_DEPRECATED(5.3, "ResetKeybindingToDefault has been deprecated in favor of Enhanced Input User Settings")
-	void ResetKeybindingToDefault(const FName MappingName, UPXLocalPlayer* LocalPlayer);
-
-	/** Resets all keybindings to their default value in their input mapping context
-	 * @param LocalPlayer   local player to reset the keybinding on
-	 */
-	UE_DEPRECATED(5.3, "ResetKeybindingsToDefault has been deprecated in favor of Enhanced Input User Settings")
-	void ResetKeybindingsToDefault(UPXLocalPlayer* LocalPlayer);
-
-	UE_DEPRECATED(5.3, "GetCustomPlayerInputConfig has been deprecated in favor of Enhanced Input User Settings")
-	const TMap<FName, FKey>& GetCustomPlayerInputConfig() const { return CustomKeyboardConfig; }
-	PRAGMA_ENABLE_DEPRECATION_WARNINGS
-
 private:
+	void LoadUserControlBusMix();
 
 	UPROPERTY(Config)
 	float OverallVolume = 1.0f;
@@ -404,7 +400,7 @@ private:
 	UPROPERTY(Config)
 	float SoundUIVolume = 1.0f;
 	UPROPERTY(Config)
-	float SoundBattleVolume = 1.0f;
+	float SoundFXVolume = 1.0f;
 	UPROPERTY(Config)
 	float DialogueVolume = 1.0f;
 	UPROPERTY(Config)
@@ -412,10 +408,12 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<FName/*SoundClassName*/, TObjectPtr<USoundControlBus>> ControlBusMap;
-	
+
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBusMix> ControlBusMix = nullptr;
 
+	UPROPERTY(Transient)
+	bool bSoundControlBusMixLoaded;
 
 	UPROPERTY(Config)
 	float SafeZoneScale = -1;
@@ -434,21 +432,6 @@ private:
 	/** The name of the current input config that the user has selected. */
 	UPROPERTY(Config)
 	FName InputConfigName = TEXT("Default");
-
-	PRAGMA_DISABLE_DEPRECATION_WARNINGS
-	/**
-	 * Array of currently registered input configs. This is populated by game feature plugins
-	 * 
-	 * @see UGameFeatureAction_AddInputConfig
-	 */
-	UE_DEPRECATED(5.3, "Input registration has been deprecated in favor of Enhanced Input User Settings")
-	TArray<FLoadedMappableConfigPair> RegisteredInputConfigs;
-	
-	/** Array of custom key mappings that have been set by the player. Empty by default. */
-	UE_DEPRECATED(5.3, "CustomKeyboardConfig has been deprecated in favor of Enhanced Input User Settings")
-	TMap<FName, FKey> CustomKeyboardConfig;
-
-	PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 	// Replays
 public:
@@ -477,5 +460,4 @@ private:
 
 private:
 	FDelegateHandle OnApplicationActivationStateChangedHandle;
-	
 };
