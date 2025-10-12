@@ -1020,16 +1020,16 @@ void UPXSettingsLocal::SetOverallVolume(float InVolume)
 	}
 
 	// Ensure it's been loaded before continuing
-	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-
-	// Locate the locally cached bus and set the volume on it
-	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Overall")))
-	{
-		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-		{
-			SetVolumeForControlBus(ControlBusPtr, OverallVolume);
-		}
-	}
+	// ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+	//
+	// // Locate the locally cached bus and set the volume on it
+	// if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Overall")))
+	// {
+	// 	if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+	// 	{
+	// 		SetVolumeForControlBus(ControlBusPtr, OverallVolume);
+	// 	}
+	// }
 
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
@@ -1061,16 +1061,16 @@ void UPXSettingsLocal::SetMusicVolume(float InVolume)
 	}
 
 	// Ensure it's been loaded before continuing
-	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-
-	// Locate the locally cached bus and set the volume on it
-	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Music")))
-	{
-		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-		{
-			SetVolumeForControlBus(ControlBusPtr, MusicVolume);
-		}
-	}
+	// ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+	//
+	// // Locate the locally cached bus and set the volume on it
+	// if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("Music")))
+	// {
+	// 	if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+	// 	{
+	// 		SetVolumeForControlBus(ControlBusPtr, MusicVolume);
+	// 	}
+	// }
 
 	UWorld* World = GEngine->GetCurrentPlayWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
@@ -1112,16 +1112,16 @@ void UPXSettingsLocal::SetSoundFXVolume(float InVolume)
 	}
 
 	// Ensure it's been loaded before continuing
-	ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
-
-	// Locate the locally cached bus and set the volume on it
-	if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("SoundFX")))
-	{
-		if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
-		{
-			SetVolumeForControlBus(ControlBusPtr, SoundFXVolume);
-		}
-	}
+	// ensureMsgf(bSoundControlBusMixLoaded, TEXT("UserControlBusMix Settings Failed to Load."));
+	//
+	// // Locate the locally cached bus and set the volume on it
+	// if (TObjectPtr<USoundControlBus>* ControlBusDblPtr = ControlBusMap.Find(TEXT("SoundFX")))
+	// {
+	// 	if (USoundControlBus* ControlBusPtr = *ControlBusDblPtr)
+	// 	{
+	// 		SetVolumeForControlBus(ControlBusPtr, SoundFXVolume);
+	// 	}
+	// }
 }
 
 float UPXSettingsLocal::GetDialogueVolume() const
