@@ -426,9 +426,6 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	
-	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
-	
-	
 	// 显示到界面
 	if (IsValid(BuffStateWidget))
 	{
@@ -438,6 +435,14 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 		}
 		else
 		{
+			if (UBuffFloatingTextWidget* Widget = BuffStateWidget->Tag2Widget_In.FindRef(Tag))
+			{
+				if (Widget->BuffName != BuffName)
+				{
+					RemoveBuff(Tag);
+				}
+			}
+			
 			BuffStateWidget->BuffIn(Tag, BuffName, TextColor);
 		}
 	}
@@ -447,8 +452,6 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 
 void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
 {
-	IBuff_Interface::RemoveBuff_Implementation(Tag, OnlySelf);
-
 	if (OnlySelf)
 	{
 		if (IsValid(BuffStateWidget))

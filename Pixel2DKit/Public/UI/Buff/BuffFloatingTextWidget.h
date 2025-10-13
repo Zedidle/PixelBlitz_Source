@@ -34,7 +34,7 @@ protected:
 public:
 
 	UPROPERTY(BlueprintReadOnly)
-	FText Text;
+	FString BuffName;
 
 	UPROPERTY(BlueprintReadOnly)
 	FLinearColor TextColor = FLinearColor::White;
@@ -53,8 +53,15 @@ public:
 	
 	
 	UFUNCTION()
-	void InitializeData(FText _Text, FLinearColor _TextColor, FVector2D _Translation, FVector2D _RenderScale, float _PlaySpeed, bool _In);
+	void InitializeData(const FString& _BuffName, FLinearColor _TextColor, float _PlaySpeed, bool _In,
+		FVector2D _Translation = FVector2D::ZeroVector,FVector2D _RenderScale = FVector2D(1.0f, 1.0f));
 
+	UFUNCTION()
+	void SetBuffName(const FString& _BuffName);
+
+	UFUNCTION()
+	void PlayIn();
+	
 	UFUNCTION()
 	void PlayOut();
 

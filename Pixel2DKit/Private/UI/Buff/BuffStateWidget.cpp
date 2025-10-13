@@ -11,33 +11,30 @@
 
 void UBuffStateWidget::BuffIn_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor)
 {
-	UKismetStringLibrary::Concat_StrStr(">", BuffName);
-	if (Tag2Widget.Contains(Tag))
+	if (UBuffFloatingTextWidget* Widget = Tag2Widget_In.FindRef(Tag))
 	{
-		Tag2Widget[Tag]->RemoveFromParent();
+		if (Widget->BuffName != BuffName)
+		{
+			Widget->SetBuffName(BuffName);
+			Widget->PlayIn();
+		}
+		return;
 	}
-
+	
 	// BuffFloatingText 相关
 	if (BuffFloatingText_WidgetClass)
 	{
-		UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(CreateWidget(GetWorld(), BuffFloatingText_WidgetClass));
+		TObjectPtr<UBuffFloatingTextWidget> BuffFloatingTextWidget = CreateWidget<UBuffFloatingTextWidget>(this, BuffFloatingText_WidgetClass);
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
 		
-		BuffFloatingTextWidget->InitializeData(
-		FText::FromString(UKismetStringLibrary::Concat_StrStr(">", BuffName)),
-			TextColor,
-			FVector2D::ZeroVector,
-			FVector2D(1.0f, 1.0f),
-			1.0f,
-			true
-		);
-		Tag2Widget.Add(Tag, BuffFloatingTextWidget);
+		BuffFloatingTextWidget->InitializeData( BuffName, TextColor,1.0f,true);
 
 		if (VerticalBox_BuffIn)
 		{
 			if (UVerticalBoxSlot* VerticalBoxSlot = VerticalBox_BuffIn->AddChildToVerticalBox(BuffFloatingTextWidget))
 			{
 				VerticalBoxSlot->SetHorizontalAlignment(HAlign_Right);
+				Tag2Widget_In.Add(Tag, BuffFloatingTextWidget);
 			}
 		}
 	}
@@ -45,21 +42,20 @@ void UBuffStateWidget::BuffIn_Implementation(FGameplayTag Tag, const FString& Bu
 
 void UBuffStateWidget::BuffOut_Implementation(FGameplayTag Tag)
 {
-	if (!Tag2Widget.Contains(Tag)) return;
+	UBuffFloatingTextWidget* Widget = Tag2Widget_In.FindRef(Tag);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Widget);
 
-	UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(Tag2Widget[Tag]);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
+	Widget->RemoveFromParent();
+	Tag2Widget_In.Remove(Tag);
 
-	BuffFloatingTextWidget->RemoveFromParent();
-	Tag2Widget.Remove(Tag);
-
-	BuffFloatingTextWidget->In = false;
+	Widget->In = false;
 
 	if (VerticalBox_BuffOut)
 	{
-		if (UVerticalBoxSlot* VerticalBoxSlot = VerticalBox_BuffOut->AddChildToVerticalBox(BuffFloatingTextWidget))
+		if (UVerticalBoxSlot* VerticalBoxSlot = VerticalBox_BuffOut->AddChildToVerticalBox(Widget))
 		{
 			VerticalBoxSlot->SetHorizontalAlignment(HAlign_Right);
+			Tag2Widget_Out.Add(Tag, Widget);
 		}
 	}
 }
@@ -67,29 +63,21 @@ void UBuffStateWidget::BuffOut_Implementation(FGameplayTag Tag)
 
 void UBuffStateWidget::BuffPermanent_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor)
 {
-	if (Tag2Widget.Contains(Tag)) return;
+	if (Tag2Widget_Permanent.Contains(Tag)) return;
 
 	if (BuffFloatingTextPermanent_WidgetClass)
 	{
-		if (UBuffPermanentFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffPermanentFloatingTextWidget>(
-	CreateWidget(GetWorld(), BuffFloatingTextPermanent_WidgetClass)))
+		if (UBuffPermanentFloatingTextWidget* Widget = CreateWidget<UBuffPermanentFloatingTextWidget>(this, BuffFloatingTextPermanent_WidgetClass))
 		{
-			BuffFloatingTextWidget->InitializeData(
-			FText::FromString(UKismetStringLibrary::Concat_StrStr(BuffName,"*")),
-				TextColor,
-				FVector2D::ZeroVector,
-				FVector2D(1.0f, 1.0f),
-				1.0f
-			);
-			Tag2Widget.Add(Tag, BuffFloatingTextWidget);
+			Widget->InitializeData(BuffName,TextColor);
 
 			if (VerticalBox_BuffPermanent)
 			{
-				VerticalBox_BuffPermanent->AddChildToVerticalBox(BuffFloatingTextWidget)->SetHorizontalAlignment(HAlign_Left);
+				VerticalBox_BuffPermanent->AddChildToVerticalBox(Widget)->SetHorizontalAlignment(HAlign_Left);
+				Tag2Widget_Permanent.Add(Tag, Widget);
 			}
 		}
 	}
-	
 }
 
 
@@ -112,13 +100,27 @@ void UBuffStateWidget::NativeConstruct()
 void UBuffStateWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+	for (auto& Pair : Tag2Widget_In)
+	{
+		Pair.Value->RemoveFromParent();
+	}
+	for (auto& Pair : Tag2Widget_Out)
+	{
+		Pair.Value->RemoveFromParent();
+	}
+	for (auto& Pair : Tag2Widget_Permanent)
+	{
+		Pair.Value->RemoveFromParent();
+	}
+	Tag2Widget_In.Empty();
+	Tag2Widget_Out.Empty();
+	Tag2Widget_Permanent.Empty();
 }
 
 void UBuffStateWidget::BuffExpire_Implementation(FGameplayTag Tag)
 {
-	if (!Tag2Widget.Contains(Tag)) return;
-
-	UBuffFloatingTextWidget* BuffFloatingTextWidget = Cast<UBuffFloatingTextWidget>(Tag2Widget[Tag]);
+	UBuffFloatingTextWidget* BuffFloatingTextWidget = Tag2Widget_In.FindRef(Tag);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
+	
 	BuffFloatingTextWidget->DispearOut();
 }

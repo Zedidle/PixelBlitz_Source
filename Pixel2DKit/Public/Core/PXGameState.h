@@ -42,7 +42,7 @@ struct FWeather: public FTableRowBase
 	EWeather WeatherType = EWeather::Sunny;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	UPrimaryDataAsset* WeatherSetting;
+	UPrimaryDataAsset* WeatherSetting = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
 	FWeatherEffectData WeatherEffect;

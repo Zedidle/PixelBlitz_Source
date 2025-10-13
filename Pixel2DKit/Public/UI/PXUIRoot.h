@@ -22,7 +22,7 @@ struct FActivatableWidgetStackToRegister
 
 	// 在蓝图Widget界面中赋值
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UCommonActivatableWidgetStack* WidgetStack; 
+	UCommonActivatableWidgetStack* WidgetStack = nullptr;
 };
 
 class UCanvasPanel;

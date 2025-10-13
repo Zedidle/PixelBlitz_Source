@@ -10,5 +10,14 @@ public class Pixel2DKitTarget : TargetRules
 		Type = TargetType.Game;
 
 		ExtraModuleNames.AddRange( new string[] { "Pixel2DKit"} );
+
+		ApplySharedTargetSettings(this);
+	}
+	
+	
+	internal static void ApplySharedTargetSettings(TargetRules Target)
+	{
+		Target.DefaultBuildSettings = BuildSettingsVersion.V5;
+		Target.IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 	}
 }

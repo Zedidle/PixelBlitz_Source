@@ -4,6 +4,7 @@
 #include "UI/Buff/BuffPermanentFloatingTextWidget.h"
 
 #include "Components/TextBlock.h"
+#include "Kismet/KismetStringLibrary.h"
 
 void UBuffPermanentFloatingTextWidget::NativeConstruct()
 {
@@ -16,16 +17,24 @@ void UBuffPermanentFloatingTextWidget::NativeConstruct()
 	if (TextBlock)
 	{
 		TextBlock->SetRenderScale(RenderScale);
+		TextBlock->SetColorAndOpacity(TextColor);
 	}
 	
 }
 
-void UBuffPermanentFloatingTextWidget::InitializeData(FText _Text, FLinearColor _TextColor, FVector2D _Translation,
+void UBuffPermanentFloatingTextWidget::InitializeData(const FString& _BuffName, FLinearColor _TextColor, FVector2D _Translation,
                                                       FVector2D _RenderScale, float _PlaySpeed)
 {
-		Text = _Text;
+		SetBuffName(_BuffName);
     	TextColor = _TextColor;
     	Translation = _Translation;
     	RenderScale = _RenderScale;
     	PlaySpeed = _PlaySpeed;
+}
+
+void UBuffPermanentFloatingTextWidget::SetBuffName(const FString& _BuffName)
+{
+	BuffName = _BuffName;
+	TextBlock->SetText(FText::FromString(UKismetStringLibrary::Concat_StrStr(BuffName,"*")));
+	
 }

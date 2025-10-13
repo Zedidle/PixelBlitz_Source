@@ -17,11 +17,6 @@ UCLASS(Abstract, Blueprintable)
 class PIXEL2DKIT_API UBuffStateWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
-
-	UPROPERTY()
-	TMap<FGameplayTag, UUserWidget*> Tag2Widget;
-
 	
 protected:
 	virtual void NativeConstruct() override;
@@ -40,6 +35,15 @@ protected:
 	
 public:
 
+
+	UPROPERTY(Transient)
+	TMap<FGameplayTag, TObjectPtr<UBuffPermanentFloatingTextWidget>> Tag2Widget_Permanent;
+	UPROPERTY(Transient)
+	TMap<FGameplayTag, TObjectPtr<UBuffFloatingTextWidget>> Tag2Widget_In;
+	UPROPERTY(Transient)
+	TMap<FGameplayTag, TObjectPtr<UBuffFloatingTextWidget>> Tag2Widget_Out;
+
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Buff")
 	TSubclassOf<UBuffFloatingTextWidget> BuffFloatingText_WidgetClass;
 	

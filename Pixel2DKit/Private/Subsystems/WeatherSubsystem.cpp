@@ -57,7 +57,6 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (!BuffComp) continue;
 
 		// 时分影响
-		IBuff_Interface::Execute_RemoveBuff(BuffComp, DayTimeTag, false);
 		if (GS->DayTimeType == EDayTimeType::Dawn)
 		{
 			DayTimeEffect = DayTimeEffectSight->DawnEffect;
@@ -83,7 +82,6 @@ void UWeatherSubsystem::MakeWeatherEffect()
 
 
 		// 天气影响
-		IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
 		if (!GS->WeatherName.IsEmpty())
 		{
 			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag, GS->WeatherName.ToString(), FLinearColor::White, false);
