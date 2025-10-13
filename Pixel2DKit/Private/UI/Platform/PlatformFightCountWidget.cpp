@@ -27,7 +27,7 @@ void UPlatformFightCountWidget::Show()
 void UPlatformFightCountWidget::Fade(float Delay)
 {
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "UPlatformFightCountWidget::Fade",
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		if (WeakThis->CurNum > 0)

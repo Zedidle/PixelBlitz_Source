@@ -51,7 +51,7 @@ void UHealthComponent::OnHurtInvulnerable()
 	FName TimerName = FName( GetReadableName()+ "_OnHurtInvulnerable");
 	
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->InvulnerableForDuration(WeakThis->InvulnerableDuration);
@@ -61,7 +61,7 @@ void UHealthComponent::OnHurtInvulnerable()
 void UHealthComponent::InvulnerableForDuration(float duration)
 {
 	SetInvulnerable(true);
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetInvulnerable(false);
@@ -75,7 +75,7 @@ void UHealthComponent::FlashForDuration(FLinearColor FlashColor, int FlashTimes,
 	
 	FName TimerName = FName("UHealthComponent::FlashForDuration" + FGuid::NewGuid().ToString());
 	UTimerSubsystemFuncLib::SetDelayLoop(World, TimerName,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this), FlashColor]
+		[WeakThis = TWeakObjectPtr(this), FlashColor]
 		{
 			if (!WeakThis.IsValid()) return;
 			

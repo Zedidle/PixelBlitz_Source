@@ -260,14 +260,14 @@ void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Gamepl
 
 void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
-	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);
-
+	if (!Tag.IsValid()) return;
+	
 	RemoveBuff_Speed(Tag);
 	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (!Owner->Implements<UBuff_Interface>()) return;
 	
-	float SlowDownResistancePercent = IBuff_Interface::Execute_GetSlowDownResistancePercent(Owner);
+	float SlowDownResistancePercent = Execute_GetSlowDownResistancePercent(Owner);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Speed.Add( Tag, SustainTime + Now);
 
@@ -342,8 +342,9 @@ void UBuffComponent::BuffUpdate_Speed_Implementation()
 
 void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
 {
-	IBuff_Interface::BuffEffect_Attack_Implementation(Tag, Percent, Value, SustainTime);
+	if (!Tag.IsValid()) return;
 
+	
 	RemoveBuff_Attack(Tag);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Attack.Add(Tag, SustainTime + Now);
@@ -367,14 +368,21 @@ void UBuffComponent::BuffUpdate_Attack_Implementation()
 
 void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
-	IBuff_Interface::BuffEffect_Sight_Implementation(Tag, Percent, Value, SustainTime);
+	// 思考是否 同一个 Tag，Percent和Value都一定一样，如果是，则可以取消注释，删除下面的RemoveBuff_xxx
+	// if (Tag2BuffEffect_Sight.Contains(Tag))
+	// {
+	// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+	// 	Tag2BuffEndTime_Sight[Tag] = SustainTime + Now;
+	// 	return;
+	// }
+	if (!Tag.IsValid()) return;
 	
 	RemoveBuff_Sight(Tag);
 	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
 	if (!Owner->Implements<UBuff_Interface>()) return;
 
-	float ShortSightResistancePercent = IBuff_Interface::Execute_GetShortSightResistancePercent(Owner);
+	float ShortSightResistancePercent = Execute_GetShortSightResistancePercent(Owner);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 	Tag2BuffEndTime_Sight.Add( Tag, SustainTime + Now);
 
@@ -424,7 +432,7 @@ int32 UBuffComponent::Buff_CalInitDamage_Implementation(int32 InDamage)
 void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
 	bool Permanent)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	if (!Tag.IsValid()) return;
 	
 	// 显示到界面
 	if (IsValid(BuffStateWidget))
@@ -452,6 +460,8 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 
 void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
 {
+	if (!Tag.IsValid()) return;
+	
 	if (OnlySelf)
 	{
 		if (IsValid(BuffStateWidget))
@@ -505,11 +515,13 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 	const FBuffOnWidget* Data = DataTableSubsystem->GetBuffOnWidgetDataByTag(Tag);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Data)
 	
-	IBuff_Interface::Execute_AddBuff(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
+	Execute_AddBuff(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
 }
 
 void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 {
+	if (!Tag.IsValid()) return;
+	
 	if (IsValid(BuffStateWidget))
 	{
 		BuffStateWidget->BuffExpire(Tag);

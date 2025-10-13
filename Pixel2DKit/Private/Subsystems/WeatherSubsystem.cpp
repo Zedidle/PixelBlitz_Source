@@ -47,9 +47,10 @@ void UWeatherSubsystem::MakeWeatherEffect()
 	
 	if (FoundActors.IsEmpty()) return;
 
-	FGameplayTag DayTimeTag = FGameplayTag::RequestGameplayTag("Buff.DayTime");
-	FGameplayTag WeatherTag = FGameplayTag::RequestGameplayTag("Buff.Weather");
+
 	FBuffValueEffect DayTimeEffect;
+
+	FGameplayTag NewDayTimeTag = DayTimeEffectSight->DayTimeType2BuffTag.FindRef(GS->DayTimeType);
 
 	for (auto& Actor : FoundActors)
 	{
@@ -73,23 +74,25 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		{
 			DayTimeEffect = DayTimeEffectSight->NightEffect;
 		}
-		
-		if (DayTimeEffectSight->DayTimeType2BuffTag.Contains(GS->DayTimeType))
+
+		if (NewDayTimeTag.IsValid() && NewDayTimeTag != CurDayTimeTag)
 		{
-			BuffComp->AddBuffByTag(DayTimeEffectSight->DayTimeType2BuffTag[GS->DayTimeType]);
+			IBuff_Interface::Execute_RemoveBuff(BuffComp, CurDayTimeTag, true);
+			BuffComp->AddBuffByTag(NewDayTimeTag);
+			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, NewDayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
+			
+			CurDayTimeTag = NewDayTimeTag;
 		}
-		IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, DayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
 
-
-		// 天气影响
+		// 天气影响 视野 和 速度
 		if (!GS->WeatherName.IsEmpty())
 		{
-			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag, GS->WeatherName.ToString(), FLinearColor::White, false);
+			IBuff_Interface::Execute_RemoveBuff(BuffComp, CurWeatherTag, true);
+			IBuff_Interface::Execute_AddBuff(BuffComp, CurWeatherTag, GS->WeatherName.ToString(), FLinearColor::White, false);
+			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, CurWeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
+			IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, CurWeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
 		}
 
-		IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
-		IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, WeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
-		
 		
 		// 针对玩家的血量影响
 		if (Cast<ABasePXCharacter>(Actor) && GameDataAsset->GE_WeatherEffect_HP)
@@ -102,7 +105,7 @@ void UWeatherSubsystem::MakeWeatherEffect()
 					FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(GameDataAsset->GE_WeatherEffect_HP, 1, ASC->MakeEffectContext());
 					if (FGameplayEffectSpec* Spec = SpecHandle.Data.Get())
 					{
-						Spec->SetSetByCallerMagnitude(FGameplayTag::RequestGameplayTag("Buff.Weather.HPEffectPerSeconds"), GS->WeatherEffect.HPEffectPerSecond);
+						Spec->SetSetByCallerMagnitude(TAG("Buff.Weather.HPEffectPerSeconds"), GS->WeatherEffect.HPEffectPerSecond);
 						ASC->ApplyGameplayEffectSpecToSelf(*Spec);
 					}
 				}

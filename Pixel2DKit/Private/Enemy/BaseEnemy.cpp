@@ -506,7 +506,7 @@ void ABaseEnemy::DelayLosePlayer_Implementation()
 {
 	FName TimerName = FName(GetActorNameOrLabel() + "_DelayLosePlayer");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 			if (WeakThis->bDead) return;
@@ -622,7 +622,7 @@ void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 {
 	FName TimerName = FName(GetActorNameOrLabel() + "_InAttackState");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
-	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 

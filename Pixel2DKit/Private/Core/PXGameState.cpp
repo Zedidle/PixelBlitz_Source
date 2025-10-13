@@ -113,15 +113,13 @@ void APXGameState::DealStatics_Implementation()
 
 void APXGameState::PassDayTime(float Time, bool DirectSet, float TransitionDuration, FName _ForceWeatherIndex)
 {
-	if (_ForceWeatherIndex.IsValid())
+	if (!_ForceWeatherIndex.IsNone())
 	{
 		ForceWeatherIndex = _ForceWeatherIndex;
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 		{
-			if (WeakThis.IsValid())
-			{
-				WeakThis->ForceWeatherIndex = FName("");
-			}
+			if (!WeakThis.IsValid()) return;
+			WeakThis->ForceWeatherIndex = FName("");
 		}, TransitionDuration + 0.5);
 	}
 	

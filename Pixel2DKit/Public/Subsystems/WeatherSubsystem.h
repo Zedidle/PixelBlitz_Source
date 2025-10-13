@@ -47,6 +47,9 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+	FGameplayTag CurDayTimeTag;
+	// Weather暂且共用一个Tag
+	FGameplayTag CurWeatherTag = TAG("Buff.Weather");
 	
 	UFUNCTION(BlueprintCallable, Category = "WeatherSystem")
 	void MakeWeatherEffect();
