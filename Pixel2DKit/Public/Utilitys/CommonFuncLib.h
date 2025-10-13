@@ -50,9 +50,6 @@ public:
 	static void SpawnCenterTip(FText _Tip, FLinearColor _Color = FLinearColor::White, FVector2D _Translation = FVector2D(0,0),
 		FVector2D _Scale = FVector2D(1.0f, 1.0f), float _PlaybackSpeed = 1.0f, EFloatingTextAnimType _AnimType = EFloatingTextAnimType::Shaking);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Input")
-	static FKey GetActionKey(UInputAction* IA, bool IsGamePad);
-	
 
 	template<typename T>
 	static bool CalRandomMap(const TMap<T, int32>& M, T& Result);

@@ -130,33 +130,6 @@ void UCommonFuncLib::SpawnCenterTip(FText _Tip, FLinearColor _Color, FVector2D _
 	UIManager->PopupTip(_Tip.ToString());
 }
 
-FKey UCommonFuncLib::GetActionKey(UInputAction* IA, bool IsGamePad)
-{
-	UWorld* World = GEngine->GetCurrentPlayWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, FKey());
-
-	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Settings, FKey());
-	
-	UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameDataAsset, FKey());
-
-	UInputMappingContext* IMC = IsGamePad ? GameDataAsset->Gamepad_IMC.LoadSynchronous() : GameDataAsset->Keyboard_IMC.LoadSynchronous();
-	if (IMC)
-	{
-		for (auto& ele : IMC->GetMappings())
-		{
-			if (ele.Action == IA)
-			{
-				return ele.Key;
-			}
-		}
-	}
-	
-
-	return FKey();
-}
-
 
 bool UCommonFuncLib::CalRandMap_Float(const TMap<float, int32>& M, float& Result)
 {

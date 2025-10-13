@@ -1643,12 +1643,16 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	{
 		EnhancedInput->SetInputConfig(DataAsset->InputConfig.LoadSynchronous());
 		EnhancedInput->BindActionByTagName("InputAction.Move", ETriggerEvent::Triggered,this, &ABasePXCharacter::Input_Move2D);
+		EnhancedInput->BindActionByTagName("InputAction.ViewPitch", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
+		EnhancedInput->BindActionByTagName("InputAction.ViewYaw", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
+		
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Completed,this, &ABasePXCharacter::StopJumping);
-		EnhancedInput->BindActionByTagName("InputAction.ViewPitch", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewPitch);
-		EnhancedInput->BindActionByTagName("InputAction.ViewYaw", ETriggerEvent::Triggered,this, &ABasePXCharacter::AddViewYaw);
+		
+		EnhancedInput->BindActionByTagName("InputAction.Skill", ETriggerEvent::Started,this, &ABasePXCharacter::TryUseSkill);
+
 	}
 }
 
@@ -1677,7 +1681,7 @@ void ABasePXCharacter::Input_Move2D(const FInputActionValue& Value)
 	if (AxisValue.X == 0 && AxisValue.Y == 0) return;
 
 	AddMovementInput(GetRightVectorWithBlendYaw(), AxisValue.X, false);
-	AddMovementInput(GetVectorFaceToCamera(), AxisValue.Y, false);
+	AddMovementInput(GetVectorFaceToCamera(), -AxisValue.Y, false);
 }
 
 void ABasePXCharacter::TryToAttack()
@@ -1742,7 +1746,10 @@ void ABasePXCharacter::JumpRelease()
 	StopJumping();
 }
 
-
+void ABasePXCharacter::TryUseSkill()
+{
+	BP_TryUseSkill();
+}
 
 
 #undef LOCTEXT_NAMESPACE

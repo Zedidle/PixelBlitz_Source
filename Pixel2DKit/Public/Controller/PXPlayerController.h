@@ -22,9 +22,7 @@ class PIXEL2DKIT_API APXPlayerController : public APlayerController
 	bool PausingToStartCounting = false;
 
 	UPROPERTY(BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess))
-	UInputMappingContext* IMC_GamePad;
-	UPROPERTY(BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess))
-	UInputMappingContext* IMC_KeyBoard;
+	UInputMappingContext* IMC_Default;
 	
 protected:
 

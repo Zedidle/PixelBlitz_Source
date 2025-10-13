@@ -21,8 +21,7 @@ void APXPlayerController::BeginPlay()
 	{
 		if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
 		{
-			IMC_GamePad = GameDataAsset->Gamepad_IMC.LoadSynchronous();
-			IMC_KeyBoard = GameDataAsset->Keyboard_IMC.LoadSynchronous();
+			IMC_Default = GameDataAsset->IMC_Default.LoadSynchronous();
 		}
 	}
 }
@@ -39,7 +38,6 @@ void APXPlayerController::OnGameStart()
 	if (PXCharacter)
 	{
 		PXCharacter->ReadyToStart();
-		// PXCharacter->EnableInput(this);
 	}
 }
 
@@ -56,15 +54,13 @@ void APXPlayerController::OnCharacterControl(bool On)
 	CharacterControlling = On;
 	if (On)
 	{
-		Subsystem->AddMappingContext(IMC_GamePad, 1, Options);
-		Subsystem->AddMappingContext(IMC_KeyBoard, 1, Options);
+		Subsystem->AddMappingContext(IMC_Default, 1, Options);
 		FInputModeGameOnly InputMode;
 		SetInputMode(InputMode);
 	}
 	else
 	{
-		Subsystem->RemoveMappingContext(IMC_GamePad);
-		Subsystem->RemoveMappingContext(IMC_KeyBoard);
+		Subsystem->RemoveMappingContext(IMC_Default);
 		FInputModeUIOnly InputMode;
 		SetInputMode(InputMode);
 	}

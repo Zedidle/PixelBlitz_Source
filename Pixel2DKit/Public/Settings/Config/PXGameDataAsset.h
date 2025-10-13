@@ -17,11 +17,9 @@ class PIXEL2DKIT_API UPXGameDataAsset : public UDataAsset
 	GENERATED_BODY()
 	
 	public:
+		// 一个可以同时处理手柄和键盘的映射
     	UPROPERTY(EditAnywhere, Category = "Input")
-    	TSoftObjectPtr<UInputMappingContext> Gamepad_IMC;
-    
-    	UPROPERTY(EditAnywhere, Category = "Input")
-    	TSoftObjectPtr<UInputMappingContext> Keyboard_IMC;
+    	TSoftObjectPtr<UInputMappingContext> IMC_Default;
     
     	UPROPERTY(EditAnywhere, Category = "Weather")
     	TSoftObjectPtr<UDayTimeEffectSight> DayTimeEffect;

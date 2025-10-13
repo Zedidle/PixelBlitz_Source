@@ -542,6 +542,10 @@ public:
 	void AttackRelease();
 	void TryToJump();
 	void JumpRelease();
+
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="TryUseSkill")
+	void BP_TryUseSkill();
+	void TryUseSkill();
 	
 	
 #pragma endregion
