@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Platform/BasePlatform.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -238,6 +239,10 @@ void APXGameMode::OnLevelLoaded()
 			if (Actor)
 			{
 				Actor->Tags.Add(CurLevelName);
+			}
+			if (ABasePlatform* Platform = Cast<ABasePlatform>(Actor))
+			{
+				Platform->SetLoadLevelLocationOffset(CurLevelInstance->LevelTransform.GetLocation());
 			}
 		}
 		if (IsLevelStarted)

@@ -72,6 +72,31 @@ void ABasePlatform::SetMobility(EComponentMobility::Type V)
 	SetActorTickEnabled(V == EComponentMobility::Movable);		
 }
 
+void ABasePlatform::SetLoadLevelLocationOffset(const FVector& Offset)
+{
+	LoadLevelLocationOffset = Offset;
+
+	if (bHasSetStartLocation && bHasSetEndLocation)
+	{
+		StartLocation += LoadLevelLocationOffset;
+		EndLocation += LoadLevelLocationOffset;
+		
+		if (PlatformMoveType == EPlatformMoveType::Float)
+		{
+			TargetOffset = (EndLocation - StartLocation) / 2 * (1.0f + FMath::RandRange(FloatDistanceRandRatio * -1.0f, FloatDistanceRandRatio));;
+			SetActorLocation(StartLocation + TargetOffset);
+			SetMobility(EComponentMobility::Movable);
+			Period =  MovePeriod / (2 * UE_PI);
+		}
+		else if (PlatformMoveType == EPlatformMoveType::LandToPass)
+		{
+			TargetOffset = EndLocation - StartLocation;
+			SetActorLocation(StartLocation);
+		}
+	}
+	
+
+}
 
 
 void ABasePlatform::OnPlayerLand_Implementation()

@@ -74,6 +74,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Platform")
 	void SetMobility(EComponentMobility::Type V);
 
+	// 关卡加载导致的位置偏移，设计时都是以 FVector(0) 为原点
+	FVector LoadLevelLocationOffset = FVector::ZeroVector;
+	
+	UFUNCTION()
+	void SetLoadLevelLocationOffset(const FVector& Offset);
 	
 	void Tick_DefaultFloat();
 	void Tick_LandToPass(float DeltaTime);
