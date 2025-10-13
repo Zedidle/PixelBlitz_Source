@@ -583,13 +583,14 @@ void ABasePXCharacter::LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass)
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+	
 	if (WeaponClass)
 	{
 		Weapon = World->SpawnActor<ABaseWeapon>(WeaponClass);
 	}
 	else
 	{
-		if (DataAsset->WeaponClass)
+		if (DataAsset && DataAsset->WeaponClass)
 		{
 			Weapon = World->SpawnActor<ABaseWeapon>(DataAsset->WeaponClass);
 		}
@@ -1636,7 +1637,7 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	if (!IsPlayerControlled()) return;
-	
+
 	UPXInputComponent* EnhancedInput = Cast<UPXInputComponent>(PlayerInputComponent);
 	if (!EnhancedInput) return;
 	if (DataAsset)

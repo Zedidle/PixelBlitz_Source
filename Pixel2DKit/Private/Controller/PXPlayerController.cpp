@@ -22,6 +22,12 @@ void APXPlayerController::BeginPlay()
 		if (const UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous())
 		{
 			IMC_Default = GameDataAsset->IMC_Default.LoadSynchronous();
+			UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Subsystem);
+
+			FModifyContextOptions Options;
+			Options.bNotifyUserSettings = true;
+			Subsystem->AddMappingContext(IMC_Default, 1, Options);
 		}
 	}
 }
@@ -45,22 +51,16 @@ void APXPlayerController::OnCharacterControl(bool On)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Subsystem);
-
-	FModifyContextOptions Options;
-	Options.bNotifyUserSettings = true;
-	
 	CharacterControlling = On;
 	if (On)
 	{
-		Subsystem->AddMappingContext(IMC_Default, 1, Options);
+		// Subsystem->AddMappingContext(IMC_Default, 1, Options);
 		FInputModeGameOnly InputMode;
 		SetInputMode(InputMode);
 	}
 	else
 	{
-		Subsystem->RemoveMappingContext(IMC_Default);
+		// Subsystem->RemoveMappingContext(IMC_Default);
 		FInputModeUIOnly InputMode;
 		SetInputMode(InputMode);
 	}

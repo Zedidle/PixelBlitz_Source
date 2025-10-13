@@ -45,8 +45,7 @@ public class Pixel2DKit : ModuleRules
 			"NavigationSystem",
 			"GameSubtitles", 
 			"GameSettings",
-			"AdvancedFadeObjects"
-
+			"AdvancedFadeObjects", "CommonGame"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
@@ -73,14 +72,12 @@ public class Pixel2DKit : ModuleRules
 			"CommonUI",
 			"CommonInput",
 			"GameSettings",
-			"CommonGame",
 			"CommonUser",
 			"GameSubtitles",
 			"AudioMixer",
 			"AudioModulation",
 			"UIExtension",
 			"EngineSettings",
-			"DTLSHandlerComponent",
 			"Json"
 		});
 		
@@ -88,7 +85,6 @@ public class Pixel2DKit : ModuleRules
 		PrivateDependencyModuleNames.Add("OnlineSubsystemSteam");
 		PrivateDependencyModuleNames.AddRange( new string[]
 		{
-			"QuicMessagingTransport", 
 			"OpenSubdiv"
 		});
 

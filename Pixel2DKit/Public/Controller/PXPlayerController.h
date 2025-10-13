@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonPlayerController.h"
 #include "InputMappingContext.h"
 #include "GameFramework/PlayerController.h"
 #include "PXPlayerController.generated.h"
 
 
 UCLASS()
-class PIXEL2DKIT_API APXPlayerController : public APlayerController
+class PIXEL2DKIT_API APXPlayerController : public ACommonPlayerController
 {
 	GENERATED_BODY()
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess))
