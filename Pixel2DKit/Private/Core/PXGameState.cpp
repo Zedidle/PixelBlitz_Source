@@ -32,7 +32,7 @@ void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void APXGameState::EventOnDayTimeTypeChanged_Implementation()
 {
-	if (ForceWeatherIndex.IsValid())
+	if (!ForceWeatherIndex.IsNone())
 	{
 		CurWeatherIndex = ForceWeatherIndex;
 		SetWeather(CurWeatherIndex);
@@ -119,11 +119,11 @@ void APXGameState::PassDayTime(float Time, bool DirectSet, float TransitionDurat
 		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
-			WeakThis->ForceWeatherIndex = FName("");
+			WeakThis->ForceWeatherIndex = FName();
 		}, TransitionDuration + 0.5);
 	}
 	
-	TimeOfDay = DirectSet ? TimeOfDay + Time : Time;
+	TimeOfDay = DirectSet ? Time : TimeOfDay + Time;
 	BP_OnPassDayTime(TimeOfDay, TransitionDuration);
 }
 
