@@ -33,7 +33,7 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 	}
 	
 
-	UObject* PlayerPawn = BlackboardComponent->GetValueAsObject(FName("PlayerPawn"));
+	APawn* PlayerPawn = Cast<APawn>(BlackboardComponent->GetValueAsObject(FName("PlayerPawn")));
 	if (!PlayerPawn)
 	{
 		FinishExecute(false);
@@ -78,6 +78,10 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
+
+	// 再往玩家方向做点随机距离
+	TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
+	
 	EnemyAIController->SimpleMoveToLocation(TargetLocation);
 	FinishExecute(true);
 	return EBTNodeResult::InProgress;

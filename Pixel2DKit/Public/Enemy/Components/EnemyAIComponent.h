@@ -67,7 +67,7 @@ public:
 	FVector CurTargetLocation;
 
 	// 目标中的玩家
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Enemy)
+	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	ABasePXCharacter* PXCharacter;
 	
 	// 如果 n 秒内都打不到玩家，则回到巡逻状态
@@ -78,6 +78,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	FVector2D AttackRange = {20.0f, 50.0f};  
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy)
+	TEnumAsByte<ETraceTypeQuery> EnemyTrace;
+
+	
 	// 行动区间范围定义
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	FActionFieldDistance ActionFieldDistance;

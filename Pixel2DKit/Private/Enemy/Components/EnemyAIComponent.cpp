@@ -92,7 +92,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
 		TArray<FHitResult> OutHits;
 		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, Location, 100, 
-	TraceTypeQuery4, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
+	EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
 	true, FLinearColor::Red, FLinearColor::Green, 0.5f);
 		
 		for (auto& result:OutHits)
