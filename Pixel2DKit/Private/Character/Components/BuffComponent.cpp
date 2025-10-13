@@ -115,7 +115,7 @@ void UBuffComponent::BeginPlay()
 			if (UWorld* World = GetWorld())
 			{
 				BuffStateWidget = Cast<UBuffStateWidget>(CreateWidget(World, BuffStateWidgetClass));
-				BuffStateWidget->AddToViewport(100);
+				BuffStateWidget->AddToViewport(1);
 			}
 		}
 	}
