@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -29,11 +29,15 @@ struct FInputMappingContextAndPriority
 	bool bRegisterWithSettings = true;
 };
 
+/**
+ * Adds InputMappingContext to local players' EnhancedInput system. 
+ * Expects that local players are set up to use the EnhancedInput system.
+ */
 UCLASS(MinimalAPI, meta = (DisplayName = "Add Input Mapping"))
-class UGameFeatureAction_AddInputContextMapping : public UGameFeatureAction_WorldActionBase
+class UGameFeatureAction_AddInputContextMapping final : public UGameFeatureAction_WorldActionBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	//~UGameFeatureAction interface
 	virtual void OnGameFeatureRegistering() override;

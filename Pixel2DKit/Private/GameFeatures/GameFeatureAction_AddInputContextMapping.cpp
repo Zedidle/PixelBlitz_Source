@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GameFeatures/GameFeatureAction_AddInputContextMapping.h"
 #include "Components/GameFrameworkComponentManager.h"
@@ -9,9 +9,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "GameFeatures/GameFeatureAction_WorldActionBase.h"
 #include "InputMappingContext.h"
-// #include "Character/PXHeroComponent.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
-// #include "System/PXAssetManager.h"
 
 #if WITH_EDITOR
 #include "Misc/DataValidation.h"
@@ -239,7 +237,7 @@ void UGameFeatureAction_AddInputContextMapping::HandleControllerExtension(AActor
 	{
 		RemoveInputMapping(AsController, ActiveData);
 	}
-	// else if ((EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded) || (EventName == UPXHeroComponent::NAME_BindInputsNow))
+	// else if ((EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded) || (EventName == ULyraHeroComponent::NAME_BindInputsNow))
 	// {
 	// 	AddInputMappingForPlayer(AsController->GetLocalPlayer(), ActiveData);
 	// }

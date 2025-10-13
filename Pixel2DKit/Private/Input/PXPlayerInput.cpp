@@ -1,0 +1,107 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Input/PXPlayerInput.h"
+#include "Performance/LatencyMarkerModule.h"
+#include "Settings/PXSettingsLocal.h"
+
+UPXPlayerInput::UPXPlayerInput()
+	: Super()
+{
+	// Don't bind to any settings delegates on the CDO, otherwise there would be a constant bound listener
+	// and it wouldn't even do anything because it doesn't get ticked/process input
+	if (HasAnyFlags(RF_ClassDefaultObject | RF_ArchetypeObject))
+	{
+		return;
+	}
+	
+	BindToLatencyMarkerSettingChange();
+}
+
+UPXPlayerInput::~UPXPlayerInput()
+{
+	UnbindLatencyMarkerSettingChangeListener();
+}
+
+bool UPXPlayerInput::InputKey(const FInputKeyEventArgs& Params)
+{
+	const bool bResult = Super::InputKey(Params);
+
+	// Note: Since PX is only going to support the "Reflex" plugin to handle latency markers,
+	// we could #if PLATFORM_DESKTOP this away to save on other platforms. However, for the sake
+	// of extensibility for this same project we will not do that. 
+	ProcessInputEventForLatencyMarker(Params);
+
+	return bResult;
+}
+
+void UPXPlayerInput::ProcessInputEventForLatencyMarker(const FInputKeyEventArgs& Params)
+{
+	if (!bShouldTriggerLatencyFlash)
+	{
+		return;
+	}
+	
+	// Flash the latency marker on left mouse down
+	if (Params.Key == EKeys::LeftMouseButton)
+	{
+		TArray<ILatencyMarkerModule*> LatencyMarkerModules = IModularFeatures::Get().GetModularFeatureImplementations<ILatencyMarkerModule>(ILatencyMarkerModule::GetModularFeatureName());
+
+		for (ILatencyMarkerModule* LatencyMarkerModule : LatencyMarkerModules)
+		{
+			// TRIGGER_FLASH is 7
+			LatencyMarkerModule->SetCustomLatencyMarker(7, GFrameCounter);
+		}
+	}
+}
+
+void UPXPlayerInput::BindToLatencyMarkerSettingChange()
+{
+	if (!UPXSettingsLocal::DoesPlatformSupportLatencyMarkers())
+	{
+		return;
+	}
+	
+	UPXSettingsLocal* Settings = UPXSettingsLocal::Get();
+	if (!Settings)
+	{
+		return;
+	}
+
+	Settings->OnLatencyFlashInidicatorSettingsChangedEvent().AddUObject(this, &ThisClass::HandleLatencyMarkerSettingChanged);
+
+	// Initalize the settings and make sure that the input latency modules are enabled
+	HandleLatencyMarkerSettingChanged();
+}
+
+void UPXPlayerInput::UnbindLatencyMarkerSettingChangeListener()
+{
+	UPXSettingsLocal* Settings = UPXSettingsLocal::Get();
+	if (!Settings)
+	{
+		return;
+	}
+
+	Settings->OnLatencyFlashInidicatorSettingsChangedEvent().RemoveAll(this);
+}
+
+void UPXPlayerInput::HandleLatencyMarkerSettingChanged()
+{
+	// Make sure that we only ever get this callback on platforms which support latency markers
+	ensure(UPXSettingsLocal::DoesPlatformSupportLatencyMarkers());
+	
+	const UPXSettingsLocal* Settings = UPXSettingsLocal::Get();
+	if (!Settings)
+	{
+		return;
+	}
+
+	// Enable or disable the latency flash on all the marker modules according to the settings change
+	bShouldTriggerLatencyFlash = Settings->GetEnableLatencyFlashIndicators();
+	
+	TArray<ILatencyMarkerModule*> LatencyMarkerModules = IModularFeatures::Get().GetModularFeatureImplementations<ILatencyMarkerModule>(ILatencyMarkerModule::GetModularFeatureName());
+	for (ILatencyMarkerModule* LatencyMarkerModule : LatencyMarkerModules)
+	{
+		LatencyMarkerModule->SetFlashIndicatorEnabled(bShouldTriggerLatencyFlash);
+	}
+}

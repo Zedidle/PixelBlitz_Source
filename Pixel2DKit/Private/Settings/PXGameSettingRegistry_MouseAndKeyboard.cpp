@@ -1,10 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+#include "CommonInputBaseTypes.h"
 #include "EnhancedInputSubsystems.h"
 #include "Settings/CustomSettings/PXSettingKeyboardInput.h"
 #include "GameSettingCollection.h"
 #include "GameSettingValueDiscreteDynamic.h"
 #include "GameSettingValueScalarDynamic.h"
+#include "EditCondition/WhenCondition.h"
 #include "Settings/PXGameSettingRegistry.h"
 #include "Player/PXLocalPlayer.h"
 #include "Settings/PXSettingsShared.h"
@@ -21,6 +23,15 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 	Screen->SetDisplayName(LOCTEXT("MouseAndKeyboardCollection_Name", "鼠标与键盘"));
 	Screen->Initialize(InLocalPlayer);
 
+	const TSharedRef<FWhenCondition> WhenPlatformSupportsMouseAndKeyboard = MakeShared<FWhenCondition>(
+	[](const ULocalPlayer*, FGameSettingEditableState& InOutEditState)
+	{
+		const UCommonInputPlatformSettings* PlatformInput = UPlatformSettingsManager::Get().GetSettingsForPlatform<UCommonInputPlatformSettings>();
+		if (!PlatformInput->SupportsInputType(ECommonInputType::MouseAndKeyboard))
+		{
+			InOutEditState.Kill(TEXT("Platform does not support mouse and keyboard"));
+		}
+	});
 
 	{
 		UGameSettingCollection* Sensitivity = NewObject<UGameSettingCollection>();
@@ -136,9 +147,9 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 		static TSet<FName> CreatedMappingNames;
 		CreatedMappingNames.Reset();
 		
-		for (const TPair<FGameplayTag, TObjectPtr<UEnhancedPlayerMappableKeyProfile>>& ProfilePair : UserSettings->GetAllSavedKeyProfiles())
+		for (const TPair<FString, TObjectPtr<UEnhancedPlayerMappableKeyProfile>>& ProfilePair : UserSettings->GetAllAvailableKeyProfiles())
 		{
-			const FGameplayTag& ProfileName = ProfilePair.Key;
+			const FString& ProfileName = ProfilePair.Key;
 			const TObjectPtr<UEnhancedPlayerMappableKeyProfile>& Profile = ProfilePair.Value;
 
 			for (const TPair<FName, FKeyMappingRow>& RowPair : Profile->GetPlayerMappingRows())
@@ -160,6 +171,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 						UPXSettingKeyboardInput* InputBinding = NewObject<UPXSettingKeyboardInput>();
 
 						InputBinding->InitializeInputData(Profile, RowPair.Value, Options);
+						InputBinding->AddEditCondition(WhenPlatformSupportsMouseAndKeyboard);
 
 						Collection->AddSetting(InputBinding);
 						CreatedMappingNames.Add(RowPair.Key);

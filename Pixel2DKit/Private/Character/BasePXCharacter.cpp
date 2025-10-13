@@ -1642,11 +1642,7 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	if (DataAsset)
 	{
 		EnhancedInput->SetInputConfig(DataAsset->InputConfig.LoadSynchronous());
-		EnhancedInput->BindActionByTagName("InputAction.MoveBack", ETriggerEvent::Triggered, this, &ABasePXCharacter::MoveY);
-		EnhancedInput->BindActionByTagName("InputAction.MoveFront", ETriggerEvent::Triggered, this, &ABasePXCharacter::MoveY);
-		EnhancedInput->BindActionByTagName("InputAction.MoveLeft", ETriggerEvent::Triggered,this, &ABasePXCharacter::MoveX);
-		EnhancedInput->BindActionByTagName("InputAction.MoveRight", ETriggerEvent::Triggered,this, &ABasePXCharacter::MoveX);
-		EnhancedInput->BindActionByTagName("InputAction.MoveGP", ETriggerEvent::Triggered,this, &ABasePXCharacter::Move2D);
+		EnhancedInput->BindActionByTagName("InputAction.Move", ETriggerEvent::Triggered,this, &ABasePXCharacter::Input_Move2D);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Triggered,this, &ABasePXCharacter::TryToAttack);
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
@@ -1674,28 +1670,14 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 
 }
 
-void ABasePXCharacter::MoveX(const FInputActionValue& Value)
-{
-	float AxisValue = Value.Get<float>();
-	if (AxisValue == 0) return;
-	AddMovementInput(GetRightVectorWithBlendYaw(), AxisValue, false);
-	
-}
 
-void ABasePXCharacter::MoveY(const FInputActionValue& Value)
-{
-	float AxisValue = Value.Get<float>();
-	if (AxisValue == 0) return;
-	AddMovementInput(GetVectorFaceToCamera(), AxisValue, false);
-	
-}
-
-void ABasePXCharacter::Move2D(const FInputActionValue& Value)
+void ABasePXCharacter::Input_Move2D(const FInputActionValue& Value)
 {
 	FVector2D AxisValue = Value.Get<FVector2D>();
 	if (AxisValue.X == 0 && AxisValue.Y == 0) return;
-	MoveX(AxisValue.X);
-	MoveY(AxisValue.Y);
+
+	AddMovementInput(GetRightVectorWithBlendYaw(), AxisValue.X, false);
+	AddMovementInput(GetVectorFaceToCamera(), AxisValue.Y, false);
 }
 
 void ABasePXCharacter::TryToAttack()

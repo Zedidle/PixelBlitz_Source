@@ -537,9 +537,7 @@ public:
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void AddMovementInput(FVector WorldDirection, float ScaleValue = 1.0f, bool bForce = false) override;
-	void MoveX(const FInputActionValue& Value);
-	void MoveY(const FInputActionValue& Value);
-	void Move2D(const FInputActionValue& Value);
+	void Input_Move2D(const FInputActionValue& Value);
 	void TryToAttack();
 	void AttackRelease();
 	void TryToJump();
