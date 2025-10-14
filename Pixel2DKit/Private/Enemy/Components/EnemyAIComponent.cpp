@@ -176,7 +176,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		);
 
 		// 检查是否命中
-		if (bHit && HitResult.GetActor() || USpaceFuncLib::CheckCliffProcess(OwnerLocation, OwnerLocation + TempTargetOffset, GetCheckCliffHeight_EnemyAI()))
+		if (bHit && HitResult.GetActor() || USpaceFuncLib::CheckCliffProcess(OwnerLocation, OwnerLocation + TempTargetOffset, GetCheckCliffHeight()))
 		{
 			blockR += DistanceScale;
 			continue;
@@ -366,7 +366,7 @@ FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
 }
 
 
-float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
+float UEnemyAIComponent::GetCheckCliffHeight()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, 50)
 	
@@ -376,6 +376,18 @@ float UEnemyAIComponent::GetCheckCliffHeight_EnemyAI()
 	
 	float ScaleZ = OwningEnemy->GetActorScale3D().Z;
 	return ScaleZ * (CharacterMovementComponent->MaxStepHeight + CapsuleComponent->GetUnscaledCapsuleHalfHeight());
+}
+
+float UEnemyAIComponent::GetMinDirSwitchDistance()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, 5)
+	
+	UCapsuleComponent* CapsuleComponent = OwningEnemy->GetComponentByClass<UCapsuleComponent>();
+	UCharacterMovementComponent* CharacterMovementComponent = OwningEnemy->GetComponentByClass<UCharacterMovementComponent>();
+	if (!CapsuleComponent || !CharacterMovementComponent) return 0;
+	
+	float ScaleZ = OwningEnemy->GetActorScale3D().X;
+	return FMath::Max(ScaleZ * CapsuleComponent->GetUnscaledCapsuleRadius() - 5 , 1);
 }
 
 FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const

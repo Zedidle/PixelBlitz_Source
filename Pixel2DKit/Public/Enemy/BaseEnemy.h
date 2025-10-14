@@ -331,8 +331,14 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnAttack();
+
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnSensingPawn(APawn* Pawn);
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void DelayLosePlayer();
+
 	
 	
 	// 默认可行动方位，一般为全方位距离可行，实际行动受设定距离限制与ActionAtPlayerXXXXX接口，需要针对不同怪物部分删除

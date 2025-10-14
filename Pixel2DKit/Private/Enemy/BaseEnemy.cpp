@@ -261,6 +261,9 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 {
 
 	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComponent"));
+	PawnSensingComponent->SightRadius = 0;
+	PawnSensingComponent->HearingThreshold = 0;
+	
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
@@ -291,7 +294,11 @@ void ABaseEnemy::BeginPlay()
 	{
 		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
-	
+
+	if (PawnSensingComponent)
+	{
+		PawnSensingComponent->OnSeePawn.AddDynamic(this, &ThisClass::OnSensingPawn);
+	}
 	
 }
 
@@ -304,6 +311,11 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (HealthComponent)
 	{
 		HealthComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+	}
+
+	if (PawnSensingComponent)
+	{
+		PawnSensingComponent->OnSeePawn.RemoveDynamic(this, &ThisClass::OnSensingPawn);
 	}
 }
 
@@ -500,6 +512,14 @@ bool ABaseEnemy::InAttackRange()
 		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
 	}
 	return false;
+}
+
+void ABaseEnemy::OnSensingPawn_Implementation(APawn* Pawn)
+{
+	if (SetPixelCharacter(Pawn))
+	{
+		DelayLosePlayer();
+	}
 }
 
 void ABaseEnemy::DelayLosePlayer_Implementation()

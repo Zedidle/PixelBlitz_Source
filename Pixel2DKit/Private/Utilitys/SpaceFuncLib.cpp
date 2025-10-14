@@ -131,27 +131,33 @@ bool USpaceFuncLib::CheckCliff(const FVector& StartLocation, const float CliffHe
 		DrawType = EDrawDebugTrace::ForDuration;
 	}
 #endif
+
+	// TraceTypeQuery1 是可视即可
 	
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
 	bool hit = UKismetSystemLibrary::LineTraceSingle(World, StartLocation, EndLocation,
-		ETraceTypeQuery::TraceTypeQuery1, false, ActorsToIgnore,
-				DrawType, OutHit, true,
+		TraceTypeQuery1, false, ActorsToIgnore,
+				EDrawDebugTrace::None, OutHit, true,
 				FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	return !hit;
 }
 
-bool USpaceFuncLib::CheckCliffProcess(const FVector& StartLocation, const FVector& EndLocation, const float CliffHeight)
+bool USpaceFuncLib::CheckCliffProcess(const FVector& StartLocation, const FVector& EndLocation, float CliffHeight, float CheckRate, float MinDirSwitchDistance)
 {
 	float LerpPercent = 1.0f;
-	while ( LerpPercent > 0.05 )
+	float CurDistance = (EndLocation - StartLocation).Size2D();
+	FVector DistanceVector = EndLocation - StartLocation;
+	
+	while ( CurDistance > MinDirSwitchDistance )
 	{
-		if (CheckCliff(StartLocation + (EndLocation - StartLocation) * LerpPercent, CliffHeight))
+		if (CheckCliff(StartLocation + DistanceVector * LerpPercent, CliffHeight))
 		{
 			return true;
 		}
-		LerpPercent *= 0.8;
+		LerpPercent *= CheckRate;
+		CurDistance *= CheckRate;
 	}
 	return false;
 }

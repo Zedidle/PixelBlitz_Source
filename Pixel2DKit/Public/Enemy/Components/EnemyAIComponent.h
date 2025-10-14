@@ -117,8 +117,11 @@ public:
 	FVector GetNearestActionFieldCanAttackLocation();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	float GetCheckCliffHeight_EnemyAI();
+	float GetCheckCliffHeight();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
+	float GetMinDirSwitchDistance();
+	
 	UFUNCTION(Blueprintable, Blueprintable, Category = "EnemyAI")
 	FGameplayTag GetActionFieldByPlayer() const;
 

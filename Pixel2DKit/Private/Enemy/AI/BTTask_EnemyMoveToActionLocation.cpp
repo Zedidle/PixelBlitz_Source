@@ -69,18 +69,18 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 
 	// 朝更近的区间走去
 	FVector TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
-	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(
-		Pawn->GetActorLocation(),TargetLocation,
-			EnemyAIComponent->GetCheckCliffHeight_EnemyAI()
-		);
+
+	
+	TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
+	
+	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(Pawn->GetActorLocation(),TargetLocation,
+						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance());
 	if (bIsCliff)
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
 
-	// 再往玩家方向做点随机距离
-	TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
 	
 	EnemyAIController->SimpleMoveToLocation(TargetLocation);
 	FinishExecute(true);

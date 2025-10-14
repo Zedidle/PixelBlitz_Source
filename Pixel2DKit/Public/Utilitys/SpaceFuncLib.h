@@ -66,7 +66,7 @@ public:
 
 	// 判断是否过程是否有悬崖
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
-	static bool CheckCliffProcess(const FVector& StartLocation, const FVector& EndLocation, const float CliffHeight = 50);
+	static bool CheckCliffProcess(const FVector& StartLocation, const FVector& EndLocation, float CliffHeight = 50, float CheckRate = 0.8, float MinDirSwitchDistance = 5);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static FVector GetDirection2DFromPlayerViewPoint(const int PlayerIndex = 0);

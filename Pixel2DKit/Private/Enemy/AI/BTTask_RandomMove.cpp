@@ -14,8 +14,10 @@
 
 UBTTask_RandomMove::UBTTask_RandomMove()
 {
-	TickInterval.Interval = 0.2f;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AIOwner)
 
+	TickInterval.Interval = 0.3f;
+	CheckMoveStartDistance = 100.f;
 }
 
 EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -57,37 +59,45 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 		FinishExecute(false);
 		return EBTNodeResult::Failed;
 	}
+
 	
-	// 重新计算方向与距离
-	float curDistance = CheckMoveStartDistance * FMath::RandRange(0.8f, 1.2f);
-	if (!bMoveSucceeded)
+	MinDirSwitchDistance = EnemyAIComponent->GetMinDirSwitchDistance();
+	CheckCliffHeight = EnemyAIComponent->GetCheckCliffHeight();
+	
+	// 计算方向与距离
+	if (bMoveSucceeded)
+	{
+		// 成功移动时，重置移动的偏转角度
+		CurRotateValue = MinRotateValue + FMath::FRandRange(0, MinRotateValue);
+		CurDistance = CheckMoveStartDistance * FMath::FRandRange(0.8, 1.2);
+	}
+	else
 	{
 		bRotateClockwise = FMath::RandBool();
+
+		// 移动失败的话，逐步加大转向角度
+		CurRotateValue = FMath::Clamp( CurRotateValue * 1.1 + 5, MinRotateValue, MaxRotateValue);
+		// 缩减移动距离
+		CurDistance = FMath::Max(CurDistance * DeDistanceRate,   MinDirSwitchDistance * 2);
 	}
-	FVector dir = FRotator(0,bRotateClockwise ? CurRotateValue : -CurRotateValue,0).RotateVector(Pawn->GetActorForwardVector())
+	
+	FVector CurDirection = FRotator(0,bRotateClockwise ? CurRotateValue : -CurRotateValue,0).RotateVector(Pawn->GetActorForwardVector())
 					.GetSafeNormal2D(0.01f);
 
 	// CliffHeight 还需动态依据怪物身高调整
-	while (MinDirSwitchDistance < curDistance)
+	FVector CurTargetLocation = Pawn->GetActorLocation() + CurDistance * CurDirection;
+	if (!USpaceFuncLib::CheckCliffProcess( Pawn->GetActorLocation(), CurTargetLocation, CheckCliffHeight, CliffCheckRate, MinDirSwitchDistance))
 	{
-		FVector CurTargetLocation = Pawn->GetActorLocation() + curDistance * dir;
-		curDistance = CliffCheckRate * curDistance;
-		if (!USpaceFuncLib::CheckCliff(CurTargetLocation, EnemyAIComponent->GetCheckCliffHeight_EnemyAI()))
-		{
-			Controller->SimpleMoveToLocation(CurTargetLocation);
-			FinishExecute(true);
-			// 成功移动时，重置移动的偏转角度
-			CurRotateValue = MinRotateValue + FMath::FRandRange(0, MinRotateValue);
-			bMoveSucceeded = true;
-			return EBTNodeResult::Succeeded;
-		}
+		Controller->SimpleMoveToLocation(CurTargetLocation);
+
+		bMoveSucceeded = true;
+		FinishExecute(true);
+		return EBTNodeResult::Succeeded;
 	}
 
-	CurRotateValue = FMath::Clamp( CurRotateValue * 1.1 + 5, MinRotateValue, MaxRotateValue);
 	bMoveSucceeded = false;
 	FinishExecute(false);
 	return EBTNodeResult::Failed;
-	// return Super::ExecuteTask(OwnerComp, NodeMemory);
 }
 
 void UBTTask_RandomMove::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
