@@ -3,6 +3,7 @@
 
 #include "Core/PXGameMode.h"
 #include "NavigationSystem.h"
+#include "PXGameplayTags.h"
 #include "Character/BasePXCharacter.h"
 #include "Core/PXGameInstance.h"
 #include "Controller/PXPlayerController.h"
@@ -10,6 +11,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Engine/LevelStreamingDynamic.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "NavMesh/NavMeshBoundsVolume.h"
@@ -120,6 +122,9 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 	{
 		CurLevelInstance = LoadedLevel;
 		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
+		
+		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLoadingLevel, EMPTY_MESSAGE);
 	}
 }
 
@@ -151,12 +156,6 @@ void APXGameMode::OnStartLevelSuccess_Implementation()
 
 	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
-	
-	
-	if (APXPlayerController* PC = Cast<APXPlayerController>(UGameplayStatics::GetPlayerController(World, 0)))
-	{
-		PC->OnCharacterControl(false);
-	}
 
 	if (const FLevelData* Data = DataTableSubsystem->GetLevelDataByName(CurLevelName))
 	{
@@ -164,6 +163,11 @@ void APXGameMode::OnStartLevelSuccess_Implementation()
 	}
 
 	ClearPreLevel();
+	
+	PrepareGame();
+
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnStartLevelSuccess, EMPTY_MESSAGE);
 }
 
 void APXGameMode::ClearPreLevel_Implementation()
@@ -182,7 +186,7 @@ void APXGameMode::ClearPreLevel_Implementation()
 	}
 }
 
-void APXGameMode::PrepareForRole()
+void APXGameMode::PrepareGame()
 {
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings);
@@ -190,12 +194,27 @@ void APXGameMode::PrepareForRole()
 	UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameDataAsset);
 
+	UPXSaveGameSubsystem* SaveGameSubsystem = UPXSaveGameSubsystem::GetSelfInstance(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+	
 	UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 
 	ABasePXCharacter* PXCharacter = UPXGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 
+	if (SaveGameSubsystem->Main_HasChoiceAbility())
+	{
+		if (GameStartCountWidgetClass)
+		{
+			if (UUIManager* UIManager = UUIManager::GetSelfInstance(this))
+			{
+				UIManager->AddWidget(GameStartCountWidgetClass, ESlateVisibility::SelfHitTestInvisible, false);
+			}
+		}
+		return;
+	}
+	
 	if (MainSaveGame->CurLevel == 1)
 	{
 		float Potential_SkillPoints = PXCharacter->GetEffectGameplayTag(TAG("TalentSet.Potential"));
@@ -204,7 +223,7 @@ void APXGameMode::PrepareForRole()
 	MainSaveGame->RemSkillPoints += GameDataAsset->BasePerLevelSkillPointsGet;
 	MainSaveGame->RemRefreshPoints += GameDataAsset->BasePerLevelSkillRefreshPointsGet;
 
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 

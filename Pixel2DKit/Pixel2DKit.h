@@ -42,3 +42,10 @@ DECLARE_STATS_GROUP(TEXT("RAGame"), STATGROUP_RAGame, STATCAT_Advanced);
 
 // GAS
 #define TAG(TagName) FGameplayTag::RequestGameplayTag((TagName))
+
+
+
+
+
+#define EMPTY_MESSAGE FDefaultEmptyMessage()
+

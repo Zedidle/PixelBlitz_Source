@@ -20,6 +20,13 @@ class PIXEL2DKIT_API UPXCustomStruct : public UObject
 };
 
 
+USTRUCT(BlueprintType)
+struct FDefaultEmptyMessage
+{
+	GENERATED_BODY()
+};
+
+
 #pragma region UConfigDataAsset
 
 UCLASS(Blueprintable)

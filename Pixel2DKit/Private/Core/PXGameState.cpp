@@ -177,6 +177,8 @@ void APXGameState::OnGameStart()
 	}
 	
 	BP_OnGameStart();
+
+	StartRaceTimer(true);
 }
 
 void APXGameState::StartRaceTimer_Implementation(bool Start)

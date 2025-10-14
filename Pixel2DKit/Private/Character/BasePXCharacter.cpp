@@ -12,6 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "PXGameplayTags.h"
 #include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
 #include "Controller/PXPlayerController.h"
@@ -27,6 +28,8 @@
 #include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/PlayerStart.h"
 #include "GAS/PXASComponent.h"
 #include "GeometryCollection/GeometryCollectionParticlesData.h"
@@ -452,6 +455,11 @@ void ABasePXCharacter::BeginPlay()
 	{
 		HealthComponent->OnHPChanged.AddDynamic(this, &ABasePXCharacter::OnHPChanged);
 	}
+
+
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle_OnLoadingLevel = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLoadingLevel, this, &ThisClass::OnLoadingLevel);
+	ListenerHandle_OnStartLevelSuccess = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnStartLevelSuccess, this, &ThisClass::OnStartLevelSuccess);
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -469,6 +477,11 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		HealthComponent->OnHPChanged.RemoveAll(this);
 	}
+
+
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	MessageSubsystem.UnregisterListener(ListenerHandle_OnLoadingLevel);
+	MessageSubsystem.UnregisterListener(ListenerHandle_OnStartLevelSuccess);
 }
 
 bool ABasePXCharacter::SelfCanJump_Implementation()
@@ -1751,6 +1764,19 @@ void ABasePXCharacter::TryUseSkill()
 {
 	BP_TryUseSkill();
 }
+
+void ABasePXCharacter::OnLoadingLevel_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+{
+	if (APXPlayerController* PC = GetController<APXPlayerController>())
+	{
+		PC->OnCharacterControl(false);
+	}
+}
+
+void ABasePXCharacter::OnStartLevelSuccess_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+{
+}
+
 
 
 #undef LOCTEXT_NAMESPACE

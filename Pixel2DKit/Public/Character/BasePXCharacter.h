@@ -9,6 +9,7 @@
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
 #include "Fight/Components/HealthComponent.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Buff_Interface.h"
 #include "Item/Weapon/BaseWeapon.h"
@@ -549,7 +550,21 @@ public:
 	
 	
 #pragma endregion
+
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnLoadingLevel(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnStartLevelSuccess(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
+
+#pragma region Massage
 	
+	FGameplayMessageListenerHandle ListenerHandle_OnLoadingLevel;
+	FGameplayMessageListenerHandle ListenerHandle_OnStartLevelSuccess;
+	
+#pragma endregion
+
 };
 
 inline bool ABasePXCharacter::CanAttack_Implementation()

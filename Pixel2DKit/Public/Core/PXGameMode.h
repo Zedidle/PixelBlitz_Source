@@ -9,10 +9,13 @@
 #include "PXGameMode.generated.h"
 
 
+
+
 class APlayerRespawnPoint;
 class ULevelStreamingDynamic;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLevelLoadedSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartLevelSuccessSignature);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLoadingLevelSignature);
 
 UCLASS(BlueprintType, Blueprintable)
 class PIXEL2DKIT_API APXGameMode : public AGameMode
@@ -37,6 +40,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> GameStartCountWidgetClass;
 	
 public:
 	
@@ -44,7 +49,11 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
 	APlayerRespawnPoint* PlayerRespawnPoint;
 
-
+	// UPROPERTY(BlueprintAssignable)
+	// FOnStartLevelSuccessSignature Event_OnStartLevelSuccess; 
+	//
+	// UPROPERTY(BlueprintAssignable)
+	// FOnLoadingLevelSignature Event_OnLoadingLevel;
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0));
@@ -63,7 +72,7 @@ public:
 	void ClearPreLevel();
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void PrepareForRole();
+	void PrepareGame();
 
 	
 #pragma endregion 

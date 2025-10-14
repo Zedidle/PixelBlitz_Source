@@ -82,6 +82,14 @@ void UPXSaveGameSubsystem::InitData_Talents()
     }
 }
 
+UPXSaveGameSubsystem* UPXSaveGameSubsystem::GetSelfInstance(const UObject* WorldContextObject)
+{
+    UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
+    CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, nullptr);
+
+    return GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+}
+
 void UPXSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
