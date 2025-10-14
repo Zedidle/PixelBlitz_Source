@@ -673,6 +673,8 @@ void ABasePXCharacter::Revive_Implementation()
 	{
 		HealthComponent->SetHP(HealthComponent->GetMaxHP());
 	}
+	CheckNearDeath();
+	
 	if (EnergyComponent)
 	{
 		EnergyComponent->SetEP(EnergyComponent->GetMaxEP() * 0.5);
@@ -955,13 +957,10 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			{
 				HealthComponent->InvulnerableForDuration(2.5);
 			}
-			UTimerSubsystemFuncLib::SetDelay(GetWorld(),
-				[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+			UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 			{
-				if (WeakThis.IsValid())
-				{
+				if (!WeakThis.IsValid()) return;
 					WeakThis->Revive();
-				}
 			}, 2);
 			
 		}
@@ -1011,7 +1010,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 					}
 	
 					UTimerSubsystemFuncLib::SetDelay(GetWorld(),
-					[WeakThis = TWeakObjectPtr<ThisClass>(this), RespawnPoint]
+					[WeakThis = TWeakObjectPtr(this), RespawnPoint]
 					{
 						if (WeakThis.IsValid() && IsValid(RespawnPoint))
 						{

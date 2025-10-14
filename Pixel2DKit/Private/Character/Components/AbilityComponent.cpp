@@ -7,6 +7,7 @@
 #include "Character/PXCharacterDataAsset.h"
 #include "Character/Components/BuffComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -71,6 +72,8 @@ void UAbilityComponent::BeginPlay()
 	{
 		CachedASC = PXASComponent;
 	}
+
+	InitAbilities();
 }
 
 
@@ -80,6 +83,16 @@ void UAbilityComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
+}
+
+void UAbilityComponent::InitAbilities()
+{
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
+	if (MainSave)
+	{
+		ChosenAbilities = MainSave->ChosenAbilities;
+		TakeEffectAbilities = MainSave->TakeEffectAbilities;
+	}
 }
 
 void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)

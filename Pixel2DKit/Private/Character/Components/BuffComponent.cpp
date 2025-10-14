@@ -447,7 +447,7 @@ void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& Buf
 			{
 				if (Widget->BuffName != BuffName)
 				{
-					RemoveBuff(Tag);
+					Execute_RemoveBuff(this, Tag, true);
 				}
 			}
 			

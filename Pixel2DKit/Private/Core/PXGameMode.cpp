@@ -43,7 +43,7 @@ void APXGameMode::BeginPlay()
 	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
 	{
 
-		FName LevelName = GameInstance->GetCurLevelName_Simple(true);
+		FName LevelName = GameInstance->GetCurLevelName_Simple(false);
 		#if WITH_EDITOR
 		if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
 		{
