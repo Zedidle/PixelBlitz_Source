@@ -105,14 +105,13 @@ void UPXGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, cons
 
 const FGameplayTagContainer* UPXGameplayAbility::GetCooldownTags() const
 {
-	FGameplayTagContainer* MutableTags = const_cast<FGameplayTagContainer*>(&TempCooldownTags);
-	MutableTags->Reset(); // 清空临时容器（避免 CDO 残留旧标签）
-    
-	// 合并父类标签与技能专属标签
+	TempCooldownTags.Reset();
+
 	const FGameplayTagContainer* ParentTags = Super::GetCooldownTags();
-	if (ParentTags) MutableTags->AppendTags(*ParentTags);
-	MutableTags->AppendTags(CooldownTags); 
-	return MutableTags;
+	if (ParentTags) TempCooldownTags.AppendTags(*ParentTags);
+	TempCooldownTags.AppendTags(CooldownTags);
+	
+	return &TempCooldownTags;
 }
 
 APawn* UPXGameplayAbility::GetPawn() const

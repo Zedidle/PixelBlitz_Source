@@ -41,7 +41,7 @@ public:
 	UUserWidget* GetWidget(TSubclassOf<UUserWidget> WidgetClass);
 	
 	UFUNCTION(BlueprintCallable, Category = "UIManager", meta = (DeterminesOutputType = "WidgetClass"))
-	UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility = ESlateVisibility::Visible, bool HideCurrentWidget = true);
+	UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility = ESlateVisibility::Visible, bool HideCurrentWidget = true, int PlusZOrder = 0);
 
 	UFUNCTION(BlueprintCallable, Category = "UIManager", meta = (DeterminesOutputType = "WidgetClass"))
 	UUserWidget* ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility = ESlateVisibility::Visible, bool HideCurrentWidget = true);

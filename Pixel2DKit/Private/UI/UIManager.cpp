@@ -31,8 +31,7 @@ UUserWidget* UUIManager::GetWidget(TSubclassOf<UUserWidget> WidgetClass)
 	return SimpleWidgetMap.FindRef(WidgetClass);
 }
 
-UUserWidget* UUIManager::AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility,
-                                   bool HideCurrentWidget)
+UUserWidget* UUIManager::AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget, int PlusZOrder)
 {
 	if (!WidgetClass) return nullptr;
 	
@@ -45,7 +44,7 @@ UUserWidget* UUIManager::AddWidget(TSubclassOf<UUserWidget> WidgetClass, const E
 	{
 		SimpleWidgetArray.Add(Widget);
 		SimpleWidgetMap.Add(WidgetClass, Widget);
-		Widget->AddToViewport(SimpleWidgetArray.Num());
+		Widget->AddToViewport(SimpleWidgetArray.Num() + PlusZOrder);
 		return Widget;
 	}
 	

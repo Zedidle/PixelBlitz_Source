@@ -13,11 +13,6 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
-
-class UCustomResourceSettings;
-
-
-
 void UPXGameInstance::StartNewGame()
 {
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();

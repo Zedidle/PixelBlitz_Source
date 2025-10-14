@@ -20,6 +20,7 @@ class PIXEL2DKIT_API UCommonTipContainerWidget : public UCommonActivatableWidget
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+
 	
 	UFUNCTION()
 	void AddTip(const FString& Content, float Time);

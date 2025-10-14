@@ -22,7 +22,7 @@ public:
 	static UUserWidget* GetWidget(TSubclassOf<UUserWidget> WidgetClass);
 
 	UFUNCTION(BlueprintCallable, DisplayName = "UI_AddWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
-	static UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget = false);
+	static UUserWidget* AddWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget = false, int PlusZOrder = 0);
 
 	UFUNCTION(BlueprintCallable, DisplayName = "UI_ShowWidget" , Category="UserWidgetFuncLib" , meta=(DeterminesOutputType = "WidgetClass"))
 	static UUserWidget* ShowWidget(TSubclassOf<UUserWidget> WidgetClass, const ESlateVisibility Visibility, bool HideCurrentWidget = true);

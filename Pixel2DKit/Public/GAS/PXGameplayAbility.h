@@ -26,11 +26,10 @@ public:
 	// 技能专属冷却标签
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Cooldown")
 	FGameplayTagContainer CooldownTags; 
-
-	// 临时容器：存储冷却 GE 标签与技能标签的并集
+	
 	UPROPERTY(Transient)
-	FGameplayTagContainer TempCooldownTags; 
-
+	mutable FGameplayTagContainer TempCooldownTags;
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Cooldown")
 	float GetCooldownDuration() const;
 
