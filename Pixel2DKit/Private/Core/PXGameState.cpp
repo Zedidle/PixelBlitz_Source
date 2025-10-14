@@ -6,6 +6,7 @@
 #include "EngineUtils.h"
 #include "Controller/PXPlayerController.h"
 #include "Core/PXGameInstance.h"
+#include "Core/PXGameMode.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/EnemySpawner.h"
@@ -139,6 +140,30 @@ void APXGameState::ToNextLevel()
 	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
 	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
 	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
+
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+	
+	
+	APXGameMode* GM = UPXGameplayStatics::GetGameMode(World);
+	if (GM)
+	{
+		GM->LoadLevel(GameInstance->GetCurLevelName_Simple(true), GetNewLevelInitLocation());
+	}
+}
+
+FVector APXGameState::GetNewLevelInitLocation()
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, FVector::ZeroVector);
+	
+	ABasePXCharacter* Character = UPXGameplayStatics::GetPlayerCharacter(World);
+	if (Character)
+	{
+		return Character->GetActorLocation() - Character->GetVectorFaceToCamera() * 240 - FVector(0,0,120);
+	}
+	
+	return FVector(0, 0, 0);
 }
 
 void APXGameState::OnGameStart()

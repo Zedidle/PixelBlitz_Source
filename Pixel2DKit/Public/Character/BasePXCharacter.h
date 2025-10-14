@@ -553,15 +553,15 @@ public:
 
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnLoadingLevel(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
+	void OnLevelLoading(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnStartLevelSuccess(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
+	void OnLevelLoaded(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
 
 #pragma region Massage
 	
-	FGameplayMessageListenerHandle ListenerHandle_OnLoadingLevel;
-	FGameplayMessageListenerHandle ListenerHandle_OnStartLevelSuccess;
+	FGameplayMessageListenerHandle ListenerHandle_OnLevelLoading;
+	FGameplayMessageListenerHandle ListenerHandle_OnLevelLoaded;
 	
 #pragma endregion
 

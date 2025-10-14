@@ -31,7 +31,6 @@ public class Pixel2DKit : ModuleRules
 			"ReplicationGraph",
 			"GameFeatures", 
 			"SignificanceManager",
-			"CommonLoadingScreen",
 			"Niagara",
 			"ControlFlows",
 			"PropertyPath",

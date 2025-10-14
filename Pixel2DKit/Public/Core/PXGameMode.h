@@ -48,12 +48,6 @@ public:
 #pragma region GameplayFlow
 	UPROPERTY(BlueprintReadOnly, Category=GameplayFlow)
 	APlayerRespawnPoint* PlayerRespawnPoint;
-
-	// UPROPERTY(BlueprintAssignable)
-	// FOnStartLevelSuccessSignature Event_OnStartLevelSuccess; 
-	//
-	// UPROPERTY(BlueprintAssignable)
-	// FOnLoadingLevelSignature Event_OnLoadingLevel;
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0));
@@ -66,7 +60,7 @@ public:
 	void TryStartCurLevel();
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=GameplayFlow)
-	void OnStartLevelSuccess();
+	void OnLevelStarted();
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category=GameplayFlow)
 	void ClearPreLevel();

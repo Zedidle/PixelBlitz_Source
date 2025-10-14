@@ -7,8 +7,9 @@
 
 namespace PXGameplayTags
 {
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLoadingLevel, "GameplayFlow.OnLoadingLevel", "关卡开始加载");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnStartLevelSuccess, "GameplayFlow.OnStartLevelSuccess", "关卡加载完成并开始关卡");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelLoading, "GameplayFlow.OnLoadingLevel", "关卡开始加载");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelLoaded, "GameplayFlow.OnLoadingLevel", "关卡加载完成");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelStarted, "GameplayFlow.OnStartLevelSuccess", "关卡正式开始，（需要主动触发）");
 
 	
 

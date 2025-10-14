@@ -458,8 +458,8 @@ void ABasePXCharacter::BeginPlay()
 
 
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
-	ListenerHandle_OnLoadingLevel = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLoadingLevel, this, &ThisClass::OnLoadingLevel);
-	ListenerHandle_OnStartLevelSuccess = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnStartLevelSuccess, this, &ThisClass::OnStartLevelSuccess);
+	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
+	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -480,8 +480,8 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
-	MessageSubsystem.UnregisterListener(ListenerHandle_OnLoadingLevel);
-	MessageSubsystem.UnregisterListener(ListenerHandle_OnStartLevelSuccess);
+	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoading);
+	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoaded);
 }
 
 bool ABasePXCharacter::SelfCanJump_Implementation()
@@ -1765,7 +1765,7 @@ void ABasePXCharacter::TryUseSkill()
 	BP_TryUseSkill();
 }
 
-void ABasePXCharacter::OnLoadingLevel_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+void ABasePXCharacter::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
 {
 	if (APXPlayerController* PC = GetController<APXPlayerController>())
 	{
@@ -1773,7 +1773,7 @@ void ABasePXCharacter::OnLoadingLevel_Implementation(FGameplayTag Channel, const
 	}
 }
 
-void ABasePXCharacter::OnStartLevelSuccess_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+void ABasePXCharacter::OnLevelLoaded_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
 {
 }
 

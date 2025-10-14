@@ -100,7 +100,7 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 
 	if (CurLevelInstance)
 	{
-		CurLevelInstance->OnLevelLoaded.RemoveDynamic(this, &ThisClass::OnLevelLoaded);
+		CurLevelInstance->OnLevelLoaded.RemoveAll(this);
 	}
 
 	PreLevelName = CurLevelName;
@@ -124,7 +124,7 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
 		
 		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
-		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLoadingLevel, EMPTY_MESSAGE);
+		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelLoading, EMPTY_MESSAGE);
 	}
 }
 
@@ -137,13 +137,13 @@ void APXGameMode::TryStartCurLevel()
 {
 	if (IsLevelLoaded)
 	{
-		OnStartLevelSuccess();
+		OnLevelStarted();
 	}
 
 	IsLevelStarted = true;
 }
 
-void APXGameMode::OnStartLevelSuccess_Implementation()
+void APXGameMode::OnLevelStarted_Implementation()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
@@ -167,7 +167,7 @@ void APXGameMode::OnStartLevelSuccess_Implementation()
 	PrepareGame();
 
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
-	MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnStartLevelSuccess, EMPTY_MESSAGE);
+	MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelStarted, EMPTY_MESSAGE);
 }
 
 void APXGameMode::ClearPreLevel_Implementation()
@@ -264,9 +264,13 @@ void APXGameMode::OnLevelLoaded()
 				Platform->SetLoadLevelLocationOffset(CurLevelInstance->LevelTransform.GetLocation());
 			}
 		}
+
+		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelLoaded, EMPTY_MESSAGE);
+		
 		if (IsLevelStarted)
 		{
-			OnStartLevelSuccess();
+			OnLevelStarted();
 		}
 	}
 }
