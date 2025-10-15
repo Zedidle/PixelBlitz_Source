@@ -16,7 +16,7 @@ class PIXEL2DKIT_API IFight_Interface
     
 public:
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    FGameplayTagContainer GetOwnCamp(); // 获取己方阵营
+    FGameplayTagContainer GetOwnCamp() const; // 获取己方阵营
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     FGameplayTagContainer GetEnemyCamp(); // 获取敌方阵营

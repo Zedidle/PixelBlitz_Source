@@ -485,7 +485,7 @@ public:
 	virtual bool GetIsDefending() override;
 	virtual bool CanAttack_Implementation() override;
 	virtual bool IsAlive_Implementation() override;
-	virtual FGameplayTagContainer GetOwnCamp_Implementation() override;
+	virtual FGameplayTagContainer GetOwnCamp_Implementation() const override;
 	virtual FGameplayTagContainer GetEnemyCamp_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
 	virtual void OnAttackHiting_Implementation() override;

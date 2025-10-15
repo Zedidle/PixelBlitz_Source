@@ -34,7 +34,6 @@ public class Pixel2DKit : ModuleRules
 			"Niagara",
 			"ControlFlows",
 			"PropertyPath",
-			"QuicMessagingTransport", 
 			"OnlineSubsystemSteam", 
 			"OnlineSubsystem", 
 			"OnlineSubsystemUtils",

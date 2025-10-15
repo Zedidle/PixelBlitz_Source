@@ -11,7 +11,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Animation/BasePXAnimInstance.h"
 #include "Core/PXGameState.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -21,7 +20,7 @@
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/AttributeSet/PXEnemyAttributeSet.h"
-#include "Perception/PawnSensingComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXPlayerState.h"
 #include "Sound/SoundCue.h"
@@ -200,7 +199,11 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	CurAttackRepel = EnemyData.AttackKnockbackForce;
 
-	PawnSensingComponent->SightRadius = EnemyData.SightRadius;
+	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
+	{
+		EnemyAIController->UpdateSightRadius(EnemyData.SightRadius);
+	}
+	
 	LostEnemyTime = EnemyData.LostEnemyTime;
 
 	HealthComponent->RepelResistance = EnemyData.RepelResistance;
@@ -260,9 +263,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
 
-	PawnSensingComponent = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensingComponent"));
-	PawnSensingComponent->SightRadius = 0;
-	PawnSensingComponent->HearingThreshold = 0;
+
 	
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
@@ -294,12 +295,6 @@ void ABaseEnemy::BeginPlay()
 	{
 		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
-
-	if (PawnSensingComponent)
-	{
-		PawnSensingComponent->OnSeePawn.AddDynamic(this, &ThisClass::OnSensingPawn);
-	}
-	
 }
 
 void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -312,12 +307,8 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		HealthComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
-
-	if (PawnSensingComponent)
-	{
-		PawnSensingComponent->OnSeePawn.RemoveDynamic(this, &ThisClass::OnSensingPawn);
-	}
 }
+
 
 void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
 {
@@ -330,11 +321,6 @@ void ABaseEnemy::OnDie_Implementation()
 	
 	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
 	DropSubsystem->SpawnItems(EnemyData.DropID_Rate, GetActorLocation());
-
-	if (PawnSensingComponent)
-	{
-		PawnSensingComponent->DestroyComponent();
-	}
 
 	if (GetCapsuleComponent())
 	{
@@ -469,9 +455,9 @@ void ABaseEnemy::BuffUpdate_Speed_Implementation()
 
 void ABaseEnemy::BuffUpdate_Sight_Implementation()
 {
-	if (PawnSensingComponent)
+	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
 	{
-		PawnSensingComponent->SightRadius = EnemyData.SightRadius * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight;
+		EnemyAIController->UpdateSightRadius(EnemyData.SightRadius * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight);
 	}
 }
 
@@ -512,14 +498,6 @@ bool ABaseEnemy::InAttackRange()
 		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
 	}
 	return false;
-}
-
-void ABaseEnemy::OnSensingPawn_Implementation(APawn* Pawn)
-{
-	if (SetPXCharacter(Pawn))
-	{
-		DelayLosePlayer();
-	}
 }
 
 void ABaseEnemy::DelayLosePlayer_Implementation()
@@ -595,7 +573,10 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 		OutDamage *= 0.5;
 	}
 
-	OnSensingPawn(Cast<APawn>(Maker));
+	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
+	{
+		EnemyAIController->OnPerceptionUpdated({Maker});
+	}
 }
 
 

@@ -3,8 +3,62 @@
 
 #include "Enemy/EnemyAIController.h"
 #include "NavigationSystem.h"
+#include "Enemy/BaseEnemy.h"
+#include "Interfaces/Fight_Interface.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "Perception/AISenseConfig_Sight.h"
 
+
+AEnemyAIController::AEnemyAIController(const FObjectInitializer& ObjectInitializer):Super(ObjectInitializer)
+{
+	AIPerception = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("AIPerception"));
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
+
+	if (AIPerception && SightConfig)
+	{
+		SightConfig->SightRadius = 1000.f;
+		SightConfig->LoseSightRadius = 1500.f;
+		SightConfig->PeripheralVisionAngleDegrees = 60.f;
+
+		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
+		// SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+		// SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+
+		AIPerception->ConfigureSense(*SightConfig);
+		AIPerception->SetDominantSense(UAISenseConfig_Sight::StaticClass());
+
+		AIPerception->OnPerceptionUpdated.AddDynamic(this, &ThisClass::OnPerceptionUpdated);
+	}
+}
+
+void AEnemyAIController::OnPerceptionUpdated_Implementation(const TArray<AActor*>& UpdatedActors)
+{
+	ABaseEnemy* Enemy = GetPawn<ABaseEnemy>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
+	
+	for (const auto& Actor : UpdatedActors)
+	{
+		if (Enemy->SetPXCharacter(Actor))
+		{
+			Enemy->DelayLosePlayer();
+			return;
+		}
+	}
+}
+
+void AEnemyAIController::UpdateSightRadius(float NewRadius)
+{
+	if (SightConfig && AIPerception)
+	{
+		// 修改配置对象的属性
+		SightConfig->SightRadius = NewRadius;
+		SightConfig->LoseSightRadius = NewRadius * 1.2 + 100.0f;
+    
+		// 重新配置感知组件中的该感官
+		AIPerception->RequestStimuliListenerUpdate();
+	}
+}
 
 void AEnemyAIController::SimpleMoveToLocation(const FVector& Dest)
 {
@@ -28,4 +82,15 @@ void AEnemyAIController::SimpleMoveToLocation(const FVector& Dest)
 FPathFollowingRequestResult AEnemyAIController::MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath)
 {
 	return Super::MoveTo(MoveRequest, OutPath);
+}
+
+ETeamAttitude::Type AEnemyAIController::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	if (Other.Implements<UFight_Interface>())
+	{
+		return IFight_Interface::Execute_GetOwnCamp(&Other).HasTag(TAG("Enemy")) ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
+	}
+
+	return ETeamAttitude::Neutral;
+	
 }

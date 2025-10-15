@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "EnemyAIController.generated.h"
 
+class UAISenseConfig_Sight;
 /**
  * 
  */
@@ -20,11 +21,46 @@ class PIXEL2DKIT_API AEnemyAIController : public AAIController
 
 public:
 
+
+	AEnemyAIController(const FObjectInitializer& ObjectInitializer);
+
+
+	UPROPERTY()
+	UAISenseConfig_Sight* SightConfig;
+		
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
+	TObjectPtr<UAIPerceptionComponent> AIPerception;
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateSightRadius(float NewRadius);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+	
+
+
+	
 	// 不需要Navmesh的直接移动
 	UFUNCTION(BlueprintCallable, Category="AI")
 	void SimpleMoveToLocation(const FVector& Dest);
 	
 	virtual FPathFollowingRequestResult MoveTo(const FAIMoveRequest& MoveRequest, FNavPathSharedPtr* OutPath = nullptr);
+
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	
 };

@@ -1249,7 +1249,7 @@ bool ABasePXCharacter::IsAlive_Implementation()
 	return HealthComponent->GetCurrentHP() > 0;
 }
 
-FGameplayTagContainer ABasePXCharacter::GetOwnCamp_Implementation()
+FGameplayTagContainer ABasePXCharacter::GetOwnCamp_Implementation() const
 {
 	return IFight_Interface::GetOwnCamp_Implementation();
 }

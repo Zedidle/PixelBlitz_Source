@@ -15,6 +15,7 @@
 #include "BaseEnemy.generated.h"
 
 
+class UAISenseConfig_Sight;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDie, ABaseEnemy*, Enemy);
 
 
@@ -79,7 +80,7 @@ struct FEnemyData : public FTableRowBase
 
 
 
-class UPawnSensingComponent;
+class UAIPerceptionComponent;
 class UEnemyAIComponent;
 class UHealthComponent;
 class UFightComponent;
@@ -109,11 +110,12 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
-	TObjectPtr<UPawnSensingComponent> PawnSensingComponent;
+
+
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
+
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UHealthComponent> HealthComponent;
@@ -139,6 +141,9 @@ public:
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void LoadEnemyData(FName Level);
+
+
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void LoadLookDeterrence(int32 Level);
@@ -334,12 +339,8 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OnSensingPawn(APawn* Pawn);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void DelayLosePlayer();
 
-	
 	
 	// 默认可行动方位，一般为全方位距离可行，实际行动受设定距离限制与ActionAtPlayerXXXXX接口，需要针对不同怪物部分删除
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")

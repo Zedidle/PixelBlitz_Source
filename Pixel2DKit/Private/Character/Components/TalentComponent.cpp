@@ -141,7 +141,7 @@ void UTalentComponent::RemoveDefenseSkill(FGameplayTag Tag)
 	DefenseSkills.RemoveAllSwap([&Tag](const ABaseDefenseSkill* Skill)
 	{
 		return Skill && Skill->AbilityTags.HasTag(Tag);
-	}, false);
+	}, EAllowShrinking::No);
 }
 
 void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
