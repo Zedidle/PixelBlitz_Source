@@ -3,14 +3,10 @@
 
 #include "UI/Talent/TalentSelectItemWidget.h"
 
+#include <string>
+
 #include "CommonTextBlock.h"
-#include "DelayAction.h"
-#include "MeshAttributes.h"
-#include "Blueprint/SlateBlueprintLibrary.h"
-#include "Blueprint/WidgetLayoutLibrary.h"
-#include "Components/CanvasPanel.h"
-#include "Components/CanvasPanelSlot.h"
-#include "Components/SizeBoxSlot.h"
+#include "Components/Image.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "UI/Talent/TalentTipWidget.h"
 
@@ -18,11 +14,26 @@ void UTalentSelectItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (Text_TalentName)
+	TalentTag = TalentData.TalentTag;
+
+	if (TextBlock_TalentName)
 	{
-		Text_TalentName->SetText(FText::AsCultureInvariant(*FString::Printf(TEXT("%d> %s"), TalentData.Price, *TalentData.TalentName.ToString())));
+		TextBlock_TalentName->SetText(TalentData.TalentName);
 	}
 
+	if (TextBlock_Price)
+	{
+		TextBlock_Price->SetText(FText::AsNumber(TalentData.Price));
+	}
+	
+	if (Image_TalentIcon)
+	{
+		if (UTexture2D* IconImage = TalentData.Icon.LoadSynchronous())
+		{
+			Image_TalentIcon->SetBrushFromTexture(IconImage);
+		}
+	}
+	
 	if (UPXBasicBuildSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld()))
 	{
 		if (SG->ChosenTalents.Contains(TalentData.TalentTag))

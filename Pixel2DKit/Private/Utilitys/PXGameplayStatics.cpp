@@ -104,7 +104,7 @@ void UPXGameplayStatics::ChoiceTalent(const UObject* WorldContextObject, FGamepl
 	}
 }
 
-void UPXGameplayStatics::RemoveChosenTalent(const UObject* WorldContextObject, FGameplayTag Tag)
+void UPXGameplayStatics::UnChoiceTalent(const UObject* WorldContextObject, FGameplayTag Tag)
 {
 	if (UPXBasicBuildSaveGame* SG = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(WorldContextObject))
 	{

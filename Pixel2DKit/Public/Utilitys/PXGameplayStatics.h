@@ -68,7 +68,7 @@ public:
 	static void ChoiceTalent(const UObject* WorldContextObject, FGameplayTag Tag);
 
 	UFUNCTION(BlueprintCallable, Category="PXGameplayStatics | Talent", meta=(WorldContext="WorldContextObject"))
-	static void RemoveChosenTalent(const UObject* WorldContextObject, FGameplayTag Tag);
+	static void UnChoiceTalent(const UObject* WorldContextObject, FGameplayTag Tag);
 #pragma endregion
 
 

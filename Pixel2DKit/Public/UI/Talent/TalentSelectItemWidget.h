@@ -9,6 +9,7 @@
 #include "TalentSelectItemWidget.generated.h"
 
 
+class UImage;
 class UTalentTipWidget;
 class UCommonTextBlock;
 
@@ -32,12 +33,22 @@ protected:
 	virtual void NativeDestruct() override;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
-	UCommonTextBlock* Text_TalentName;
+	UCommonTextBlock* TextBlock_TalentName;
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
+	UTextBlock* TextBlock_Price;
+	
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
+	UImage* Image_TalentIcon;
+
 	
 public:
+
+	UPROPERTY(BlueprintReadOnly, Category = "TalentSelectItemWidget")
+	FGameplayTag TalentTag;
+	
 	UPROPERTY(BlueprintReadWrite, Category = "TalentSelectItemWidget", meta = (ExposeOnSpawn = true))
 	FTalent TalentData;
-
 
 
 	UFUNCTION()
