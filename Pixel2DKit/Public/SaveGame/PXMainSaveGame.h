@@ -53,12 +53,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int HurtTimes = 0;
 
+	// 当前小关累计金币
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int JustPickedGolds;
-	
+
+	// 当局累计金币
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RoundGoldNum;
 
+	// 是否拾取了所有金币
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool PickupAllGolds;
 

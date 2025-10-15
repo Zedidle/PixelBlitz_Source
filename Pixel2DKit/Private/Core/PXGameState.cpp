@@ -90,7 +90,7 @@ void APXGameState::DealStatics_Implementation()
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
-	UGameInstance* GameInstance = GetGameInstance();
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	
 	UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(World);
@@ -102,16 +102,31 @@ void APXGameState::DealStatics_Implementation()
 	UPXTalentsSaveGame* TalentSaveGame = UPXSaveGameSubSystemFuncLib::GetTalentsData(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSaveGame);
 
+
+	// 时间记录
+	float PreUsedTime; bool NewRecord;
+	GameInstance->GetTotalUseTime(PreUsedTime, NewRecord);
+	
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+
+	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreUsedTime);
+	
 	MainSaveGame->RoundGoldNum += MainSaveGame->JustPickedGolds;
 	BasicBuildSaveGame->RemainGoldNum += MainSaveGame->JustPickedGolds;
 	TalentSaveGame->TotalPickupGolds += MainSaveGame->JustPickedGolds;
 	MainSaveGame->JustPickedGolds = 0;
 
+	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
+	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
+	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
+	
 	if (UAchievementSubsystem* AchievementSubsystem = GameInstance->GetSubsystem<UAchievementSubsystem>())
 	{
 		AchievementSubsystem->Achievement_LevelTransition();
 	}
-	
+
+
 }
 
 void APXGameState::PassDayTime(float Time, bool DirectSet, float TransitionDuration, FName _ForceWeatherIndex)
@@ -137,11 +152,6 @@ void APXGameState::ToNextLevel()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
 	
-	DealStatics();
-	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
-	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
-	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
-
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	
@@ -151,16 +161,10 @@ void APXGameState::ToNextLevel()
 		GM->LoadLevel(GameInstance->GetCurLevelName_Simple(true), GetNewLevelInitLocation());
 	}
 
-	float PreUsedTime; bool NewRecord;
-	GameInstance->GetTotalUseTime(PreUsedTime, NewRecord);
-	
 
-	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-
-	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreUsedTime);
-	
+	// 由于UI需要Statics来显示，DealUI要先
 	DealUI();
+	DealStatics();
 }
 
 FVector APXGameState::GetNewLevelInitLocation()
