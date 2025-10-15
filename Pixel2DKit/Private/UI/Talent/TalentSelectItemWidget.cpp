@@ -49,6 +49,10 @@ void UTalentSelectItemWidget::NativeConstruct()
 void UTalentSelectItemWidget::NativeDestruct()
 {
 	Super::NativeDestruct();
+	if (TalentTipWidget)
+	{
+		TalentTipWidget->RemoveFromParent();
+	}
 }
 
 
