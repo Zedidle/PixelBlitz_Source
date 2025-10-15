@@ -5,9 +5,12 @@
 #include "CoreMinimal.h"
 #include "CommonPlayerController.h"
 #include "InputMappingContext.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/PlayerController.h"
 #include "PXPlayerController.generated.h"
 
+
+struct FDefaultEmptyMessage;
 
 UCLASS()
 class PIXEL2DKIT_API APXPlayerController : public ACommonPlayerController
@@ -29,7 +32,8 @@ protected:
 
 
 	virtual void BeginPlay() override;
-	
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 public:
 	UPROPERTY(BlueprintReadOnly)
@@ -44,5 +48,22 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Game)
 	bool CanPause();
 
+
+
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnLevelLoading(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnLevelLoaded(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
+
+
+
+#pragma region Massage
+	
+	FGameplayMessageListenerHandle ListenerHandle_OnLevelLoading;
+	FGameplayMessageListenerHandle ListenerHandle_OnLevelLoaded;
+	
+#pragma endregion
 	
 };

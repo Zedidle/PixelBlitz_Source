@@ -4,6 +4,7 @@
 #include "Controller/PXPlayerController.h"
 
 #include "EnhancedInputSubsystems.h"
+#include "PXGameplayTags.h"
 #include "Character/BasePXCharacter.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
@@ -30,7 +31,22 @@ void APXPlayerController::BeginPlay()
 			Subsystem->AddMappingContext(IMC_Default, 1, Options);
 		}
 	}
+
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
+	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
+	
 }
+
+void APXPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoading);
+	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoaded);
+}
+
 
 void APXPlayerController::OnGameStart()
 {
@@ -50,17 +66,24 @@ void APXPlayerController::OnGameStart()
 void APXPlayerController::OnCharacterControl(bool On)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Subsystem);
+	
 	CharacterControlling = On;
+	
+	
 	if (On)
 	{
-		// Subsystem->AddMappingContext(IMC_Default, 1, Options);
+		const FModifyContextOptions Options;
+		Subsystem->AddMappingContext(IMC_Default, 1, Options);
+		
 		FInputModeGameOnly InputMode;
 		SetInputMode(InputMode);
+		
 	}
 	else
 	{
-		// Subsystem->RemoveMappingContext(IMC_Default);
+		Subsystem->RemoveMappingContext(IMC_Default);
 		FInputModeUIOnly InputMode;
 		SetInputMode(InputMode);
 	}
@@ -70,4 +93,14 @@ void APXPlayerController::OnCharacterControl(bool On)
 bool APXPlayerController::CanPause()
 {
 	return CharacterControlling && GameAlreadyStart;
+}
+
+void APXPlayerController::OnLevelLoaded_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+{
+	OnCharacterControl(true);
+}
+
+void APXPlayerController::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+{
+	OnCharacterControl(false);
 }

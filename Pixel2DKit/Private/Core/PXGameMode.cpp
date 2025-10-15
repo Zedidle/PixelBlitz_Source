@@ -122,7 +122,7 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 	{
 		CurLevelInstance = LoadedLevel;
 		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
-		
+
 		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelLoading, EMPTY_MESSAGE);
 	}
