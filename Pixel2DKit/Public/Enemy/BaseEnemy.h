@@ -150,7 +150,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
 	UFUNCTION(BlueprintCallable, Category="Enemy")
-	bool SetPixelCharacter(AActor* Character);
+	bool SetPXCharacter(AActor* Character);
 
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;

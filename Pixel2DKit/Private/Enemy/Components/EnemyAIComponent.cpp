@@ -67,7 +67,7 @@ void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
 		if (!WeakThis.IsValid()) return;
 		if (WeakThis->OwningEnemy)
 		{
-			WeakThis->OwningEnemy->SetPixelCharacter(nullptr);
+			WeakThis->OwningEnemy->SetPXCharacter(nullptr);
 		}
 	}, AttackPatienceTime);
 }

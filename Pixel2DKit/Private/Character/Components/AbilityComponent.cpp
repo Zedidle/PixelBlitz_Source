@@ -132,6 +132,7 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 void UAbilityComponent::LoadAbility()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
 	
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
@@ -165,6 +166,11 @@ void UAbilityComponent::LoadAbility()
 		{
 			EffectGameplayTags.AddData(D.Key, D.Value);
 		}
+
+		FString Parent;
+		FString Level;
+		Tag.ToString().Split(".Level", &Parent, &Level);
+		PXCharacter->BuffComponent->AddBuffByTag(TAG(*Parent));
 	}
 
 	UHealthComponent* HealthComponent = PXCharacter->GetComponentByClass<UHealthComponent>();
@@ -217,32 +223,7 @@ void UAbilityComponent::LoadAbility()
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		HealthComponent->InRockPercent = EffectGameplayTags[Tag];
-		BuffComponent->AddBuffByTag(TAG("Buff.Ability.InRock"));
 	}
-
-	// 空击
-	Tag = TAG("AbilitySet.InAir.DamagePlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		BuffComponent->AddBuffByTag(TAG("Buff.Ability.AirFight"));
-	}
-	
-
-	// 天手力
-	Tag = TAG("AbilitySet.SkyHandPower.Cooldown");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		BuffComponent->AddBuffByTag(TAG("Buff.Ability.SkyHandPower"));
-	}
-	
-	// 移形换影
-	Tag = TAG("AbilitySet.Mobiliarbus.Cooldown");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		BuffComponent->AddBuffByTag(TAG("Buff.Ability.Mobiliarbus"));
-	}
-
-
 	
 	
 #pragma endregion 
@@ -339,7 +320,7 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 	HurtMaker = Maker;
 	
 	// 触发黑荆棘
-	CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn")));
+	CachedASC->TryActivateAbilityByTagName("Ability.Blackthorn");
 
 	// 所有涉及到 RemDamage 的都需要判断 bForce
 	if (!bForce)

@@ -41,7 +41,7 @@ AActor* ABaseEnemy::GetPixelCharacter()
 	return Cast<AActor>(PXCharacter);
 }
 
-bool ABaseEnemy::SetPixelCharacter(AActor* Character)
+bool ABaseEnemy::SetPXCharacter(AActor* Character)
 {
 	if (Character == nullptr)
 	{
@@ -516,7 +516,7 @@ bool ABaseEnemy::InAttackRange()
 
 void ABaseEnemy::OnSensingPawn_Implementation(APawn* Pawn)
 {
-	if (SetPixelCharacter(Pawn))
+	if (SetPXCharacter(Pawn))
 	{
 		DelayLosePlayer();
 	}
@@ -536,7 +536,7 @@ void ABaseEnemy::DelayLosePlayer_Implementation()
 			UTimerSubsystemFuncLib::SetDelay(WeakThis->GetWorld(), [WeakThis]
 			{
 				if (!WeakThis.IsValid()) return;
-				WeakThis->SetPixelCharacter(nullptr);
+				WeakThis->SetPXCharacter(nullptr);
 			}, 2);
 		}, LostEnemyTime);
 }
@@ -594,6 +594,8 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 	{
 		OutDamage *= 0.5;
 	}
+
+	OnSensingPawn(Cast<APawn>(Maker));
 }
 
 

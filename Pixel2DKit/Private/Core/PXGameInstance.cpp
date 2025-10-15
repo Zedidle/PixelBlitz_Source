@@ -99,18 +99,16 @@ FName UPXGameInstance::GetCurLevelName_Simple(bool Next)
 	
 	if (MainSaveGame->RemLevels.Num() == 0) return FName();
 
-	if (Next || MainSaveGame->CurLevelName.IsNone())
-	{
-		MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
-	}
-
 	if (Next)
 	{
 		MainSaveGame->CurLevel++;
-		MainSaveGame->RemLevels.Remove(MainSaveGame->CurLevelName);
+		MainSaveGame->RemLevels.RemoveAt(0);
 	}
+
+	if (!MainSaveGame->RemLevels.IsValidIndex(0)) return FName();
 	
-	return MainSaveGame->CurLevelName;	
+	MainSaveGame->CurLevelName = MainSaveGame->RemLevels[0];
+	return MainSaveGame->CurLevelName;
 }
 
 FName UPXGameInstance::GetCurLevelNameByNum(int Num)
