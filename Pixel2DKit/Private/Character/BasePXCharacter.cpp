@@ -421,6 +421,11 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	Camera->SetupAttachment(SpringArm);
 	
 	JumpMaxCount = 9999;
+
+	if (GetSprite())
+	{
+		GetSprite()->CastShadow = true;
+	}
 }
 
 bool ABasePXCharacter::HasEffectGameplayTag(const FGameplayTag Tag) const

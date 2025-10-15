@@ -5,6 +5,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "PaperFlipbookComponent.h"
+#include "StaticMeshAttributes.h"
 #include "Components/WidgetComponent.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Utilitys/SpaceFuncLib.h"
@@ -262,8 +263,6 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
-
-
 	
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
@@ -278,6 +277,10 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
+	if (GetSprite())
+	{
+		GetSprite()->CastShadow = true;
+	}
 }
 
 void ABaseEnemy::Initialize_Implementation(FName Level)
