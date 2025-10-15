@@ -55,7 +55,7 @@ bool UPXASComponent::TryActivateAbilityByTag(const FGameplayTag& Tag, bool bAllo
 	bool bSuccess = false;
 	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 	{		
-		if (Spec.Ability && Spec.Ability->AbilityTags.HasTagExact(Tag))
+		if (Spec.Ability && Spec.Ability->GetAssetTags().HasTagExact(Tag))
 		{
 			bSuccess |= TryActivateAbility(Spec.Handle, bAllowRemoteActivation);
 		}
@@ -73,7 +73,7 @@ FGameplayAbilitySpec* UPXASComponent::GetAbilityByTagName(FName AbilityTagName)
 	{
 		if (Spec.Ability)
 		{
-			if (Spec.Ability->AbilityTags.HasTagExact(Tag))
+			if (Spec.Ability->GetAssetTags().HasTagExact(Tag))
 			{
 				return &Spec;
 			}

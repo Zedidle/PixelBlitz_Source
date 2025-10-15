@@ -263,7 +263,8 @@ FVector UEnemyAIComponent::GetCurActionFieldDirectionLocation(const bool bNear)
 	// 应该直接走向最近的能攻击的区域
 	// 可能后续要加入直接跳跃到可攻击区域的技能
 	
-	FVector TargetLocation;
+	FVector TargetLocation = PlayerLocation;
+	
 	if (ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y)
 	{
 		if (bNear)

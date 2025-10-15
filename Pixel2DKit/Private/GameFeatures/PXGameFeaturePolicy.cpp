@@ -59,12 +59,6 @@ void UPXGameFeaturePolicy::GetGameFeatureLoadingMode(bool& bLoadClientData, bool
 	bLoadServerData = !IsRunningClientOnly();
 }
 
-bool UPXGameFeaturePolicy::IsPluginAllowed(const FString& PluginURL) const
-{
-	return Super::IsPluginAllowed(PluginURL);
-}
-
-
 
 #include "AbilitySystemGlobals.h"
 #include "GameFeatures/GameFeatureAction_AddGameplayCuePath.h"
