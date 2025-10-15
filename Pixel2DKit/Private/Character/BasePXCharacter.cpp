@@ -625,7 +625,7 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 	}
 	if (AbilityComponent)
 	{
-		AbilityComponent->LoadAbility();
+		AbilityComponent->LoadAbilities();
 	}
 	if (BuffComponent)
 	{

@@ -20,11 +20,36 @@ UTimerSubsystem* UTimerSubsystemFuncLib::GetTimerSubsystem(UObject* WorldContext
 	return nullptr;
 }
 
+bool UTimerSubsystemFuncLib::HasTimer(UObject* WorldContext, FName TimerName)
+{
+	if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+	{
+		return Subsystem->HasTimer(TimerName);
+	}
+	return false;
+}
+
 void UTimerSubsystemFuncLib::CancelDelay(UObject* WorldContext, FName TimerName)
 {
 	if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
 	{
 		Subsystem->CancelDelay(TimerName);
+	}
+}
+
+void UTimerSubsystemFuncLib::PauseDelay(UObject* WorldContext, FName TimerName)
+{
+	if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+	{
+		Subsystem->PauseDelay(TimerName);
+	}
+}
+
+void UTimerSubsystemFuncLib::UnPauseDelay(UObject* WorldContext, FName TimerName)
+{
+	if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+	{
+		Subsystem->UnPauseDelay(TimerName);
 	}
 }
 

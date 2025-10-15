@@ -96,7 +96,7 @@ public:
 	void LearnAbility(const FGameplayTag& AbilityTag);
 	
 	UFUNCTION(BlueprintCallable)
-	void LoadAbility();
+	void LoadAbilities();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasChosenAbility(const FGameplayTag& AbilityTag);

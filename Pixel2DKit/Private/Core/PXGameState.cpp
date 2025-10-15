@@ -15,6 +15,7 @@
 #include "Platform/PlatformFight.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Subsystems/PXAudioSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
 #include "Utilitys/CommonFuncLib.h"
@@ -28,7 +29,8 @@ void APXGameState::BeginPlay()
 void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
+	
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), "APXGameState.RaceTimer");
 }
 
 void APXGameState::EventOnDayTimeTypeChanged_Implementation()
@@ -136,7 +138,6 @@ void APXGameState::ToNextLevel()
 
 	
 	DealStatics();
-	DealUI();
 	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
 	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
 	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
@@ -144,12 +145,22 @@ void APXGameState::ToNextLevel()
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	
-	
 	APXGameMode* GM = UPXGameplayStatics::GetGameMode(World);
 	if (GM)
 	{
 		GM->LoadLevel(GameInstance->GetCurLevelName_Simple(true), GetNewLevelInitLocation());
 	}
+
+	float PreUsedTime; bool NewRecord;
+	GameInstance->GetTotalUseTime(PreUsedTime, NewRecord);
+	
+
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
+
+	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreUsedTime);
+	
+	DealUI();
 }
 
 FVector APXGameState::GetNewLevelInitLocation()
@@ -206,9 +217,61 @@ void APXGameState::OnGameStart()
 	StartRaceTimer(true);
 }
 
-void APXGameState::StartRaceTimer_Implementation(bool Start)
+
+
+void APXGameState::OnEnemyBossDie_Implementation()
 {
+	StartRaceTimer(false);
 	
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		WeakThis->ToNextLevel();
+	}, 1.2);
+
+	if (UPXAudioSubsystem* AudioSubsystem = GetGameInstance()->GetSubsystem<UPXAudioSubsystem>())
+	{
+		AudioSubsystem->CloseBGM();
+	}
+}
+
+void APXGameState::StartRaceTimer_Implementation(bool bStart)
+{
+    UTimerSubsystem* TimerSubsystem = GetGameInstance()->GetSubsystem<UTimerSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TimerSubsystem);
+
+
+	FName TimerName = "APXGameState.RaceTimer";
+	
+	if (bStart)
+	{
+		if (TimerSubsystem->HasTimer(TimerName))
+		{
+			TimerSubsystem->UnPauseDelay(TimerName);
+		}
+		else
+		{
+			TimerSubsystem->SetDelayLoop(TimerName, [WeakThis = TWeakObjectPtr(this)]
+			{
+				if (!WeakThis.IsValid()) return;
+				WeakThis->CurRaceTime += 0.01;
+
+				// 1. 创建数字格式选项并设置精度
+				FNumberFormattingOptions FormatOptions;
+				FormatOptions.MinimumFractionalDigits = 2; // 保证至少两位小数
+				FormatOptions.MaximumFractionalDigits = 2; // 保证最多两位小数（即精确到两位）
+
+				// 2. 转换为FText
+				FText FormattedText = FText::AsNumber(WeakThis->CurRaceTime, &FormatOptions);
+				WeakThis->BP_OnTimerUpdate(FormattedText);
+				
+			}, 0.01);
+		}
+	}
+	else
+	{
+		TimerSubsystem->PauseDelay(TimerName);
+	}
 }
 
 UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
@@ -234,4 +297,8 @@ UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
 
 void APXGameState::OnEnemyDie_Implementation(ABaseEnemy* Enemy)
 {
+	if (IFight_Interface::Execute_GetOwnCamp(Enemy).HasTag(TAG("Enemy.BOSS")))
+	{
+		OnEnemyBossDie();
+	}
 }

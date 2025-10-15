@@ -139,13 +139,20 @@ public:
 
     
 
+    UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Timer", meta = (WorldContext = "WorldContext"))
+    static bool HasTimer(UObject* WorldContext, FName TimerName);
+    
     UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
     static void CancelDelay(UObject* WorldContext, FName TimerName);
-    
 
     UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
-    static bool IsDelayActive(UObject* WorldContext, FName TimerName);
+    static void PauseDelay(UObject* WorldContext, FName TimerName);
+
+    UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
+    static void UnPauseDelay(UObject* WorldContext, FName TimerName);
     
+    UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
+    static bool IsDelayActive(UObject* WorldContext, FName TimerName);
 
     UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
     static float GetRemainingTime(UObject* WorldContext, FName TimerName);

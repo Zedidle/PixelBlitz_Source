@@ -63,6 +63,9 @@ class PIXEL2DKIT_API APXGameState : public AGameState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather", meta = (AllowPrivateAccess))
 	FName ForceWeatherIndex;
 
+	
+	float CurRaceTime = 0.0f; 
+	
 protected:
 
 	virtual void BeginPlay() override;
@@ -132,8 +135,14 @@ public:
 
 	// 竞速计时器
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | GameplayFlow")
-	void StartRaceTimer(bool Start);
-	
+	void StartRaceTimer(bool bStart);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnEnemyBossDie();
+
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnTimerUpdate")
+	void BP_OnTimerUpdate(const FText& TimeToShow);
+
 };
 
 

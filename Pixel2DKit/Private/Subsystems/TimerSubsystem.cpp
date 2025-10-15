@@ -132,6 +132,11 @@ void UTimerSubsystem::CancelDelay(FName TimerName)
 	}
 }
 
+bool UTimerSubsystem::HasTimer(FName TimerName)
+{
+	return ActiveTimers.Contains(TimerName);
+}
+
 bool UTimerSubsystem::IsDelayActive(FName TimerName) const
 {
 	if (const FTimerHandle* Handle = ActiveTimers.Find(TimerName))
@@ -172,8 +177,7 @@ void UTimerSubsystem::UnPauseDelay(FName TimerName)
 {
 	if (FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{
-		UWorld* World = GetWorld();
-		if (World)
+		if (UWorld* World = GetWorld())
 		{
 			World->GetTimerManager().UnPauseTimer(*Handle);
 		}

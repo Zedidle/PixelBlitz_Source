@@ -129,7 +129,7 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 	
 }
 
-void UAbilityComponent::LoadAbility()
+void UAbilityComponent::LoadAbilities()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent);
@@ -164,7 +164,7 @@ void UAbilityComponent::LoadAbility()
 		
 		for (auto& D : AbilityData.Effect_GameplayTag)
 		{
-			EffectGameplayTags.AddData(D.Key, D.Value);
+			EffectGameplayTags.SetData(D.Key, D.Value);
 		}
 
 		FString Parent;

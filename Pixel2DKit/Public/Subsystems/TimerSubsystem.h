@@ -97,6 +97,11 @@ public:
 	 * @param TimerName 要取消的计时器名称
 	 */
 	void CancelDelay(FName TimerName);
+	
+	bool HasTimer(FName TimerName);
+
+	float GetRemainingTime(FName TimerName) const;
+
 
 	/* 检查指定的延迟计时器是否处于活动状态
 	 * 
@@ -104,16 +109,18 @@ public:
 	 * @return 如果计时器处于活动状态返回true，否则false
 	 */
 	bool IsDelayActive(FName TimerName) const;
+	
+	// 检查定时器是否处于暂停状态
+	bool IsDelayPaused(FName TimerName) const;
 
-	float GetRemainingTime(FName TimerName) const;
-
-
+	
 	// 暂停指定的定时器
 	void PauseDelay(FName TimerName);
 	// 恢复指定的定时器
 	void UnPauseDelay(FName TimerName);
-	// 检查定时器是否处于暂停状态
-	bool IsDelayPaused(FName TimerName) const;
+
+
+
 	
 };
 
