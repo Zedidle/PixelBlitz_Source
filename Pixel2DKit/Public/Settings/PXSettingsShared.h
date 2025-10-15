@@ -358,10 +358,10 @@ private:
 	bool bShowBloodVFX = true;
 
 	UPROPERTY()
-	EStyleType DrawStyle = EStyleType::Normal;
+	EStyleType DrawStyle = EStyleType::Cartoon;
 
 	UPROPERTY()
-	ECameraColorFilter CameraColorFilter = ECameraColorFilter::None;
+	ECameraColorFilter CameraColorFilter = ECameraColorFilter::MoonlitNight;
 	
 	UPROPERTY()
 	ECameraFollowMode CameraFollowMode = ECameraFollowMode::Preview;
