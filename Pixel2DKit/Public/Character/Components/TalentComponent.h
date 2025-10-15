@@ -65,7 +65,7 @@ public:
 	void RemoveDefenseSkill(FGameplayTag Tag);
 	
 	UFUNCTION()
-	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage);
+	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce = false);
 	
 	
 	UFUNCTION(BlueprintCallable)

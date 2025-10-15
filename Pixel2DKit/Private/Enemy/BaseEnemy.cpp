@@ -567,13 +567,11 @@ bool ABaseEnemy::Dash_Implementation()
 
 }
 
-void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage)
+void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Maker)
 	
 	OutDamage = InDamage;
-	int SurDamage = InDamage;
-
 	if (Execute_GetOwnCamp(this).HasTag(
 				FGameplayTag::RequestGameplayTag("Enemy.BOSS")))
 	{
@@ -582,17 +580,20 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 			FGameplayTag::RequestGameplayTag("AbilitySet.ToBossDamagePlusPercent"),
 			Result))
 		{
-			SurDamage = SurDamage * (1 + Result);
+			OutDamage *= 1 + Result;
 		}
+	}
+
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
 	}
 
 	// 暂时默认防御减半伤害
 	if (bInDefendState)
 	{
-		SurDamage *= 0.5;
+		OutDamage *= 0.5;
 	}
-	
-	OutDamage = SurDamage;
 }
 
 

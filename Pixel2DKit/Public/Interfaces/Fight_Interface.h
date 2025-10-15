@@ -48,7 +48,7 @@ public:
     void OnBeAttacked_Invulnerable();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    void OnBeAttacked(AActor* Maker, int Damage, int& OutDamage);
+    void OnBeAttacked(AActor* Maker, int Damage, int& OutDamage, bool bForce);
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     int DamagePlus(int InDamage, AActor* Receiver);

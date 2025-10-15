@@ -319,8 +319,14 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 	return true;
 }
 
-void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage)
+void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {
+	if (InDamage <= 0)
+	{
+		OutDamage = 0;
+		return;
+	}
+	
 	if (!CachedASC || !Maker || !Maker->Implements<UFight_Interface>())
 	{
 		OutDamage = InDamage;
@@ -328,17 +334,21 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 	}
 
 	AcceptDamage = InDamage;
-	int SurDamage = InDamage;
+	int RemDamage = InDamage;
 	
 	HurtMaker = Maker;
 	
 	// 触发黑荆棘
 	CachedASC->TryActivateAbilitiesByTag(CreateGameplayTagContainer(FName("Ability.Blackthorn")));
 
-	// 移形换影
-	if (CachedASC->TryActivateAbilityByTagName("Ability.Mobiliarbus"))
+	// 所有涉及到 RemDamage 的都需要判断 bForce
+	if (!bForce)
 	{
-		SurDamage = 0;
+		// 移形换影
+		if (CachedASC->TryActivateAbilityByTagName("Ability.Mobiliarbus"))
+		{
+			RemDamage = 0;
+		}
 	}
 
 	if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower.QTE"))
@@ -346,7 +356,7 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 		ListenHurtInstigatorDead();
 	}
 
-	OutDamage = SurDamage; 
+	OutDamage = RemDamage; 
 }
 
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)

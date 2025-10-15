@@ -1341,33 +1341,19 @@ void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 	}
 }
 
-void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage)
+void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {
 	OutDamage = InDamage;
-	int SurDamage = InDamage;
-	
 	if (AbilityComponent)
 	{
-		AbilityComponent->OnBeAttacked(Maker, InDamage, SurDamage);
+		AbilityComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
 	}
-	if (SurDamage <= 0)
-	{
-		OutDamage = 0;
-		return;
-	}
-
-	InDamage = SurDamage;
 	
 	if (TalentComponent)
 	{
-		TalentComponent->OnBeAttacked(Maker, InDamage, SurDamage);
-	}
-	if (SurDamage <= 0)
-	{
-		OutDamage = 0;
+		TalentComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
 	}
 }
-
 
 
 int ABasePXCharacter::DamagePlus_Implementation(int InDamage, AActor* Receiver)

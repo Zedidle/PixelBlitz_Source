@@ -144,28 +144,40 @@ void UTalentComponent::RemoveDefenseSkill(FGameplayTag Tag)
 	}, false);
 }
 
-void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage)
+void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {
+	if (InDamage <= 0)
+	{
+		OutDamage = 0;
+		return;
+	}
+	
 	if (!Maker)
 	{
 		OutDamage = InDamage;
 		return;
 	}
+
 	
-	int PreDamage = InDamage;
+	int RemDamage = InDamage;
+
 	for (int Index = 0; Index < DefenseSkills.Num(); ++Index)
 	{
 		if (!DefenseSkills[Index]) continue;
-		
+	
 		bool stop;
 		int _OutDamage;
-		DefenseSkills[Index]->OnBeAttacked(Maker, PreDamage, _OutDamage, stop);
-		PreDamage = _OutDamage;
-		
+		DefenseSkills[Index]->OnBeAttacked(Maker, RemDamage, _OutDamage, stop);
+
+		// 某些防御性技能不只是削减伤害
+		if (!bForce)
+		{
+			RemDamage = _OutDamage;
+		}
 		if (stop) break;
 	}
 	
-	OutDamage = PreDamage;
+	OutDamage = RemDamage;
 }
 
 void UTalentComponent::LoadTalents()

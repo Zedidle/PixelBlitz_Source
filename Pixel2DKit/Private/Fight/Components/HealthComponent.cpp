@@ -299,7 +299,7 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 
 	int OutDamage = Damage;
 
-	IFight_Interface::Execute_OnBeAttacked(Owner, Maker, Damage, OutDamage);
+	IFight_Interface::Execute_OnBeAttacked(Owner, Maker, Damage, OutDamage, bForce);
 	KnockBack(KnockbackForce * (OutDamage / Damage), Maker);
 	
 	
