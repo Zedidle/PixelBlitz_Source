@@ -67,7 +67,10 @@ struct FEnemyData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	TMap<FName, int> DropID_Rate;
- 	
+
+	// 需要覆盖但略低于 ActionFieldDistance 允许的攻击区域的范围，否则就会进入不攻击的状态
+	// 停着不动是因为，某个区域被允许攻击并且触发了攻击状态 SetInAttackState(true)
+	// 但是并没有触发动画来 SetInAttackState(false)，该状态会阻止接下来的移动和攻击
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	FVector2D AttackRange = {20, 60};
 
@@ -157,6 +160,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Enemy")
 	bool SetPXCharacter(AActor* Character);
 
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnSensingPlayer")
+	void BP_OnSensingPlayer(AActor* PlayerActor);
+	UFUNCTION()
+	void OnSensingPlayer(AActor* PlayerActor);
+	
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;
 

@@ -39,11 +39,8 @@ void AEnemyAIController::OnPerceptionUpdated_Implementation(const TArray<AActor*
 	
 	for (const auto& Actor : UpdatedActors)
 	{
-		if (Enemy->SetPXCharacter(Actor))
-		{
-			Enemy->DelayLosePlayer();
-			return;
-		}
+		Enemy->OnSensingPlayer(Actor);
+		return;
 	}
 }
 

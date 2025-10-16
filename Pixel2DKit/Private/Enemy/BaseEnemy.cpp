@@ -48,7 +48,7 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 		PXCharacter = nullptr;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->SetPixelCharacter(PXCharacter);
+			EnemyAIComponent->SetPixelCharacter(nullptr);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
@@ -72,6 +72,15 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 	}
 	return false;
 }
+
+void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
+{
+	SetPXCharacter(PlayerActor);
+	DelayLosePlayer();
+
+	BP_OnSensingPlayer(PlayerActor);
+}
+
 
 void ABaseEnemy::SetDead(bool V)
 {
