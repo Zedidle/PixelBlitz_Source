@@ -21,7 +21,7 @@ void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
 
 	PlayAnimIn();
 	
-	UTimerSubsystemFuncLib::SetDelay(World, [WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	UTimerSubsystemFuncLib::SetDelay(World, [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->PlayAnimOut();

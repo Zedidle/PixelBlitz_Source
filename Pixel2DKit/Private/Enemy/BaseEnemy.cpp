@@ -675,7 +675,7 @@ void ABaseEnemy::OnAttackEffectEnd_Implementation()
 	SetInAttackEffect(false);
 	FName TimerName = FName(GetActorNameOrLabel() + "_InAttackState");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
-	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 

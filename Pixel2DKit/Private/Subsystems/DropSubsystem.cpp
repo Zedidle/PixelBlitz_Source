@@ -43,7 +43,7 @@ void UDropSubsystem::SpawnItems(const FName& DropID, const FVector& SpawnLocatio
 	FString UniqueTimerName = FString::Printf(TEXT("UDropSubsystem_SpawnItems_%s"), *FGuid::NewGuid().ToString());
 	
 	UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), FName(*UniqueTimerName),
-		[WeakThis=TWeakObjectPtr<ThisClass>(this), DropData, SpawnLocation]
+		[WeakThis=TWeakObjectPtr(this), DropData, SpawnLocation]
 		{
 			if (!WeakThis.IsValid()) return;
 				

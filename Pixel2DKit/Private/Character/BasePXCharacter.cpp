@@ -465,6 +465,9 @@ void ABasePXCharacter::BeginPlay()
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
 	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
+
+	
+	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -508,20 +511,17 @@ bool ABasePXCharacter::SelfCanJump_Implementation()
 
 void ABasePXCharacter::JumpStart_Implementation()
 {
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-	{
-		ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.Jump")));
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	CachedASC->TryActivateAbilityByTagName("Ability.Jump");
 }
 
 void ABasePXCharacter::Jump()
 {
 	Super::Jump();
 	SetJumping(true);
-	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-	{
-		ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.StepOnHead")));
-	}
+
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	CachedASC->TryActivateAbilityByTagName("Ability.StepOnHead");
 }
 
 void ABasePXCharacter::OnJumped_Implementation()
@@ -701,7 +701,6 @@ void ABasePXCharacter::Revive_Implementation()
 
 UAbilitySystemComponent* ABasePXCharacter::GetAbilitySystemComponent() const
 {
-	
 	if(const APXCharacterPlayerState* CharacterPlayerState = Cast<APXCharacterPlayerState>(GetPlayerState()))
 	{
 		return CharacterPlayerState->GetAbilitySystemComponent();
@@ -754,7 +753,7 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
 	UTimerSubsystemFuncLib::SetDelay(GetWorld(), 
-	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this), TempOffset]
+	[WeakThis = TWeakObjectPtr(this), TempOffset]
 		{
 			if (!WeakThis.IsValid()) return;
 		
@@ -774,14 +773,12 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
 	FName TimerName = FName(GetActorNameOrLabel() + "_OutOfControl");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]{
-			if (WeakThis.IsValid())
-			{
-				IBuff_Interface::Execute_BuffUpdate_Speed(WeakThis.Get());
-			}
-		}, SustainTime
-	);
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,[WeakThis = TWeakObjectPtr(this)]{
+		if (WeakThis.IsValid())
+		{
+			Execute_BuffUpdate_Speed(WeakThis.Get());
+		}
+	}, SustainTime);
 }
 
 FVector ABasePXCharacter::CalSkillVelocity(float DashSpeed)
@@ -817,8 +814,7 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 	if (!bHurt) return;
 	if (duration > 0)
 	{
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
-	[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (WeakThis.IsValid())
 			{
@@ -857,7 +853,7 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 	if (!bLanding) return;
 
 	PreFrameFalling = false;
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetLanding(false, 0);
@@ -993,7 +989,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				{
 					HealthComponent->DestroyComponent();
 				}
-				UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+				UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 				{
 					if (WeakThis.IsValid())
 					{
@@ -1116,7 +1112,7 @@ void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
 		
 		FName TimerName = FName(GetActorNameOrLabel() + "_AddViewYaw");
 		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-			[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+			[WeakThis = TWeakObjectPtr(this)]
 			{
 				if (WeakThis.IsValid())
 				{
@@ -1144,7 +1140,7 @@ void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 	int Invert = Settings->GetInvertVerticalAxis() ? -1 : 1;
 	float Sensitivity = Settings->GetViewPointSensitivityPitch();
 	
-	float Pitch = FMath::Clamp( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue) + CurBlendPitch, -45, 15);
+	float Pitch = FMath::Clamp( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue) + CurBlendPitch, ViewPitchRange.X, ViewPitchRange.Y);
 	
 	SetBlendPitch(Pitch);
 }
@@ -1202,7 +1198,7 @@ void ABasePXCharacter::ToStartPoint_Implementation()
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling, 0);
 
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (WeakThis.IsValid())
 			{
@@ -1308,26 +1304,21 @@ void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 		NiagaraComponent->SetVariableFloat(FName("Power"), Power);
 		bRepulsion = true;
 		OutOfControl(Power/1000);
-		
-		if (GetWorld())
+
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 		{
-			TWeakObjectPtr<ABasePXCharacter> WeakThis = this;
-			FTimerHandle TimerHandle;
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [WeakThis]
+			if (WeakThis.IsValid())
 			{
-				if (WeakThis.IsValid())
-				{
-					ABasePXCharacter* PxCharacter = WeakThis.Get();
-					PxCharacter->bRepulsion = false;
-					UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_DE-STUN", "解除硬直"),
-					PxCharacter->GetActorLocation(),
-					FLinearColor(0.68, 0.35, 1.0f, 1.0f),
-						FVector2D(0.8,0.8)
-					);
-				}
-				
-			}, Power/1000, false);
-		}
+				ABasePXCharacter* PxCharacter = WeakThis.Get();
+				PxCharacter->bRepulsion = false;
+				UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_DE-STUN", "解除硬直"),
+				PxCharacter->GetActorLocation(),
+				FLinearColor(0.68, 0.35, 1.0f, 1.0f),
+					FVector2D(0.8,0.8)
+				);
+			}
+			
+		}, Power/1000);
 	}
 }
 
@@ -1336,12 +1327,10 @@ void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 	if (bDashing)
 	{
 		PerfectDodgeTimes++;
-		if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-		{
-			ASC->TryActivateAbilitiesByTag(
-				FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.PerfectDodge"))
-			);			
-		}
+
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+		CachedASC->TryActivateAbilityByTagName("Ability.PerfectDodge");
+
 		CameraOffset_BulletTime(0.03f);
 	}
 }
@@ -1690,12 +1679,10 @@ void ABasePXCharacter::Input_Move2D(const FInputActionValue& Value)
 
 void ABasePXCharacter::TryToAttack()
 {
-	if (!IFight_Interface::Execute_CanAttack(this)) return;
+	if (!Execute_CanAttack(this)) return;
 	
-	UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
-	
-	if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	if (CachedASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
 	{
 		bAttackStartup = true;
 		SetAttackAnimToggle(true);
@@ -1732,15 +1719,15 @@ void ABasePXCharacter::TryToJump()
 	else
 	{
 		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(),"TryToJump",
-		[WeakThis = TWeakObjectPtr<ABasePXCharacter>(this)]{
-				if (WeakThis.IsValid())
+	[WeakThis = TWeakObjectPtr(this)]{
+			if (WeakThis.IsValid())
+			{
+				if (WeakThis->SelfCanJump())
 				{
-					if (WeakThis->SelfCanJump())
-					{
-						WeakThis->JumpStart();
-						UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
-					}
+					WeakThis->JumpStart();
+					UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
 				}
+			}
 		}, 0.016f, 0.2f);
 	}
 }

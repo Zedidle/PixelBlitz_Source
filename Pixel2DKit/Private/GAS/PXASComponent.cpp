@@ -4,6 +4,7 @@
 #include "GAS/PXASComponent.h"
 #include "AbilitySystemStats.h"
 #include "AudioMixerBlueprintLibrary.h"
+#include "NativeGameplayTags.h"
 #include "GAS/PXGameplayEffect.h"
 
 FGameplayEffectSpecHandle UPXASComponent::MakeOutgoingSpec(TSubclassOf<UGameplayEffect> GameplayEffectClass,

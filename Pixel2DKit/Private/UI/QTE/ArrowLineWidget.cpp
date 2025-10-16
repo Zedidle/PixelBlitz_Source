@@ -19,7 +19,7 @@ void UArrowLineWidget::NativeConstruct()
 
 	if (LifeSpan > 0)
 	{
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (WeakThis.IsValid())
 			{

@@ -43,7 +43,6 @@ public class Pixel2DKit : ModuleRules
 			"NavigationSystem",
 			"GameSubtitles", 
 			"GameSettings",
-			"AdvancedFadeObjects", 
 			"CommonGame", 
 			"GameplayMessageRuntime"
 		});

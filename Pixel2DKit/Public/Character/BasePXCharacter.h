@@ -205,6 +205,11 @@ public:
 	void Revive();
 
 #pragma region GAS
+
+
+	UPROPERTY(BlueprintReadOnly)
+	UPXASComponent* CachedASC;
+		
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UPROPERTY()
@@ -417,6 +422,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddViewPitch(const FInputActionValue& Value);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
+	FVector2D ViewPitchRange = FVector2D(-45, 10);
+	
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Game)
 	void PreReadyToStart();
 	

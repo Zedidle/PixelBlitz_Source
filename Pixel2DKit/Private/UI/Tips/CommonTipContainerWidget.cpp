@@ -74,7 +74,7 @@ void UCommonTipContainerWidget::OnCommonTipRemoveAll(float NewEndTime)
 	CurEndTime = NewEndTime;
 
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "UCommonTipContainerWidget::OnCommonTipRemoveAll",
-	[WeakThis = TWeakObjectPtr<ThisClass>(this)]
+	[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 

@@ -75,7 +75,7 @@ void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& C
 	
 	if (SustainTime > 0.0f)
 	{
-		SetDelay([WeakThis=TWeakObjectPtr<UTimerSubsystem>(this), TimerName]
+		SetDelay([WeakThis=TWeakObjectPtr(this), TimerName]
 		{
 			if (WeakThis.IsValid())
 			{
@@ -94,11 +94,9 @@ void UTimerSubsystem::SetRetriggerableDelay(const FName& TimerName, TFunction<vo
 	if (!World) return;
 
 	CancelDelay(TimerName);
-
-	TWeakObjectPtr<UTimerSubsystem> WeakThis(this);
+	
 	FTimerDelegate Delegate;
-	Delegate.BindLambda(
-		[WeakThis, TimerName, Callback = MoveTemp(Callback)]() mutable
+	Delegate.BindLambda([WeakThis = TWeakObjectPtr(this), TimerName, Callback = MoveTemp(Callback)]() mutable
 		{
 			if (!WeakThis.IsValid()) return;
 			
