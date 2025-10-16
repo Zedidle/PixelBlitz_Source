@@ -101,16 +101,7 @@ void APXGameState::DealStatics_Implementation()
 
 	UPXTalentsSaveGame* TalentSaveGame = UPXSaveGameSubSystemFuncLib::GetTalentsData(World);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSaveGame);
-
-
-	// 时间记录
-	float PreUsedTime; bool NewRecord;
-	GameInstance->GetTotalUseTime(PreUsedTime, NewRecord);
 	
-	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
-
-	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreUsedTime);
 	
 	MainSaveGame->RoundGoldNum += MainSaveGame->JustPickedGolds;
 	BasicBuildSaveGame->RemainGoldNum += MainSaveGame->JustPickedGolds;
@@ -150,7 +141,6 @@ void APXGameState::ToNextLevel()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-
 	
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
@@ -161,7 +151,15 @@ void APXGameState::ToNextLevel()
 		GM->LoadLevel(GameInstance->GetCurLevelName_Simple(true), GetNewLevelInitLocation());
 	}
 
+	// 时间记录
+	float PreUsedTime; bool NewRecord;
+	GameInstance->GetTotalUseTime(PreUsedTime, NewRecord);
+	
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 
+	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreUsedTime);
+	
 	// 由于UI需要Statics来显示，DealUI要先
 	DealUI();
 	DealStatics();

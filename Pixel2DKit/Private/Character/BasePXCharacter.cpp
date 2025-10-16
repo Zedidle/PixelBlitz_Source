@@ -1757,10 +1757,7 @@ void ABasePXCharacter::TryUseSkill()
 
 void ABasePXCharacter::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
 {
-	if (APXPlayerController* PC = GetController<APXPlayerController>())
-	{
-		PC->OnCharacterControl(false);
-	}
+
 }
 
 void ABasePXCharacter::OnLevelLoaded_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)

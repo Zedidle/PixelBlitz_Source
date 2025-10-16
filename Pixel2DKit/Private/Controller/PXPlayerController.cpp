@@ -6,7 +6,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "PXGameplayTags.h"
 #include "Character/BasePXCharacter.h"
+#include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "SaveGame/PXMainSaveGame.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
 
@@ -70,22 +72,14 @@ void APXPlayerController::OnCharacterControl(bool On)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Subsystem);
 	
 	CharacterControlling = On;
-	
-	
 	if (On)
 	{
 		const FModifyContextOptions Options;
 		Subsystem->AddMappingContext(IMC_Default, 1, Options);
-		
-		FInputModeGameOnly InputMode;
-		SetInputMode(InputMode);
-		
 	}
 	else
 	{
 		Subsystem->RemoveMappingContext(IMC_Default);
-		FInputModeUIOnly InputMode;
-		SetInputMode(InputMode);
 	}
 	FlushPressedKeys();
 }
@@ -95,12 +89,28 @@ bool APXPlayerController::CanPause()
 	return CharacterControlling && GameAlreadyStart;
 }
 
-void APXPlayerController::OnLevelLoaded_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
-{
-	OnCharacterControl(true);
-}
-
 void APXPlayerController::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
 {
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
+
 	OnCharacterControl(false);
 }
+
+
+
+void APXPlayerController::OnLevelLoaded_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
+{
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
+	
+	if (MainSave->CurLevel == 1)
+	{
+		OnCharacterControl(false);
+	}
+	else
+	{
+		OnCharacterControl(true);
+	}
+}
+
