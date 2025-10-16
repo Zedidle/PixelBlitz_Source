@@ -35,14 +35,17 @@ void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void APXGameState::EventOnDayTimeTypeChanged_Implementation()
 {
-	if (!ForceWeatherIndex.IsNone())
+	if (!bAbortWeatherChange)
 	{
-		CurWeatherIndex = ForceWeatherIndex;
-		SetWeather(CurWeatherIndex);
-	}
-	else
-	{
-		RandomWeather();
+		if (!ForceWeatherIndex.IsNone())
+		{
+			CurWeatherIndex = ForceWeatherIndex;
+			SetWeather(CurWeatherIndex);
+		}
+		else
+		{
+			RandomWeather();
+		}
 	}
 
 	if (UWeatherSubsystem* WeatherSubsystem = GetGameInstance()->GetSubsystem<UWeatherSubsystem>())
@@ -120,8 +123,10 @@ void APXGameState::DealStatics_Implementation()
 
 }
 
-void APXGameState::PassDayTime(float Time, bool DirectSet, float TransitionDuration, FName _ForceWeatherIndex)
+void APXGameState::PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange, float TransitionDuration, FName _ForceWeatherIndex)
 {
+	bAbortWeatherChange = AbortWeatherChange;
+	
 	if (!_ForceWeatherIndex.IsNone())
 	{
 		ForceWeatherIndex = _ForceWeatherIndex;
@@ -134,6 +139,27 @@ void APXGameState::PassDayTime(float Time, bool DirectSet, float TransitionDurat
 	
 	TimeOfDay = DirectSet ? Time : TimeOfDay + Time;
 	BP_OnPassDayTime(TimeOfDay, TransitionDuration);
+}
+
+void APXGameState::SetWeather(FName WeatherRowName)
+{
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
+
+	UDataTable* DT= DataTableSubsystem->GetWeatherData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DT)
+
+	FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("APXGameState::SetWeather_Implementation"));
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WeatherData);
+
+	WeatherName = WeatherData->WeatherName;
+	WeatherType = WeatherData->WeatherType;
+	WeatherEffect = WeatherData->WeatherEffect;
+
+	BP_SetWeather(WeatherData->WeatherSetting);
 }
 
 
@@ -276,26 +302,7 @@ void APXGameState::StartRaceTimer_Implementation(bool bStart)
 	}
 }
 
-UPrimaryDataAsset* APXGameState::SetWeather_Implementation(FName WeatherRowName)
-{
-	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, nullptr)
 
-	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, nullptr)
-
-	UDataTable* DT= DataTableSubsystem->GetWeatherData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DT, nullptr)
-
-	FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("APXGameState::SetWeather_Implementation"));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(WeatherData, nullptr);
-	
-	WeatherName = WeatherData->WeatherName;
-	WeatherType = WeatherData->WeatherType;
-	WeatherEffect = WeatherData->WeatherEffect;
-
-	return WeatherData->WeatherSetting;
-}
 
 void APXGameState::OnEnemyDie_Implementation(ABaseEnemy* Enemy)
 {

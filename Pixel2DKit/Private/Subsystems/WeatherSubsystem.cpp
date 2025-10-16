@@ -47,52 +47,49 @@ void UWeatherSubsystem::MakeWeatherEffect()
 	
 	if (FoundActors.IsEmpty()) return;
 
-
 	FBuffValueEffect DayTimeEffect;
-
-	FGameplayTag NewDayTimeTag = DayTimeEffectSight->DayTimeType2BuffTag.FindRef(GS->DayTimeType);
-
+	FText DayTimeName = DayTimeEffectSight->DayTime2Name.FindRef(GS->DayTimeType);
+	// 时分影响
+	if (GS->DayTimeType == EDayTimeType::Dawn)
+	{
+		DayTimeEffect = DayTimeEffectSight->DawnEffect;
+	}
+	else if (GS->DayTimeType == EDayTimeType::Light)
+	{
+		DayTimeEffect = DayTimeEffectSight->LightEffect;
+	}
+	else if (GS->DayTimeType == EDayTimeType::Dusk)
+	{
+		DayTimeEffect = DayTimeEffectSight->DuskEffect;
+	}
+	else if (GS->DayTimeType == EDayTimeType::Night)
+	{
+		DayTimeEffect = DayTimeEffectSight->NightEffect;
+	}
+	
 	for (auto& Actor : FoundActors)
 	{
 		UBuffComponent* BuffComp = Actor->GetComponentByClass<UBuffComponent>();
 		if (!BuffComp) continue;
 
 		// 时分影响
-		if (GS->DayTimeType == EDayTimeType::Dawn)
+		if (DayTimeNameString != DayTimeName.ToString())
 		{
-			DayTimeEffect = DayTimeEffectSight->DawnEffect;
-		}
-		else if (GS->DayTimeType == EDayTimeType::Light)
-		{
-			DayTimeEffect = DayTimeEffectSight->LightEffect;
-		}
-		else if (GS->DayTimeType == EDayTimeType::Dusk)
-		{
-			DayTimeEffect = DayTimeEffectSight->DuskEffect;
-		}
-		else if (GS->DayTimeType == EDayTimeType::Night)
-		{
-			DayTimeEffect = DayTimeEffectSight->NightEffect;
+			DayTimeNameString = DayTimeName.ToString();
+			IBuff_Interface::Execute_RemoveBuff(BuffComp, DayTimeTag, true);
+			IBuff_Interface::Execute_AddBuff(BuffComp, DayTimeTag, DayTimeNameString, FLinearColor::White, false);
+			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, DayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
 		}
 
-		if (NewDayTimeTag.IsValid() && NewDayTimeTag != CurDayTimeTag)
+		// 天气影响
+		if (!GS->WeatherName.IsEmpty() && WeatherNameString != GS->WeatherName.ToString())
 		{
-			IBuff_Interface::Execute_RemoveBuff(BuffComp, CurDayTimeTag, true);
-			BuffComp->AddBuffByTag(NewDayTimeTag);
-			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, NewDayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
-			
-			CurDayTimeTag = NewDayTimeTag;
+			WeatherNameString = GS->WeatherName.ToString();
+			IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
+			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag, WeatherNameString, FLinearColor::White, false);
+			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
+			IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, WeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
 		}
-
-		// 天气影响 视野 和 速度
-		if (!GS->WeatherName.IsEmpty())
-		{
-			IBuff_Interface::Execute_RemoveBuff(BuffComp, CurWeatherTag, true);
-			IBuff_Interface::Execute_AddBuff(BuffComp, CurWeatherTag, GS->WeatherName.ToString(), FLinearColor::White, false);
-			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, CurWeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
-			IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, CurWeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
-		}
-
 		
 		// 针对玩家的血量影响
 		if (Cast<ABasePXCharacter>(Actor) && GameDataAsset->GE_WeatherEffect_HP)
@@ -112,6 +109,4 @@ void UWeatherSubsystem::MakeWeatherEffect()
 			}
 		}
 	}
-
-
 }

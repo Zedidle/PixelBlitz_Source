@@ -26,12 +26,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBuffValueEffect NightEffect = {-0.05, -20.0f};
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<EDayTimeType, FGameplayTag> DayTimeType2BuffTag;	
+	TMap<EDayTimeType, FText> DayTime2Name;	
 };
-
-
 
 
 UCLASS()
@@ -47,9 +45,10 @@ public:
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	FGameplayTag CurDayTimeTag;
-	// Weather暂且共用一个Tag
-	FGameplayTag CurWeatherTag = TAG("Buff.Weather");
+	FString DayTimeNameString;
+	FString WeatherNameString;
+	FGameplayTag DayTimeTag = TAG("Buff.DayTime");
+	FGameplayTag WeatherTag = TAG("Buff.Weather");
 	
 	UFUNCTION(BlueprintCallable, Category = "WeatherSystem")
 	void MakeWeatherEffect();

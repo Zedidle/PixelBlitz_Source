@@ -65,6 +65,9 @@ class PIXEL2DKIT_API APXGameState : public AGameState
 
 	
 	float CurRaceTime = 0.0f; 
+
+	// 时间转换期间是否禁止天气转变 
+	bool bAbortWeatherChange = false;
 	
 protected:
 
@@ -104,12 +107,16 @@ public:
 	void RandomWeather();
 	
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
-	void PassDayTime(float Time, bool DirectSet, float TransitionDuration = 3, FName _ForceWeatherIndex = FName("None"));
+	void PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange = false, float TransitionDuration = 3, FName _ForceWeatherIndex = FName("None"));
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameState | Weather", DisplayName="OnPassDayTime")
 	void BP_OnPassDayTime(float NewTime, float TransitionDuration = 3);
+
 	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Weather")
-	UPrimaryDataAsset* SetWeather(FName WeatherRowName);
+	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
+	void SetWeather(FName WeatherRowName);
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, DisplayName = "SetWeather", Category = "GameState | Weather")
+	void BP_SetWeather(UPrimaryDataAsset* WeatherDataAsset);
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Monster")
 	void OnEnemyDie(ABaseEnemy* Enemy);

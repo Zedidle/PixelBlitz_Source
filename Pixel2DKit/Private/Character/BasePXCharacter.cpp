@@ -1011,7 +1011,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				{
 					if (APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld()))
 					{
-						GS->PassDayTime(DataAsset->RevivePassDayTime, false, DataAsset->ReviveDelayTime);
+						GS->PassDayTime(DataAsset->RevivePassDayTime, false, false, DataAsset->ReviveDelayTime);
 					}
 	
 					UTimerSubsystemFuncLib::SetDelay(GetWorld(),
