@@ -145,8 +145,8 @@ public:
 	FOnPlayerAttackStart OnPlayerAttackStart;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float VelocityRepelFactor = 1.0f;
-
+	FVector VelocityRepelFactor = FVector(1.0, 1.0, 1.2);
+	
 	FTimerHandle ScaleTimerHandle;
 	FTimerHandle AttackHitTimerHandle;
 	int AttackHitComboNum = 0;
