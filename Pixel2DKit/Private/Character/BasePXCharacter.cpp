@@ -362,7 +362,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	}
 }
 
-void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset)
+void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset, float SustainTime)
 {
 	if (CameraOffsetMap.Contains(OffsetName))
 	{
@@ -371,6 +371,17 @@ void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset)
 	else
 	{
 		CameraOffsetMap.Add(OffsetName, Offset);
+	}
+
+	if (SustainTime > 0)
+	{
+		UTimerSubsystemFuncLib::SetDelay(GetWorld(), 
+	[WeakThis = TWeakObjectPtr(this), OffsetName]
+		{
+			if (!WeakThis.IsValid()) return;
+			
+			WeakThis->RemoveCameraOffset(OffsetName);
+		}, SustainTime);
 	}
 }
 
@@ -756,17 +767,13 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	{
 		TempOffset = CameraOffset;
 	}
-	AddCameraOffset(FName("BulletTime"), TempOffset);
+	AddCameraOffset(FName("BulletTime"), TempOffset, SustainTime);
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), 
-	[WeakThis = TWeakObjectPtr(this), TempOffset]
-		{
-			if (!WeakThis.IsValid()) return;
-		
-			WeakThis->RemoveCameraOffset(FName("BulletTime"));
-			UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
-		}, SustainTime);
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	{
+		UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
+	}, SustainTime);
 }
 
 void ABasePXCharacter::OutOfControl(float SustainTime)

@@ -6,6 +6,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/Components/AbilityComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
@@ -70,10 +71,20 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	int Damage = IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
 	FVector PreEnemyLocation = Enemy->GetActorLocation();
 
-	Enemy->SetActorLocation(Enemy->GetActorScale3D() * FVector(0, 0, 44.0f) + PXCharacter->GetActorLocation());
-	PXCharacter->SetActorLocation(PreEnemyLocation);
 	
-	EnemyHealthComponent->DecreaseHP(Damage, FVector(0,0,0), PXCharacter, true);
+	float SwitchedEnemyHeightOffset = 44.0f;
+	if (UCapsuleComponent* Capsule = Enemy->GetComponentByClass<UCapsuleComponent>())
+	{
+		SwitchedEnemyHeightOffset = Capsule->GetScaledCapsuleHalfHeight();
+	}
+	
+	Enemy->SetActorLocation(Enemy->GetActorScale3D() * FVector(0, 0, SwitchedEnemyHeightOffset) + PXCharacter->GetActorLocation());
+	PXCharacter->SetActorLocation(PreEnemyLocation);
+
+	FVector PlayerCameraOffset = Enemy->GetActorLocation() - PreEnemyLocation;
+	PXCharacter->CameraOffset_BulletTime(0.3f, PlayerCameraOffset, 0.5);
+	
+	EnemyHealthComponent->DecreaseHP(Damage, PlayerCameraOffset, PXCharacter, true);
 
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)

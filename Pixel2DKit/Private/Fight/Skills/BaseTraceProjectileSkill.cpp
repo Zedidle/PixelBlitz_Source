@@ -1,0 +1,206 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Fight/Skills/BaseTraceProjectileSkill.h"
+
+#include "NiagaraFunctionLibrary.h"
+#include "Pixel2DKit.h"
+#include "Enemy/BaseEnemy.h"
+#include "Utilitys/SpaceFuncLib.h"
+
+
+// Sets default values
+ABaseTraceProjectileSkill::ABaseTraceProjectileSkill()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+
+	ProjectileComp = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
+	ProjectileComp->ProjectileGravityScale = 0.0f;
+	ProjectileComp->bRotationFollowsVelocity = true;
+}
+
+// Called when the game starts or when spawned
+void ABaseTraceProjectileSkill::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (Target)
+	{
+		SetNewTarget(Target, bIdle);
+	}
+}
+
+// Called every frame
+void ABaseTraceProjectileSkill::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (bEnding) return;
+	
+	if (Target)
+	{
+		float DistanceToTarget = FVector::Distance(Target->GetActorLocation(), GetActorLocation());
+		float Magnitude = CurMagnitude * FMath::GetMappedRangeValueClamped(
+			FVector2D(InRangeNear, InRangeNear*3), FVector2D(MagnitudeScaleNear, MagnitudeScaleFar), DistanceToTarget);
+		if (ProjectileComp)
+		{
+			ProjectileComp->HomingAccelerationMagnitude = Magnitude;
+			if (bIdle && DistanceToTarget < InRangeNear)
+			{
+				ProjectileComp->Velocity *= 0.99;
+			}
+		}
+	}
+	else
+	{
+		TryFindNextTarget(GetOwner());
+	}
+	
+}
+
+void ABaseTraceProjectileSkill::OnSkillEnd()
+{
+	Super::OnSkillEnd();
+	if (ProjectileComp)
+	{
+		ProjectileComp->bIsHomingProjectile = false;
+	}
+
+	// 还需要触发Niagara的消失效果
+}
+
+void ABaseTraceProjectileSkill::SetVelocity(const FVector& V)
+{
+	if (bEnding) return;
+	
+	if (ProjectileComp)
+	{
+		ProjectileComp->Velocity = V;
+	}
+}
+
+void ABaseTraceProjectileSkill::TryFindNextTarget(AActor* CenterActor)
+{
+	if (bEnding) return;
+	
+	if (ABaseEnemy* NewEnemy = USpaceFuncLib::FindActorInRangeClosest<ABaseEnemy>(GetWorld(), CenterActor))
+	{
+		SetNewTarget(NewEnemy);
+	}
+	else
+	{
+		OnSkillEnd();
+	}
+}
+
+void ABaseTraceProjectileSkill::SetDamageData(int _Damage, FVector& _Knockback, int _RemHitNum, bool Force, int _DamageDecreasePercentPerHit)
+{
+	Damage = _Damage;
+	Knockback = _Knockback;
+	RemHitNum = _RemHitNum;
+	bForce = Force;
+	DamageDecreasePercentPerHit = _DamageDecreasePercentPerHit;
+}
+
+void ABaseTraceProjectileSkill::StartPlusDamageByDistance(int _DamagePlusPer100Meter)
+{
+	if (_DamagePlusPer100Meter <= 0)
+	{
+		bPlusDamageByDistance = false;
+	}
+	else
+	{
+		bPlusDamageByDistance = true;
+		DamagePlusPer100Meter = _DamagePlusPer100Meter;
+		DistanceDamageInitLocation = GetActorLocation();
+	}
+}
+
+
+void ABaseTraceProjectileSkill::SetTraceData(const FTraceProjectileData& Data)
+{
+	bIdle = Data.bIdle;
+	NewTargetLifeSpan = Data.NewTargetLifeSpan;
+	CurMagnitude = Data.CurMagnitude;
+	InRangeNear = Data.InRangeNear;
+	MagnitudeScaleNear= Data.MagnitudeScaleNear;
+	MagnitudeScaleFar = Data.MagnitudeScaleFar;
+	InitSpeed = Data.InitSpeed;
+	MaxSpeed = Data.MaxSpeed;
+}
+
+void ABaseTraceProjectileSkill::SetNewTarget(AActor* Actor, bool Idle)
+{
+	if (!Actor)
+	{
+		OnSkillEnd();
+		return;
+	}
+
+	if (bEnding) return;
+
+	Target = Actor;
+	bIdle = Idle;
+	SetLifeSpan(bIdle ? 0 : NewTargetLifeSpan);
+
+	if (USceneComponent* TargetRootComponent = Actor->GetRootComponent())
+	{
+		ProjectileComp->HomingTargetComponent = TargetRootComponent;
+		ProjectileComp->Velocity += ProjectileComp->Velocity * (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+
+		CurMagnitude *= FMath::RandRange(0.8, 1.2);
+		InRangeNear *= FMath::RandRange(0.8, 1.2);
+		MagnitudeScaleNear *= FMath::RandRange(0.8, 1.2);
+		MagnitudeScaleFar *= FMath::RandRange(0.8, 1.2);
+		
+		if (ProjectileComp)
+		{
+			ProjectileComp->bIsHomingProjectile = true;
+			ProjectileComp->HomingAccelerationMagnitude = CurMagnitude;
+
+			// 初始速度设置实际可能无效
+			ProjectileComp->InitialSpeed = InitSpeed;
+			ProjectileComp->MaxSpeed = MaxSpeed;
+		}
+	}
+
+	if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(Target))
+	{
+		Enemy->OnEnemyDie.AddUniqueDynamic(this, &ThisClass::OnEnemyDie);
+	}
+}
+
+void ABaseTraceProjectileSkill::OnEnemyDie(ABaseEnemy* Enemy)
+{
+	Enemy->OnEnemyDie.RemoveDynamic(this, &ThisClass::OnEnemyDie);
+	TryFindNextTarget(Enemy);
+}
+
+void ABaseTraceProjectileSkill::OnHitTarget_Implementation(AActor* HitTarget)
+{
+	if (HitTarget != Target) return;
+	if (bIdle) return;
+
+	if (UHealthComponent* HealthComponent = Target->GetComponentByClass<UHealthComponent>())
+	{
+		int DistanceDamage = bPlusDamageByDistance ? FVector::Distance(DistanceDamageInitLocation, GetActorLocation()) * DamagePlusPer100Meter / 100 : 0;
+		HealthComponent->DecreaseHP(Damage + DistanceDamage, Knockback, GetOwner(), bForce);
+	}
+
+	Damage *= 1 - DamageDecreasePercentPerHit;
+	DamagePlusPer100Meter *= 1 - DamageDecreasePercentPerHit;
+
+	if (Damage <= 0 || --RemHitNum <= 0)
+	{
+		OnSkillEnd();
+	}
+	else
+	{
+		TryFindNextTarget(Target);
+	}
+
+	if (HitNiagara)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), FRotator(0,0,0),  GetActorScale3D());
+	}
+}

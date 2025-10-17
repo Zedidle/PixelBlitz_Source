@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
 #include "BaseSkill.generated.h"
 
@@ -16,12 +17,64 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 {
 	GENERATED_BODY()
 
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	USoundBase* BeginSound = nullptr;
+	
+
+
+	
+protected:
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bEnding = false;
+	
 public:
+
+	
 	// 一般来说，每个技能都会有对应的Tag
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="BaseSkill")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Skill")
 	FGameplayTagContainer AbilityTags;
 	
-	UFUNCTION(BLueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Skills")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Skill")
 	bool CanDamageEffect(AActor* Actor); 
 
+
+
+
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnSkillEnd")
+	void BP_OnSkillEnd();
+	// 静止所有 碰撞/伤害 生效，触发Niagara消除效果
+	UFUNCTION(BlueprintCallable)
+	virtual void OnSkillEnd();
+
+
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Skill | Niagara")
+	void SetColor(FLinearColor Color);
+
+	UFUNCTION(BlueprintCallable, Category="Skill | Niagara")
+	void ReinitializeNiagara();
 };
+
+inline void ABaseSkill::SetColor_Implementation(FLinearColor Color)
+{
+	TArray<FName> ColorNames = { "LinearColor", "Color"};
+	
+	if (UNiagaraComponent* Niagara = GetComponentByClass<UNiagaraComponent>())
+	{
+		for (auto& ColorName : ColorNames)
+		{
+			Niagara->SetVariableLinearColor(ColorName, Color);
+		}
+	}
+}
+
+inline void ABaseSkill::ReinitializeNiagara()
+{
+	if (UNiagaraComponent* Niagara = GetComponentByClass<UNiagaraComponent>())
+	{
+		Niagara->ReinitializeSystem();
+	}
+}

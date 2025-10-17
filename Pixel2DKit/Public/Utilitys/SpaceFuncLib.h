@@ -118,7 +118,9 @@ T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AAc
 	for (TActorIterator<T> It(World); It; ++It)
 	{
 		T* B = *It;
+		if (A == B) continue;
 		if (!IsValid(B)) continue;
+		
 		
 		if (bAlive)
 		{
@@ -153,6 +155,7 @@ T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AA
 	for (TActorIterator<T> It(World); It; ++It)
 	{
 		T* B = *It;
+		if (A == B) continue;
 		if (!IsValid(B)) continue;
 
 		if (bAlive)
@@ -188,6 +191,7 @@ T* USpaceFuncLib::FindActorInRangeRandomOne(const UObject* WorldContextObject, A
 	for (TActorIterator<T> It(World); It; ++It)
 	{
 		T* B = *It;
+		if (A == B) continue;
 		if (!IsValid(B)) continue;
 		
 		if (bAlive)

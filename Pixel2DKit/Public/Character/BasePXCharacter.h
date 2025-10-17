@@ -188,7 +188,7 @@ public:
 	FVector CurCameraOffset;
 	TMap<FName, FVector> CameraOffsetMap;
 	UFUNCTION(BlueprintCallable)
-	void AddCameraOffset(FName OffsetName, FVector Offset);
+	void AddCameraOffset(FName OffsetName, FVector Offset, float SustainTime = 0);
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveCameraOffset(FName OffsetName);

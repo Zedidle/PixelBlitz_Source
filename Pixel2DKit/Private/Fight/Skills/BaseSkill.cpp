@@ -4,6 +4,7 @@
 #include "Fight/Skills/BaseSkill.h"
 
 #include "Interfaces/Fight_Interface.h"
+#include "Utilitys/SoundFuncLib.h"
 
 bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
 {
@@ -15,3 +16,26 @@ bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
 	
 	return DamageMakerEnemyCamp.HasAny(ActorCamp) || ActorCamp.HasAny(DamageMakerEnemyCamp);
 }
+
+
+void ABaseSkill::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (BeginSound)
+	{
+		USoundFuncLib::PlaySoundAtLocation(BeginSound, GetActorLocation());
+	}
+	
+}
+
+void ABaseSkill::OnSkillEnd()
+{
+	bEnding = true;
+	SetActorEnableCollision(false);
+	
+	SetLifeSpan(2.0f);
+
+	BP_OnSkillEnd();
+}
+
