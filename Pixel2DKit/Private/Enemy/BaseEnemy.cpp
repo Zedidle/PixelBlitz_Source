@@ -76,9 +76,21 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 {
 	SetPXCharacter(PlayerActor);
-	DelayLosePlayer();
-
+	// DelayLosePlayer();
 	BP_OnSensingPlayer(PlayerActor);
+}
+
+void ABaseEnemy::OnLostPlayer(AActor* PlayerActor)
+{
+	if (PlayerActor != PXCharacter) return;
+	DelayLosePlayer();
+}
+
+void ABaseEnemy::GoPatrol()
+{
+	SetAttackAnimToggle(false);
+	SetInAttackState(false);
+	SetPXCharacter(nullptr);
 }
 
 
@@ -519,15 +531,8 @@ void ABaseEnemy::DelayLosePlayer_Implementation()
 		[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
-			if (WeakThis->bDead) return;
-
-			WeakThis->SetAttackAnimToggle(false);
-
-			UTimerSubsystemFuncLib::SetDelay(WeakThis->GetWorld(), [WeakThis]
-			{
-				if (!WeakThis.IsValid()) return;
-				WeakThis->SetPXCharacter(nullptr);
-			}, 2);
+			
+			WeakThis->GoPatrol();
 		}, LostEnemyTime);
 }
 
@@ -585,10 +590,7 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 		OutDamage *= 0.5;
 	}
 
-	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
-	{
-		EnemyAIController->OnPerceptionUpdated({Maker});
-	}
+	OnSensingPlayer(Maker);
 }
 
 
@@ -758,7 +760,7 @@ void ABaseEnemy::TryAttack_Implementation()
 {
 	if (!Execute_CanAttack(this)) return;
 	if (!InAttackRange()) return;
-
+	
 	UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
 

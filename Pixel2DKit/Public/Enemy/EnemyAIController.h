@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Perception/AIPerceptionTypes.h"
 #include "EnemyAIController.generated.h"
 
 class UAISenseConfig_Sight;
@@ -35,8 +36,8 @@ public:
 	void UpdateSightRadius(float NewRadius);
 
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OnPerceptionUpdated(const TArray<AActor*>& UpdatedActors);
+	UFUNCTION(BlueprintCallable)
+	void OnPerceptionUpdated(const FActorPerceptionUpdateInfo& UpdateInfo);
 	
 
 

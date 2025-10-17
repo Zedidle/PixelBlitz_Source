@@ -64,6 +64,7 @@ void ABaseTraceProjectileSkill::OnSkillEnd()
 	if (ProjectileComp)
 	{
 		ProjectileComp->bIsHomingProjectile = false;
+		Target = nullptr;
 	}
 
 	// 还需要触发Niagara的消失效果

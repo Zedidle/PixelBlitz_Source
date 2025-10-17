@@ -19,7 +19,7 @@ AEnemyAIController::AEnemyAIController(const FObjectInitializer& ObjectInitializ
 	{
 		SightConfig->SightRadius = 1000.f;
 		SightConfig->LoseSightRadius = 1500.f;
-		SightConfig->PeripheralVisionAngleDegrees = 60.f;
+		SightConfig->PeripheralVisionAngleDegrees = 90.f;
 
 		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 		// SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
@@ -28,19 +28,28 @@ AEnemyAIController::AEnemyAIController(const FObjectInitializer& ObjectInitializ
 		AIPerception->ConfigureSense(*SightConfig);
 		AIPerception->SetDominantSense(UAISenseConfig_Sight::StaticClass());
 
-		AIPerception->OnPerceptionUpdated.AddDynamic(this, &ThisClass::OnPerceptionUpdated);
+		AIPerception->OnTargetPerceptionInfoUpdated.AddDynamic(this, &ThisClass::OnPerceptionUpdated);
 	}
 }
 
-void AEnemyAIController::OnPerceptionUpdated_Implementation(const TArray<AActor*>& UpdatedActors)
+void AEnemyAIController::OnPerceptionUpdated(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-	ABaseEnemy* Enemy = GetPawn<ABaseEnemy>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
-	
-	for (const auto& Actor : UpdatedActors)
+	ABaseEnemy* Enemy = Cast<ABaseEnemy>(GetPawn());
+	if (!Enemy) return;
+ 
+	AActor* Actor = UpdateInfo.Target.Get();
+	const FAIStimulus& Stimulus = UpdateInfo.Stimulus;
+ 
+	if (Stimulus.WasSuccessfullySensed())
 	{
-		Enemy->OnSensingPlayer(Actor);
-		return;
+		if (IsValid(Actor) && !Actor->IsPendingKillPending())
+		{
+			Enemy->OnSensingPlayer(Actor);
+		}
+	}
+	else
+	{
+		Enemy->OnLostPlayer(Actor);
 	}
 }
 
