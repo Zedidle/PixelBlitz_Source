@@ -740,7 +740,8 @@ FVector ABasePXCharacter::GetRightVectorWithBlendYaw()
 
 FVector ABasePXCharacter::GetVectorFaceToCamera()
 {
-	return FRotator(0, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
+	// return FRotator(0, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
+	return FRotator(CurBlendPitch, CurBlendYaw + 90,0 ).RotateVector(FVector(1,0,0));
 }
 
 
