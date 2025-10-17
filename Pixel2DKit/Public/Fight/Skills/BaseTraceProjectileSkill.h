@@ -18,24 +18,24 @@ struct FTraceProjectileData
 	GENERATED_BODY()
 
 	// 是否处于待机状态
-	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	bool bIdle = true;
 
 	// 找到新目标时刷新的技能存活时间
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
 	float NewTargetLifeSpan = 2.0f;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float CurMagnitude = 3000.0f;
 
 	// 与目标低于此距离，促发近距离效果
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess = true))
 	float InRangeNear = 1000.0f;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float MagnitudeScaleNear = 2.0f;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float MagnitudeScaleFar = 1.0f;
 
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
@@ -43,6 +43,9 @@ struct FTraceProjectileData
 
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
 	float MaxSpeed = 1000.0f;
+
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
+	float MaxTraceDistance = 1000.0f;
 	
 };
 
@@ -102,8 +105,14 @@ public:
 	float InitSpeed = 500.0f;
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
 	float MaxSpeed = 1000.0f;
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
+	float MaxTraceDistance = 1000.0f;
 	
+	UFUNCTION(BlueprintCallable, Category="Skill | Projectile")
+	void SetTraceData(const FTraceProjectileData& Data);
 
+
+	
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
 	int Damage = 0;
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
@@ -117,6 +126,8 @@ public:
 	
 	void SetDamageData(int _Damage, FVector& _Knockback, int _RemHitNum = 1, bool Force = false, int _DamageDecreasePercentPerHit = 0.1);
 
+
+	
 	UFUNCTION(BlueprintCallable, Category="Skill")
 	void StartPlusDamageByDistance(int _DamagePlusPer100Meter);
 
@@ -127,8 +138,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Skill | Projectile")
 	void TryFindNextTarget(AActor* CenterActor);
 
-	
-	void SetTraceData(const FTraceProjectileData& Data);
+
 	
 	UFUNCTION(BlueprintCallable)
 	void SetNewTarget(AActor* Actor, bool Idle = false);

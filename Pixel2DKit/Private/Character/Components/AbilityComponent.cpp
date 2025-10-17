@@ -427,10 +427,7 @@ void UAbilityComponent::ListenHurtInstigatorDead()
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtMaker);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
 
-	if (!Enemy->OnEnemyDie.IsAlreadyBound(this, &UAbilityComponent::OnHurtInstigatorDead))
-	{
-		Enemy->OnEnemyDie.AddDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
-	}
+	Enemy->OnEnemyDie.AddUniqueDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
 }
 
 FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FGameplayTag& Tag)

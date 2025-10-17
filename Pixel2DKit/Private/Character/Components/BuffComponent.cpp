@@ -234,13 +234,19 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
-		// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UBuffComponent::OnGameplayEffectApplied Tag: %s"), *Tag.ToString()));
-
-		if (!Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff"))) continue;
-
-		if (DataTableSubsystem->GetBuffOnWidgetDataByTag(Tag))
+		FString TagString = Tag.ToString();
+		if (TagString.Contains("Buff"))
 		{
 			Execute_RemoveBuff(this, Tag, true);
+		}
+		else if (TagString.Contains(".CD"))
+		{
+			FString AbilityBuffTag, _;
+			TagString.Split(".CD", &AbilityBuffTag, &_);
+			if (!AbilityBuffTag.IsEmpty())
+			{
+				Execute_RemoveBuff(this, TAG(*AbilityBuffTag), true);
+			}
 		}
 	}
 }
@@ -251,9 +257,19 @@ void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Gamepl
 	TArray<FGameplayTag> Tags = GameplayTagContainer.GetGameplayTagArray();
 	for (const FGameplayTag& Tag : Tags)
 	{
-		if (Tag.MatchesTag(FGameplayTag::RequestGameplayTag("Buff")))
+		FString TagString = Tag.ToString();
+		if (TagString.Contains("Buff"))
 		{
 			AddBuffByTag(Tag);
+		}
+		else if (TagString.Contains(".CD"))
+		{
+			FString AbilityBuffTag, _;
+			TagString.Split(".CD", &AbilityBuffTag, &_);
+			if (!AbilityBuffTag.IsEmpty())
+			{
+				AddBuffByTag(TAG(*AbilityBuffTag));
+			}
 		}
 	}
 }
@@ -426,7 +442,7 @@ void UBuffComponent::BuffUpdate_Sight_Implementation()
 
 int32 UBuffComponent::Buff_CalInitDamage_Implementation(int32 InDamage)
 {
-	return IBuff_Interface::Buff_CalInitDamage(InDamage);
+	return InDamage;
 }
 
 void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,

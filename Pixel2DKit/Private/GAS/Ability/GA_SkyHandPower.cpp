@@ -50,7 +50,9 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtInstigator);
-	if (!Enemy || !Enemy->Implements<UFight_Interface>() || !IFight_Interface::Execute_IsAlive(Enemy))
+	if (!Enemy || !Enemy->Implements<UFight_Interface>() ||
+		!IFight_Interface::Execute_IsAlive(Enemy) ||
+		IFight_Interface::Execute_GetOwnCamp(Enemy).HasTag(TAG("Enemy.BOSS")))
 	{
 		K2_EndAbility();
 		return;
@@ -67,23 +69,27 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		K2_EndAbility();
 		return;
 	}
-	
-	int Damage = IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
-	FVector PreEnemyLocation = Enemy->GetActorLocation();
 
+	float MultiPercent;
+	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("AbilitySet.SkyHandPower.DamageOnAttackDamagePercent"), MultiPercent);
+	
+	int Damage = MultiPercent * IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
+	FVector PreEnemyLocation = Enemy->GetActorLocation();
 	
 	float SwitchedEnemyHeightOffset = 44.0f;
 	if (UCapsuleComponent* Capsule = Enemy->GetComponentByClass<UCapsuleComponent>())
 	{
 		SwitchedEnemyHeightOffset = Capsule->GetScaledCapsuleHalfHeight();
 	}
+
+	FVector EnemyNewLocation = Enemy->GetActorScale3D() * FVector(0, 0, SwitchedEnemyHeightOffset) + PXCharacter->GetActorLocation();
+
+	FVector PlayerCameraOffset = EnemyNewLocation - PreEnemyLocation;
+	PXCharacter->CameraOffset_BulletTime(0.2f, PlayerCameraOffset, 0.5);
 	
-	Enemy->SetActorLocation(Enemy->GetActorScale3D() * FVector(0, 0, SwitchedEnemyHeightOffset) + PXCharacter->GetActorLocation());
+	Enemy->SetActorLocation(EnemyNewLocation);
 	PXCharacter->SetActorLocation(PreEnemyLocation);
 
-	FVector PlayerCameraOffset = Enemy->GetActorLocation() - PreEnemyLocation;
-	PXCharacter->CameraOffset_BulletTime(0.3f, PlayerCameraOffset, 0.5);
-	
 	EnemyHealthComponent->DecreaseHP(Damage, PlayerCameraOffset, PXCharacter, true);
 
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();

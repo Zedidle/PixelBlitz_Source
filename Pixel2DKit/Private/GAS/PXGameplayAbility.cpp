@@ -46,21 +46,19 @@ void UPXGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle,
 	FGameplayEffectSpecHandle SpecHandle = MakeOutgoingGameplayEffectSpec(CooldownGE->GetClass(), GetAbilityLevel());
     
 	// 动态注入参数
-	SpecHandle.Data.Get()->DynamicGrantedTags.AppendTags(CooldownTags); // 添加技能专属标签
-	SpecHandle.Data.Get()->SetSetByCallerMagnitude(
-		FGameplayTag::RequestGameplayTag(FName("AbilityCD")), // 自定义 SetByCaller 标签
-		GetCooldownDuration()
-	);
+	FGameplayEffectSpec* Spec = SpecHandle.Data.Get();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Spec);
+	
+	Spec->DynamicGrantedTags.AppendTags(CooldownTags);
+	Spec->AppendDynamicAssetTags(CooldownTags);
+	Spec->SetSetByCallerMagnitude(TAG("AbilityCD"), GetCooldownDuration());
 
 	if (UPXGameplayEffect* PXGE = Cast<UPXGameplayEffect>(CooldownGE))
 	{
-		if (FGameplayEffectSpec* Spec = SpecHandle.Data.Get())
-		{
-			Spec->AppendDynamicAssetTags(PXGE->AssetTags);
-			Spec->DynamicGrantedTags.AppendTags(PXGE->GrantedTags);
-		}
+		Spec->AppendDynamicAssetTags(PXGE->AssetTags);
+		Spec->DynamicGrantedTags.AppendTags(PXGE->GrantedTags);
 	}
-	
+
 	// 应用至所有者
 	ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, SpecHandle);
 }

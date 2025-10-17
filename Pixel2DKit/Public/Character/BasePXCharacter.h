@@ -464,7 +464,7 @@ public:
 	void SetHurt(const bool V, const float duration = 0.1f);
 	
 	UFUNCTION(BlueprintCallable, Category = Movement)
-	void SetJumping(const bool V, const float time = 0.2f);
+	void SetJumping(const bool V, float time = 0.2f);
 	
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	void SetFalling(const bool V);

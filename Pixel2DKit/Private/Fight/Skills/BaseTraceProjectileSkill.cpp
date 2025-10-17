@@ -83,7 +83,7 @@ void ABaseTraceProjectileSkill::TryFindNextTarget(AActor* CenterActor)
 {
 	if (bEnding) return;
 	
-	if (ABaseEnemy* NewEnemy = USpaceFuncLib::FindActorInRangeClosest<ABaseEnemy>(GetWorld(), CenterActor))
+	if (ABaseEnemy* NewEnemy = USpaceFuncLib::FindActorInRangeClosest<ABaseEnemy>(GetWorld(), CenterActor, FVector2D(0, MaxTraceDistance)))
 	{
 		SetNewTarget(NewEnemy);
 	}
@@ -127,6 +127,7 @@ void ABaseTraceProjectileSkill::SetTraceData(const FTraceProjectileData& Data)
 	MagnitudeScaleFar = Data.MagnitudeScaleFar;
 	InitSpeed = Data.InitSpeed;
 	MaxSpeed = Data.MaxSpeed;
+	MaxTraceDistance = Data.MaxTraceDistance;
 }
 
 void ABaseTraceProjectileSkill::SetNewTarget(AActor* Actor, bool Idle)
@@ -179,7 +180,6 @@ void ABaseTraceProjectileSkill::OnEnemyDie(ABaseEnemy* Enemy)
 void ABaseTraceProjectileSkill::OnHitTarget_Implementation(AActor* HitTarget)
 {
 	if (HitTarget != Target) return;
-	if (bIdle) return;
 
 	if (UHealthComponent* HealthComponent = Target->GetComponentByClass<UHealthComponent>())
 	{
@@ -190,7 +190,7 @@ void ABaseTraceProjectileSkill::OnHitTarget_Implementation(AActor* HitTarget)
 	Damage *= 1 - DamageDecreasePercentPerHit;
 	DamagePlusPer100Meter *= 1 - DamageDecreasePercentPerHit;
 
-	if (Damage <= 0 || --RemHitNum <= 0)
+	if (--RemHitNum <= 0 || Damage <= 0)
 	{
 		OnSkillEnd();
 	}

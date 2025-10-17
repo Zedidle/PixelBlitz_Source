@@ -838,19 +838,20 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 	}
 }
 
-void ABasePXCharacter::SetJumping(bool V, const float time)
+void ABasePXCharacter::SetJumping(bool V, float time)
 {
 	bJumping = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
 	
 	if (!bJumping) return;
 
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-[this]{
-			SetJumping(false,0);
-	});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+	{
+		if (WeakThis.IsValid())
+		{
+			WeakThis->SetJumping(false, 0);
+		}
+	}, time);
 }
 
 void ABasePXCharacter::SetFalling(bool V)
