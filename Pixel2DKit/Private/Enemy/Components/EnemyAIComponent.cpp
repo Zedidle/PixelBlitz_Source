@@ -110,15 +110,21 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 
 
 			FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
-			// 与同盟位置的点乘
+
+			// 近距离斥力
+			if (VectorToAlly.Length() < AllyCheckRadius * 0.5)
+			{
+				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
+			}
+
+			// 移动方位斥力， 与同盟位置的点乘
 			float DotAlly = MoveVector.GetSafeNormal2D().Dot(VectorToAlly.GetSafeNormal2D());
-			
 			// 如果当前移动方向与检测到的同盟方向不接近，> 60° ，则忽略
-			if ( DotAlly < 0.5) continue;
-
-			// 检测到同盟后，产生默认斥力
-			NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
-
+			if ( DotAlly < 0.5)
+			{
+				// 检测到同盟后，产生默认斥力
+				NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
+			}
 
 			FVector AllyToTarget = Ally->GetActorLocation() - AllyAI->CurTargetLocation;
 			
