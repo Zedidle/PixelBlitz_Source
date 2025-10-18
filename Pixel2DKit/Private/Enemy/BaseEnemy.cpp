@@ -382,11 +382,10 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 	if (bDead) return;
 	if (OldValue == NewValue) return;
 	
-	
 	UGameInstance* GameInstance = GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
-
+	
 	if (NewValue > 0)
 	{
 		OnHurt(NewValue);

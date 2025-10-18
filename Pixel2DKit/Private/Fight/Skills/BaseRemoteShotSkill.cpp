@@ -101,6 +101,7 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
 
 			// OnSkillEnd();
 		}
+		return;
 	}
 
 
@@ -154,7 +155,8 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
 				SpawnParams.Owner = Owner;
 				SpawnParams.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
 				
-				if (ABaseRemoteShotSkill* NewSkill = Cast<ABaseRemoteShotSkill>(GetWorld()->SpawnActorAbsolute(SelfClass, NewTrans, SpawnParams)))
+				if (ABaseRemoteShotSkill* NewSkill = GetWorld()->SpawnActorDeferred<ABaseRemoteShotSkill>(SelfClass, NewTrans, Owner, nullptr,
+					ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
 				{
 					FRemoteShotData Data;
 					Data.InitSpeed = InitSpeed * 0.9;
@@ -165,6 +167,8 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
 					
 					NewSkill->SetTraceData(Data);
 					NewSkill->SetDamageData(Damage * 0.6, Knockback * 0.8, RemHitNum, DamageDecreasePercentPerHit, RemSplitNum, RemSplitNum);
+
+					UGameplayStatics::FinishSpawningActor(NewSkill, NewTrans);
 					NewSkill->StartTrace();
 				}
 

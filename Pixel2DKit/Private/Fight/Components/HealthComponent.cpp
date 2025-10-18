@@ -83,7 +83,9 @@ void UHealthComponent::FlashForDuration(FLinearColor FlashColor, int FlashTimes,
 			if (!PF) return;
 			
 			WeakThis->bFlashing = !WeakThis->bFlashing;
-			PF->SetSpriteColor(WeakThis->bFlashing ? FlashColor : FLinearColor::White);
+			PF->SetSpriteColor(WeakThis->bFlashing ? FlashColor :
+				FMath::GetMappedRangeValueClamped(FVector2D(0.2f, 1),FVector2D(0.4, 1), WeakThis->GetHPPercent()) * FLinearColor::White
+			);
 		}, FlashRate, -1, FlashTimes * 2);
 }
 

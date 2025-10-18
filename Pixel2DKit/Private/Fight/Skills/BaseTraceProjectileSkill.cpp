@@ -31,6 +31,15 @@ void ABaseTraceProjectileSkill::BeginPlay()
 	}
 }
 
+void ABaseTraceProjectileSkill::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	if (ProjectileComp)
+	{
+		ProjectileComp->DestroyComponent();
+	}
+}
+
 // Called every frame
 void ABaseTraceProjectileSkill::Tick(float DeltaTime)
 {
