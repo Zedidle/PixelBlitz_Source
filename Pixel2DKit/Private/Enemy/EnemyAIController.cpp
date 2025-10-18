@@ -49,7 +49,7 @@ void AEnemyAIController::OnPerceptionUpdated(const FActorPerceptionUpdateInfo& U
 	}
 	else
 	{
-		Enemy->OnLostPlayer(Actor);
+		Enemy->DelayLosePlayer();
 	}
 }
 

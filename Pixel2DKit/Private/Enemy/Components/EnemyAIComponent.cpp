@@ -12,6 +12,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 
 extern TAutoConsoleVariable<int32> CDebugTraceDuration;
 
@@ -58,18 +60,6 @@ void UEnemyAIComponent::SetActionFieldDistance(const FActionFieldDistance& actio
 void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
 {
 	PXCharacter = Character;
-	if (Character == nullptr) return;
-
-	FName TimerName = FName(GetReadableName() + "_SetPixelCharacter");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-	[WeakThis = TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		if (WeakThis->OwningEnemy)
-		{
-			WeakThis->OwningEnemy->SetPXCharacter(nullptr);
-		}
-	}, AttackPatienceTime);
 }
 
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate, float MaxRotateValue,
@@ -79,24 +69,31 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 
 	FVector OwnerLocation = OwningEnemy->GetActorLocation();
 
-	// 同步高度
-	NewTargetLocation.Z = OwnerLocation.Z;
-
+	// 不同步高度，可能可以实现跨阶梯
+	// NewTargetLocation.Z = OwnerLocation.Z;
+	
 	// 移动向量
-	FVector MoveVector = FRotator(0, (FMath::RandBool()? 1 : -1) * (DefaultDirRotate + BlockValue * BlockDirModifyValue), 0)
-							.RotateVector(NewTargetLocation - OwnerLocation);
+	float BlockYawModify = FMath::Min(MaxBlockYawModify, BlockValue * BlockDirModifyValue);
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("BlockValue: %f, BlockYawModify: %f"), BlockValue, BlockYawModify));
 
+	
+	if (PreDirection.IsZero())
+	{
+		PreBlockYawDirection = FMath::RandBool();
+	}
+	
+	FVector MoveVector = FRotator(0, (PreBlockYawDirection ? 1 : -1) * (DefaultDirRotate + BlockYawModify), 0)
+							.RotateVector(NewTargetLocation - OwnerLocation);
+	
 	// 处理范围周围半径范围的怪物互斥逻辑
 	if (MinDirectlyDistance > MoveVector.Length())
 	{
-		BlockValue = 0;
-		
 		// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
 		TArray<AActor*> ActorsToIgnore = {OwningEnemy};
 		TArray<FHitResult> OutHits;
 		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius, 
 	EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
-	true, FLinearColor::Red, FLinearColor::Green, 0.5f);
+	true, FLinearColor::Red, FLinearColor::Green, 0.1f);
 		
 		for (auto& result:OutHits)
 		{
@@ -142,19 +139,24 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 	
 	TMap<FVector, int> TargetOffsetMap;
 	int totalR = 0;
+	
 	float blockR = 0; // 阻挡因子
+	
 	int n = -1;
 	while (DotDirPerRotate * n <= MaxRotateValue)
 	{
 		n++;
+
 		float tmpD = blockR * DotDirPerRotate * n / MaxRotateValue;
+		
 		float tmpR = FMath::Cos(FMath::DegreesToRadians(DotDirPerRotate * n));
 
-		// 一般来说，越偏移目标点则概率越小，移动距离也越小，但是受到阻挡因子的影响，起始方向也会偏转
+		// 一般来说，越偏移目标点则概率越小，移动距离也越小
+		// 但阻挡因子会影响 起始方向 偏转
 		float DistanceScale = tmpR > 0 ? FMath::Max(0.5, tmpR) + tmpD : FMath::Min(-0.5, tmpR) - tmpD;
 		
 		// 目标点相对起点的位置
-		FVector TempTargetOffset = DistanceScale * FRotator(0, (FMath::RandBool() ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(MoveVector);
+		FVector TempTargetOffset = DistanceScale * FRotator(0, (PreBlockYawDirection ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(MoveVector);
 
 		TArray<AActor*> ActorsToIgnore;
 		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
@@ -163,21 +165,16 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 		FHitResult HitResult;
 
 		// 执行射线检测
-		bool bHit = UKismetSystemLibrary::LineTraceSingle(
-			this, // WorldContextObject
-			OwnerLocation, // 起点
-			OwnerLocation + TempTargetOffset, // 终点
-			TraceTypeQuery3, // 检测通道（例如 Visibility）
-			false, // bTraceComplex
-			ActorsToIgnore, // 忽略的 Actor
-			EDrawDebugTrace::None, // 调试绘制类型
+		bool bHit = UKismetSystemLibrary::LineTraceSingle(this, OwnerLocation, OwnerLocation + TempTargetOffset,
+			TraceTypeQuery3,false, ActorsToIgnore, 
+			EDrawDebugTrace::ForDuration,
 			HitResult, // 碰撞结果
-			true // bIgnoreSelf
-		);
+			true, FLinearColor::Blue, FLinearColor::Green, 0.1 );
 
-		// 检查是否命中
-		if (bHit && HitResult.GetActor() || USpaceFuncLib::CheckCliffProcess(OwnerLocation, OwnerLocation + TempTargetOffset, GetCheckCliffHeight()))
+		// 无法到达则跳过并提供阻挡因子
+		if (bHit || USpaceFuncLib::CheckCliffProcess(OwnerLocation, OwnerLocation + TempTargetOffset, GetCheckCliffHeight()))
 		{
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("blockR Plus DistanceScale: %f \n "), DistanceScale));
 			blockR += DistanceScale;
 			continue;
 		}
@@ -185,33 +182,28 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 		float tmpBlockAvg = blockR * (MaxRotateValue - DotDirPerRotate * n) / MaxRotateValue;
 		tmpR = (DistanceScale + tmpBlockAvg ) * 100 + 400;
 		totalR += tmpR;
-		TargetOffsetMap.FindOrAdd(TempTargetOffset) = tmpR;
+		TargetOffsetMap.FindOrAdd(TempTargetOffset, tmpR);
 		
 		blockR -= tmpBlockAvg;
 	}
-	
 
-	TArray<FVector> values;
-	TargetOffsetMap.GetKeys(values);
-	int tmpV = 0;
-	int randV = FMath::RandRange(0, totalR);
-	for (int i = 0; i < values.Num(); i++)
+	
+	FVector Result;
+	if (UCommonFuncLib::CalRandomMap(TargetOffsetMap, Result))
 	{
-		tmpV += TargetOffsetMap[values[i]];
-		if (tmpV >= randV)
+		BlockValue *= BlockValueWeekPercent;
+		FVector CurDirection = Result.GetSafeNormal2D();
+		if (!PreDirection.IsZero())
 		{
-			BlockValue *= BlockValueWeekPercent;
-			FVector CurDir = values[i].GetSafeNormal2D();
-			if (!PreDirection.IsZero())
-			{
-				CurDir = UKismetMathLibrary::VLerp(CurDir, PreDirection, PreDirValue);
-			}
-			
-			PreDirection = CurDir;
-			return values[i].Size() * CurDir + OwnerLocation;
+			CurDirection = UKismetMathLibrary::VLerp(CurDirection, PreDirection, PreDirectionPercent);
 		}
+			
+		PreDirection = CurDirection;
+		return Result.Size() * CurDirection + OwnerLocation;
 	}
 
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("\n BlockValue Plus blockR: %f \n "), blockR));
+	
 	BlockValue += FMath::Abs(blockR);
 	PreDirection = FVector::ZeroVector;
 	return OwnerLocation;

@@ -33,7 +33,7 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	GENERATED_BODY()
 
 	FVector PreDirection = FVector::ZeroVector;
-
+	bool PreBlockYawDirection = false;
 
 	// 阻挡因子，动态改变，该值越大时默认偏转角度越大
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -41,16 +41,19 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 
 	// 方向惯性因子
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float PreDirValue = 0.7f;
+	float PreDirectionPercent = 0.7f;
 
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float MaxBlockYawModify = 90;
+	
 	// 调整怪物的接近欲望，基于阻挡因子的方向调整基值, 该值越大，欲望越低
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float BlockDirModifyValue = 100;
 	
 	// 调整怪物的接近欲望，每次寻路成功后，进行一次阻挡因子衰减， 该值越小，欲望越大
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float BlockValueWeekPercent = 0.7; 
+	float BlockValueWeekPercent = 0.2; 
 
 	// 盟友互斥检测半径
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -94,10 +97,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	ABasePXCharacter* PXCharacter;
 	
-	// 如果 n 秒内都打不到玩家，则回到巡逻状态
-	UPROPERTY(BlueprintReadOnly, Category = Enemy)
-	float AttackPatienceTime = 5;   
-
 	// 最远的攻击距离, 20 - 50 为默认小怪攻击距离；
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	FVector2D AttackRange = {20.0f, 50.0f};  
@@ -124,8 +123,8 @@ public:
 	 * MinDirectlyDistance - 低于多少距离时，直接到达
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Camera, meta = (AllowPrivateAccess))
-	FVector GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate = 15.0f,
-								float MaxRotateValue = 90, float DefaultDirRotate = 0, float MinDirectlyDistance = 50);
+	FVector GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate = 10.0f,
+								float MaxRotateValue = 60, float DefaultDirRotate = 0, float MinDirectlyDistance = 50);
 
 	// 获取在X方向（相对玩家的东西方向）的攻击位置
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)

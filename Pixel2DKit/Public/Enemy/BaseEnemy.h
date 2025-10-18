@@ -63,7 +63,7 @@ struct FEnemyData : public FTableRowBase
 	float SightRadius = 300.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float LostEnemyTime = 5.0f;
+	float LostEnemyTime = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	TMap<FName, int> DropID_Rate;
