@@ -92,7 +92,7 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 	TArray<AActor*> ActorsToIgnore;
 	bool bTraceWallHit = UKismetSystemLibrary::LineTraceSingle(World, Pawn->GetActorLocation(), CurTargetLocation,
 		TraceTypeQuery1, false, ActorsToIgnore,
-				EDrawDebugTrace::ForDuration, OutHit, true,
+				EDrawDebugTrace::None, OutHit, true,
 				FLinearColor::Red, FLinearColor::Green, 1.0f);
 	if (bTraceWallHit)
 	{

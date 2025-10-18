@@ -32,20 +32,33 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	// 调整近战怪物的 ”进攻欲望“
-	// 基于阻挡因子的方向调整基值, 该值越大，欲望越低
-	float BlockDirModifyValue = 100; 
-	// 每次寻路成功后，进行一次阻挡因子衰减， 该值越小，欲望越大
-	float BlockValueWeekValue = 0.7; 
+	FVector PreDirection = FVector::ZeroVector;
+
 
 	// 阻挡因子，动态改变，该值越大时默认偏转角度越大
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float BlockValue = 0.0f; 
 
 	// 方向惯性因子
-	float PreDirValue = 0.7f; 
-	FVector PreDir = FVector::ZeroVector;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float PreDirValue = 0.7f;
 
 
+	// 调整怪物的接近欲望，基于阻挡因子的方向调整基值, 该值越大，欲望越低
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float BlockDirModifyValue = 100;
+	
+	// 调整怪物的接近欲望，每次寻路成功后，进行一次阻挡因子衰减， 该值越小，欲望越大
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float BlockValueWeekPercent = 0.7; 
+
+	// 盟友互斥检测半径
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float AllyCheckRadius = 100.f;
+
+	// 盟友互斥因子，建议 0.1 - 2 之间，越大越松散
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float AllyRepulsion = 0.5f;
 	
 public:	
 	// Sets default values for this component's properties
@@ -57,6 +70,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 
+
+
+
+
+
+
+
+
+
+
+	
 	
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	class ABaseEnemy* OwningEnemy = nullptr;
@@ -93,16 +117,15 @@ public:
 	
 
 	/* 向量点积法 弱随机移动到目标位置
-	 * TargetLocation - 目标位置
+	 * TargetLocation - 尝试到达的目标位置
 	 * DotDirPerRotate - 每次偏转角度
 	 * MaxRotateValue - 最大偏转角度
 	 * DefaultDirRotate - 默认的最初角度
 	 * MinDirectlyDistance - 低于多少距离时，直接到达
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Camera, meta = (AllowPrivateAccess))
-	FVector GetMoveDotDirRandLocation(const FVector TargetLocation, const float DotDirPerRotate = 15.0f,
-								const float MaxRotateValue = 90, const float DefaultDirRotate = 0, const float MinDirectlyDistance = 50);
-	
+	FVector GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate = 15.0f,
+								float MaxRotateValue = 90, float DefaultDirRotate = 0, float MinDirectlyDistance = 50);
 
 	// 获取在X方向（相对玩家的东西方向）的攻击位置
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)

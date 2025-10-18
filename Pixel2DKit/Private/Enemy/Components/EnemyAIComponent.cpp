@@ -72,53 +72,67 @@ void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
 	}, AttackPatienceTime);
 }
 
-FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, float DotDirPerRotate, float MaxRotateValue,
-                                                     float DefaultDirRotate, const float MinDirectlyDistance)
+FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate, float MaxRotateValue,
+                                                     float DefaultDirRotate, float MinDirectlyDistance)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector);
 
 	FVector OwnerLocation = OwningEnemy->GetActorLocation();
-	TargetLocation.Z = OwnerLocation.Z; // 涉及到转向，避免Owner太高转到半空中导致无效位置
-	FVector DefaultDirVector = FRotator(0, (FMath::RandBool()? 1 : -1) * (DefaultDirRotate + BlockValue * BlockDirModifyValue), 0)
-							.RotateVector(TargetLocation - OwnerLocation);
 
-	
-	if (MinDirectlyDistance > DefaultDirVector.Length())
+	// 同步高度
+	NewTargetLocation.Z = OwnerLocation.Z;
+
+	// 移动向量
+	FVector MoveVector = FRotator(0, (FMath::RandBool()? 1 : -1) * (DefaultDirRotate + BlockValue * BlockDirModifyValue), 0)
+							.RotateVector(NewTargetLocation - OwnerLocation);
+
+	// 处理范围周围半径范围的怪物互斥逻辑
+	if (MinDirectlyDistance > MoveVector.Length())
 	{
 		BlockValue = 0;
-		FVector Location = OwnerLocation + DefaultDirVector;
+		
 		// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
-		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
+		TArray<AActor*> ActorsToIgnore = {OwningEnemy};
 		TArray<FHitResult> OutHits;
-		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, Location, 100, 
+		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius, 
 	EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
 	true, FLinearColor::Red, FLinearColor::Green, 0.5f);
 		
 		for (auto& result:OutHits)
 		{
 			if (!IsValid(result.GetActor())) continue;
-			if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(result.GetActor()))
+			
+			ABaseEnemy* Ally = Cast<ABaseEnemy>(result.GetActor());
+			if (!IsValid(Ally)) continue;
+
+			UEnemyAIComponent* AllyAI = Ally->GetComponentByClass<UEnemyAIComponent>();
+			if (!IsValid(AllyAI)) continue;
+
+
+			FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
+			// 与同盟位置的点乘
+			float DotAlly = MoveVector.GetSafeNormal2D().Dot(VectorToAlly.GetSafeNormal2D());
+			
+			// 如果当前移动方向与检测到的同盟方向不接近，> 60° ，则忽略
+			if ( DotAlly < 0.5) continue;
+
+			// 检测到同盟后，产生默认斥力
+			NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
+
+
+			FVector AllyToTarget = Ally->GetActorLocation() - AllyAI->CurTargetLocation;
+			
+			// 如果同盟的目标点 与 自身目标点十分接近，且它到目标的距离小于自身到目标的，则再次产生斥力（让路）
+			if (AllyAI->CurTargetLocation.Equals(NewTargetLocation, 20) && MoveVector.Size() > AllyToTarget.Size())
 			{
-				if (DefaultDirVector.GetSafeNormal2D().Dot((Enemy->GetActorLocation() - OwnerLocation).GetSafeNormal2D()) < 0.8) continue;
-				
-				if (UEnemyAIComponent* EnemyAIComp = Enemy->GetComponentByClass<UEnemyAIComponent>())
-				{
-					if (EnemyAIComp->CurTargetLocation.Equals(Location, 10))
-					{
-						if (DefaultDirVector.Size() > (Enemy->GetActorLocation() - EnemyAIComp->CurTargetLocation).Size())
-						{
-							CurTargetLocation = OwnerLocation - 0.5 * FMath::FRand() * DefaultDirVector;
-							return CurTargetLocation;
-						}
-					}
-				}
+				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - AllyAI->CurTargetLocation);
 			}
 		}
 
-		CurTargetLocation = Location;
-		return Location;
+		CurTargetLocation = NewTargetLocation;
+		return CurTargetLocation;
 	}
+
 	
 	TMap<FVector, int> TargetOffsetMap;
 	int totalR = 0;
@@ -131,18 +145,10 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		float tmpR = FMath::Cos(FMath::DegreesToRadians(DotDirPerRotate * n));
 
 		// 一般来说，越偏移目标点则概率越小，移动距离也越小，但是受到阻挡因子的影响，起始方向也会偏转
-		float DistanceScale;
-		if (tmpR > 0)  // 当前偏转 < 90°
-		{
-			DistanceScale = FMath::Max(0.5, tmpR) + tmpD;
-		}
-		else // > 90°
-		{
-			DistanceScale = FMath::Min(-0.5, tmpR) - tmpD;
-		}
+		float DistanceScale = tmpR > 0 ? FMath::Max(0.5, tmpR) + tmpD : FMath::Min(-0.5, tmpR) - tmpD;
 		
 		// 目标点相对起点的位置
-		FVector TempTargetOffset = DistanceScale * FRotator(0, (FMath::RandBool() ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(DefaultDirVector);
+		FVector TempTargetOffset = DistanceScale * FRotator(0, (FMath::RandBool() ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(MoveVector);
 
 		TArray<AActor*> ActorsToIgnore;
 		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
@@ -150,24 +156,15 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		// 存储碰撞结果
 		FHitResult HitResult;
 
-		EDrawDebugTrace::Type DrawType = EDrawDebugTrace::None;
-
-#if WITH_EDITOR
-		if (CDebugTraceDuration.GetValueOnGameThread())
-		{
-			DrawType = EDrawDebugTrace::ForDuration;
-		}
-#endif
-		
 		// 执行射线检测
 		bool bHit = UKismetSystemLibrary::LineTraceSingle(
 			this, // WorldContextObject
 			OwnerLocation, // 起点
 			OwnerLocation + TempTargetOffset, // 终点
-			ETraceTypeQuery::TraceTypeQuery3, // 检测通道（例如 Visibility）
+			TraceTypeQuery3, // 检测通道（例如 Visibility）
 			false, // bTraceComplex
 			ActorsToIgnore, // 忽略的 Actor
-			DrawType, // 调试绘制类型
+			EDrawDebugTrace::None, // 调试绘制类型
 			HitResult, // 碰撞结果
 			true // bIgnoreSelf
 		);
@@ -197,20 +194,20 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		tmpV += TargetOffsetMap[values[i]];
 		if (tmpV >= randV)
 		{
-			BlockValue = BlockValue * BlockValueWeekValue;
+			BlockValue *= BlockValueWeekPercent;
 			FVector CurDir = values[i].GetSafeNormal2D();
-			if (!PreDir.IsZero())
+			if (!PreDirection.IsZero())
 			{
-				CurDir = UKismetMathLibrary::VLerp(CurDir, PreDir, PreDirValue);
+				CurDir = UKismetMathLibrary::VLerp(CurDir, PreDirection, PreDirValue);
 			}
 			
-			PreDir = CurDir;
+			PreDirection = CurDir;
 			return values[i].Size() * CurDir + OwnerLocation;
 		}
 	}
 
 	BlockValue += FMath::Abs(blockR);
-	PreDir = FVector::ZeroVector;
+	PreDirection = FVector::ZeroVector;
 	return OwnerLocation;
 }
 
