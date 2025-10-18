@@ -53,7 +53,7 @@ void ABaseTraceProjectileSkill::Tick(float DeltaTime)
 	}
 	else
 	{
-		TryFindNextTarget(GetOwner());
+		TryFindNextTarget(Owner);
 	}
 	
 }
@@ -83,8 +83,9 @@ void ABaseTraceProjectileSkill::SetVelocity(const FVector& V)
 void ABaseTraceProjectileSkill::TryFindNextTarget(AActor* CenterActor)
 {
 	if (bEnding) return;
-	
-	if (ABaseEnemy* NewEnemy = USpaceFuncLib::FindActorInRangeClosest<ABaseEnemy>(GetWorld(), CenterActor, FVector2D(0, MaxTraceDistance)))
+
+	TArray<AActor*> ActorsToIgnore;
+	if (ABaseEnemy* NewEnemy = USpaceFuncLib::FindActorInRangeClosest<ABaseEnemy>(GetWorld(), CenterActor, ActorsToIgnore,FVector2D(0, MaxTraceDistance)))
 	{
 		SetNewTarget(NewEnemy);
 	}
@@ -185,7 +186,7 @@ void ABaseTraceProjectileSkill::OnHitTarget_Implementation(AActor* HitTarget)
 	if (UHealthComponent* HealthComponent = Target->GetComponentByClass<UHealthComponent>())
 	{
 		int DistanceDamage = bPlusDamageByDistance ? FVector::Distance(DistanceDamageInitLocation, GetActorLocation()) * DamagePlusPer100Meter / 100 : 0;
-		HealthComponent->DecreaseHP(Damage + DistanceDamage, Knockback, GetOwner(), bForce);
+		HealthComponent->DecreaseHP(Damage + DistanceDamage, Knockback, Owner, bForce);
 	}
 
 	Damage *= 1 - DamageDecreasePercentPerHit;

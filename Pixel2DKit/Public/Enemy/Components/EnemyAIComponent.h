@@ -108,11 +108,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	FVector GetAttackLocation();
 
-
-	// 获取 接近/远离 (-1 / 1)玩家的行动域位置，不管是否能够攻击
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	FVector GetCurActionFieldDirectionLocation(const bool bNear = true);
-
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	FVector GetNearestActionFieldCanAttackLocation();
 	

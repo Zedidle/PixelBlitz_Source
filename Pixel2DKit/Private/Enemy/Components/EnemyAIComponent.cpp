@@ -141,9 +141,6 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 			DistanceScale = FMath::Min(-0.5, tmpR) - tmpD;
 		}
 		
-// 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Black,
-//		FString::Printf(TEXT("GetMoveDotDirRandLocation R: %d, %d"), R, __LINE__));
-		
 		// 目标点相对起点的位置
 		FVector TempTargetOffset = DistanceScale * FRotator(0, (FMath::RandBool() ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(DefaultDirVector);
 
@@ -190,18 +187,6 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector TargetLocation, flo
 		blockR -= tmpBlockAvg;
 	}
 	
-#if WITH_EDITOR
-	if (CDebugTraceDuration.GetValueOnGameThread())
-	{
-		// 寻路射线测试
-		for(auto& v : TargetOffsetMap)
-		{
-			FLinearColor color = FLinearColor::LerpUsingHSV(FLinearColor(0.1, 0.5, 0.1, 0.2),FLinearColor::Green, v.Key.Length() / 150);
-			UKismetSystemLibrary::DrawDebugLine(GetWorld(), OwnerLocation, OwnerLocation + v.Value, color, 0.2f, 0.5);
-		}
-	}
-
-#endif
 
 	TArray<FVector> values;
 	TargetOffsetMap.GetKeys(values);
@@ -249,72 +234,6 @@ FVector UEnemyAIComponent::GetAttackLocation()
 }
 
 
-FVector UEnemyAIComponent::GetCurActionFieldDirectionLocation(const bool bNear)
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector)
-	
-	if (!IsValid(PXCharacter)) return OwningEnemy->GetActorLocation();
-
-	const FVector PlayerLocation = PXCharacter->GetActorLocation();
-	const FVector OwnerLocation = OwningEnemy->GetActorLocation();
-	float Distance = (PlayerLocation - OwnerLocation).Size2D();
-	FVector Dir = (OwnerLocation - PlayerLocation).GetSafeNormal2D();
-
-	// 应该直接走向最近的能攻击的区域
-	// 可能后续要加入直接跳跃到可攻击区域的技能
-	
-	FVector TargetLocation = PlayerLocation;
-	
-	if (ActionFieldDistance.DistanceNear.X < Distance && Distance <= ActionFieldDistance.DistanceNear.Y)
-	{
-		if (bNear)
-		{
-			TargetLocation = GetAttackLocation();
-		}
-		else
-		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceMid.X + 10);
-		}
-	}
-	else if (ActionFieldDistance.DistanceMid.X < Distance && Distance <= ActionFieldDistance.DistanceMid.Y)
-	{
-		if (bNear)
-		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceNear.Y - 10);
-		}
-		else
-		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceFar.X + 10);
-		}
-	}
-	else if (ActionFieldDistance.DistanceFar.X < Distance && Distance <= ActionFieldDistance.DistanceFar.Y)
-	{
-		if (bNear)
-		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceMid.Y - 10);
-		}
-		else
-		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceRemote.X + 10);
-		}
-	}
-	else if (ActionFieldDistance.DistanceRemote.X < Distance && Distance <= ActionFieldDistance.DistanceRemote.Y)
-	{
-		if (bNear)
-		{
-			TargetLocation = PlayerLocation + Dir * (ActionFieldDistance.DistanceRemote.X - 10);
-		}
-		else
-		{
-			TargetLocation = OwnerLocation + Dir * 100;
-		}
-	}
-
-	
-	CurTargetLocation = GetMoveDotDirRandLocation(TargetLocation);
-	return CurTargetLocation;
-}
-
 FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector)
@@ -323,13 +242,8 @@ FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
 	FGameplayTag GameplayTag = GetActionFieldByPlayer();
 	if (!GameplayTag.IsValid()) return EnemyLocation;
 
-	const FGameplayTagContainer& ActionFieldsCanAttack = OwningEnemy->ActionFieldsCanAttack;
-
 	FVector PlayerLocation = PXCharacter->GetActorLocation();
 	FVector EastDir = PXCharacter->GetRightVectorWithBlendYaw();
-	FVector NorthDir = FRotator(0, 90, 0).RotateVector(EastDir);
-	FVector WestDir = FRotator(0, 90, 0).RotateVector(NorthDir);
-	FVector SouthDir = FRotator(0, 90, 0).RotateVector(WestDir);
 
 	float CurDistance = MAX_FLOAT;
 	FVector Result = EnemyLocation;
@@ -344,14 +258,17 @@ FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
 		}
 		else if (TagString.Contains("North"))
 		{
+			FVector NorthDir = FRotator(0, 90, 0).RotateVector(EastDir);
 			TmpPoint = PlayerLocation + NorthDir * DirDistance.Value;
 		}
 		else if (TagString.Contains("West"))
 		{
+			FVector WestDir = FRotator(0, 180, 0).RotateVector(EastDir);
 			TmpPoint = PlayerLocation + WestDir * DirDistance.Value;
 		}
 		else if (TagString.Contains("South"))
 		{
+			FVector SouthDir = FRotator(0, -90, 0).RotateVector(EastDir);
 			TmpPoint = PlayerLocation + SouthDir * DirDistance.Value;
 		}
 		

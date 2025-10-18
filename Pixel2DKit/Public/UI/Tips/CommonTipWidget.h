@@ -7,6 +7,8 @@
 #include "CommonTipWidget.generated.h"
 
 
+class UTextBlock;
+
 UCLASS()
 class PIXEL2DKIT_API UCommonTipWidget : public UPXUserWidget
 {

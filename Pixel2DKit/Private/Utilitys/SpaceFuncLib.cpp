@@ -240,17 +240,17 @@ float USpaceFuncLib::CalAngle2D(FVector2D A, FVector2D B)
 	return Angle;
 }
 
-ABaseEnemy* USpaceFuncLib::FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
+ABaseEnemy* USpaceFuncLib::FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange)
 {
-	return FindActorInRangeClosest<ABaseEnemy>(WorldContextObject, A, InRange);
+	return FindActorInRangeClosest<ABaseEnemy>(WorldContextObject, A, ActorsToIgnore, InRange);
 }
 
-ABaseEnemy* USpaceFuncLib::FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
+ABaseEnemy* USpaceFuncLib::FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange)
 {
-	return FindActorInRangeFarthest<ABaseEnemy>(WorldContextObject, A, InRange);
+	return FindActorInRangeFarthest<ABaseEnemy>(WorldContextObject, A,ActorsToIgnore,  InRange);
 }
 
-ABaseEnemy* USpaceFuncLib::FindEnemyInRangeRandomOne(const UObject* WorldContextObject, AActor* A, FVector2D InRange)
+ABaseEnemy* USpaceFuncLib::FindEnemyInRangeRandomOne(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange)
 {
-	return FindActorInRangeRandomOne<ABaseEnemy>(WorldContextObject, A, InRange);
+	return FindActorInRangeRandomOne<ABaseEnemy>(WorldContextObject, A,ActorsToIgnore,  InRange);
 }

@@ -91,22 +91,22 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	bool bIdle = false;
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
 	float NewTargetLifeSpan = 2.0f;
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float CurMagnitude = 3000.0f;
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
 	float InRangeNear = 1000.0f;
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float MagnitudeScaleNear = 2.0f;
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float MagnitudeScaleFar = 1.0f;
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile",meta = (ExposeOnSpawn))
 	float InitSpeed = 500.0f;
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile",meta = (ExposeOnSpawn))
 	float MaxSpeed = 1000.0f;
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn, AllowPrivateAccess=true))
-	float MaxTraceDistance = 1000.0f;
+	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile",meta = (ExposeOnSpawn))
+	float MaxTraceDistance = 600.0f;
 	
 	UFUNCTION(BlueprintCallable, Category="Skill | Projectile")
 	void SetTraceData(const FTraceProjectileData& Data);

@@ -89,24 +89,24 @@ public:
 
 
 	template<typename T>
-	static T* FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange = {0, 1000}, bool bAlive = true);
+	static T* FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = {0, 1000}, bool bAlive = true);
 	template<typename T>
-	static T* FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange = {0, 1000}, bool bAlive = true);
+	static T* FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = {0, 1000}, bool bAlive = true);
 	template<typename T>
-	static T* FindActorInRangeRandomOne(const UObject* WorldContextObject, AActor* A, FVector2D InRange = {0, 1000}, bool bAlive = true);
+	static T* FindActorInRangeRandomOne(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange = {0, 1000}, bool bAlive = true);
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
-	static ABaseEnemy* FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange = FVector2D(0, 1000));
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
+	static ABaseEnemy* FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = FVector2D(0, 1000));
 	
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
-	static ABaseEnemy* FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange = FVector2D(0, 1000));
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
+	static ABaseEnemy* FindEnemyInRangeFarthest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = FVector2D(0, 1000));
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
-	static ABaseEnemy* FindEnemyInRangeRandomOne(const UObject* WorldContextObject, AActor* A, FVector2D InRange = FVector2D(0, 1000));
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
+	static ABaseEnemy* FindEnemyInRangeRandomOne(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = FVector2D(0, 1000));
 };
 
 template <typename T>
-T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, FVector2D InRange, bool bAlive)
+T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange, bool bAlive)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
 	UWorld* World = WorldContextObject->GetWorld();
@@ -120,7 +120,7 @@ T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AAc
 		T* B = *It;
 		if (A == B) continue;
 		if (!IsValid(B)) continue;
-		
+		if (ActorsToIgnore.Contains(B)) continue;
 		
 		if (bAlive)
 		{
@@ -144,7 +144,7 @@ T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AAc
 }
 
 template <typename T>
-T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, FVector2D InRange, bool bAlive)
+T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange, bool bAlive)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
 	UWorld* World = WorldContextObject->GetWorld();
@@ -157,6 +157,7 @@ T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AA
 		T* B = *It;
 		if (A == B) continue;
 		if (!IsValid(B)) continue;
+		if (ActorsToIgnore.Contains(B)) continue;
 
 		if (bAlive)
 		{
@@ -180,7 +181,7 @@ T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AA
 }
 
 template <typename T>
-T* USpaceFuncLib::FindActorInRangeRandomOne(const UObject* WorldContextObject, AActor* A, FVector2D InRange, bool bAlive)
+T* USpaceFuncLib::FindActorInRangeRandomOne(const UObject* WorldContextObject, AActor* A,const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange, bool bAlive)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
 	UWorld* World = WorldContextObject->GetWorld();
@@ -193,6 +194,7 @@ T* USpaceFuncLib::FindActorInRangeRandomOne(const UObject* WorldContextObject, A
 		T* B = *It;
 		if (A == B) continue;
 		if (!IsValid(B)) continue;
+		if (ActorsToIgnore.Contains(B)) continue;
 		
 		if (bAlive)
 		{
