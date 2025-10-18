@@ -86,6 +86,21 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 
 	// CliffHeight 还需动态依据怪物身高调整
 	FVector CurTargetLocation = Pawn->GetActorLocation() + CurDistance * CurDirection;
+
+
+	FHitResult OutHit;
+	TArray<AActor*> ActorsToIgnore;
+	bool bTraceWallHit = UKismetSystemLibrary::LineTraceSingle(World, Pawn->GetActorLocation(), CurTargetLocation,
+		TraceTypeQuery1, false, ActorsToIgnore,
+				EDrawDebugTrace::ForDuration, OutHit, true,
+				FLinearColor::Red, FLinearColor::Green, 1.0f);
+	if (bTraceWallHit)
+	{
+		bMoveSucceeded = false;
+		FinishExecute(false);
+		return EBTNodeResult::Failed;
+	}
+	
 	if (!USpaceFuncLib::CheckCliffProcess( Pawn->GetActorLocation(), CurTargetLocation, CheckCliffHeight, CliffCheckRate, MinDirSwitchDistance))
 	{
 		Controller->SimpleMoveToLocation(CurTargetLocation);
