@@ -74,8 +74,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 	
 	// 移动向量
 	float BlockYawModify = FMath::Min(MaxBlockYawModify, BlockValue * BlockDirModifyValue);
-	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("BlockValue: %f, BlockYawModify: %f"), BlockValue, BlockYawModify));
-
+	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("BlockValue: %f, BlockYawModify: %f"), BlockValue, BlockYawModify));
 	
 	if (PreDirection.IsZero())
 	{
@@ -84,27 +83,41 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 	
 	FVector MoveVector = FRotator(0, (PreBlockYawDirection ? 1 : -1) * (DefaultDirRotate + BlockYawModify), 0)
 							.RotateVector(NewTargetLocation - OwnerLocation);
-	
-	// 处理范围周围半径范围的怪物互斥逻辑
-	if (MinDirectlyDistance > MoveVector.Length())
+
+	// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
+	TArray<AActor*> ActorsToIgnore = {OwningEnemy};
+	TArray<FHitResult> OutHits;
+	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius, 
+EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
+true, FLinearColor::Red, FLinearColor::Green, 0.1f);
+
+	TArray<ABaseEnemy*> FoundAllies;
+	for (auto& result : OutHits)
 	{
-		// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
-		TArray<AActor*> ActorsToIgnore = {OwningEnemy};
-		TArray<FHitResult> OutHits;
-		UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius, 
-	EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
-	true, FLinearColor::Red, FLinearColor::Green, 0.1f);
-		
-		for (auto& result:OutHits)
+		if (!IsValid(result.GetActor())) continue;
+		if (ABaseEnemy* Ally = Cast<ABaseEnemy>(result.GetActor()))
 		{
-			if (!IsValid(result.GetActor())) continue;
-			
-			ABaseEnemy* Ally = Cast<ABaseEnemy>(result.GetActor());
+			FoundAllies.Add(Ally);		
+		}
+	}
+
+	
+	if (FoundAllies.IsEmpty())
+	{
+		if (MoveVector.Size() < MinDirectlyDistance)
+		{
+			CurTargetLocation = NewTargetLocation;
+			return CurTargetLocation;
+		}
+	}
+	else
+	{
+		for (auto& Ally : FoundAllies)
+		{
 			if (!IsValid(Ally)) continue;
 
 			UEnemyAIComponent* AllyAI = Ally->GetComponentByClass<UEnemyAIComponent>();
 			if (!IsValid(AllyAI)) continue;
-
 
 			FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
 
@@ -158,23 +171,20 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 		// 目标点相对起点的位置
 		FVector TempTargetOffset = DistanceScale * FRotator(0, (PreBlockYawDirection ? 1 : -1) * DotDirPerRotate * n, 0).RotateVector(MoveVector);
 
-		TArray<AActor*> ActorsToIgnore;
-		ActorsToIgnore.Add(OwningEnemy); // 忽略自己
-
 		// 存储碰撞结果
 		FHitResult HitResult;
 
 		// 执行射线检测
 		bool bHit = UKismetSystemLibrary::LineTraceSingle(this, OwnerLocation, OwnerLocation + TempTargetOffset,
 			TraceTypeQuery3,false, ActorsToIgnore, 
-			EDrawDebugTrace::ForDuration,
+			EDrawDebugTrace::None,
 			HitResult, // 碰撞结果
 			true, FLinearColor::Blue, FLinearColor::Green, 0.1 );
 
 		// 无法到达则跳过并提供阻挡因子
 		if (bHit || USpaceFuncLib::CheckCliffProcess(OwnerLocation, OwnerLocation + TempTargetOffset, GetCheckCliffHeight()))
 		{
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("blockR Plus DistanceScale: %f \n "), DistanceScale));
+			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("blockR Plus DistanceScale: %f \n "), DistanceScale));
 			blockR += DistanceScale;
 			continue;
 		}
@@ -202,7 +212,7 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 		return Result.Size() * CurDirection + OwnerLocation;
 	}
 
-	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("\n BlockValue Plus blockR: %f \n "), blockR));
+	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("\n BlockValue Plus blockR: %f \n "), blockR));
 	
 	BlockValue += FMath::Abs(blockR);
 	PreDirection = FVector::ZeroVector;

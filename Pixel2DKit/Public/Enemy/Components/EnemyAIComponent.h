@@ -45,11 +45,11 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float MaxBlockYawModify = 90;
+	float MaxBlockYawModify = 80;
 	
 	// 调整怪物的接近欲望，基于阻挡因子的方向调整基值, 该值越大，欲望越低
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float BlockDirModifyValue = 100;
+	float BlockDirModifyValue = 60;
 	
 	// 调整怪物的接近欲望，每次寻路成功后，进行一次阻挡因子衰减， 该值越小，欲望越大
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -120,7 +120,7 @@ public:
 	 * DotDirPerRotate - 每次偏转角度
 	 * MaxRotateValue - 最大偏转角度
 	 * DefaultDirRotate - 默认的最初角度
-	 * MinDirectlyDistance - 低于多少距离时，直接到达
+	 * MinDirectlyDistance - 低于多少距离时，直接到达, 不宜太远，会掉落平台
 	*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Camera, meta = (AllowPrivateAccess))
 	FVector GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate = 10.0f,
