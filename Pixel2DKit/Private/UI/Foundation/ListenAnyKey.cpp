@@ -18,18 +18,19 @@ public:
 
 	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override
 	{
-		HandleKey(InKeyEvent.GetKey());
+		KeyReleased(InKeyEvent.GetKey());
 		return true;
 	}
 
 	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override
 	{
+		KeyPressed(InKeyEvent.GetKey());
 		return true;
 	}
 
 	virtual bool HandleMouseButtonDoubleClickEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override
 	{
-		HandleKey(MouseEvent.GetEffectingButton());
+		KeyPressed(MouseEvent.GetEffectingButton());
 		return true;
 	}
 
@@ -40,7 +41,7 @@ public:
 
 	virtual bool HandleMouseButtonUpEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override
 	{
-		HandleKey(MouseEvent.GetEffectingButton());
+		KeyPressed(MouseEvent.GetEffectingButton());
 		return true;
 	}
 
@@ -49,19 +50,22 @@ public:
 		if (InWheelEvent.GetWheelDelta() != 0)
 		{
 			const FKey Key = InWheelEvent.GetWheelDelta() < 0 ? EKeys::MouseScrollDown : EKeys::MouseScrollUp;
-			HandleKey(Key);
+			KeyPressed(Key);
 		}
 		return true;
 	}
 
-	DECLARE_MULTICAST_DELEGATE(FListenAnyKeyInputPreProcessorCanceled);
-	FListenAnyKeyInputPreProcessorCanceled OnKeyExit;
+	DECLARE_MULTICAST_DELEGATE(FListenAnyKeyInput_Exit);
+	FListenAnyKeyInput_Exit OnKeyExit;
 	
-	DECLARE_MULTICAST_DELEGATE_OneParam(FListenAnyKeyInputPreProcessorKeySelected, FKey);
-	FListenAnyKeyInputPreProcessorKeySelected OnKeyPressed;
+	DECLARE_MULTICAST_DELEGATE_OneParam(FListenAnyKeyInput_Pressed, FKey);
+	FListenAnyKeyInput_Pressed OnKeyPressed;
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FListenAnyKeyInput_Released, FKey);
+	FListenAnyKeyInput_Released OnKeyReleased;
 	
 private:
-	void HandleKey(const FKey& Key)
+	void KeyPressed(const FKey& Key)
 	{
 		// Cancel this process if it's Escape, Touch, or a gamepad key.
 		if (Key == EKeys::LeftCommand || Key == EKeys::RightCommand)
@@ -77,6 +81,11 @@ private:
 			OnKeyPressed.Broadcast(Key);
 		}
 	}
+
+	void KeyReleased(const FKey& Key)
+	{
+		OnKeyReleased.Broadcast(Key);
+	}
 };
 
 
@@ -88,10 +97,9 @@ void UListenAnyKey::NativeOnActivated()
 {
 	Super::NativeOnActivated();
 
-	bKeySelected = false;
-
 	InputProcessor = MakeShared<FListenAnyKeyInputPreProcessor>();
 	InputProcessor->OnKeyPressed.AddUObject(this, &ThisClass::HandleKeyPressed);
+	InputProcessor->OnKeyReleased.AddUObject(this, &ThisClass::HandleKeyReleased);
 	InputProcessor->OnKeyExit.AddUObject(this, &ThisClass::HandleKeyExit);
 	FSlateApplication::Get().RegisterInputPreProcessor(InputProcessor, 0);
 }
@@ -109,6 +117,11 @@ void UListenAnyKey::NativeOnDeactivated()
 void UListenAnyKey::HandleKeyPressed(FKey InKey)
 {
 	OnKeyPressed.Broadcast(InKey);
+}
+
+void UListenAnyKey::HandleKeyReleased(FKey InKey)
+{
+	OnKeyReleased.Broadcast(InKey);
 }
 
 void UListenAnyKey::HandleKeyExit()
