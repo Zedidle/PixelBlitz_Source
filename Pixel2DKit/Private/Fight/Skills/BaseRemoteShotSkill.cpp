@@ -82,6 +82,67 @@ FVector ABaseRemoteShotSkill::FindNextTargetDirection()
 	return FVector::ZeroVector;
 }
 
+bool ABaseRemoteShotSkill::OnSplit()
+{
+	// 分裂
+	if (RemSplitNum <= 0) return false;
+	
+	RemSplitNum --;
+	float TmpSplitRotation = (FMath::RandBool() ? 1 : -1 ) * FMath::FRandRange(25.0f, 35.0f);
+
+	UClass* SelfClass = GetClass();
+	if (ProjectileComp)
+	{
+		FVector CurVelocity = ProjectileComp->Velocity;
+		FVector NewDir = FRotator(0, TmpSplitRotation, 0).RotateVector(CurVelocity).GetSafeNormal();
+		FVector NewLocation = GetActorLocation() + NewDir * 20;
+		FVector NewScale = GetActorScale3D() * 0.9;
+
+		UDebugFuncLab::ScreenMessage(*NewScale.ToString());
+			
+		FTransform NewTrans(FRotator(0,0,0), NewLocation , NewScale);
+			
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Owner;
+		SpawnParams.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
+			
+		if (ABaseRemoteShotSkill* NewSkill = GetWorld()->SpawnActorDeferred<ABaseRemoteShotSkill>(SelfClass, NewTrans, Owner, nullptr,
+			ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
+		{
+			FRemoteShotData Data;
+			Data.InitSpeed = InitSpeed * 0.9;
+			Data.MaxSpeed = MaxSpeed * 0.9;
+			Data.NewTargetLifeSpan = NewTargetLifeSpan * 0.9;
+			Data.MaxTraceDistance = MaxTraceDistance * 0.9;
+			Data.Direction = NewDir;
+				
+			NewSkill->SetTraceData(Data);
+			NewSkill->SetDamageData(Damage * 0.6, Knockback * 0.8, RemHitNum, DamageDecreasePercentPerHit, RemSplitNum, RemSplitNum);
+
+			UGameplayStatics::FinishSpawningActor(NewSkill, NewTrans);
+			NewSkill->StartTrace();
+		}
+
+		ProjectileComp->Velocity =  FRotator(0, -TmpSplitRotation, 0).RotateVector(ProjectileComp->Velocity);
+	}
+	return true;
+}
+
+bool ABaseRemoteShotSkill::OnSpring()
+{
+	// 弹射
+	if (RemSpringNum <= 0) return false;
+	
+	RemSpringNum --;
+	if (ProjectileComp)
+	{
+		FVector NewDir = FindNextTargetDirection();
+		ProjectileComp->Velocity = ProjectileComp->Velocity.Size() * NewDir;
+	}
+
+	return true;
+}
+
 
 void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
 {
@@ -120,61 +181,10 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
 	}
 	else
 	{
-		// 弹射
-		if (RemSpringNum > 0)
+		if (OnSplit() | OnSpring())
 		{
-			RemSpringNum --;
-			if (ProjectileComp)
-			{
-				FVector NewDir = FindNextTargetDirection();
-				ProjectileComp->Velocity = ProjectileComp->Velocity.Size() * NewDir;
-				AddActorWorldOffset(NewDir * 20);
-			}
+			AddActorWorldOffset(ProjectileComp->Velocity.GetSafeNormal() * 20);
 			ReinitializeNiagara();
-		}
-
-		// 分裂
-		if (RemSplitNum > 0)
-		{
-			RemSplitNum --;
-			float TmpSplitRotation = (FMath::RandBool() ? 1 : -1 ) * FMath::FRandRange(25.0f, 35.0f);
-
-			UClass* SelfClass = GetClass();
-			if (ProjectileComp)
-			{
-				FVector CurVelocity = ProjectileComp->Velocity;
-				FVector NewDir = FRotator(0, TmpSplitRotation, 0).RotateVector(CurVelocity).GetSafeNormal();
-				FVector NewLocation = GetActorLocation() + NewDir * 20;
-				FVector NewScale = GetActorScale3D() * 0.9;
-
-				UDebugFuncLab::ScreenMessage(*NewScale.ToString());
-				
-				FTransform NewTrans(FRotator(0,0,0), NewLocation , NewScale);
-				
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.Owner = Owner;
-				SpawnParams.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
-				
-				if (ABaseRemoteShotSkill* NewSkill = GetWorld()->SpawnActorDeferred<ABaseRemoteShotSkill>(SelfClass, NewTrans, Owner, nullptr,
-					ESpawnActorCollisionHandlingMethod::AlwaysSpawn))
-				{
-					FRemoteShotData Data;
-					Data.InitSpeed = InitSpeed * 0.9;
-					Data.MaxSpeed = MaxSpeed * 0.9;
-					Data.NewTargetLifeSpan = NewTargetLifeSpan * 0.9;
-					Data.MaxTraceDistance = MaxTraceDistance * 0.9;
-					Data.Direction = NewDir;
-					
-					NewSkill->SetTraceData(Data);
-					NewSkill->SetDamageData(Damage * 0.6, Knockback * 0.8, RemHitNum, DamageDecreasePercentPerHit, RemSplitNum, RemSplitNum);
-
-					UGameplayStatics::FinishSpawningActor(NewSkill, NewTrans);
-					NewSkill->StartTrace();
-				}
-
-				ProjectileComp->Velocity =  FRotator(0, -TmpSplitRotation, 0).RotateVector(ProjectileComp->Velocity);
-				AddActorWorldOffset(ProjectileComp->Velocity.GetSafeNormal() * 20);
-			}
 		}
 	}
 	

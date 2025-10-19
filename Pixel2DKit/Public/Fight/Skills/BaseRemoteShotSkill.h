@@ -108,17 +108,18 @@ public:
 
 
 
-
-
-
 	
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector FindNextTargetDirection();
-
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnHitTarget(AActor* HitTarget);
 
+
+	bool OnSplit();
+	bool OnSpring();
+
+	
 	
 };
