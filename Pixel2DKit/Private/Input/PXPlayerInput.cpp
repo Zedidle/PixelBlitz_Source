@@ -35,6 +35,12 @@ bool UPXPlayerInput::InputKey(const FInputKeyEventArgs& Params)
 	return bResult;
 }
 
+void UPXPlayerInput::EvaluateInputDelegates(const TArray<UInputComponent*>& InputComponentStack, const float DeltaTime,
+	const bool bGamePaused, const TArray<TPair<FKey, FKeyState*>>& KeysWithEvents)
+{
+	Super::EvaluateInputDelegates(InputComponentStack, DeltaTime, bGamePaused, KeysWithEvents);
+}
+
 void UPXPlayerInput::ProcessInputEventForLatencyMarker(const FInputKeyEventArgs& Params)
 {
 	if (!bShouldTriggerLatencyFlash)

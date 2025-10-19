@@ -20,7 +20,6 @@ void UPressAnyKey::NativeOnDeactivated()
 
 void UPressAnyKey::HandleKeyPressed_Implementation(FKey InKey)
 {
-	RemoveFromParent();
 
 }
 

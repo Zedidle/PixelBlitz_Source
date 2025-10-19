@@ -20,6 +20,9 @@ protected:
 	virtual bool InputKey(const FInputKeyEventArgs& Params) override;
 	//~ End of UEnhancedPlayerInput interface
 
+	virtual void EvaluateInputDelegates(const TArray<UInputComponent*>& InputComponentStack, const float DeltaTime, const bool bGamePaused, const TArray<TPair<FKey, FKeyState*>>& KeysWithEvents) override;
+
+	
 	void ProcessInputEventForLatencyMarker(const FInputKeyEventArgs& Params);
 	void BindToLatencyMarkerSettingChange();
 	void UnbindLatencyMarkerSettingChangeListener();
