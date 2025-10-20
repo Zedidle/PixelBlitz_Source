@@ -480,6 +480,11 @@ void ABaseEnemy::BuffUpdate_Speed_Implementation()
 
 	MovementComponent->MaxWalkSpeed = EnemyData.MoveSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
 	MovementComponent->MaxAcceleration = EnemyData.MoveAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
+
+	if (MovementComponent->MaxWalkSpeed < EnemyData.MoveSpeed)
+	{
+		CustomTimeDilation = MovementComponent->MaxWalkSpeed / EnemyData.MoveSpeed;
+	}
 }
 
 void ABaseEnemy::BuffUpdate_Sight_Implementation()

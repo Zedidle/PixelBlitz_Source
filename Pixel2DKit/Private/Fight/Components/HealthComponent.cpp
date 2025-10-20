@@ -90,7 +90,7 @@ void UHealthComponent::FlashForDuration(FLinearColor FlashColor, int FlashTimes,
 		}, FlashRate, -1, FlashTimes * 2);
 }
 
-FVector UHealthComponent::GetRepel(FVector IncomeRepel, const AActor* Instigator) const
+FVector UHealthComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigator) const
 {
 	if (!IsValid(Instigator)) return IncomeRepel;
 	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel;
@@ -363,7 +363,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 
 	if (bInvulnerable) return;
 
-	Repel = (1 - InRockPercent) * GetRepel(Repel, Maker) * KnockBackMultiplier;
+	Repel = (1 - InRockPercent) * CalRepel(Repel, Maker) * KnockBackMultiplier;
 	
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())
 	{
@@ -413,7 +413,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 			ENCPoolMethod::None,
 			true
 		);
-		NS_HitSmoke->SetVariableFloat(FName("Power"), Repel.Size());
+		NS_HitSmoke->SetVariableFloat(FName("Power"), Repel.Size() / 1.5);
 	}
 	else
 	{

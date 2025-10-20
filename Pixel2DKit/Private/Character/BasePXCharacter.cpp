@@ -213,7 +213,6 @@ void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 	}
 	else
 	{
-		// VelocityDotMoveForwardVector
 		float d2 = FVector::DotProduct(Velocity.GetSafeNormal2D(), GetRightVectorWithBlendYaw());
 		if (d != 0)
 		{
@@ -293,7 +292,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	CurDot_VelocityToCamera = FMath::Lerp(CurDot_VelocityToCamera, FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal()), DeltaSeconds);
 
 	// 镜头偏转
-	float pitch = FMath::Clamp(CurDot_VelocityToCamera,-0.3, 0.5) * -15 + CurBlendPitch;
+	float pitch = FMath::Clamp(CurDot_VelocityToCamera,-0.2, 0.45) * -15 + CurBlendPitch;
 	
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
@@ -1538,6 +1537,11 @@ void ABasePXCharacter::BuffUpdate_Speed_Implementation()
 
 	MovementComponent->MaxWalkSpeed = MaxWalkSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
 	MovementComponent->MaxAcceleration = MaxAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
+
+	if (MovementComponent->MaxWalkSpeed < MaxWalkSpeed)
+	{
+		CustomTimeDilation = MovementComponent->MaxWalkSpeed / MaxWalkSpeed;
+	}
 }
 
 void ABasePXCharacter::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)

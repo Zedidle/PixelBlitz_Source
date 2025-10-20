@@ -71,7 +71,7 @@ public:
 	void OnHurtInvulnerable();
 	
 	
-	FVector GetRepel(FVector IncomeRepel, const AActor* Instigator) const;
+	FVector CalRepel(FVector& IncomeRepel, const AActor* Instigator) const;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Health")
 	FOnHPChangedSignature OnHPChanged;
