@@ -290,10 +290,11 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	
-	float Dot_VelocityToCamera = FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal());
+	CurDot_VelocityToCamera = FMath::Lerp(CurDot_VelocityToCamera, FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal()), DeltaSeconds);
 	
 	// 镜头偏转
-	float pitch = FMath::Clamp(Dot_VelocityToCamera,-0.3, 0.5) * -15 + CurBlendPitch;
+	float pitch = DeltaSeconds * FMath::Clamp(CurDot_VelocityToCamera,-0.3, 0.5) * -15 + CurBlendPitch;
+	
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
 
@@ -302,7 +303,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	if (Velocity.Size() > 0)
 	{
 		// 朝向 / 反向 摄像机的偏移削减比例
-		float DeOffsetPercent = 0.3 * FMath::Abs(Dot_VelocityToCamera);
+		float DeOffsetPercent = 0.3 * FMath::Abs(CurDot_VelocityToCamera);
 		Velocity *= 1 - DeOffsetPercent;
 
 		switch (SettingsShared->GetCameraFollowMode())
@@ -1331,45 +1332,20 @@ void ABasePXCharacter::OnAttackHiting_Implementation()
 
 void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
-	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+	bRepulsion = true;
+	OutOfControl(Power/1000);
 
-	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
-	
-	if (ResourceDataAsset && ResourceDataAsset->IsEditorOnly())
+	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
-		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			ResourceDataAsset->NS_HitSmoke.LoadSynchronous(),
-			GetRootComponent(),
-			FName(""),
-			FVector::ZeroVector,
-			FRotator::ZeroRotator,
-			EAttachLocation::Type::KeepRelativeOffset,
-			true,
-			true,
-			ENCPoolMethod::None,
-			true
-		);
-		NiagaraComponent->SetVariableFloat(FName("Power"), Power);
-		bRepulsion = true;
-		OutOfControl(Power/1000);
+		if (!WeakThis.IsValid()) return;
 
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-		{
-			if (WeakThis.IsValid())
-			{
-				ABasePXCharacter* PxCharacter = WeakThis.Get();
-				PxCharacter->bRepulsion = false;
-				UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_DE-STUN", "解除硬直"),
-				PxCharacter->GetActorLocation(),
-				FLinearColor(0.68, 0.35, 1.0f, 1.0f),
-					FVector2D(0.8,0.8)
-				);
-			}
-			
-		}, Power/1000);
-	}
+		WeakThis->bRepulsion = false;
+		UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_DE-STUN", "解除硬直"),
+			WeakThis->GetActorLocation(),
+		FLinearColor(0.68, 0.35, 1.0f, 1.0f),
+			FVector2D(0.8,0.8)
+		);
+	}, Power/1000);
 }
 
 void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()

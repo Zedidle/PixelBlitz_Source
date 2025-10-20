@@ -385,6 +385,8 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CameraShakeDataAsset)
 	UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+	const UPXResourceDataAsset* ResourceDataAsset = CustomSettings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
 	
 	if (!GetOwner()->Implements<UFight_Interface>()) return;
 
@@ -408,6 +410,19 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 				ownerLocation, 0, 500, 0.2, true);
 		}
 		IFight_Interface::Execute_PowerRepulsion(GetOwner(), Repel.Size());
+
+		UNiagaraComponent* NS_HitSmoke = UNiagaraFunctionLibrary::SpawnSystemAttached(ResourceDataAsset->NS_HitSmoke.LoadSynchronous(),
+			OwnerPawn->GetRootComponent(), 
+			FName(""),
+			FVector::ZeroVector,
+			FRotator::ZeroRotator,
+			EAttachLocation::Type::KeepRelativeOffset,
+			true,
+			true,
+			ENCPoolMethod::None,
+			true
+		);
+		NS_HitSmoke->SetVariableFloat(FName("Power"), Repel.Size());
 	}
 	else
 	{

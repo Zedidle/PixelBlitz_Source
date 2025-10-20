@@ -611,6 +611,20 @@ int ABaseEnemy::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 	return 0;
 }
 
+void ABaseEnemy::PowerRepulsion_Implementation(float Power)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		UTimerSubsystemFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+
+			WeakThis->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		}, Power / 6000);
+	}
+}
+
 int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 {
 	if (GetIsDefending())

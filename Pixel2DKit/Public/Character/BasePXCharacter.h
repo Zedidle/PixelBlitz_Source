@@ -314,6 +314,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendPitch = -20.0f;
 
+	UPROPERTY(BlueprintReadOnly, Category = View)
+	float CurDot_VelocityToCamera = 0;
+	
+	
 	// 玩家视角水平转移角度
 	UPROPERTY(BlueprintReadWrite, Category = View)
 	float DeltaBlendYaw = 0.0f;
