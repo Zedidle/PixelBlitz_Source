@@ -291,9 +291,11 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	FVector Velocity = GetCharacterMovement()->Velocity;
 	
 	CurDot_VelocityToCamera = FMath::Lerp(CurDot_VelocityToCamera, FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal()), DeltaSeconds);
+
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("CurDot_VelocityToCamera: %f"), CurDot_VelocityToCamera));
 	
 	// 镜头偏转
-	float pitch = DeltaSeconds * FMath::Clamp(CurDot_VelocityToCamera,-0.3, 0.5) * -15 + CurBlendPitch;
+	float pitch = FMath::Clamp(CurDot_VelocityToCamera,-0.3, 0.5) * -15 + CurBlendPitch;
 	
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
