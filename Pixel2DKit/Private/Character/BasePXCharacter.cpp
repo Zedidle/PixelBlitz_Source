@@ -602,7 +602,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	}
 
 	// 舞空术成就
-	if (UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
+	if (JumpStartTime > 0 && UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
 	{
 		if (UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>())
 		{

@@ -125,7 +125,7 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	bool PreFrameFalling = false;
 	bool PreSpriteLeft = false;
 	FVector CameraOffsetForBulletTime;
-	float JumpStartTime;
+	float JumpStartTime = -1;
 
 
 	bool bViewYawChangingByPlayerControl = false;
@@ -423,7 +423,7 @@ public:
 	void AddViewPitch(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
-	FVector2D ViewPitchRange = FVector2D(-45, 15);
+	FVector2D ViewPitchRange = FVector2D(-50, 20);
 	
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Game)
