@@ -39,6 +39,10 @@ class UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	bool bOwnerIsPlayer;
+
+
+	
 public:
 
 	// 因为掉落地面死亡

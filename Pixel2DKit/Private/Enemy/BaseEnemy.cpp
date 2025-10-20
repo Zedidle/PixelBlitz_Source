@@ -400,10 +400,10 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 	}
 	else
 	{
-		if (GetCharacterMovement())
-		{
-			GetCharacterMovement()->StopMovementImmediately();
-		}
+		// if (GetCharacterMovement())
+		// {
+		// 	GetCharacterMovement()->StopMovementImmediately();
+		// }
 		if (DataAsset)
 		{
 			if (USoundCue* DieSound = DataAsset->DieSound.LoadSynchronous())
@@ -627,7 +627,7 @@ void ABaseEnemy::OnDefendingHitEffect_Implementation()
 
 void ABaseEnemy::OnAnimDieEnd_Implementation()
 {
-
+	GetCharacterMovement()->DestroyComponent();
 }
 
 void ABaseEnemy::OnRemoteAttackEffect_Implementation()

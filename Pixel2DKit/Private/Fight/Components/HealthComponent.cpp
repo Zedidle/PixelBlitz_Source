@@ -20,6 +20,7 @@
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXForceFeedbackEffectDataAsset.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
@@ -208,6 +209,9 @@ void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
+	
 	OnHPChanged.AddDynamic(this, &UHealthComponent::Event_OnHPChanged);
 }
 
@@ -314,7 +318,7 @@ void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AAct
 	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
 	int ChangedValue = FMath::Abs(preHealth - CurrentHealth);
 	if (ChangedValue <= 0) return;
-
+	
 	UPXSettingsShared* SettingsShared = UPXGameplayStatics::GetSettingsShared(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsShared);
 	
@@ -379,18 +383,24 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
 	UPXCameraResourceDataAsset* CameraShakeDataAsset = CustomSettings->CameraResourceDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CameraShakeDataAsset)
-
+	UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+	
 	if (!GetOwner()->Implements<UFight_Interface>()) return;
-	bool bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
-	FVector ownerLocation = GetOwner()->GetActorLocation();
+
+	APawn* OwnerPawn = GetOwner<APawn>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwnerPawn)
+	
+	FVector ownerLocation = OwnerPawn->GetActorLocation();
 	// 如果受力大于300则属于强效击退
 	const UWorld* World = GetWorld();
 	if (World && Repel.Size() > MinPowerRepelForceValue)
 	{
-		if (bOwnerIsPlayer)
+		if (bOwnerIsPlayer && OwnerPawn->GetController() && OwnerPawn->GetController()->IsLocalController())
 		{
 			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake_Powerful,
 				ownerLocation, 0, 500, 0, true);
+			UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->HugeKnockback.LoadSynchronous(), GetOwner()->GetRootComponent());
 		}
 		else
 		{
@@ -401,10 +411,11 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	}
 	else
 	{
-		if (bOwnerIsPlayer)
+		if (bOwnerIsPlayer && OwnerPawn->GetController() && OwnerPawn->GetController()->IsLocalController())
 		{
 			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake,
 				ownerLocation, 0, 500, 0, true);
+			UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->Knockback.LoadSynchronous(), GetOwner()->GetRootComponent());
 		}
 		else
 		{

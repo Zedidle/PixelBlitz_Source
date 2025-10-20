@@ -42,6 +42,7 @@
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
+#include "Settings/Config/PXForceFeedbackEffectDataAsset.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Settings/Config/PXWidgetsDataAsset.h"
 #include "Sound/SoundCue.h"
@@ -906,7 +907,39 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+
+	int ChangedValue = OldValue - NewValue;
+	float ChangedHPPercent = static_cast<float>(ChangedValue) / HealthComponent->GetMaxHP();
 	
+	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
+	UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+
+
+	if (NewValue < OldValue && (Execute_GetOwnCamp(this).HasTag(TAG("Player")) || GetController()->IsLocalController()))
+	{
+		if (NewValue <= 0)
+		{
+			UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->PlayerDie.LoadSynchronous(), Owner->GetRootComponent());
+		}
+		else
+		{
+			if (ChangedHPPercent <= 0.1)
+			{
+				UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->LittleDamage.LoadSynchronous(), Owner->GetRootComponent());
+			}
+			else if (ChangedHPPercent <= 0.25)
+			{
+				UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->NormalDamage.LoadSynchronous(), Owner->GetRootComponent());
+			}
+			else
+			{
+				UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->HugeDamage.LoadSynchronous(), Owner->GetRootComponent());
+			}
+		}
+	}
+
 	if (NewValue > 0)
 	{
 		// 生命值恢复或降低
@@ -917,9 +950,6 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		}
 		if (NewValue < OldValue)
 		{
-			int ChangedValue = OldValue - NewValue;
-			float ChangedHPPercent = static_cast<float>(ChangedValue) / HealthComponent->GetMaxHP();
-
 			if (ChangedHPPercent >= 0.02)
 			{
 				USoundFuncLib::PlaySoundAtLocation(DataAsset->HurtSound.LoadSynchronous(), GetActorLocation());
@@ -934,6 +964,9 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				OutOfControl(UCommonFuncLib::DealDeltaTime(ChangedHPPercent / 20));
 				SetHurt(true);
 			}
+
+
+			
 		}
 	}
 	else
@@ -1303,10 +1336,10 @@ void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
 	
-	if (ResourceDataAsset && ResourceDataAsset->NS_HitSmoke)
+	if (ResourceDataAsset && ResourceDataAsset->IsEditorOnly())
 	{
 		UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-			ResourceDataAsset->NS_SpeedUP.LoadSynchronous(),
+			ResourceDataAsset->NS_HitSmoke.LoadSynchronous(),
 			GetRootComponent(),
 			FName(""),
 			FVector::ZeroVector,
@@ -1391,6 +1424,16 @@ void ABasePXCharacter::OnAttackHolding_Implementation()
 {
 	IFight_Interface::OnAttackHolding_Implementation();
 	SetAttackHolding(true);
+	
+	if (GetController() && GetController()->IsLocalController())
+	{
+		const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
+		UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+		
+		UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->AttackHolding.LoadSynchronous(), GetOwner()->GetRootComponent());
+	}
 }
 
 void ABasePXCharacter::OnDefendingHitEffect_Implementation()
@@ -1420,6 +1463,16 @@ void ABasePXCharacter::OnAttackEffect_Implementation()
 	if (Weapon)
 	{
 		Weapon->Use();
+	}
+
+	if (GetController() && GetController()->IsLocalController())
+	{
+		const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
+		UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+		
+		UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->Attack.LoadSynchronous(), GetOwner()->GetRootComponent());
 	}
 }
 
