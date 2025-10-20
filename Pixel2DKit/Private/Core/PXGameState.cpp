@@ -199,7 +199,7 @@ FVector APXGameState::GetNewLevelInitLocation()
 	ABasePXCharacter* Character = UPXGameplayStatics::GetPlayerCharacter(World);
 	if (Character)
 	{
-		return Character->GetActorLocation() - Character->GetVectorFaceToCamera() * 240 - FVector(0,0,120);
+		return Character->GetActorLocation() - Character->GetVectorFaceToCamera().GetSafeNormal2D() * 240 - FVector(0,0,120);
 	}
 	
 	return FVector(0, 0, 0);
