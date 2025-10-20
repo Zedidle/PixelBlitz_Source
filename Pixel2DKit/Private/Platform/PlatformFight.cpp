@@ -5,8 +5,10 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/PXSettingsShared.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 void APlatformFight::Tick(float DeltaTime)
 {
@@ -65,7 +67,7 @@ void APlatformFight::Tick(float DeltaTime)
 		float CrossZ = FVector::CrossProduct(CenterToViewPoint.GetSafeNormal(), (PlayerLocation - EyeViewPoint).GetSafeNormal()).Z;
 		if (FMath::Abs(CrossZ) > ViewRotateFactor)
 		{
-			PXCharacter->AddViewYaw(CrossZ * FMath::GetMappedRangeValueClamped(FVector2D(0, 300),
+			PXCharacter->AddViewYaw(HorizontalInvert * CrossZ * FMath::GetMappedRangeValueClamped(FVector2D(0, 300),
 					FVector2D(-1.8, OutRangeB), PXCharacter->GetVelocity().Size() / 2 ));
 		}
 	}

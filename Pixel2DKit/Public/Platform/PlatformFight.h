@@ -7,7 +7,9 @@
 #include "Enemy/BaseEnemy.h"
 #include "Enemy/EnemySpawner.h"
 #include "Platform/BasePlatform.h"
+#include "Settings/PXSettingsShared.h"
 #include "UI/Platform/PlatformFightCountWidget.h"
+#include "Utilitys/PXGameplayStatics.h"
 #include "PlatformFight.generated.h"
 
 
@@ -16,6 +18,8 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 {
 	GENERATED_BODY()
 
+	float HorizontalInvert = 1;
+	
 	
 	float InRangeA = 0.0f;
 	float OutRangeB = -0.36f;
@@ -79,4 +83,12 @@ inline void APlatformFight::OnPlayerOut_Implementation()
 
 inline void APlatformFight::OnPlayerIn_Implementation()
 {
+	if (UPXGameplayStatics::IsGamepadControlling(GetWorld()))
+	{
+		HorizontalInvert = GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis_Gamepad() ? -1 : 1;
+	}
+	else
+	{
+		HorizontalInvert = GetDefault<UPXSettingsShared>()->GetViewPointSensitivityYaw_Mouse() ? -1 : 1;
+	}
 }

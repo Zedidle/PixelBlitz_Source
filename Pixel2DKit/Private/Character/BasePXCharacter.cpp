@@ -802,14 +802,15 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 FVector ABasePXCharacter::CalSkillVelocity(float DashSpeed)
 {
 	if (DashSpeed <= 0) return FVector(0);
-	
+
 	FVector Velocity = DashSpeed * GetDashDirection();
 
 	if (GetCharacterMovement())
 	{
 		FVector MovementVelocity = GetCharacterMovement()->Velocity;
-		Velocity.X += MovementVelocity.X;
-		Velocity.Y += MovementVelocity.Y;
+
+		Velocity.X = Velocity.X * DashInitSpeedPercent + MovementVelocity.X * DashNewDirSpeedPercent;
+		Velocity.Y = Velocity.Y * DashInitSpeedPercent + MovementVelocity.Y * DashNewDirSpeedPercent;
 		Velocity.Z += MovementVelocity.Z * 0.1;
 	}
 

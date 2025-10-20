@@ -20,7 +20,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 {
 	UGameSettingCollection* Screen = NewObject<UGameSettingCollection>();
 	Screen->SetDevName(TEXT("MouseAndKeyboardCollection"));
-	Screen->SetDisplayName(LOCTEXT("MouseAndKeyboardCollection_Name", "控制"));
+	Screen->SetDisplayName(LOCTEXT("MouseAndKeyboardCollection_Name", "键盘鼠标"));
 	Screen->Initialize(InLocalPlayer);
 
 	const TSharedRef<FWhenCondition> WhenPlatformSupportsMouseAndKeyboard = MakeShared<FWhenCondition>(
@@ -50,7 +50,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityYaw_Mouse));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetViewPointSensitivityYaw_Mouse());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
-			Setting->SetSourceRangeAndStep(TRange<double>(0, 0.5), 0.01);
+			Setting->SetSourceRangeAndStep(TRange<double>(0.5, 5), 0.02);
 			Setting->SetMinimumLimit(0.01);
 			
 

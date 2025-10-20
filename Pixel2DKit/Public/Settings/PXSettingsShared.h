@@ -422,7 +422,7 @@ private:
 	UPROPERTY()
 	double ViewPointSensitivityPitch_Mouse = 0.1;
 	UPROPERTY()
-	double ViewPointSensitivityYaw_Mouse = 0.1;
+	double ViewPointSensitivityYaw_Mouse = 1;
 	UPROPERTY()
 	bool bInvertVerticalAxis_Mouse = false;
 	UPROPERTY()

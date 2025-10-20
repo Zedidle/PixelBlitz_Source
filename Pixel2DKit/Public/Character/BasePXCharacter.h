@@ -143,6 +143,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector VelocityRepelFactor = FVector(1.0, 1.0, 1.2);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DashInitSpeedPercent = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DashNewDirSpeedPercent = 0.2;
 	
 	FTimerHandle ScaleTimerHandle;
 	FTimerHandle AttackHitTimerHandle;

@@ -137,7 +137,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
 			Setting->SetDevName(TEXT("GamepadLookSensitivityPreset"));
 			Setting->SetDisplayName(LOCTEXT("GamepadLookSensitivityPreset_Name", "视角灵敏度"));
-			Setting->SetDescriptionRichText(LOCTEXT("GamepadLookSensitivityPreset_Description", "视角的旋转速度"));
+			Setting->SetDescriptionRichText(LOCTEXT("GamepadLookSensitivityPreset_Description", "视角的旋转速度，转太快肯能会导致眩晕。"));
 			
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadLookSensitivity));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadLookSensitivity));
