@@ -369,15 +369,6 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	{
 		MovementComponent->AddImpulse(Repel , true);
 	}
-	else if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(GetOwner()->GetRootComponent()))
-	{
-		if (PrimitiveComponent->GetCollisionEnabled() != ECollisionEnabled::QueryAndPhysics) return;
-		PrimitiveComponent->AddImpulse(Repel, FName(), true);
-	}
-	else
-	{
-		return;
-	}
 
 	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
