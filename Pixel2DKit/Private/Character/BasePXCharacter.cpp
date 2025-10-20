@@ -157,7 +157,7 @@ void ABasePXCharacter::LoadData()
 }
 
 
-void ABasePXCharacter::Tick_SaveFallingStartTime()
+void ABasePXCharacter::Tick_SaveFallingStartTime(float DeltaSeconds)
 {
 	if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
 	{
@@ -172,7 +172,7 @@ void ABasePXCharacter::Tick_SaveFallingStartTime()
 	}
 }
 
-void ABasePXCharacter::Tick_SpriteRotation()
+void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 {
 	if (!GetCharacterMovement() || GetCharacterMovement()->Velocity.Size2D() < 1.0f) return;
 
@@ -280,7 +280,7 @@ void ABasePXCharacter::Tick_SpriteRotation()
 	DeltaBlendYaw = 0;
 }
 
-void ABasePXCharacter::Tick_SpringArmMotivation()
+void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 {
 	if (!GetCharacterMovement()) return;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SpringArm)
@@ -337,20 +337,17 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 	}
 
 
-	
-	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("SettingsShared->GetCameraOffsetSpeed: %f"), SettingsShared->GetCameraOffsetSpeed()));	
-	
 	TArray<FVector> OffsetValues;
 	CameraOffsetMap.GenerateValueArray(OffsetValues);
 
 	FVector NewTargetCameraOffset;
 	if (UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset))
 	{
-		CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, SettingsShared->GetCameraOffsetSpeed());
+		CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds);
 	}
 	else
 	{
-		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), SettingsShared->GetCameraOffsetSpeed());
+		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds);
 	}
 	SpringArm->SetWorldLocation(GetActorLocation() + CurCameraOffset);
 
@@ -1233,9 +1230,9 @@ float ABasePXCharacter::GetFallingTime()
 void ABasePXCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	Tick_SaveFallingStartTime();
-	Tick_SpriteRotation();
-	Tick_SpringArmMotivation();
+	Tick_SaveFallingStartTime(DeltaSeconds);
+	Tick_SpriteRotation(DeltaSeconds);
+	Tick_SpringArmMotivation(DeltaSeconds);
 	
 	if (IsValid(GetCharacterMovement()))
 	{

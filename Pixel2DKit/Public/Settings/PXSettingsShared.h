@@ -372,7 +372,7 @@ private:
 	ECameraFollowMode CameraFollowMode = ECameraFollowMode::Preview;
 
 	UPROPERTY()
-	float CameraOffsetSpeed = 0.02;
+	float CameraOffsetSpeed = 2.0f;
 	
 #pragma endregion
 

@@ -177,9 +177,9 @@ public:
 
 
 	
-	virtual void Tick_SaveFallingStartTime();
-	virtual void Tick_SpriteRotation(); // 漂移式偏转
-	virtual void Tick_SpringArmMotivation();
+	virtual void Tick_SaveFallingStartTime(float DeltaSeconds);
+	virtual void Tick_SpriteRotation(float DeltaSeconds); // 漂移式偏转
+	virtual void Tick_SpringArmMotivation(float DeltaSeconds);
 	
 	FVector CurCameraOffset;
 	TMap<FName, FVector> CameraOffsetMap;

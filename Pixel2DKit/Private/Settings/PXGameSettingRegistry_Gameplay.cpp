@@ -225,8 +225,8 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetCameraOffsetSpeed));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetCameraOffsetSpeed());
 
-			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::SourceAsPercent100);
-			Setting->SetSourceRangeAndStep(TRange<double>(0.01, 0.1), 0.01);
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawOneDecimal);
+			Setting->SetSourceRangeAndStep(TRange<double>(1, 10), 0.1);
 			
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 	
