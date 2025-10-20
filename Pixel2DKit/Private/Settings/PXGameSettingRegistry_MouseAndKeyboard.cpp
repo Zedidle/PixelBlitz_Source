@@ -50,7 +50,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityYaw));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetViewPointSensitivityYaw());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
-			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
+			Setting->SetSourceRangeAndStep(TRange<double>(0, 0.5), 0.01);
 			Setting->SetMinimumLimit(0.01);
 			
 
@@ -68,7 +68,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityPitch));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetViewPointSensitivityPitch());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
-			Setting->SetSourceRangeAndStep(TRange<double>(0, 10), 0.01);
+			Setting->SetSourceRangeAndStep(TRange<double>(0, 0.5), 0.01);
 			Setting->SetMinimumLimit(0.01);
 			
 			Sensitivity->AddSetting(Setting);

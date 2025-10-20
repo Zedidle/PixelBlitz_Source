@@ -404,11 +404,11 @@ public:
 private:
 	/** Holds the mouse horizontal sensitivity */
 	UPROPERTY()
-	double ViewPointSensitivityPitch = 1.0;
+	double ViewPointSensitivityPitch = 0.1;
 
 	/** Holds the mouse vertical sensitivity */
 	UPROPERTY()
-	double ViewPointSensitivityYaw = 1.0;
+	double ViewPointSensitivityYaw = 0.1;
 
 
 	/** If true then the vertical look axis should be inverted */
