@@ -151,50 +151,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 			BasicSensitivity->AddSetting(Setting);
 		}
 	}
-
-	// Dead Zone
-	////////////////////////////////////////////////////////////////////////////////////
-	{
-		UGameSettingCollection* DeadZone = NewObject<UGameSettingCollection>();
-		DeadZone->SetDevName(TEXT("DeadZoneCollection"));
-		DeadZone->SetDisplayName(LOCTEXT("DeadZoneCollection_Name", "控制器死区"));
-		Screen->AddSetting(DeadZone);
-
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-			Setting->SetDevName(TEXT("MoveStickDeadZone"));
-			Setting->SetDisplayName(LOCTEXT("MoveStickDeadZone_Name", "左摇杆死区"));
-			Setting->SetDescriptionRichText(LOCTEXT("MoveStickDeadZone_Description", "增加或减小摇杆周围不会识别输入的区域范围。若将该数值设置得过低，可能导致手指离开摇杆后角色仍持续移动。"));
-
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadMoveStickDeadZone));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadMoveStickDeadZone));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetGamepadMoveStickDeadZone());
-			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-			Setting->SetMinimumLimit(0.05);
-			Setting->SetMaximumLimit(0.95);
-
-			DeadZone->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-		{
-			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
-			Setting->SetDevName(TEXT("LookStickDeadZone"));
-			Setting->SetDisplayName(LOCTEXT("LookStickDeadZone_Name", "右摇杆死区"));
-			Setting->SetDescriptionRichText(LOCTEXT("LookStickDeadZone_Description", "调整摇杆周围不被识别输入的死区范围。若将该值设置得过低，可能导致手指离开摇杆后相机视角仍继续移动。"));
-
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadLookStickDeadZone));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadLookStickDeadZone));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetGamepadLookStickDeadZone());
-			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
-			Setting->SetMinimumLimit(0.05);
-			Setting->SetMaximumLimit(0.95);
-
-			DeadZone->AddSetting(Setting);
-		}
-		//----------------------------------------------------------------------------------
-	}
-
+	
 	return Screen;
 }
 
