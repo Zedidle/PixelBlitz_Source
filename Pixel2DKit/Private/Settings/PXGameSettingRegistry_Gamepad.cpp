@@ -93,9 +93,9 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 			Setting->SetDisplayName(LOCTEXT("InvertVerticalAxis_Gamepad_Name", "反转垂直旋转"));
 			Setting->SetDescriptionRichText(LOCTEXT("InvertVerticalAxis_Gamepad_Description", "是否反转垂直方向上的视角旋转"));
 
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertVerticalAxis));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis());
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertVerticalAxis_Gamepad));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertVerticalAxis_Gamepad));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertVerticalAxis_Gamepad());
 
 			Hardware->AddSetting(Setting);
 		}
@@ -106,9 +106,9 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 			Setting->SetDisplayName(LOCTEXT("InvertHorizontalAxis_Gamepad_Name", "反转水平旋转"));
 			Setting->SetDescriptionRichText(LOCTEXT("InvertHorizontalAxis_Gamepad_Description", "是否反转水平方向上的视角旋转."));
 
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertHorizontalAxis));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertHorizontalAxis));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis());
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetInvertHorizontalAxis_Gamepad));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetInvertHorizontalAxis_Gamepad));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetInvertHorizontalAxis_Gamepad());
 
 			Hardware->AddSetting(Setting);
 		}
@@ -131,35 +131,22 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGamepadSettings(UPXLoc
 		BasicSensitivity->SetDisplayName(LOCTEXT("BasicSensitivityCollection_Name", "灵敏度"));
 		Screen->AddSetting(BasicSensitivity);
 
-		const FText EGamepadSensitivityText[] = {
-			FText::GetEmpty(),
-			LOCTEXT("EFortGamepadSensitivity_Slow", "1 (慢)"),
-			LOCTEXT("EFortGamepadSensitivity_SlowPlus", "2 (慢+)"),
-			LOCTEXT("EFortGamepadSensitivity_SlowPlusPlus", "3 (慢++)"),
-			LOCTEXT("EFortGamepadSensitivity_Normal", "4 (正常)"),
-			LOCTEXT("EFortGamepadSensitivity_NormalPlus", "5 (正常+)"),
-			LOCTEXT("EFortGamepadSensitivity_NormalPlusPlus", "6 (正常++)"),
-			LOCTEXT("EFortGamepadSensitivity_Fast", "7 (快)"),
-			LOCTEXT("EFortGamepadSensitivity_FastPlus", "8 (快+)"),
-			LOCTEXT("EFortGamepadSensitivity_FastPlusPlus", "9 (快++)"),
-			LOCTEXT("EFortGamepadSensitivity_Insane", "10 (非常快)"),
-		};
-		
+
 		//----------------------------------------------------------------------------------
 		{
-			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
-			Setting->SetDevName(TEXT("LookSensitivityPreset"));
-			Setting->SetDisplayName(LOCTEXT("LookSensitivityPreset_Name", "视角灵敏度"));
-			Setting->SetDescriptionRichText(LOCTEXT("LookSensitivityPreset_Description", "视角的旋转速度"));
+			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
+			Setting->SetDevName(TEXT("GamepadLookSensitivityPreset"));
+			Setting->SetDisplayName(LOCTEXT("GamepadLookSensitivityPreset_Name", "视角灵敏度"));
+			Setting->SetDescriptionRichText(LOCTEXT("GamepadLookSensitivityPreset_Description", "视角的旋转速度"));
 			
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadLookSensitivityPreset));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetLookSensitivityPreset));
-			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetGamepadLookSensitivityPreset());
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetGamepadLookSensitivity));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetGamepadLookSensitivity));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetGamepadLookSensitivity());
 
-			for (int32 PresetIndex = 1; PresetIndex < (int32)EPXGamepadSensitivity::MAX; PresetIndex++)
-			{
-				Setting->AddEnumOption(static_cast<EPXGamepadSensitivity>(PresetIndex), EGamepadSensitivityText[PresetIndex]);
-			}
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
+			Setting->SetSourceRangeAndStep(TRange<double>(0.1, 5), 0.01);
+			
+			Setting->SetMinimumLimit(0.1);
 			
 			BasicSensitivity->AddSetting(Setting);
 		}

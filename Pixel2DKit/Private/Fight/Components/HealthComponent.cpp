@@ -402,7 +402,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 		{
 			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake_Powerful,
 				ownerLocation, 0, 500, 0, true);
-			UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->HugeKnockback.LoadSynchronous(), GetOwner()->GetRootComponent());
+			UPXGameplayStatics::SpawnForceFeedbackAttached(OwnerPawn, ForceFeedbackEffectDataAsset->HugeKnockback.LoadSynchronous(), GetOwner()->GetRootComponent());
 		}
 		else
 		{
@@ -430,7 +430,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 		{
 			UGameplayStatics::PlayWorldCameraShake(World, CameraShakeDataAsset->PlayerHitedShake,
 				ownerLocation, 0, 500, 0, true);
-			UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->Knockback.LoadSynchronous(), GetOwner()->GetRootComponent());
+			UPXGameplayStatics::SpawnForceFeedbackAttached(OwnerPawn, ForceFeedbackEffectDataAsset->Knockback.LoadSynchronous(), GetOwner()->GetRootComponent());
 		}
 		else
 		{

@@ -12,6 +12,7 @@
 #include "SubtitleDisplaySubsystem.h"
 #include "EnhancedInputSubsystems.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
+#include "Utilitys/DebugFuncLab.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PXSettingsShared)
 
@@ -123,6 +124,14 @@ void UPXSettingsShared::SetColorBlindStrength(int32 InColorBlindStrength)
 		FSlateApplication::Get().GetRenderer()->SetColorVisionDeficiencyType(
 			(EColorVisionDeficiency)(int32)ColorBlindMode, (int32)ColorBlindStrength, true, false);
 	}
+}
+
+void UPXSettingsShared::SetForceFeedbackEnabled(const bool NewValue)
+{
+	
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UPXSettingsShared::SetForceFeedbackEnabled: %i"), NewValue));
+	
+	ChangeValueAndDirty(bForceFeedbackEnabled, NewValue);
 }
 
 int32 UPXSettingsShared::GetColorBlindStrength() const
@@ -272,6 +281,11 @@ void UPXSettingsShared::ResetToDefaultCulture()
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void UPXSettingsShared::SetInvertVerticalAxis_Gamepad(bool NewValue)
+{
+	ChangeValueAndDirty(bInvertVerticalAxis_Gamepad, NewValue); ApplyInputSensitivity(); 
+}
 
 void UPXSettingsShared::ApplyInputSensitivity()
 {

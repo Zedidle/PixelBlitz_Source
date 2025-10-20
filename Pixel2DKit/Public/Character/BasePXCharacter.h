@@ -127,9 +127,6 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	FVector CameraOffsetForBulletTime;
 	float JumpStartTime = -1;
 
-
-	bool bViewYawChangingByPlayerControl = false;
-
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UBasePlayerStatusWidget* PlayerStatusWidget;
 	
@@ -418,7 +415,7 @@ public:
 	
 	void AddViewYaw(const FInputActionValue& Value);
 	UFUNCTION(BlueprintCallable, Category = View)
-	void AddViewYaw(float V, bool bPlayerControl);
+	void AddViewYaw(float AxisValue);
 	UFUNCTION(BlueprintCallable, Category = View)
 	void AddViewPitch(const FInputActionValue& Value);
 

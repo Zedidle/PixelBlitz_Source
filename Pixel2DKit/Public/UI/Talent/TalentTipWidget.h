@@ -32,6 +32,9 @@ public:
 	FTalent TalentData;
 
 	UFUNCTION(BlueprintCallable, Category = "TalentTipWidget")
-	void SetTalentData(FTalent& Data);
+	void SetTalentData(const FTalent& Data);
+
+	UFUNCTION(BlueprintCallable, Category = "TalentTipWidget")
+	void UpdateData();
 	
 };

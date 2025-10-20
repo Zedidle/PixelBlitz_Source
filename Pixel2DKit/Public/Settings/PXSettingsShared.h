@@ -42,24 +42,24 @@ enum class EPXAllowBackgroundAudioSetting : uint8
 	Num UMETA(Hidden),
 };
 
-UENUM(BlueprintType)
-enum class EPXGamepadSensitivity : uint8
-{
-	Invalid = 0		UMETA(Hidden),
-
-	Slow			UMETA(DisplayName = "01 - Slow"),
-	SlowPlus		UMETA(DisplayName = "02 - Slow+"),
-	SlowPlusPlus	UMETA(DisplayName = "03 - Slow++"),
-	Normal			UMETA(DisplayName = "04 - Normal"),
-	NormalPlus		UMETA(DisplayName = "05 - Normal+"),
-	NormalPlusPlus	UMETA(DisplayName = "06 - Normal++"),
-	Fast			UMETA(DisplayName = "07 - Fast"),
-	FastPlus		UMETA(DisplayName = "08 - Fast+"),
-	FastPlusPlus	UMETA(DisplayName = "09 - Fast++"),
-	Insane			UMETA(DisplayName = "10 - Insane"),
-
-	MAX				UMETA(Hidden),
-};
+// UENUM(BlueprintType)
+// enum class EPXGamepadSensitivity : uint8
+// {
+// 	Invalid = 0		UMETA(Hidden),
+//
+// 	Slow			UMETA(DisplayName = "01 - Slow"),
+// 	SlowPlus		UMETA(DisplayName = "02 - Slow+"),
+// 	SlowPlusPlus	UMETA(DisplayName = "03 - Slow++"),
+// 	Normal			UMETA(DisplayName = "04 - Normal"),
+// 	NormalPlus		UMETA(DisplayName = "05 - Normal+"),
+// 	NormalPlusPlus	UMETA(DisplayName = "06 - Normal++"),
+// 	Fast			UMETA(DisplayName = "07 - Fast"),
+// 	FastPlus		UMETA(DisplayName = "08 - Fast+"),
+// 	FastPlusPlus	UMETA(DisplayName = "09 - Fast++"),
+// 	Insane			UMETA(DisplayName = "10 - Insane"),
+//
+// 	MAX				UMETA(Hidden),
+// };
 
 class UPXLocalPlayer;
 
@@ -128,7 +128,8 @@ public:
 	bool GetForceFeedbackEnabled() const { return bForceFeedbackEnabled; }
 
 	UFUNCTION()
-	void SetForceFeedbackEnabled(const bool NewValue) { ChangeValueAndDirty(bForceFeedbackEnabled, NewValue); }
+	void SetForceFeedbackEnabled(const bool NewValue);
+
 	
 private:
 	/** Is force feedback enabled when a controller is being used? */
@@ -382,63 +383,68 @@ private:
 	// Gamepad Sensitivity
 public:
 	UFUNCTION()
-	double GetViewPointSensitivityPitch() const { return ViewPointSensitivityPitch; }
+	double GetViewPointSensitivityPitch_Mouse() const { return ViewPointSensitivityPitch_Mouse; }
 	UFUNCTION()
-	void SetViewPointSensitivityPitch(double NewValue) { ChangeValueAndDirty(ViewPointSensitivityPitch, NewValue); ApplyInputSensitivity(); }
+	void SetViewPointSensitivityPitch_Mouse(double NewValue) { ChangeValueAndDirty(ViewPointSensitivityPitch_Mouse, NewValue); ApplyInputSensitivity(); }
 
 	UFUNCTION()
-	double GetViewPointSensitivityYaw() const { return ViewPointSensitivityYaw; }
+	double GetViewPointSensitivityYaw_Mouse() const { return ViewPointSensitivityYaw_Mouse; }
 	UFUNCTION()
-	void SetViewPointSensitivityYaw(double NewValue) { ChangeValueAndDirty(ViewPointSensitivityYaw, NewValue); ApplyInputSensitivity(); }
+	void SetViewPointSensitivityYaw_Mouse(double NewValue) { ChangeValueAndDirty(ViewPointSensitivityYaw_Mouse, NewValue); ApplyInputSensitivity(); }
 	
 	UFUNCTION()
-	bool GetInvertVerticalAxis() const { return bInvertVerticalAxis; }
+	bool GetInvertVerticalAxis_Mouse() const { return bInvertVerticalAxis_Mouse; }
 	UFUNCTION()
-	void SetInvertVerticalAxis(bool NewValue) { ChangeValueAndDirty(bInvertVerticalAxis, NewValue); ApplyInputSensitivity(); }
+	void SetInvertVerticalAxis_Mouse(bool NewValue) { ChangeValueAndDirty(bInvertVerticalAxis_Mouse, NewValue); ApplyInputSensitivity(); }
 
 	UFUNCTION()
-	bool GetInvertHorizontalAxis() const { return bInvertHorizontalAxis; }
+	bool GetInvertHorizontalAxis_Mouse() const { return bInvertHorizontalAxis_Mouse; }
 	UFUNCTION()
-	void SetInvertHorizontalAxis(bool NewValue) { ChangeValueAndDirty(bInvertHorizontalAxis, NewValue); ApplyInputSensitivity(); }
+	void SetInvertHorizontalAxis_Mouse(bool NewValue) { ChangeValueAndDirty(bInvertHorizontalAxis_Mouse, NewValue); ApplyInputSensitivity(); }
+
+
+	
+	UFUNCTION()
+	bool GetInvertVerticalAxis_Gamepad() const { return bInvertVerticalAxis_Gamepad; }
+	UFUNCTION()
+	void SetInvertVerticalAxis_Gamepad(bool NewValue);
+
+	UFUNCTION()
+	bool GetInvertHorizontalAxis_Gamepad() const { return bInvertHorizontalAxis_Gamepad; }
+	UFUNCTION()
+	void SetInvertHorizontalAxis_Gamepad(bool NewValue) { ChangeValueAndDirty(bInvertHorizontalAxis_Gamepad, NewValue); ApplyInputSensitivity(); }
+	
+
 	
 private:
-	/** Holds the mouse horizontal sensitivity */
-	UPROPERTY()
-	double ViewPointSensitivityPitch = 0.1;
 
-	/** Holds the mouse vertical sensitivity */
+	// Mouse
 	UPROPERTY()
-	double ViewPointSensitivityYaw = 0.1;
-
-
-	/** If true then the vertical look axis should be inverted */
+	double ViewPointSensitivityPitch_Mouse = 0.1;
 	UPROPERTY()
-	bool bInvertVerticalAxis = false;
-
-	/** If true then the horizontal look axis should be inverted */
+	double ViewPointSensitivityYaw_Mouse = 0.1;
 	UPROPERTY()
-	bool bInvertHorizontalAxis = false;
+	bool bInvertVerticalAxis_Mouse = false;
+	UPROPERTY()
+	bool bInvertHorizontalAxis_Mouse = false;
+
 	
-	////////////////////////////////////////////////////////
-	// Gamepad Sensitivity
+	// Gamepad
+	UPROPERTY()
+	bool bInvertVerticalAxis_Gamepad = false;
+	UPROPERTY()
+	bool bInvertHorizontalAxis_Gamepad = false;
+	UPROPERTY()
+	float GamepadLookSensitivity = 1;
+	
 public:
 	UFUNCTION()
-	EPXGamepadSensitivity GetGamepadLookSensitivityPreset() const { return GamepadLookSensitivityPreset; }
+	float GetGamepadLookSensitivity() const { return GamepadLookSensitivity; }
 	UFUNCTION()
-	void SetLookSensitivityPreset(EPXGamepadSensitivity NewValue) { ChangeValueAndDirty(GamepadLookSensitivityPreset, NewValue); ApplyInputSensitivity(); }
-
-	UFUNCTION()
-	EPXGamepadSensitivity GetGamepadTargetingSensitivityPreset() const { return GamepadTargetingSensitivityPreset; }
-	UFUNCTION()
-	void SetGamepadTargetingSensitivityPreset(EPXGamepadSensitivity NewValue) { ChangeValueAndDirty(GamepadTargetingSensitivityPreset, NewValue); ApplyInputSensitivity(); }
-
-	void ApplyInputSensitivity();
+	void SetGamepadLookSensitivity(float NewValue) { ChangeValueAndDirty(GamepadLookSensitivity, NewValue); ApplyInputSensitivity(); }
 	
-private:
-	UPROPERTY()
-	EPXGamepadSensitivity GamepadLookSensitivityPreset = EPXGamepadSensitivity::Normal;
-	UPROPERTY()
-	EPXGamepadSensitivity GamepadTargetingSensitivityPreset = EPXGamepadSensitivity::Normal;
+	void ApplyInputSensitivity();
+
 	
 	////////////////////////////////////////////////////////
 	/// Dirty and Change Reporting

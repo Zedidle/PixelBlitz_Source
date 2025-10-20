@@ -923,21 +923,21 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 	{
 		if (NewValue <= 0)
 		{
-			UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->PlayerDie.LoadSynchronous(), Owner->GetRootComponent());
+			UPXGameplayStatics::SpawnForceFeedbackAttached(this, ForceFeedbackEffectDataAsset->PlayerDie.LoadSynchronous(), Owner->GetRootComponent());
 		}
 		else
 		{
 			if (ChangedHPPercent <= 0.1)
 			{
-				UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->LittleDamage.LoadSynchronous(), Owner->GetRootComponent());
+				UPXGameplayStatics::SpawnForceFeedbackAttached(this, ForceFeedbackEffectDataAsset->LittleDamage.LoadSynchronous(), Owner->GetRootComponent());
 			}
 			else if (ChangedHPPercent <= 0.25)
 			{
-				UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->NormalDamage.LoadSynchronous(), Owner->GetRootComponent());
+				UPXGameplayStatics::SpawnForceFeedbackAttached(this, ForceFeedbackEffectDataAsset->NormalDamage.LoadSynchronous(), Owner->GetRootComponent());
 			}
 			else
 			{
-				UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->HugeDamage.LoadSynchronous(), Owner->GetRootComponent());
+				UPXGameplayStatics::SpawnForceFeedbackAttached(this, ForceFeedbackEffectDataAsset->HugeDamage.LoadSynchronous(), Owner->GetRootComponent());
 			}
 		}
 	}
@@ -1144,41 +1144,30 @@ void ABasePXCharacter::AddViewYaw(const FInputActionValue& Value)
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
 	
-	AddViewYaw(AxisValue, true);
+	AddViewYaw(AxisValue);
 }
 
-void ABasePXCharacter::AddViewYaw(float V, bool bPlayerControl)
+void ABasePXCharacter::AddViewYaw(float AxisValue)
 {
-	if (bPlayerControl)
+	UPXSettingsShared* Settings = UPXGameplayStatics::GetSettingsShared(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	if (UPXGameplayStatics::IsGamepadControlling(this))
 	{
-		bViewYawChangingByPlayerControl = true;
+		int Invert = Settings->GetInvertHorizontalAxis_Gamepad() ? -1 : 1;
+		float Sensitivity = Settings->GetGamepadLookSensitivity();
 
-		UPXSettingsShared* Settings = UPXGameplayStatics::GetSettingsShared(GetWorld());
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-		
-		int Invert = Settings->GetInvertHorizontalAxis() ? -1 : 1;
-		float Sensitivity = Settings->GetViewPointSensitivityYaw();
-
-		AddBlendYaw( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(V));
-		
-		FName TimerName = FName(GetActorNameOrLabel() + "_AddViewYaw");
-		UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-			[WeakThis = TWeakObjectPtr(this)]
-			{
-				if (WeakThis.IsValid())
-				{
-					WeakThis->bViewYawChangingByPlayerControl = false;
-				}
-			}, 0.5);
+		AddBlendYaw( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue));
 	}
 	else
 	{
-		if (!bViewYawChangingByPlayerControl)
-		{
-			AddBlendYaw(UCommonFuncLib::DealDeltaTime(V) * 1.6);	
-		}
+		int Invert = Settings->GetInvertHorizontalAxis_Mouse() ? -1 : 1;
+		float Sensitivity = Settings->GetViewPointSensitivityYaw_Mouse();
+
+		AddBlendYaw( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue));
 	}
 }
+
 
 void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 {
@@ -1187,13 +1176,23 @@ void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 	
 	UPXSettingsShared* Settings = UPXGameplayStatics::GetSettingsShared(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-	
-	int Invert = Settings->GetInvertVerticalAxis() ? -1 : 1;
-	float Sensitivity = Settings->GetViewPointSensitivityPitch();
-	
-	float Pitch = FMath::Clamp( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue) + CurBlendPitch, ViewPitchRange.X, ViewPitchRange.Y);
-	
-	SetBlendPitch(Pitch);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Controller)
+
+	// const UCommonInputSub
+	if (UPXGameplayStatics::IsGamepadControlling(this))
+	{
+		int Invert = Settings->GetInvertVerticalAxis_Gamepad() ? -1 : 1;
+		float Sensitivity = Settings->GetGamepadLookSensitivity();
+		float Pitch = FMath::Clamp( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue) + CurBlendPitch, ViewPitchRange.X, ViewPitchRange.Y);
+		SetBlendPitch(Pitch);
+	}
+	else
+	{
+		int Invert = Settings->GetInvertVerticalAxis_Mouse() ? -1 : 1;
+		float Sensitivity = Settings->GetViewPointSensitivityPitch_Mouse();
+		float Pitch = FMath::Clamp( Invert * Sensitivity * UCommonFuncLib::DealDeltaTime(AxisValue) + CurBlendPitch, ViewPitchRange.X, ViewPitchRange.Y);
+		SetBlendPitch(Pitch);
+	}
 }
 
 void ABasePXCharacter::PreReadyToStart_Implementation()
@@ -1402,15 +1401,13 @@ void ABasePXCharacter::OnAttackHolding_Implementation()
 	IFight_Interface::OnAttackHolding_Implementation();
 	SetAttackHolding(true);
 	
-	if (GetController() && GetController()->IsLocalController())
-	{
-		const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
-		UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
-		
-		UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->AttackHolding.LoadSynchronous(), GetOwner()->GetRootComponent());
-	}
+	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
+	UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+	
+	UPXGameplayStatics::SpawnForceFeedbackAttached(this,ForceFeedbackEffectDataAsset->AttackHolding.LoadSynchronous(), GetOwner()->GetRootComponent());
+
 }
 
 void ABasePXCharacter::OnDefendingHitEffect_Implementation()
@@ -1442,15 +1439,12 @@ void ABasePXCharacter::OnAttackEffect_Implementation()
 		Weapon->Use();
 	}
 
-	if (GetController() && GetController()->IsLocalController())
-	{
-		const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
-		UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
-		
-		UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffectDataAsset->Attack.LoadSynchronous(), GetOwner()->GetRootComponent());
-	}
+	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
+	UPXForceFeedbackEffectDataAsset* ForceFeedbackEffectDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
+	
+	UPXGameplayStatics::SpawnForceFeedbackAttached(this,ForceFeedbackEffectDataAsset->Attack.LoadSynchronous(), GetOwner()->GetRootComponent());
 }
 
 void ABasePXCharacter::OnAttackEffectBegin_Implementation()

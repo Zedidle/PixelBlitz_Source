@@ -2,12 +2,17 @@
 
 
 #include "Utilitys/PXGameplayStatics.h"
+
+#include "CommonInputSubsystem.h"
+#include "CommonUIExtensions.h"
 #include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
 #include "Controller/PXPlayerController.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXLocalPlayer.h"
+#include "Settings/PXSettingsShared.h"
+#include "Utilitys/DebugFuncLab.h"
 
 UPXGameInstance* UPXGameplayStatics::GetGameInstance(const UObject* WorldContextObject)
 {
@@ -110,5 +115,30 @@ void UPXGameplayStatics::UnChoiceTalent(const UObject* WorldContextObject, FGame
 	{
 		SG->ChosenTalents.Remove(Tag);		
 	}
+}
+
+void UPXGameplayStatics::SpawnForceFeedbackAttached(const UObject* WorldContextObject, UForceFeedbackEffect* ForceFeedbackEffect, USceneComponent* AttachToComponent)
+{
+	if (!IsGamepadControlling(WorldContextObject)) return;
+
+	bool bForceFeedBack =  GetDefault<UPXSettingsShared>()->GetForceFeedbackEnabled();
+
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("bForceFeedBack: %s"), bForceFeedBack ? TEXT("ForceFeedBack Open") : TEXT("ForceFeedBack Close")));
+	if (bForceFeedBack)
+	{
+		UGameplayStatics::SpawnForceFeedbackAttached(ForceFeedbackEffect, AttachToComponent);
+	}
+}
+
+bool UPXGameplayStatics::IsGamepadControlling(const UObject* WorldContextObject)
+{
+	APXPlayerController* PXPlayerController = GetPlayerController(WorldContextObject);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXPlayerController, false)
+	if(!PXPlayerController->IsLocalController()) return false;
+
+	const UCommonInputSubsystem* InputSubsystem = UCommonInputSubsystem::Get(PXPlayerController->GetLocalPlayer());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXPlayerController, false)
+
+	return InputSubsystem->GetCurrentInputType() == ECommonInputType::Gamepad;
 }
 

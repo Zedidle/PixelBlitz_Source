@@ -50,14 +50,13 @@ public:
 
 
 
-
 	UFUNCTION(BlueprintNativeEvent)
 	void OnLevelLoading(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnLevelLoaded(FGameplayTag Channel, const FDefaultEmptyMessage& Message);
 
-
+	
 
 #pragma region Massage
 	

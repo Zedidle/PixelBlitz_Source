@@ -6,10 +6,9 @@
 void UTalentTipWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (TextBlock_Desc)
-	{
-		TextBlock_Desc->SetText(TalentData.TalentDesc);
-	}
+
+
+	UpdateData();
 }
 
 void UTalentTipWidget::NativeDestruct()
@@ -17,7 +16,15 @@ void UTalentTipWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UTalentTipWidget::SetTalentData(FTalent& Data)
+void UTalentTipWidget::SetTalentData(const FTalent& Data)
 {
 	TalentData = Data;
+}
+
+void UTalentTipWidget::UpdateData()
+{
+	if (TextBlock_Desc)
+	{
+		TextBlock_Desc->SetText(TalentData.TalentDesc);
+	}
 }

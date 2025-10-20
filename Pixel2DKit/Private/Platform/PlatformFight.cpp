@@ -66,7 +66,7 @@ void APlatformFight::Tick(float DeltaTime)
 		if (FMath::Abs(CrossZ) > ViewRotateFactor)
 		{
 			PXCharacter->AddViewYaw(CrossZ * FMath::GetMappedRangeValueClamped(FVector2D(0, 300),
-					FVector2D(-1.8, OutRangeB), PXCharacter->GetVelocity().Size()), false);
+					FVector2D(-1.8, OutRangeB), PXCharacter->GetVelocity().Size() / 2 ));
 		}
 	}
 }

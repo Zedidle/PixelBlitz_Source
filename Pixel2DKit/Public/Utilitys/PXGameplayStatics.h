@@ -73,6 +73,12 @@ public:
 
 
 
+	UFUNCTION(BlueprintCallable, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static void SpawnForceFeedbackAttached(const UObject* WorldContextObject, UForceFeedbackEffect* ForceFeedbackEffect, USceneComponent* AttachToComponent);
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static bool IsGamepadControlling(const UObject* WorldContextObject);
 
 	
 };
