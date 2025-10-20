@@ -6,6 +6,7 @@
 #include "EditCondition/WhenPlayingAsPrimaryPlayer.h"
 #include "Settings/CustomSettings/PXSettingValueDiscrete_Language.h"
 #include "GameSettingValueDiscreteDynamic.h"
+#include "GameSettingValueScalarDynamic.h"
 #include "Player/PXLocalPlayer.h"
 #include "Settings/PXSettingsShared.h"
 
@@ -198,7 +199,6 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 		GameplayCameraCollection->SetDisplayName(LOCTEXT("GameplayCameraCollection_Name", "镜头控制"));
 		Screen->AddSetting(GameplayCameraCollection);
 
-		//----------------------------------------------------------------------------------
 		{
 			UGameSettingValueDiscreteDynamic_Enum* Setting = NewObject<UGameSettingValueDiscreteDynamic_Enum>();
 			Setting->SetDevName(TEXT("GameplayCamera_FollowMode"));
@@ -212,6 +212,24 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeGameplaySettings(UPXLo
 			Setting->AddEnumOption(ECameraFollowMode::Behind, LOCTEXT("GameplayCamera_FollowModeBehind", "尾随"));
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 
+			GameplayCameraCollection->AddSetting(Setting);
+		}
+
+		{
+			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
+			Setting->SetDevName(TEXT("GameplayCamera_CameraOffsetSpeed"));
+			Setting->SetDisplayName(LOCTEXT("GameplayCamera_CameraOffsetSpeed_Name", "前瞻模式镜头转移速度"));
+			Setting->SetDescriptionRichText(LOCTEXT("GameplayCamera_CameraOffsetSpeed_Desc", "前瞻模式下的镜头转移速度，该值越大，角色转向时镜头回弹越快，但可能容易引起不适。"));
+	
+			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetCameraOffsetSpeed));
+			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetCameraOffsetSpeed));
+			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetCameraOffsetSpeed());
+
+			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::SourceAsPercent100);
+			Setting->SetSourceRangeAndStep(TRange<double>(0.01, 0.1), 0.01);
+			
+			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
+	
 			GameplayCameraCollection->AddSetting(Setting);
 		}
 	}

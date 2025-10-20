@@ -336,17 +336,21 @@ void ABasePXCharacter::Tick_SpringArmMotivation()
 		RemoveCameraOffset(FName("Move"));
 	}
 
+
+	
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("SettingsShared->GetCameraOffsetSpeed: %f"), SettingsShared->GetCameraOffsetSpeed()));	
+	
 	TArray<FVector> OffsetValues;
 	CameraOffsetMap.GenerateValueArray(OffsetValues);
 
 	FVector NewTargetCameraOffset;
 	if (UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset))
 	{
-		CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, CameraOffsetSpeedFactor);
+		CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, SettingsShared->GetCameraOffsetSpeed());
 	}
 	else
 	{
-		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), CameraOffsetSpeedFactor);
+		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), SettingsShared->GetCameraOffsetSpeed());
 	}
 	SpringArm->SetWorldLocation(GetActorLocation() + CurCameraOffset);
 

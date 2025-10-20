@@ -337,6 +337,11 @@ public:
 	UFUNCTION()
 	void SetCameraFollowMode(ECameraFollowMode InMode);
 
+	UFUNCTION()
+	float GetCameraOffsetSpeed() const { return CameraOffsetSpeed; }
+	UFUNCTION()
+	void SetCameraOffsetSpeed(float Value);
+	
 	
 	void ApplyGameplayOptions();
 
@@ -365,6 +370,9 @@ private:
 	
 	UPROPERTY()
 	ECameraFollowMode CameraFollowMode = ECameraFollowMode::Preview;
+
+	UPROPERTY()
+	float CameraOffsetSpeed = 0.02;
 	
 #pragma endregion
 

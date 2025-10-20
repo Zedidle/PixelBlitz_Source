@@ -180,10 +180,6 @@ public:
 	virtual void Tick_SaveFallingStartTime();
 	virtual void Tick_SpriteRotation(); // 漂移式偏转
 	virtual void Tick_SpringArmMotivation();
-
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float CameraOffsetSpeedFactor = 0.04;
 	
 	FVector CurCameraOffset;
 	TMap<FName, FVector> CameraOffsetMap;

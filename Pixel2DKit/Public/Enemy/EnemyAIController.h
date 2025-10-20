@@ -38,7 +38,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OnPerceptionUpdated(const FActorPerceptionUpdateInfo& UpdateInfo);
-	
 
 
 	
@@ -53,7 +52,7 @@ public:
 
 
 
-
+	void StopAI();
 
 
 

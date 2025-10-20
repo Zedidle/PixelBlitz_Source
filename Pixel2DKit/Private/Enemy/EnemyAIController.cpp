@@ -100,3 +100,11 @@ ETeamAttitude::Type AEnemyAIController::GetTeamAttitudeTowards(const AActor& Oth
 	return ETeamAttitude::Neutral;
 	
 }
+
+void AEnemyAIController::StopAI()
+{
+	if (AIPerception)
+	{
+		AIPerception->UnregisterComponent();
+	}
+}

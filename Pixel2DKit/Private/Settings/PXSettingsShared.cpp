@@ -224,6 +224,11 @@ void UPXSettingsShared::SetCameraFollowMode(ECameraFollowMode InMode)
 	}
 }
 
+void UPXSettingsShared::SetCameraOffsetSpeed(float Value)
+{
+	CameraOffsetSpeed = Value;
+}
+
 void UPXSettingsShared::ApplyGameplayOptions()
 {
 }

@@ -400,10 +400,16 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 	}
 	else
 	{
-		// if (GetCharacterMovement())
-		// {
-		// 	GetCharacterMovement()->StopMovementImmediately();
-		// }
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->StopMovementImmediately();
+		}
+
+		if (AEnemyAIController* EnemyAI = GetController<AEnemyAIController>())
+		{
+			EnemyAI->StopAI();
+		}
+		
 		if (DataAsset)
 		{
 			if (USoundCue* DieSound = DataAsset->DieSound.LoadSynchronous())
