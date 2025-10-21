@@ -48,7 +48,7 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 		PXCharacter = nullptr;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->SetPixelCharacter(nullptr);
+			EnemyAIComponent->SetPXCharacter(nullptr);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
@@ -62,7 +62,7 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 		PXCharacter = C;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->SetPixelCharacter(PXCharacter);
+			EnemyAIComponent->SetPXCharacter(PXCharacter);
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{

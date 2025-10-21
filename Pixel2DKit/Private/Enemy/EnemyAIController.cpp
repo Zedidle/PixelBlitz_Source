@@ -8,6 +8,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Utilitys/DebugFuncLab.h"
 
 
 AEnemyAIController::AEnemyAIController(const FObjectInitializer& ObjectInitializer):Super(ObjectInitializer)

@@ -40,14 +40,14 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
-	APawn* Pawn = AIOwner->GetPawn();
-	if (!Pawn || !Pawn->Implements<UEnemyAI_Interface>())
+	APawn* SelfPawn = AIOwner->GetPawn();
+	if (!SelfPawn || !SelfPawn->Implements<UEnemyAI_Interface>())
 	{
 		FinishAbort();
 		return EBTNodeResult::Failed;
 	}
 
-	UEnemyAIComponent* EnemyAIComponent = Pawn->GetComponentByClass<UEnemyAIComponent>();
+	UEnemyAIComponent* EnemyAIComponent = SelfPawn->GetComponentByClass<UEnemyAIComponent>();
 	AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(AIOwner);
 	if (!EnemyAIComponent || !EnemyAIController)
 	{
@@ -55,20 +55,19 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 	
-	if (!IEnemyAI_Interface::Execute_CanMove(Pawn))
+	if (!IEnemyAI_Interface::Execute_CanMove(SelfPawn))
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
 	
-	if (IEnemyAI_Interface::Execute_Dash(Pawn))
+	if (IEnemyAI_Interface::Execute_Dash(SelfPawn))
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
 
-	FVector PawnLocation = Pawn->GetActorLocation();
-
+	FVector PawnLocation = SelfPawn->GetActorLocation();
 	
 	// 先做一个简单悬崖判断
 	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(PawnLocation,
@@ -81,14 +80,28 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 	
-	
-	// 朝更近的区间走去
-	FVector TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
+	FHitResult OutHit;
+	// 向玩家位置做一个射线检测，判断能否直接看见
+	bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(SelfPawn->GetWorld(), PawnLocation, PlayerPawn->GetActorLocation(),
+	TraceTypeQuery1, false, {SelfPawn},
+			EDrawDebugTrace::None, OutHit, true,
+			FLinearColor::Red, FLinearColor::Green, 1.0f);
 
+	FVector TargetLocation;
+	if (bLostSeePlayer)
+	{
+		TargetLocation = EnemyAIComponent->GetPlayerPathPoint();
+		DrawDebugSphere(GetWorld(), SelfPawn->GetActorLocation(), 10, 16, FColor::Green, false, 3);
+		// TargetLocation = EnemyAIComponent->GetMoveDotDirRandLocation(TargetLocation, 10.0f, 30.0f);
+	}
+	else
+	{
+		TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
+		TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
+	}
 	
-	TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
 	
-	bIsCliff = USpaceFuncLib::CheckCliffProcess(Pawn->GetActorLocation(),TargetLocation,
+	bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfPawn->GetActorLocation(),TargetLocation,
 						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance());
 	if (bIsCliff)
 	{
@@ -96,7 +109,6 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
-	
 	EnemyAIController->SimpleMoveToLocation(TargetLocation);
 	FinishExecute(true);
 	return EBTNodeResult::InProgress;

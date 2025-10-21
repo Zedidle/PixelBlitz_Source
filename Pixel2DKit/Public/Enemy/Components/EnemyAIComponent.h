@@ -32,6 +32,17 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	// 记录玩家移动路径
+	TArray<FVector> PlayerPaths;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int MaxPlayerPathsNum = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int DistanceNextPathPointNear = 50;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int CheckPlayerLocationInterval = 1.0f;
+	
 	FVector PreDirection = FVector::ZeroVector;
 	bool PreBlockYawDirection = false;
 
@@ -43,9 +54,9 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float PreDirectionPercent = 0.7f;
 
-
+	// 当被障碍物阻挡时，侧向移动的最大角度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float MaxBlockYawModify = 80;
+	float MaxBlockYawModify = 60;
 	
 	// 调整怪物的接近欲望，基于阻挡因子的方向调整基值, 该值越大，欲望越低
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -112,8 +123,9 @@ public:
 	void SetActionFieldDistance(const FActionFieldDistance& actionFieldDistance);
 	
 	UFUNCTION(BlueprintCallable, Category="Enemy")
-	void SetPixelCharacter(ABasePXCharacter* Character);
-	
+	void SetPXCharacter(ABasePXCharacter* Character);
+
+	void UpdatePlayerPaths();
 
 	/* 向量点积法 弱随机移动到目标位置
 	 * TargetLocation - 尝试到达的目标位置
@@ -143,7 +155,7 @@ public:
 	UFUNCTION(Blueprintable, Blueprintable, Category = "EnemyAI")
 	FGameplayTag GetActionFieldByPlayer() const;
 
-
-
+	
+	FVector GetPlayerPathPoint();
 		
 };

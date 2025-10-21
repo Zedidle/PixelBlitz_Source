@@ -57,9 +57,57 @@ void UEnemyAIComponent::SetActionFieldDistance(const FActionFieldDistance& actio
 	
 }
 
-void UEnemyAIComponent::SetPixelCharacter(ABasePXCharacter* Character)
+void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 {
+	
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	PXCharacter = Character;
+
+	FName TimerName = FName("UEnemyAIComponent::SetPixelCharacter" + OwningEnemy->GetActorNameOrLabel());
+	
+	if (PXCharacter)
+	{
+		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("TimerName: %s,   UEnemyAIComponent::SetPixelCharacter: %s"), *TimerName.ToString(), *Character->GetActorNameOrLabel()));
+
+		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+
+			WeakThis->UpdatePlayerPaths();
+			
+		}, CheckPlayerLocationInterval);
+	}
+	else
+	{
+		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UEnemyAIComponent::SetPixelCharacter: null")));
+		UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName);
+	}
+
+	
+}
+
+void UEnemyAIComponent::UpdatePlayerPaths()
+{
+	if (!PXCharacter) return;
+	if (!OwningEnemy) return;
+			
+	FHitResult OutHit;
+	// 想玩家位置做一个射线检测，判断能否直接看见
+	bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(GetWorld(), OwningEnemy->GetActorLocation(), PXCharacter->GetActorLocation(),
+	TraceTypeQuery1, false, {OwningEnemy},
+			EDrawDebugTrace::ForDuration, OutHit, true,
+			FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
+
+	if (bLostSeePlayer) return;
+
+	DrawDebugSphere(GetWorld(), PXCharacter->GetActorLocation(), 15, 16, FColor::Blue, false, 3);
+
+	PlayerPaths.Add(PXCharacter->GetActorLocation());
+	
+	if (PlayerPaths.Num() > MaxPlayerPathsNum)
+	{
+		PlayerPaths.RemoveAt(0);
+	}
 }
 
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate, float MaxRotateValue,
@@ -398,6 +446,21 @@ FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const
 	}
 
 	return FGameplayTag();
+}
+
+FVector UEnemyAIComponent::GetPlayerPathPoint()
+{
+	if (!OwningEnemy) return FVector();
+	if (PlayerPaths.IsEmpty()) return FVector();
+	
+	FVector Point = PlayerPaths[0];
+	if (FVector::Distance(Point, OwningEnemy->GetActorLocation()) < DistanceNextPathPointNear)
+	{
+		// PlayerPaths.HeapPopDiscard(0);
+		PlayerPaths.RemoveAt(0);
+	}
+
+	return Point;
 }
 
 

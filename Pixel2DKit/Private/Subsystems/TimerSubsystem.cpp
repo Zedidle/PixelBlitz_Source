@@ -50,10 +50,10 @@ void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& C
 	if (!World) return;
 	
 	CancelDelay(TimerName);
-
+	
 	FTimerDelegate Delegate;
 	Delegate.BindLambda(
-		[TimerName, WeakThis = TWeakObjectPtr<ThisClass>(this), Callback = MoveTemp(Callback)]() mutable
+		[TimerName, WeakThis = TWeakObjectPtr(this), Callback = MoveTemp(Callback)]() mutable
 		{
 			if (!WeakThis.IsValid()) return;
 			Callback();

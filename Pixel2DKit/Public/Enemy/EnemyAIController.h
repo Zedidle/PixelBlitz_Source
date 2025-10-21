@@ -18,8 +18,6 @@ class PIXEL2DKIT_API AEnemyAIController : public AAIController
 
 
 
-
-
 public:
 
 
