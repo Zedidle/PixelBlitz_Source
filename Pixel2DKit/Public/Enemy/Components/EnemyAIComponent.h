@@ -35,13 +35,12 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	// 记录玩家移动路径
 	TArray<FVector> PlayerPaths;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int MaxPlayerPathsNum = 5;
+	int MaxPlayerPathsNum = 4;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	int DistanceNextPathPointNear = 50;
 
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int CheckPlayerLocationInterval = 1.0f;
+	float CheckPlayerLocationInterval = 0.5f;
 	
 	FVector PreDirection = FVector::ZeroVector;
 	bool PreBlockYawDirection = false;
@@ -79,6 +78,8 @@ public:
 	UEnemyAIComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void BeginPlay() override;
+
+	virtual void DestroyComponent(bool bPromoteChildren = false);
 	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -138,6 +139,9 @@ public:
 	FVector GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate = 10.0f,
 								float MaxRotateValue = 60, float DefaultDirRotate = 0, float MinDirectlyDistance = 50);
 
+	bool MoveCheckAllies(FVector& Result, FVector NewTargetLocation, float MinDirectlyDistance = 50);
+
+	
 	// 获取在X方向（相对玩家的东西方向）的攻击位置
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
 	FVector GetAttackLocation();
@@ -156,6 +160,6 @@ public:
 	FGameplayTag GetActionFieldByPlayer() const;
 
 	
-	FVector GetPlayerPathPoint();
+	bool GetPlayerPathPoint(FVector& Point);
 		
 };

@@ -88,18 +88,17 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 			FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	FVector TargetLocation;
+	bool bFoundPathPoint = false;
 	if (bLostSeePlayer)
 	{
-		TargetLocation = EnemyAIComponent->GetPlayerPathPoint();
-		DrawDebugSphere(GetWorld(), SelfPawn->GetActorLocation(), 10, 16, FColor::Green, false, 3);
-		// TargetLocation = EnemyAIComponent->GetMoveDotDirRandLocation(TargetLocation, 10.0f, 30.0f);
+		bFoundPathPoint = EnemyAIComponent->GetPlayerPathPoint(TargetLocation);
+		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation, 50);
 	}
-	else
+	if (!bFoundPathPoint)
 	{
 		TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
 		TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
 	}
-	
 	
 	bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfPawn->GetActorLocation(),TargetLocation,
 						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance());

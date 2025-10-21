@@ -1525,7 +1525,7 @@ void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float P
 	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
-		IBuff_Interface::Execute_BuffEffect_Speed(BuffComponent, Tag, Percent, Value, SustainTime);
+		Execute_BuffEffect_Speed(BuffComponent, Tag, Percent, Value, SustainTime);
 	}
 }
 
@@ -1549,7 +1549,7 @@ void ABasePXCharacter::BuffEffect_Attack_Implementation(FGameplayTag Tag, float 
 	IBuff_Interface::BuffEffect_Attack_Implementation(Tag, Percent, Value, SustainTime);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
-		IBuff_Interface::Execute_BuffEffect_Attack(BuffComponent, Tag, Percent, Value, SustainTime);
+		Execute_BuffEffect_Attack(BuffComponent, Tag, Percent, Value, SustainTime);
 	}
 }
 
@@ -1563,7 +1563,7 @@ void ABasePXCharacter::BuffEffect_Sight_Implementation(FGameplayTag Tag, float P
 	IBuff_Interface::BuffEffect_Sight_Implementation(Tag, Percent, Value, SustainTime);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
-		IBuff_Interface::Execute_BuffEffect_Sight(BuffComponent, Tag, Percent, Value, SustainTime);
+		Execute_BuffEffect_Sight(BuffComponent, Tag, Percent, Value, SustainTime);
 	}
 }
 
@@ -1603,7 +1603,7 @@ void ABasePXCharacter::AddBuff_Implementation(FGameplayTag Tag, const FString& B
 	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
-		IBuff_Interface::Execute_AddBuff(BuffComponent, Tag, BuffName, TextColor, Permanent);
+		Execute_AddBuff(BuffComponent, Tag, BuffName, TextColor, Permanent);
 	}
 }
 
@@ -1612,7 +1612,7 @@ void ABasePXCharacter::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf
 	IBuff_Interface::RemoveBuff_Implementation(Tag, OnlySelf);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
-		IBuff_Interface::Execute_RemoveBuff(BuffComponent, Tag, OnlySelf);
+		Execute_RemoveBuff(BuffComponent, Tag, OnlySelf);
 	}
 }
 

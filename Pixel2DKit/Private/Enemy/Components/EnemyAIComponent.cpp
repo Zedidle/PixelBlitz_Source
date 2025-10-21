@@ -67,8 +67,8 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 	
 	if (PXCharacter)
 	{
-		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("TimerName: %s,   UEnemyAIComponent::SetPixelCharacter: %s"), *TimerName.ToString(), *Character->GetActorNameOrLabel()));
-
+		if (UTimerSubsystemFuncLib::IsDelayActive(GetWorld(), TimerName)) return;
+		
 		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
@@ -95,12 +95,10 @@ void UEnemyAIComponent::UpdatePlayerPaths()
 	// 想玩家位置做一个射线检测，判断能否直接看见
 	bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(GetWorld(), OwningEnemy->GetActorLocation(), PXCharacter->GetActorLocation(),
 	TraceTypeQuery1, false, {OwningEnemy},
-			EDrawDebugTrace::ForDuration, OutHit, true,
+			EDrawDebugTrace::None, OutHit, true,
 			FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
 
 	if (bLostSeePlayer) return;
-
-	DrawDebugSphere(GetWorld(), PXCharacter->GetActorLocation(), 15, 16, FColor::Blue, false, 3);
 
 	PlayerPaths.Add(PXCharacter->GetActorLocation());
 	
@@ -115,87 +113,25 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, FVector::ZeroVector);
 
-	FVector OwnerLocation = OwningEnemy->GetActorLocation();
-
 	// 不同步高度，可能可以实现跨阶梯
 	// NewTargetLocation.Z = OwnerLocation.Z;
-	
-	// 移动向量
-	float BlockYawModify = FMath::Min(MaxBlockYawModify, BlockValue * BlockDirModifyValue);
-	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("BlockValue: %f, BlockYawModify: %f"), BlockValue, BlockYawModify));
+
+	// 检测同盟是否阻挡自身的移动方位
+	if (MoveCheckAllies(NewTargetLocation, NewTargetLocation, MinDirectlyDistance)) return NewTargetLocation;
+
+
+	FVector OwnerLocation = OwningEnemy->GetActorLocation();
 	
 	if (PreDirection.IsZero())
 	{
 		PreBlockYawDirection = FMath::RandBool();
 	}
 	
+	// 移动向量
+	float BlockYawModify = FMath::Min(MaxBlockYawModify, BlockValue * BlockDirModifyValue);
+	
 	FVector MoveVector = FRotator(0, (PreBlockYawDirection ? 1 : -1) * (DefaultDirRotate + BlockYawModify), 0)
 							.RotateVector(NewTargetLocation - OwnerLocation);
-
-	// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
-	TArray<AActor*> ActorsToIgnore = {OwningEnemy};
-	TArray<FHitResult> OutHits;
-	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius, 
-EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
-true, FLinearColor::Red, FLinearColor::Green, 0.1f);
-
-	TArray<ABaseEnemy*> FoundAllies;
-	for (auto& result : OutHits)
-	{
-		if (!IsValid(result.GetActor())) continue;
-		if (ABaseEnemy* Ally = Cast<ABaseEnemy>(result.GetActor()))
-		{
-			FoundAllies.Add(Ally);		
-		}
-	}
-
-	
-	if (FoundAllies.IsEmpty())
-	{
-		if (MoveVector.Size() < MinDirectlyDistance)
-		{
-			CurTargetLocation = NewTargetLocation;
-			return CurTargetLocation;
-		}
-	}
-	else
-	{
-		for (auto& Ally : FoundAllies)
-		{
-			if (!IsValid(Ally)) continue;
-
-			UEnemyAIComponent* AllyAI = Ally->GetComponentByClass<UEnemyAIComponent>();
-			if (!IsValid(AllyAI)) continue;
-
-			FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
-
-			// 近距离斥力
-			if (VectorToAlly.Length() < AllyCheckRadius * 0.5)
-			{
-				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
-			}
-
-			// 移动方位斥力， 与同盟位置的点乘
-			float DotAlly = MoveVector.GetSafeNormal2D().Dot(VectorToAlly.GetSafeNormal2D());
-			// 如果当前移动方向与检测到的同盟方向不接近，> 60° ，则忽略
-			if ( DotAlly < 0.5)
-			{
-				// 检测到同盟后，产生默认斥力
-				NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
-			}
-
-			FVector AllyToTarget = Ally->GetActorLocation() - AllyAI->CurTargetLocation;
-			
-			// 如果同盟的目标点 与 自身目标点十分接近，且它到目标的距离小于自身到目标的，则再次产生斥力（让路）
-			if (AllyAI->CurTargetLocation.Equals(NewTargetLocation, 20) && MoveVector.Size() > AllyToTarget.Size())
-			{
-				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - AllyAI->CurTargetLocation);
-			}
-		}
-
-		CurTargetLocation = NewTargetLocation;
-		return CurTargetLocation;
-	}
 
 	
 	TMap<FVector, int> TargetOffsetMap;
@@ -224,7 +160,7 @@ true, FLinearColor::Red, FLinearColor::Green, 0.1f);
 
 		// 执行射线检测
 		bool bHit = UKismetSystemLibrary::LineTraceSingle(this, OwnerLocation, OwnerLocation + TempTargetOffset,
-			TraceTypeQuery3,false, ActorsToIgnore, 
+			TraceTypeQuery3,false, {OwningEnemy}, 
 			EDrawDebugTrace::None,
 			HitResult, // 碰撞结果
 			true, FLinearColor::Blue, FLinearColor::Green, 0.1 );
@@ -265,6 +201,82 @@ true, FLinearColor::Red, FLinearColor::Green, 0.1f);
 	BlockValue += FMath::Abs(blockR);
 	PreDirection = FVector::ZeroVector;
 	return OwnerLocation;
+}
+
+bool UEnemyAIComponent::MoveCheckAllies(FVector& Result, FVector NewTargetLocation, float MinDirectlyDistance)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, false);
+	
+	FVector OwnerLocation = OwningEnemy->GetActorLocation();
+	
+	// 判断是否有怪物要去相近的位置，如果相较之下自身里目标位置较远，则后退让位
+	TArray<AActor*> ActorsToIgnore = {OwningEnemy};
+	TArray<FHitResult> OutHits;
+	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius, 
+EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
+true, FLinearColor::Red, FLinearColor::Green, 0.1f);
+
+	TArray<ABaseEnemy*> FoundAllies;
+	for (auto& result : OutHits)
+	{
+		if (!IsValid(result.GetActor())) continue;
+		if (ABaseEnemy* Ally = Cast<ABaseEnemy>(result.GetActor()))
+		{
+			FoundAllies.Add(Ally);		
+		}
+	}
+
+	FVector MoveVector = NewTargetLocation - OwnerLocation;
+	
+	if (FoundAllies.IsEmpty())
+	{
+		if (MoveVector.Size() < MinDirectlyDistance)
+		{
+			CurTargetLocation = NewTargetLocation;
+			Result = CurTargetLocation;
+			return true;
+		}
+		return false;
+	}
+	else
+	{
+		for (auto& Ally : FoundAllies)
+		{
+			if (!IsValid(Ally)) continue;
+
+			UEnemyAIComponent* AllyAI = Ally->GetComponentByClass<UEnemyAIComponent>();
+			if (!IsValid(AllyAI)) continue;
+
+			FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
+
+			// 近距离斥力
+			if (VectorToAlly.Length() < AllyCheckRadius * 0.5)
+			{
+				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
+			}
+
+			// 移动方位斥力， 与同盟位置的点乘
+			float DotAlly = MoveVector.GetSafeNormal2D().Dot(VectorToAlly.GetSafeNormal2D());
+			// 如果当前移动方向与检测到的同盟方向不接近，> 60° ，则忽略
+			if ( DotAlly < 0.5)
+			{
+				// 检测到同盟后，产生默认斥力
+				NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
+			}
+
+			FVector AllyToTarget = Ally->GetActorLocation() - AllyAI->CurTargetLocation;
+			
+			// 如果同盟的目标点 与 自身目标点十分接近，且它到目标的距离小于自身到目标的，则再次产生斥力（让路）
+			if (AllyAI->CurTargetLocation.Equals(NewTargetLocation, 20) && MoveVector.Size() > AllyToTarget.Size())
+			{
+				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - AllyAI->CurTargetLocation);
+			}
+		}
+
+		CurTargetLocation = NewTargetLocation;
+		Result = CurTargetLocation;
+		return true;
+	}
 }
 
 FVector UEnemyAIComponent::GetAttackLocation()
@@ -448,19 +460,18 @@ FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const
 	return FGameplayTag();
 }
 
-FVector UEnemyAIComponent::GetPlayerPathPoint()
+bool UEnemyAIComponent::GetPlayerPathPoint(FVector& Point)
 {
-	if (!OwningEnemy) return FVector();
-	if (PlayerPaths.IsEmpty()) return FVector();
+	if (!OwningEnemy || PlayerPaths.IsEmpty()) return false;
 	
-	FVector Point = PlayerPaths[0];
+	Point = PlayerPaths[0];
 	if (FVector::Distance(Point, OwningEnemy->GetActorLocation()) < DistanceNextPathPointNear)
 	{
 		// PlayerPaths.HeapPopDiscard(0);
 		PlayerPaths.RemoveAt(0);
 	}
 
-	return Point;
+	return true;
 }
 
 
@@ -470,6 +481,13 @@ void UEnemyAIComponent::BeginPlay()
 	Super::BeginPlay();
 	OwningEnemy = Cast<ABaseEnemy>(GetOwner());
 	
+}
+
+void UEnemyAIComponent::DestroyComponent(bool bPromoteChildren)
+{
+	Super::DestroyComponent(bPromoteChildren);
+	FName TimerName = FName("UEnemyAIComponent::SetPixelCharacter" + OwningEnemy->GetActorNameOrLabel());
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName);
 }
 
 
