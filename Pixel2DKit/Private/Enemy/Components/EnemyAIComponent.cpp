@@ -238,45 +238,43 @@ true, FLinearColor::Red, FLinearColor::Green, 0.1f);
 		}
 		return false;
 	}
-	else
+
+	for (auto& Ally : FoundAllies)
 	{
-		for (auto& Ally : FoundAllies)
+		if (!IsValid(Ally)) continue;
+
+		UEnemyAIComponent* AllyAI = Ally->GetComponentByClass<UEnemyAIComponent>();
+		if (!IsValid(AllyAI)) continue;
+
+		FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
+
+		// 近距离斥力
+		if (VectorToAlly.Length() < AllyCheckRadius * 0.5)
 		{
-			if (!IsValid(Ally)) continue;
-
-			UEnemyAIComponent* AllyAI = Ally->GetComponentByClass<UEnemyAIComponent>();
-			if (!IsValid(AllyAI)) continue;
-
-			FVector VectorToAlly = Ally->GetActorLocation() - OwnerLocation;
-
-			// 近距离斥力
-			if (VectorToAlly.Length() < AllyCheckRadius * 0.5)
-			{
-				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
-			}
-
-			// 移动方位斥力， 与同盟位置的点乘
-			float DotAlly = MoveVector.GetSafeNormal2D().Dot(VectorToAlly.GetSafeNormal2D());
-			// 如果当前移动方向与检测到的同盟方向不接近，> 60° ，则忽略
-			if ( DotAlly < 0.5)
-			{
-				// 检测到同盟后，产生默认斥力
-				NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
-			}
-
-			FVector AllyToTarget = Ally->GetActorLocation() - AllyAI->CurTargetLocation;
-			
-			// 如果同盟的目标点 与 自身目标点十分接近，且它到目标的距离小于自身到目标的，则再次产生斥力（让路）
-			if (AllyAI->CurTargetLocation.Equals(NewTargetLocation, 20) && MoveVector.Size() > AllyToTarget.Size())
-			{
-				NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - AllyAI->CurTargetLocation);
-			}
+			NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
 		}
 
-		CurTargetLocation = NewTargetLocation;
-		Result = CurTargetLocation;
-		return true;
+		// 移动方位斥力， 与同盟位置的点乘
+		float DotAlly = MoveVector.GetSafeNormal2D().Dot(VectorToAlly.GetSafeNormal2D());
+		// 如果当前移动方向与检测到的同盟方向不接近，> 60° ，则忽略
+		if ( DotAlly < 0.5)
+		{
+			// 检测到同盟后，产生默认斥力
+			NewTargetLocation += AllyRepulsion * (OwnerLocation - Ally->GetActorLocation());
+		}
+
+		FVector AllyToTarget = Ally->GetActorLocation() - AllyAI->CurTargetLocation;
+		
+		// 如果同盟的目标点 与 自身目标点十分接近，且它到目标的距离小于自身到目标的，则再次产生斥力（让路）
+		if (AllyAI->CurTargetLocation.Equals(NewTargetLocation, 20) && MoveVector.Size() > AllyToTarget.Size())
+		{
+			NewTargetLocation += 0.5 * AllyRepulsion * (OwnerLocation - AllyAI->CurTargetLocation);
+		}
 	}
+
+	CurTargetLocation = NewTargetLocation;
+	Result = CurTargetLocation;
+	return true;
 }
 
 FVector UEnemyAIComponent::GetAttackLocation()

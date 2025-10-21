@@ -87,20 +87,24 @@ struct FActionMove
 {
 	GENERATED_BODY()
 
-	bool bActionMoving = true;
-	float ActionMoveCurTime = 0.0f;
+	bool bActionMoving = false;
+	float CurTime = 0.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
-	FVector ActionMoveStartLocation = FVector::ZeroVector;
+	FVector StartLocation = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
-	FVector ActionMoveTargetLocation  = FVector::ZeroVector;
+	FVector TargetLocation  = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
-	UCurveVector* ActionMoveCurveVector = nullptr;
+	UCurveVector* CurveVector = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
-	float ActionMoveSustainTime = 0.0f;
+	float SustainTime = 0.5f;
+
+	// 是否飘起？ 起跳，浮空技能， 需要设为 true
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	bool bFloat = false;
 };
 
 
@@ -164,7 +168,7 @@ public:
 	
 	FActionMove ActionMove;
 	UFUNCTION(BlueprintCallable)
-	void SetActionMove(const FActionMove& Move);
+	void SetActionMove(const FVector& MoveVector, UCurveVector* MoveCurve, float SustainTime = 0.5f, bool bFloat = false);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);

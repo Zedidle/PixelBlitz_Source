@@ -24,6 +24,8 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXPlayerState.h"
+#include "Settings/Config/EnemyActionMoveDataAsset.h"
+#include "Settings/Config/PXCustomSettings.h"
 #include "Sound/SoundCue.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/DropSubsystem.h"
@@ -75,8 +77,22 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 
 void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 {
+	if (PXCharacter == nullptr)
+	{
+		// 受惊
+		// 后续可能要配置受惊距离
+		if (PlayerActor->GetDistanceTo(this) < 100.0f)
+		{
+			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+			UEnemyActionMoveDataAsset* ActionMoveData = Settings->EnemyActionMoveDataAsset.LoadSynchronous();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ActionMoveData);
+			SetActionMove(GetHorizontalDirectionToPlayer() * -20, ActionMoveData->CV_Startled.LoadSynchronous(), 0.5, true);
+		}
+	}
+
 	SetPXCharacter(PlayerActor);
-	// DelayLosePlayer();
+	
+	
 	BP_OnSensingPlayer(PlayerActor);
 }
 
@@ -315,8 +331,6 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ActionMove.bActionMoving = false;
-	
 	if (HealthComponent)
 	{
 		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
@@ -335,9 +349,48 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-void ABaseEnemy::SetActionMove(const FActionMove& Move)
+void ABaseEnemy::SetActionMove(const FVector& MoveVector,  UCurveVector* MoveCurve, float SustainTime, bool bFloat)
 {
-	ActionMove = Move;
+	if (!GetCapsuleComponent()) return;
+	if (SustainTime <= 0.0f) return;
+	if (ActionMove.bActionMoving) return;
+
+	
+	FVector StartLocation = GetActorLocation();
+	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
+	FVector TargetLocation = StartLocation + MoveVector;
+
+	// 水平方向的墙体检测
+	FHitResult OutHit;
+	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,TargetLocation,
+	TraceTypeQuery1, false, {this},
+			EDrawDebugTrace::ForDuration, OutHit, true,
+			FLinearColor::Red, FLinearColor::Green, 1.0f);
+	if (bWallBlock)
+	{
+		if (OutHit.Distance < Radius * 2) return;
+		
+		TargetLocation = OutHit.Location + OutHit.Normal * Radius;
+	}
+
+	if (EnemyAIComponent)
+	{
+		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation);
+	}
+
+	ActionMove.bActionMoving = true;
+	ActionMove.CurTime = 0;
+	ActionMove.SustainTime = SustainTime;
+	ActionMove.StartLocation = StartLocation;
+	ActionMove.TargetLocation = TargetLocation;
+	ActionMove.CurveVector = MoveCurve;
+	ActionMove.bFloat = bFloat;
+	
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetActive(false, false);
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	}
 }
 
 
@@ -939,36 +992,63 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 {
 	if (!ActionMove.bActionMoving) return;
 
-	ActionMove.ActionMoveCurTime += DeltaSeconds;
-	float MovePercent = ActionMove.ActionMoveCurTime / ActionMove.ActionMoveSustainTime;
+	ActionMove.CurTime += DeltaSeconds;
+	float MovePercent = ActionMove.CurTime / ActionMove.SustainTime;
 
 	if (MovePercent <= 1)
 	{
-		if (ActionMove.ActionMoveCurveVector)
+		if (ActionMove.CurveVector)
 		{
+			FVector CurCurveVector = ActionMove.CurveVector->GetVectorValue(MovePercent);
 			FVector CurLocation;
-			CurLocation.X = FMath::Lerp(ActionMove.ActionMoveStartLocation.X , ActionMove.ActionMoveTargetLocation.X, MovePercent);
-			CurLocation.Y = FMath::Lerp(ActionMove.ActionMoveStartLocation.Y , ActionMove.ActionMoveTargetLocation.Y, MovePercent);
+			CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
+			CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
 
-			if (ActionMove.ActionMoveTargetLocation.Z > 1)
+			if (CurCurveVector.Z > 1)
 			{
-				CurLocation.Z = ActionMove.ActionMoveStartLocation.Z + ActionMove.ActionMoveTargetLocation.Z;
+				CurLocation.Z = ActionMove.TargetLocation.Z + CurCurveVector.Z;
 			}
 			else
 			{
-				CurLocation.Z = FMath::Lerp(ActionMove.ActionMoveStartLocation.Z , ActionMove.ActionMoveTargetLocation.Z, MovePercent);
+				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, CurCurveVector.Z);
 			}
 			
-			SetActorLocation(CurLocation);
+			SetActorLocation(CurLocation, false);
 		}
 		else
 		{
-			SetActorLocation(FMath::Lerp( ActionMove.ActionMoveStartLocation, ActionMove.ActionMoveTargetLocation, MovePercent));
+			SetActorLocation(FMath::Lerp( ActionMove.StartLocation, ActionMove.TargetLocation, MovePercent), false);
+		}
+
+		if (GetCapsuleComponent())
+		{
+			float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+			
+			// 为了避免 陷入/上飘 浮动的地面，要做一个检测上浮
+			FHitResult OutHit;
+			bool bCheckedFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
+				GetActorLocation() + FVector(0,0, -HalfHeight*2),
+			TraceTypeQuery1, false, {this},
+					EDrawDebugTrace::None, OutHit, true,
+					FLinearColor::Red, FLinearColor::Green, 1.0f);
+			if (bCheckedFloor)
+			{
+				float FixHeight = HalfHeight - OutHit.Distance;
+				if (FixHeight < 0 || !ActionMove.bFloat)
+				{
+					AddActorWorldOffset(FVector(0,0, FixHeight));
+				}
+			}
 		}
 	}
 	else
 	{
-		ActionMove.bActionMoving = false;	
+		ActionMove.bActionMoving = false;
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->SetActive(true, false);
+			GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		}
 	}
 }
 
