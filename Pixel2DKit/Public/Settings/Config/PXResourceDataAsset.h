@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Utilitys/PXCustomStruct.h"
 #include "PXResourceDataAsset.generated.h"
 
 class APlayerRespawnPoint;

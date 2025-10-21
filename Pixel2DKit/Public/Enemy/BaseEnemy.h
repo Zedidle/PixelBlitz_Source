@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "Character/BasePXCharacter.h"
 #include "Components/EnemyAIComponent.h"
+#include "Curves/CurveVector.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Utilitys/PXCustomStruct.h"
@@ -81,6 +82,30 @@ struct FEnemyData : public FTableRowBase
 };
 
 
+USTRUCT(BlueprintType)
+struct FActionMove
+{
+	GENERATED_BODY()
+
+	bool bActionMoving = true;
+	float ActionMoveCurTime = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FVector ActionMoveStartLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FVector ActionMoveTargetLocation  = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	UCurveVector* ActionMoveCurveVector = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	float ActionMoveSustainTime = 0.0f;
+};
+
+
+
+
 
 
 class UAIPerceptionComponent;
@@ -113,9 +138,6 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-
-
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
 
@@ -138,14 +160,17 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	
+	FActionMove ActionMove;
+	UFUNCTION(BlueprintCallable)
+	void SetActionMove(const FActionMove& Move);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void LoadEnemyData(FName Level);
-
-
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
@@ -169,7 +194,6 @@ public:
 	UFUNCTION()
 	void GoPatrol();
 
-	
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;
 
@@ -264,6 +288,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
 	void OnHurt(int RemainHP);
+
+	UFUNCTION(Blueprintable, BlueprintPure)
+	FVector GetHorizontalDirectionToPlayer();
+	
 	
 #pragma region GAS
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
@@ -362,9 +390,13 @@ public:
 	FName EnemyLevel = "1"; 
 	
 protected:
+	virtual void Tick(float DeltaSeconds) override;
+
 	void Tick_KeepFaceToPixelCharacter(float DeltaSeconds);
 
-	virtual void Tick(float DeltaSeconds) override;
+	void Tick_ActionMove(float DeltaSeconds);
+	
+
 
 	
 };

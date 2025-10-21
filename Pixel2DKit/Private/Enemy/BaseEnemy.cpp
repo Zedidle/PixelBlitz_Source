@@ -315,6 +315,8 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ActionMove.bActionMoving = false;
+	
 	if (HealthComponent)
 	{
 		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
@@ -331,6 +333,11 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	{
 		HealthComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
+}
+
+void ABaseEnemy::SetActionMove(const FActionMove& Move)
+{
+	ActionMove = Move;
 }
 
 
@@ -457,6 +464,18 @@ void ABaseEnemy::OnHurt_Implementation(int RemainHP)
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Hurt, GetActorLocation());
 		}
 	}
+}
+
+FVector ABaseEnemy::GetHorizontalDirectionToPlayer()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, FVector::ZeroVector)
+
+	if (PXCharacter)
+	{
+		return (PXCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+	}
+
+	return FVector::ZeroVector;
 }
 
 UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
@@ -916,16 +935,58 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	SetActorRotation(FRotator(0, InYaw, 0));
 }
 
+void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
+{
+	if (!ActionMove.bActionMoving) return;
+
+	ActionMove.ActionMoveCurTime += DeltaSeconds;
+	float MovePercent = ActionMove.ActionMoveCurTime / ActionMove.ActionMoveSustainTime;
+
+	if (MovePercent <= 1)
+	{
+		if (ActionMove.ActionMoveCurveVector)
+		{
+			FVector CurLocation;
+			CurLocation.X = FMath::Lerp(ActionMove.ActionMoveStartLocation.X , ActionMove.ActionMoveTargetLocation.X, MovePercent);
+			CurLocation.Y = FMath::Lerp(ActionMove.ActionMoveStartLocation.Y , ActionMove.ActionMoveTargetLocation.Y, MovePercent);
+
+			if (ActionMove.ActionMoveTargetLocation.Z > 1)
+			{
+				CurLocation.Z = ActionMove.ActionMoveStartLocation.Z + ActionMove.ActionMoveTargetLocation.Z;
+			}
+			else
+			{
+				CurLocation.Z = FMath::Lerp(ActionMove.ActionMoveStartLocation.Z , ActionMove.ActionMoveTargetLocation.Z, MovePercent);
+			}
+			
+			SetActorLocation(CurLocation);
+		}
+		else
+		{
+			SetActorLocation(FMath::Lerp( ActionMove.ActionMoveStartLocation, ActionMove.ActionMoveTargetLocation, MovePercent));
+		}
+	}
+	else
+	{
+		ActionMove.bActionMoving = false;	
+	}
+}
+
 void ABaseEnemy::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Tick_KeepFaceToPixelCharacter(DeltaSeconds);
+	Tick_ActionMove(DeltaSeconds);
 
+	
 	// 目前只有 HealthWidget
 	if (UWidgetComponent* Widget = FindComponentByClass<UWidgetComponent>())
 	{
 		Widget->SetVisibility(IsValid(PXCharacter));
 	}
+
+	
+
 	
 }
 

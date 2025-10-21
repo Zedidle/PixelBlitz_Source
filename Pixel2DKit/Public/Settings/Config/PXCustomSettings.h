@@ -6,6 +6,7 @@
 
 #include "PXCustomSettings.generated.h"
 
+class UEnemyActionMoveDataAsset;
 class UPXForceFeedbackEffectDataAsset;
 class UDevelopConfigDataAsset;
 class UPXWidgetsDataAsset;
@@ -30,6 +31,9 @@ public:
 	
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXCameraResourceDataAsset> CameraResourceDataAsset;
+
+	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
+	TSoftObjectPtr<UEnemyActionMoveDataAsset> EnemyActionMoveDataAsset;
 	
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXForceFeedbackEffectDataAsset> ForceFeedbackEffectDataAsset;
