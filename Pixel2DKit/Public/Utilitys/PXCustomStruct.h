@@ -57,6 +57,18 @@ public:
 #pragma endregion
 
 
+#pragma region EAttackType
+UENUM(BlueprintType)
+enum class EAttackType : uint8
+{
+	None UMETA(DisplayName = "无"),
+	Melee UMETA(DisplayName = "近战 挥砍/撞击"),
+	Projectile UMETA(DisplayName = "远战 投射物"),
+	Spell  UMETA(DisplayName = "法术"),
+};
+#pragma endregion
+
+
 #pragma region EWeather
 UENUM(BlueprintType, meta = (ScriptName = "GameStatusWeather"))
 enum class EWeather : uint8

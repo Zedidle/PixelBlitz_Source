@@ -7,6 +7,27 @@
 #include "GameFramework/GameState.h"
 #include "PXGameState.generated.h"
 
+USTRUCT(BlueprintType)
+struct FWeatherEffectData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SightDistancePercent = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 HPEffectPerSecond = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MoveSpeedEffectPercent = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float EPConsumePercent = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DamagePlusPercent = 0.0f;
+};
+
 UENUM(BlueprintType)
 enum class EDayTimeType : uint8
 {

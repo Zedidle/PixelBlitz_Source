@@ -19,30 +19,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 
 // 发起攻击的监听事件
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerAttackStart);
-
-
-USTRUCT(BlueprintType)
-struct FWeatherEffectData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SightDistancePercent = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 HPEffectPerSecond = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MoveSpeedEffectPercent = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float EPConsumePercent = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DamagePlusPercent = 0.0f;
-};
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerAttackStart, EAttackType, AttackType);
 
 
 
@@ -132,7 +109,8 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	
 public:
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	// 要在蓝图类中直接设定
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	class UPXCharacterDataAsset* DataAsset;
 	
 	UPROPERTY(BlueprintAssignable)

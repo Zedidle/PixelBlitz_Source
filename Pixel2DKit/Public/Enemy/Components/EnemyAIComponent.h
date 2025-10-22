@@ -9,6 +9,15 @@
 #include "EnemyAIComponent.generated.h"
 
 
+UENUM(BlueprintType)
+enum class EPlayerMovementType : uint8
+{
+	None UMETA(DisplayName = "无"),
+	Approach UMETA(DisplayName = "接近"),
+	ApproachQuick UMETA(DisplayName = "快速接近"),
+	Avoidance UMETA(DisplayName = "远离"),
+	AvoidanceQuick UMETA(DisplayName = "快速远离"),
+};
 
 
 USTRUCT(BlueprintType)
@@ -32,6 +41,10 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	// 玩家相对于自身的高度
+	float PlayerHigher = 0;
+	EPlayerMovementType CurPlayerMovementType = EPlayerMovementType::None;
+	
 	// 记录玩家移动路径
 	TArray<FVector> PlayerPaths;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -81,10 +94,12 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 
 	// 监听玩家后的反应
 
-	// 闪避概率
+	// 闪避数值，需要配置
+	// 概率
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float OnPlayerAttackStart_DodgeRate = 0.6f;
-	
+
+	// 距离
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float OnPlayerAttackStart_DodgeDistance = 50.0f;
 
@@ -117,7 +132,7 @@ public:
 	
 	
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
-	class ABaseEnemy* OwningEnemy = nullptr;
+	ABaseEnemy* OwningEnemy = nullptr;
 
 	TMap<FGameplayTag, float> DirDistanceToActionPoint;
 	
@@ -180,8 +195,11 @@ public:
 
 
 
-
 	UFUNCTION()
-	void OnPlayerAttackStart();
+	void OnPlayerAttackStart(EAttackType Type);
+
+	// 监听玩家运动状态
+	UFUNCTION()
+	void Event_CheckPlayerMovement();
 	
 };

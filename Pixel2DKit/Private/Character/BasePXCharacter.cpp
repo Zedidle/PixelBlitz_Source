@@ -1731,7 +1731,10 @@ void ABasePXCharacter::TryToAttack()
 	{
 		bAttackStartup = true;
 		SetAttackAnimToggle(true);
-		OnPlayerAttackStart.Broadcast();
+		if (DataAsset)
+		{
+			OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType);
+		}
 	}
 }
 

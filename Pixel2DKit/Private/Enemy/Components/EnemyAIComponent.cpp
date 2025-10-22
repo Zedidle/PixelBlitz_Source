@@ -22,7 +22,7 @@ extern TAutoConsoleVariable<int32> CDebugTraceDuration;
 UEnemyAIComponent::UEnemyAIComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	
+	// PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UEnemyAIComponent::SetActionFieldDistance(const FActionFieldDistance& actionFieldDistance)
@@ -64,19 +64,22 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	PXCharacter = Character;
 
-	FName TimerName = FName("UEnemyAIComponent::SetPixelCharacter" + OwningEnemy->GetActorNameOrLabel());
+	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetActorNameOrLabel() + "_SetPixelCharacter");
 	
 	if (PXCharacter)
 	{
-		if (UTimerSubsystemFuncLib::IsDelayActive(GetWorld(), TimerName)) return;
+		if (UTimerSubsystemFuncLib::IsDelayActive(GetWorld(), TimerName_CheckPlayerLocation)) return;
 		
-		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
+		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), TimerName_CheckPlayerLocation, [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 			WeakThis->UpdatePlayerPaths();
 		}, CheckPlayerLocationInterval);
 
 		Character->OnPlayerAttackStart.AddUniqueDynamic(this, &ThisClass::OnPlayerAttackStart);
+		
+		FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetActorNameOrLabel() + "_CheckPlayerMovement");
+		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckPlayerMovement, this, &ThisClass::Event_CheckPlayerMovement, 0.1);
 	}
 	else
 	{
@@ -108,12 +111,16 @@ void UEnemyAIComponent::UpdatePlayerPaths()
 
 void UEnemyAIComponent::LostPlayer()
 {
-	FName TimerName = FName("UEnemyAIComponent::SetPixelCharacter" + OwningEnemy->GetActorNameOrLabel());
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName);
+	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetActorNameOrLabel() + "_SetPixelCharacter");
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerLocation);
+	
+	FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetActorNameOrLabel() + "_CheckPlayerMovement");
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerMovement);
+
 	if (PXCharacter)
 	{
 		PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &ThisClass::OnPlayerAttackStart);
-	}	
+	}
 }
 
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate, float MaxRotateValue,
@@ -461,19 +468,83 @@ bool UEnemyAIComponent::GetPlayerPathPoint(FVector& Point)
 	return true;
 }
 
-void UEnemyAIComponent::OnPlayerAttackStart()
+void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 
-	// 侧闪，需要判断攻击类型 ？ 
+	// 侧闪，需要判断攻击类型: 判断方式为玩家发起攻击时距离自身的位置（后续可能会加入方位等判断？）
 	if (FMath::RandRange(0.0f, 1.0f) <= OnPlayerAttackStart_DodgeRate)
 	{
-		TArray<float> RandRotateYaws = { 45, -45, 90, -90, 135, -135, 180};
-		float Yaw = RandRotateYaws[FMath::RandRange(0, RandRotateYaws.Num() - 1)];
-		FVector MoveVector = FRotator(0, Yaw, 0).RotateVector(OwningEnemy->GetHorizontalDirectionToPlayer()) * OnPlayerAttackStart_DodgeDistance;
-		OwningEnemy->SetActionMove(MoveVector, "Dodge", 0.3, false);
+		TArray<float> RandRotateYaws;
+		FName CurveName;
+		if (Type == EAttackType::Melee && OwningEnemy->GetDistanceToPlayer() < AttackRange.Y * 2)
+		{
+			RandRotateYaws = { 180, -150, 150};
+			CurveName = "DropBack";
+		}
+		else if (Type == EAttackType::Projectile)
+		{
+			RandRotateYaws = { 60, -60, 90, -90, 120, -120};
+			CurveName = "Dodge";
+		}
+
+		if (!RandRotateYaws.IsEmpty())
+		{
+			float Yaw = RandRotateYaws[FMath::RandRange(0, RandRotateYaws.Num() - 1)];
+			FVector MoveVector = FRotator(0, Yaw, 0).RotateVector(OwningEnemy->GetHorizontalDirectionToPlayer()) * OnPlayerAttackStart_DodgeDistance;
+			OwningEnemy->SetActionMove(MoveVector, CurveName, 0.3, false);
+		}
+	}
+}
+
+void UEnemyAIComponent::Event_CheckPlayerMovement()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+
+	FVector PlayerVelocity = PXCharacter->GetVelocity();
+	if (PlayerVelocity.IsZero()) return;
+	
+	FVector DirectionToPlayer = OwningEnemy->GetHorizontalDirectionToPlayer();
+	FVector PlayerVelocityNormal = PlayerVelocity.GetSafeNormal2D();
+
+	float Dot = PlayerVelocityNormal.Dot(DirectionToPlayer);
+
+	float SpeedQuick;
+	if (OwningEnemy->GetCharacterMovement())
+	{
+		SpeedQuick = OwningEnemy->GetCharacterMovement()->MaxWalkSpeed * 1.5;
+	}
+	else
+	{
+		SpeedQuick = 160;
 	}
 	
+	if (Dot > 0 && Dot < 0.5)
+	{
+		if (PlayerVelocity.Length() > SpeedQuick)
+		{
+			CurPlayerMovementType = EPlayerMovementType::AvoidanceQuick;
+		}
+		else
+		{
+			CurPlayerMovementType = EPlayerMovementType::Avoidance;
+		}
+	}
+	else if (Dot < 0 && Dot < -0.5)
+	{
+		if (PlayerVelocity.Length() > SpeedQuick)
+		{
+			CurPlayerMovementType = EPlayerMovementType::ApproachQuick;
+		}
+		else
+		{
+			CurPlayerMovementType = EPlayerMovementType::Approach;
+		}
+	}
+
+	PlayerHigher = PXCharacter->GetActorLocation().Z - OwningEnemy->GetActorLocation().Z;
+	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Event_CheckPlayerMovement: %f, CurPlayerMovementType: %d"), PlayerVelocity.Size(), CurPlayerMovementType));
 }
 
 
@@ -482,7 +553,8 @@ void UEnemyAIComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	OwningEnemy = Cast<ABaseEnemy>(GetOwner());
-	
+
+
 }
 
 void UEnemyAIComponent::DestroyComponent(bool bPromoteChildren)
@@ -496,7 +568,6 @@ void UEnemyAIComponent::DestroyComponent(bool bPromoteChildren)
 void UEnemyAIComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	
 }
 

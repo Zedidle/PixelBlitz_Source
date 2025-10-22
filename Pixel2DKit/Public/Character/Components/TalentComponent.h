@@ -56,7 +56,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-	void Event_OnPlayerAttackStart();
+	void Event_OnPlayerAttackStart(EAttackType Type);
 
 	UFUNCTION()
 	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);
