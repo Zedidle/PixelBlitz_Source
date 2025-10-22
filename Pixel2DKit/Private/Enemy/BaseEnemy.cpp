@@ -122,6 +122,8 @@ void ABaseEnemy::SetDead(bool V)
 		bInAttackState = false;
 		bInAttackEffect = false;
 	}
+	
+	ActionMove.bActionMoving = false;
 }
 
 void ABaseEnemy::SetHurt(bool V, const float duration)
@@ -988,6 +990,7 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 
 void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 {
+	if (bDead) return;
 	if (!ActionMove.bActionMoving) return;
 
 	ActionMove.CurTime += DeltaSeconds;

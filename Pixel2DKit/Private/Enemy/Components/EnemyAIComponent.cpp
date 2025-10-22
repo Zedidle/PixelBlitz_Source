@@ -482,7 +482,7 @@ void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type)
 			RandRotateYaws = { 180, -150, 150};
 			CurveName = "DropBack";
 		}
-		else if (Type == EAttackType::Projectile)
+		else if (Type == EAttackType::Projectile && OwningEnemy->GetDistanceToPlayer() >= AttackRange.Y * 3)
 		{
 			RandRotateYaws = { 60, -60, 90, -90, 120, -120};
 			CurveName = "Dodge";
