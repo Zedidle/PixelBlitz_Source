@@ -121,9 +121,15 @@ void ABaseEnemy::SetDead(bool V)
 		bAttackAnimToggle = false;
 		bInAttackState = false;
 		bInAttackEffect = false;
+
+		ActionMove.bActionMoving = false;
+		// ActionMove图中被击落
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->SetActive(true, false);
+			GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+		}
 	}
-	
-	ActionMove.bActionMoving = false;
 }
 
 void ABaseEnemy::SetHurt(bool V, const float duration)
@@ -347,20 +353,35 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bFloat)
+void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bFloat, bool bInterrupt)
 {
 	if (!GetCapsuleComponent()) return;
 	if (SustainTime <= 0.0f) return;
-	if (ActionMove.bActionMoving) return;
+	if (ActionMove.bActionMoving && !bInterrupt) return;
 
 	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
 	FVector StartLocation = GetActorLocation();
+
+	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
+	if (ActionMoveCurveData.CheckBehindDistance > 0)
+	{
+		FHitResult OutHit;
+		FVector CheckBehindLocation = StartLocation - ActionMoveCurveData.CheckBehindDistance * MoveVector.GetSafeNormal2D();
+		bool bBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,CheckBehindLocation,
+		TraceTypeQuery1, false, {this},
+				EDrawDebugTrace::None, OutHit, true,
+				FLinearColor::Red, FLinearColor::Green, 1.0f);
+
+		if (bBlock) return;
+	}
+
+
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 	FVector TargetLocation = StartLocation + MoveVector;
-
-	// 水平方向的墙体检测
+	
+	// 目标水平方向的墙体检测
 	FHitResult OutHit;
 	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,TargetLocation,
 	TraceTypeQuery1, false, {this},
@@ -383,7 +404,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	ActionMove.SustainTime = SustainTime;
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
-	ActionMove.CurveVector = EnemyAISubsystem->GetActionMoveCurve(CurveName);
+	ActionMove.CurveVector = ActionMoveCurveData.Curve.LoadSynchronous();
 	ActionMove.bFloat = bFloat;
 	
 	if (GetCharacterMovement())
@@ -408,7 +429,7 @@ void ABaseEnemy::OnDie_Implementation()
 
 	if (GetCapsuleComponent())
 	{
-		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PlayerPawn, ECollisionResponse::ECR_Overlap);
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_PlayerPawn, ECR_Overlap);
 	}
 	
 	SetInAttackEffect(false);

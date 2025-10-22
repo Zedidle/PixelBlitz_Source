@@ -468,31 +468,36 @@ bool UEnemyAIComponent::GetPlayerPathPoint(FVector& Point)
 	return true;
 }
 
-void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type)
+void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type, FVector Direction)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 
-	// 侧闪，需要判断攻击类型: 判断方式为玩家发起攻击时距离自身的位置（后续可能会加入方位等判断？）
-	if (FMath::RandRange(0.0f, 1.0f) <= OnPlayerAttackStart_DodgeRate)
+	// 判断玩家是否朝向自己发起攻击，
+	if (Direction.Dot(- OwningEnemy->GetHorizontalDirectionToPlayer()) > DotDegree10)
 	{
-		TArray<float> RandRotateYaws;
-		FName CurveName;
-		if (Type == EAttackType::Melee && OwningEnemy->GetDistanceToPlayer() < AttackRange.Y * 2)
+		// 侧闪，需要判断攻击类型: 判断方式为玩家发起攻击时距离自身的位置（后续可能会加入方位等判断？）
+		if (FMath::RandRange(0.0f, 1.0f) <= OnPlayerAttackStart_DodgeRate)
 		{
-			RandRotateYaws = { 180, -150, 150};
-			CurveName = "DropBack";
-		}
-		else if (Type == EAttackType::Projectile && OwningEnemy->GetDistanceToPlayer() >= AttackRange.Y * 3)
-		{
-			RandRotateYaws = { 60, -60, 90, -90, 120, -120};
-			CurveName = "Dodge";
-		}
+			TArray<float> RandRotateYaws;
+			FName CurveName;
+			if (Type == EAttackType::Melee && OwningEnemy->GetDistanceToPlayer() < ActionFieldDistance.DistanceNear.Y)
+			{
+				RandRotateYaws = { 180, -150, 150};
+				CurveName = "DropBack";
+			}
+			else if (Type == EAttackType::Projectile && OwningEnemy->GetDistanceToPlayer() >= ActionFieldDistance.DistanceNear.Y * 2)
+			{
+				RandRotateYaws = { 60, -60, 90, -90, 120, -120};
+				CurveName = "Dodge";
+			}
 
-		if (!RandRotateYaws.IsEmpty())
-		{
-			float Yaw = RandRotateYaws[FMath::RandRange(0, RandRotateYaws.Num() - 1)];
-			FVector MoveVector = FRotator(0, Yaw, 0).RotateVector(OwningEnemy->GetHorizontalDirectionToPlayer()) * OnPlayerAttackStart_DodgeDistance;
-			OwningEnemy->SetActionMove(MoveVector, CurveName, 0.3, false);
+			if (!RandRotateYaws.IsEmpty())
+			{
+				float Yaw = RandRotateYaws[FMath::RandRange(0, RandRotateYaws.Num() - 1)];
+				FVector MoveVector = FRotator(0, Yaw, 0).RotateVector(OwningEnemy->GetHorizontalDirectionToPlayer()) * OnPlayerAttackStart_DodgeDistance;
+				OwningEnemy->SetActionMove(MoveVector, CurveName, 0.3, false);
+			}
 		}
 	}
 }

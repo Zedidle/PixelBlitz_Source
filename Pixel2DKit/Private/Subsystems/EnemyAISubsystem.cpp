@@ -15,11 +15,10 @@ void UEnemyAISubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	UEnemyActionMoveDataAsset* ActionMoveData = Settings->EnemyActionMoveDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ActionMoveData);
 
-	for (auto& [CurveFloatName, Curve]: ActionMoveData->ActionMoveCurveVectors)
+	for (auto& Data: ActionMoveData->ActionMoveCurveVectors)
 	{
-		ActionMoveCurveVector.Add(CurveFloatName, Curve.LoadSynchronous());
+		ActionMoveCurveVector.Add(Data.CurveFloatName, Data);
 	}
-	
 }
 
 void UEnemyAISubsystem::Deinitialize()
@@ -32,7 +31,7 @@ void UEnemyAISubsystem::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-UCurveVector* UEnemyAISubsystem::GetActionMoveCurve(FName CurveName) const
+FCurveFloatData UEnemyAISubsystem::GetActionMoveCurveData(const FName& CurveName) const
 {
-	return ActionMoveCurveVector.FindRef(CurveName);
+	return  ActionMoveCurveVector.FindRef(CurveName);
 }

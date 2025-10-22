@@ -143,6 +143,8 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
 
@@ -168,7 +170,7 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable)
-	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false);
+	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false, bool bInterrupt = false);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);

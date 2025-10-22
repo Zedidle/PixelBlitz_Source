@@ -111,7 +111,7 @@ void UTalentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UTalentComponent::Event_OnPlayerAttackStart(EAttackType Type)
+void UTalentComponent::Event_OnPlayerAttackStart(EAttackType Type, FVector Direction)
 {
 	MakeSwingFistPower();
 	

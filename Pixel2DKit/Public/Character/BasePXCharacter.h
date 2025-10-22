@@ -19,7 +19,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 
 // 发起攻击的监听事件
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerAttackStart, EAttackType, AttackType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerAttackStart, EAttackType, AttackType, FVector, AttackDirection);
 
 
 
@@ -138,6 +138,10 @@ public:
 	FVector InitScale;
 
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FVector GetSpriteForwardVector();
+
+	
 #pragma region 临时存储数据，后续看存到哪
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
@@ -153,8 +157,6 @@ public:
 	int AirDashTimes = 0;
 	
 #pragma endregion 
-	
-
 
 	
 	virtual void Tick_SaveFallingStartTime(float DeltaSeconds);

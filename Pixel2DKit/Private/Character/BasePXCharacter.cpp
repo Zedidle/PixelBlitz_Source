@@ -157,6 +157,16 @@ void ABasePXCharacter::LoadData()
 }
 
 
+FVector ABasePXCharacter::GetSpriteForwardVector()
+{
+	if (GetSprite())
+	{
+		return GetSprite()->GetForwardVector();
+	}
+
+	return FVector::ForwardVector;
+}
+
 void ABasePXCharacter::Tick_SaveFallingStartTime(float DeltaSeconds)
 {
 	if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
@@ -1735,7 +1745,7 @@ void ABasePXCharacter::TryToAttack()
 		// 近战时按下按键时 广播
 		if (DataAsset && DataAsset->NormalAttackType == EAttackType::Melee)
 		{
-			OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType);
+			OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType, GetSpriteForwardVector());
 		}
 	}
 }
@@ -1747,7 +1757,7 @@ void ABasePXCharacter::AttackRelease()
 	// 远战攻击释放时 广播 ， 后续有什么近战蓄力技能的释放再考虑额外处理 ？ 
 	if (DataAsset && DataAsset->NormalAttackType == EAttackType::Projectile)
 	{
-		OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType);
+		OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType, GetSpriteForwardVector());
 	}
 	if (bAttackHolding)
 	{

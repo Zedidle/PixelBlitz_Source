@@ -196,7 +196,7 @@ public:
 
 
 	UFUNCTION()
-	void OnPlayerAttackStart(EAttackType Type);
+	void OnPlayerAttackStart(EAttackType Type, FVector Direction);
 
 	// 监听玩家运动状态
 	UFUNCTION()

@@ -23,20 +23,8 @@ UBTTask_RandomMove::UBTTask_RandomMove()
 EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	const UWorld* World = GEngine->GetCurrentPlayWorld();
-	if (!World)
-	{
-		FinishExecute(false);
-		return EBTNodeResult::Failed;
-	}
-	
-	if (!AIOwner)
-	{
-		FinishExecute(false);
-		return EBTNodeResult::Failed;
-	}
-	
 	AEnemyAIController* Controller = Cast<AEnemyAIController>(AIOwner);
-	if (!Controller)
+	if (!World || !AIOwner || !Controller)
 	{
 		FinishExecute(false);
 		return EBTNodeResult::Failed;

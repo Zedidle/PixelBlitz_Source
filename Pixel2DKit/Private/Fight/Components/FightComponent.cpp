@@ -56,8 +56,8 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 
 			TArray<FHitResult> OutHits;
 			UKismetSystemLibrary::SphereTraceMulti(World, PreLocation, CurLocation, MeleeAttackRadius,
-				ETraceTypeQuery::TraceTypeQuery2, false, MeleeAttackActorsIgnore,
-				EDrawDebugTrace::ForDuration, OutHits, true, FLinearColor::Red,
+				TraceTypeQuery2, false, MeleeAttackActorsIgnore,
+				EDrawDebugTrace::None, OutHits, true, FLinearColor::Red,
 				FLinearColor::Green, 1);
 			if (OutHits.IsEmpty()) return;
 			for (auto& hit : OutHits)

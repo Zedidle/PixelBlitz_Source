@@ -69,6 +69,7 @@ enum class EAttackType : uint8
 #pragma endregion
 
 
+
 #pragma region EWeather
 UENUM(BlueprintType, meta = (ScriptName = "GameStatusWeather"))
 enum class EWeather : uint8

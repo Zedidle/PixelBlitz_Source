@@ -33,12 +33,17 @@ DECLARE_STATS_GROUP(TEXT("RAGame"), STATGROUP_RAGame, STATCAT_Advanced);
 //Judge is SIMULATE client
 #define IS_SIMULATED_CLIENT (ROLE_SimulatedProxy == Role)
 #define IS_SINGLE_PLAYER_FROM_PAWN(Pawn) (ROLE_Authority == Role&&Pawn->IsLocallyControlled())
-#define IS_SINGLE_PLAYERF_ROM_CONTROLLER(Controller) (ROLE_Authority == Role&&Controller->IsLocalPlayerController())
+#define IS_SINGLE_PLAYER_FROM_CONTROLLER(Controller) (ROLE_Authority == Role&&Controller->IsLocalPlayerController())
 
 // 获取float最大值
 #define MAX_FLOAT std::numeric_limits<float>::max()
 
-
+#define DotDegree5 0.996
+#define DotDegree10 0.985
+#define DotDegree15 0.966
+#define DotDegree30 0.866
+#define DotDegree45 0.707
+#define DotDegree60 0.5
 
 // GAS
 #define TAG(TagName) FGameplayTag::RequestGameplayTag((TagName))
