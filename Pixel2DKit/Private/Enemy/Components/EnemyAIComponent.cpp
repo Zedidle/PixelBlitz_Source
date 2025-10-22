@@ -11,6 +11,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
+#include "Settings/Config/EnemyActionMoveDataAsset.h"
+#include "Settings/Config/PXCustomSettings.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
@@ -59,7 +61,6 @@ void UEnemyAIComponent::SetActionFieldDistance(const FActionFieldDistance& actio
 
 void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 {
-	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	PXCharacter = Character;
 
@@ -72,18 +73,15 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
-
 			WeakThis->UpdatePlayerPaths();
-			
 		}, CheckPlayerLocationInterval);
+
+		Character->OnPlayerAttackStart.AddUniqueDynamic(this, &ThisClass::OnPlayerAttackStart);
 	}
 	else
 	{
-		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("UEnemyAIComponent::SetPixelCharacter: null")));
-		UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName);
+		LostPlayer();
 	}
-
-	
 }
 
 void UEnemyAIComponent::UpdatePlayerPaths()
@@ -106,6 +104,16 @@ void UEnemyAIComponent::UpdatePlayerPaths()
 	{
 		PlayerPaths.RemoveAt(0);
 	}
+}
+
+void UEnemyAIComponent::LostPlayer()
+{
+	FName TimerName = FName("UEnemyAIComponent::SetPixelCharacter" + OwningEnemy->GetActorNameOrLabel());
+	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName);
+	if (PXCharacter)
+	{
+		PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &ThisClass::OnPlayerAttackStart);
+	}	
 }
 
 FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, float DotDirPerRotate, float MaxRotateValue,
@@ -275,25 +283,6 @@ true, FLinearColor::Red, FLinearColor::Green, 0.1f);
 	CurTargetLocation = NewTargetLocation;
 	Result = CurTargetLocation;
 	return true;
-}
-
-FVector UEnemyAIComponent::GetAttackLocation()
-{
-	if (!IsValid(OwningEnemy)) return FVector::Zero();
-	if (!IsValid( PXCharacter)) return FVector::Zero();	
-
-	FVector Dir = (OwningEnemy->GetActorLocation() - PXCharacter->GetActorLocation()).GetSafeNormal2D();
-	if (OwningEnemy->GetDistanceToPlayer() < AttackRange.X)
-	{
-		return PXCharacter->GetActorLocation() + (AttackRange.X + 5) * Dir;
-	}
-
-	if (OwningEnemy->GetDistanceToPlayer() > AttackRange.Y)
-	{
-		return PXCharacter->GetActorLocation() + (AttackRange.Y - 5) * Dir;
-	}
-
-	return OwningEnemy->GetActorLocation();
 }
 
 
@@ -472,6 +461,21 @@ bool UEnemyAIComponent::GetPlayerPathPoint(FVector& Point)
 	return true;
 }
 
+void UEnemyAIComponent::OnPlayerAttackStart()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
+
+	// 侧闪，需要判断攻击类型 ？ 
+	if (FMath::RandRange(0.0f, 1.0f) <= OnPlayerAttackStart_DodgeRate)
+	{
+		TArray<float> RandRotateYaws = { 45, -45, 90, -90, 135, -135, 180};
+		float Yaw = RandRotateYaws[FMath::RandRange(0, RandRotateYaws.Num() - 1)];
+		FVector MoveVector = FRotator(0, Yaw, 0).RotateVector(OwningEnemy->GetHorizontalDirectionToPlayer()) * OnPlayerAttackStart_DodgeDistance;
+		OwningEnemy->SetActionMove(MoveVector, "Dodge", 0.3, false);
+	}
+	
+}
+
 
 // Called when the game starts
 void UEnemyAIComponent::BeginPlay()
@@ -484,8 +488,7 @@ void UEnemyAIComponent::BeginPlay()
 void UEnemyAIComponent::DestroyComponent(bool bPromoteChildren)
 {
 	Super::DestroyComponent(bPromoteChildren);
-	FName TimerName = FName("UEnemyAIComponent::SetPixelCharacter" + OwningEnemy->GetActorNameOrLabel());
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName);
+	LostPlayer();
 }
 
 

@@ -72,6 +72,25 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	// 盟友互斥因子，建议 0.1 - 2 之间，越大越松散
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float AllyRepulsion = 0.5f;
+
+
+
+
+
+
+
+	// 监听玩家后的反应
+
+	// 闪避概率
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float OnPlayerAttackStart_DodgeRate = 0.6f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float OnPlayerAttackStart_DodgeDistance = 50.0f;
+
+
+
+
 	
 public:	
 	// Sets default values for this component's properties
@@ -128,6 +147,8 @@ public:
 
 	void UpdatePlayerPaths();
 
+	void LostPlayer();
+
 	/* 向量点积法 弱随机移动到目标位置
 	 * TargetLocation - 尝试到达的目标位置
 	 * DotDirPerRotate - 每次偏转角度
@@ -140,11 +161,6 @@ public:
 								float MaxRotateValue = 60, float DefaultDirRotate = 0, float MinDirectlyDistance = 50);
 
 	bool MoveCheckAllies(FVector& Result, FVector NewTargetLocation, float MinDirectlyDistance = 50);
-
-	
-	// 获取在X方向（相对玩家的东西方向）的攻击位置
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
-	FVector GetAttackLocation();
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = EnemyAI)
@@ -161,5 +177,11 @@ public:
 
 	
 	bool GetPlayerPathPoint(FVector& Point);
-		
+
+
+
+
+	UFUNCTION()
+	void OnPlayerAttackStart();
+	
 };

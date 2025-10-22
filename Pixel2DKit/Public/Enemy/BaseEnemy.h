@@ -138,6 +138,7 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	
 	void SetLanding(const bool V, const float time = 0.1f);
 
+	FActionMove ActionMove;
 	
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -166,9 +167,8 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	
-	FActionMove ActionMove;
 	UFUNCTION(BlueprintCallable)
-	void SetActionMove(const FVector& MoveVector, UCurveVector* MoveCurve, float SustainTime = 0.5f, bool bFloat = false);
+	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
@@ -187,7 +187,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
 	UFUNCTION(BlueprintCallable, Category="Enemy")
-	bool SetPXCharacter(AActor* Character);
+	void SetPXCharacter(AActor* Character);
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnSensingPlayer")
 	void BP_OnSensingPlayer(AActor* PlayerActor);

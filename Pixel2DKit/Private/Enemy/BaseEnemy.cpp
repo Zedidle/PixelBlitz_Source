@@ -29,6 +29,7 @@
 #include "Sound/SoundCue.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/DropSubsystem.h"
+#include "Subsystems/EnemyAISubsystem.h"
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
@@ -43,7 +44,7 @@ AActor* ABaseEnemy::GetPixelCharacter()
 	return Cast<AActor>(PXCharacter);
 }
 
-bool ABaseEnemy::SetPXCharacter(AActor* Character)
+void ABaseEnemy::SetPXCharacter(AActor* Character)
 {
 	if (Character == nullptr)
 	{
@@ -56,9 +57,11 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), nullptr);
 		}
-		return true;
+		return;
 	}
-	
+
+	if (IsValid(PXCharacter)) return;
+
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(Character))
 	{
 		PXCharacter = C;
@@ -70,9 +73,7 @@ bool ABaseEnemy::SetPXCharacter(AActor* Character)
 		{
 			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PXCharacter);
 		}
-		return true;
 	}
-	return false;
 }
 
 void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
@@ -83,16 +84,11 @@ void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 		// 后续可能要配置受惊距离
 		if (PlayerActor->GetDistanceTo(this) < 100.0f)
 		{
-			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-			UEnemyActionMoveDataAsset* ActionMoveData = Settings->EnemyActionMoveDataAsset.LoadSynchronous();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ActionMoveData);
-			SetActionMove(GetHorizontalDirectionToPlayer() * -20, ActionMoveData->CV_Startled.LoadSynchronous(), 0.5, true);
+			SetActionMove(GetHorizontalDirectionToPlayer() * -20, "Startled", 0.5, true);
 		}
 	}
 
 	SetPXCharacter(PlayerActor);
-	
-	
 	BP_OnSensingPlayer(PlayerActor);
 }
 
@@ -206,7 +202,7 @@ float ABaseEnemy::GetDistanceToPlayer() const
 	{
 		return (PXCharacter->GetActorLocation() - GetActorLocation()).Size();
 	}
-	return 99999;
+	return 0;
 }
 
 void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
@@ -349,13 +345,15 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-void ABaseEnemy::SetActionMove(const FVector& MoveVector,  UCurveVector* MoveCurve, float SustainTime, bool bFloat)
+void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bFloat)
 {
 	if (!GetCapsuleComponent()) return;
 	if (SustainTime <= 0.0f) return;
 	if (ActionMove.bActionMoving) return;
 
-	
+	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
+
 	FVector StartLocation = GetActorLocation();
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 	FVector TargetLocation = StartLocation + MoveVector;
@@ -364,7 +362,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  UCurveVector* MoveCur
 	FHitResult OutHit;
 	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,TargetLocation,
 	TraceTypeQuery1, false, {this},
-			EDrawDebugTrace::ForDuration, OutHit, true,
+			EDrawDebugTrace::None, OutHit, true,
 			FLinearColor::Red, FLinearColor::Green, 1.0f);
 	if (bWallBlock)
 	{
@@ -383,7 +381,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  UCurveVector* MoveCur
 	ActionMove.SustainTime = SustainTime;
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
-	ActionMove.CurveVector = MoveCurve;
+	ActionMove.CurveVector = EnemyAISubsystem->GetActionMoveCurve(CurveName);
 	ActionMove.bFloat = bFloat;
 	
 	if (GetCharacterMovement())
