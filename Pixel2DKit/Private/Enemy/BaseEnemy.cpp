@@ -204,11 +204,20 @@ void ABaseEnemy::SetJumping(const bool V, const float time)
 	
 }
 
-float ABaseEnemy::GetDistanceToPlayer() const
+float ABaseEnemy::GetHorizontalDistanceToPlayer() const
 {
 	if (IsValid(PXCharacter))
 	{
-		return (PXCharacter->GetActorLocation() - GetActorLocation()).Size();
+		return (PXCharacter->GetActorLocation() - GetActorLocation()).Size2D();
+	}
+	return 0;
+}
+
+float ABaseEnemy::GetVerticalDistanceToPlayer() const
+{
+	if (IsValid(PXCharacter))
+	{
+		return PXCharacter->GetActorLocation().Z - GetActorLocation().Z;
 	}
 	return 0;
 }
@@ -426,6 +435,15 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	}
 }
 
+float ABaseEnemy::GetDefaultHalfHeight() const
+{
+	if (GetCapsuleComponent())
+	{
+		return GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	}
+	return Super::GetDefaultHalfHeight();
+}
+
 
 void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
 {
@@ -632,8 +650,16 @@ bool ABaseEnemy::InAttackRange()
 	{
 		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 		if (!ActionFieldsCanAttack.HasTag(ActionField)) return false;
+
+
+		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetVerticalDistanceToPlayer: %f"), GetVerticalDistanceToPlayer()));
 		
-		float distance = GetDistanceToPlayer();
+		if (FMath::Abs(GetVerticalDistanceToPlayer()) > 50)
+		{
+			return false;
+		}
+		
+		float distance = GetHorizontalDistanceToPlayer();
 		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
 	}
 	return false;
@@ -1049,20 +1075,24 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 		CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
 		CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
 
+
+		// 跳跃的话（包括小跳，大跳），bFloat 需要设定为 true
 		if (!ActionMove.bFloat && bHitFloor)
 		{
 			CurLocation.Z = NotFloatZ;
 		}
 		else
 		{
-			if (CurCurveVector.Z > 1)
-			{
-				CurLocation.Z = ActionMove.TargetLocation.Z + CurCurveVector.Z;
-			}
-			else
-			{
-				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, CurCurveVector.Z);
-			}
+			// 曲线的 Z 值针对跳跃必须一开始就大于 1
+			CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;
+			
+			// if (CurCurveVector.Z > 1)
+			// {
+			// }
+			// else
+			// {
+			// 	CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, CurCurveVector.Z);
+			// }
 		}
 		
 		SetActorLocation(CurLocation, false);

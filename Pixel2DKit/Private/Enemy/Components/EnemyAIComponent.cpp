@@ -480,12 +480,12 @@ void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type, FVector Direction)
 		{
 			TArray<float> RandRotateYaws;
 			FName CurveName;
-			if (Type == EAttackType::Melee && OwningEnemy->GetDistanceToPlayer() < ActionFieldDistance.DistanceNear.Y)
+			if (Type == EAttackType::Melee && OwningEnemy->GetHorizontalDistanceToPlayer() < ActionFieldDistance.DistanceNear.Y)
 			{
 				RandRotateYaws = { 180, -150, 150};
 				CurveName = "DropBack";
 			}
-			else if (Type == EAttackType::Projectile && OwningEnemy->GetDistanceToPlayer() >= ActionFieldDistance.DistanceNear.Y * 2)
+			else if (Type == EAttackType::Projectile && OwningEnemy->GetHorizontalDistanceToPlayer() >= ActionFieldDistance.DistanceNear.Y * 2)
 			{
 				RandRotateYaws = { 60, -60, 90, -90, 120, -120};
 				CurveName = "Dodge";

@@ -182,6 +182,8 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void LoadEnemyData(FName Level);
 
+	virtual float GetDefaultHalfHeight() const override;
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void LoadLookDeterrence(int32 Level);
@@ -291,7 +293,9 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
-	float GetDistanceToPlayer() const;
+	float GetHorizontalDistanceToPlayer() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	float GetVerticalDistanceToPlayer() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Enemy | Fight")
 	void TryAttack();

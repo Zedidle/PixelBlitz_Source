@@ -8,8 +8,10 @@
 #include "Enemy/BaseEnemy.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/Components/EnemyAIComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Utilitys/SpaceFuncLib.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
+#include "Utilitys/DebugFuncLab.h"
 
 
 UBTTask_EnemyMoveToActionLocation::UBTTask_EnemyMoveToActionLocation()
@@ -74,9 +76,19 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(PawnLocation,
 		PawnLocation + (PlayerPawn->GetActorLocation() - PawnLocation).GetSafeNormal2D() * EnemyAIComponent->GetMinDirSwitchDistance() * 2,
 						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance() / 2);
-	
-	if (bIsCliff)
+
+	float VerticalDistanceToPlayer = SelfEnemyPawn->GetVerticalDistanceToPlayer();
+
+	// 中间隔了悬崖，或者高度差超过某数值，触发跳跃
+	if (bIsCliff || FMath::Abs(VerticalDistanceToPlayer) >= 50 )
 	{
+		// 跳跃的前提是在站在地面上
+		if (!SelfEnemyPawn->GetCharacterMovement() || !SelfEnemyPawn->GetCharacterMovement()->IsWalking())
+		{
+			FinishExecute(false);
+			return EBTNodeResult::Failed;
+		}
+
 		FinishExecute(true);
 
 		TArray<FVector> Points;
@@ -86,7 +98,31 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 			// 一般下标为 0 是最远的
 			// FVector JumpPoint = Points[0];
 			FVector JumpPoint = Points[0] + SelfEnemyPawn->GetDefaultHalfHeight();
-			SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpHorizontal", SelfEnemyPawn->JumpDuration, true, false, false);
+
+			if (FMath::Abs(VerticalDistanceToPlayer) < 50)
+			{
+				UDebugFuncLab::ScreenMessage("JumpHorizontal");
+				SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpHorizontal", SelfEnemyPawn->JumpDuration, true, false, false);
+			}
+			else if (VerticalDistanceToPlayer >= 50 && VerticalDistanceToPlayer <= 150)
+			{
+				FHitResult HitResult_Ceil;
+				bool bHitCeil = UKismetSystemLibrary::LineTraceSingle(SelfEnemyPawn->GetWorld(), PawnLocation, PawnLocation + FVector(0,0,150),
+				TraceTypeQuery1, false, {SelfEnemyPawn},
+						EDrawDebugTrace::None, HitResult_Ceil, true,
+						FLinearColor::Black, FLinearColor::Gray, 1.0f);
+				
+				if (!bHitCeil)
+				{
+					SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpToHigher", SelfEnemyPawn->JumpDuration, true, false, false);
+				}
+			}
+			else if (VerticalDistanceToPlayer  <= -50 && VerticalDistanceToPlayer >= -150)
+			{
+				UDebugFuncLab::ScreenMessage("JumpToLower");
+				SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpToLower", SelfEnemyPawn->JumpDuration, true, false, false);
+			}
+			
 			return EBTNodeResult::InProgress;
 		}
 		return EBTNodeResult::Failed;

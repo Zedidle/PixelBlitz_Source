@@ -180,7 +180,7 @@ bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartL
 		
 		TArray<FHitResult> OutHits;
 		bool bHit = UKismetSystemLibrary::LineTraceMulti(World, CheckStart, CheckEnd, TraceTypeQuery1, false, {},
-			EDrawDebugTrace::None, OutHits, true, FLinearColor::Red, FLinearColor::Green, 2.0f
+			EDrawDebugTrace::ForDuration, OutHits, true, FLinearColor::Red, FLinearColor::Green, 2.0f
 		);
 
 		if (bHit)
