@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PaperZDAnimNotify.h"
-#include "ZDAN_ActionMove.generated.h"
-
+#include "PaperZDAnimNotifyState.h"
+#include "ZDANS_ActionMove.generated.h"
 
 UENUM(BlueprintType)
 enum class EActionMoveDirectionType: uint8
@@ -16,9 +15,8 @@ enum class EActionMoveDirectionType: uint8
 
 
 
-
 UCLASS()
-class PIXEL2DKIT_API UZDAN_ActionMove : public UPaperZDAnimNotify
+class PIXEL2DKIT_API UZDANS_ActionMove : public UPaperZDAnimNotifyState
 {
 	GENERATED_BODY()
 
@@ -27,9 +25,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FName CurveName = FName("None");
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	float SustainTime = 0.5f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	bool bFloat = false;
@@ -48,6 +43,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	bool bInterrupt = true;	
 	
+
+
 	
-	void OnReceiveNotify_Implementation(UPaperZDAnimInstance* OwningInstance = nullptr) const;
+	void OnNotifyBegin_Implementation(UPaperZDAnimInstance* OwningInstance) const;
+	void OnNotifyEnd_Implementation(UPaperZDAnimInstance* OwningInstance) const;
+	
 };

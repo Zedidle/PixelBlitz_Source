@@ -1049,7 +1049,7 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 			// 为了避免 陷入/上飘 浮动的地面，要做一个检测上浮
 			FHitResult OutHit;
 			bool bCheckedFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
-				GetActorLocation() + FVector(0,0, -HalfHeight*2),
+				GetActorLocation() + FVector(0, 0, -20 * HalfHeight),
 			TraceTypeQuery1, false, {this},
 					EDrawDebugTrace::None, OutHit, true,
 					FLinearColor::Red, FLinearColor::Green, 1.0f);
