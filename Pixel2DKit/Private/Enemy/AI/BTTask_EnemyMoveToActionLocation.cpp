@@ -89,7 +89,6 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 			return EBTNodeResult::Failed;
 		}
 
-		FinishExecute(true);
 
 		TArray<FVector> Points;
 		// 判断是否可以直接跳过去？
@@ -97,11 +96,27 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		{
 			// 一般下标为 0 是最远的
 			// FVector JumpPoint = Points[0];
-			FVector JumpPoint = Points[0] + SelfEnemyPawn->GetDefaultHalfHeight();
+			// 应该从所有点位里选一个与目标的高度差不超过50的
+
+			TArray<FVector> PointsMaybe;
+			for (FVector& P : Points)
+			{
+				if (FMath::Abs(P.Z - PlayerPawn->GetActorLocation().Z) < 50)
+				{
+					PointsMaybe.Add(P);
+				}
+			}
+
+			if (PointsMaybe.IsEmpty())
+			{
+				FinishExecute(false);
+				return EBTNodeResult::Failed;
+			}
+
+			FVector JumpPoint = PointsMaybe[FMath::RandRange(0, PointsMaybe.Num() - 1)] + SelfEnemyPawn->GetDefaultHalfHeight();
 
 			if (FMath::Abs(VerticalDistanceToPlayer) < 50)
 			{
-				UDebugFuncLab::ScreenMessage("JumpHorizontal");
 				SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpHorizontal", SelfEnemyPawn->JumpDuration, true, false, false);
 			}
 			else if (VerticalDistanceToPlayer >= 50 && VerticalDistanceToPlayer <= 150)
@@ -114,17 +129,21 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 				
 				if (!bHitCeil)
 				{
+					UDebugFuncLab::ScreenMessage("JumpToHigher");
 					SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpToHigher", SelfEnemyPawn->JumpDuration, true, false, false);
 				}
 			}
 			else if (VerticalDistanceToPlayer  <= -50 && VerticalDistanceToPlayer >= -150)
 			{
-				UDebugFuncLab::ScreenMessage("JumpToLower");
 				SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpToLower", SelfEnemyPawn->JumpDuration, true, false, false);
 			}
-			
+
+			FinishExecute(true);
 			return EBTNodeResult::InProgress;
 		}
+
+
+		FinishExecute(false);
 		return EBTNodeResult::Failed;
 	}
 	

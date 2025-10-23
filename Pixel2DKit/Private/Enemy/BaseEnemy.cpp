@@ -651,9 +651,6 @@ bool ABaseEnemy::InAttackRange()
 		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 		if (!ActionFieldsCanAttack.HasTag(ActionField)) return false;
 
-
-		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetVerticalDistanceToPlayer: %f"), GetVerticalDistanceToPlayer()));
-		
 		if (FMath::Abs(GetVerticalDistanceToPlayer()) > 50)
 		{
 			return false;
@@ -1065,7 +1062,7 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 		bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
 			GetActorLocation() + FVector(0, 0, -5 * HalfHeight),
 		TraceTypeQuery1, false, {this},
-				EDrawDebugTrace::ForDuration, OutHit, true,
+				EDrawDebugTrace::None, OutHit, true,
 				FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
 
 		float NotFloatZ = OutHit.Location.Z + HalfHeight;
