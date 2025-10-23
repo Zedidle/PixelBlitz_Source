@@ -76,11 +76,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	int Damage = MultiPercent * IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
 	FVector PreEnemyLocation = Enemy->GetActorLocation();
 	
-	float SwitchedEnemyHeightOffset = 44.0f;
-	if (UCapsuleComponent* Capsule = Enemy->GetComponentByClass<UCapsuleComponent>())
-	{
-		SwitchedEnemyHeightOffset = Capsule->GetScaledCapsuleHalfHeight();
-	}
+	float SwitchedEnemyHeightOffset = Enemy->GetDefaultHalfHeight();
 
 	FVector EnemyNewLocation = Enemy->GetActorScale3D() * FVector(0, 0, SwitchedEnemyHeightOffset) + PXCharacter->GetActorLocation();
 

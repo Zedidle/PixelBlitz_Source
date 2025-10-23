@@ -105,6 +105,10 @@ struct FActionMove
 	// 是否飘起？ 起跳，浮空技能， 需要设为 true
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
 	bool bFloat = false;
+
+	// 是否能被打断？
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	bool bCabBeInterrupt = true;
 };
 
 
@@ -143,7 +147,7 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-
+	bool IsActionMoving() const;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
@@ -170,7 +174,7 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable)
-	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false, bool bInterrupt = false);
+	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false, bool bInterrupt = false, bool bCabBeInterrupt = false);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
@@ -203,6 +207,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;
 
+	// 跳跃时长， 其实应该取决于距离和自身的速度
+	float JumpDuration = 1.0f;
+	
 	int32 CurAttackDamage = 10;
 	FVector CurAttackRepel = FVector(50,50,100);
 	

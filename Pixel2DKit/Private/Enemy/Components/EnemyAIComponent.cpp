@@ -347,12 +347,11 @@ float UEnemyAIComponent::GetCheckCliffHeight()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, 50)
 	
-	UCapsuleComponent* CapsuleComponent = OwningEnemy->GetComponentByClass<UCapsuleComponent>();
 	UCharacterMovementComponent* CharacterMovementComponent = OwningEnemy->GetComponentByClass<UCharacterMovementComponent>();
-	if (!CapsuleComponent || !CharacterMovementComponent) return 0;
+	if (!CharacterMovementComponent) return 0;
 	
 	float ScaleZ = OwningEnemy->GetActorScale3D().Z;
-	return ScaleZ * (CharacterMovementComponent->MaxStepHeight + CapsuleComponent->GetUnscaledCapsuleHalfHeight());
+	return ScaleZ * CharacterMovementComponent->MaxStepHeight + OwningEnemy->GetDefaultHalfHeight();
 }
 
 float UEnemyAIComponent::GetMinDirSwitchDistance()

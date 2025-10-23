@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/BTFunctionLibrary.h"
+#include "Enemy/BaseEnemy.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Utilitys/SpaceFuncLib.h"
@@ -40,14 +41,14 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
-	APawn* SelfPawn = AIOwner->GetPawn();
-	if (!SelfPawn || !SelfPawn->Implements<UEnemyAI_Interface>())
+	ABaseEnemy* SelfEnemyPawn = AIOwner->GetPawn<ABaseEnemy>();
+	if (!SelfEnemyPawn || !SelfEnemyPawn->Implements<UEnemyAI_Interface>() || SelfEnemyPawn->IsActionMoving())
 	{
 		FinishAbort();
 		return EBTNodeResult::Failed;
 	}
 
-	UEnemyAIComponent* EnemyAIComponent = SelfPawn->GetComponentByClass<UEnemyAIComponent>();
+	UEnemyAIComponent* EnemyAIComponent = SelfEnemyPawn->GetComponentByClass<UEnemyAIComponent>();
 	AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(AIOwner);
 	if (!EnemyAIComponent || !EnemyAIController)
 	{
@@ -55,19 +56,19 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 	
-	if (!IEnemyAI_Interface::Execute_CanMove(SelfPawn))
+	if (!IEnemyAI_Interface::Execute_CanMove(SelfEnemyPawn))
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
 	
-	if (IEnemyAI_Interface::Execute_Dash(SelfPawn))
+	if (IEnemyAI_Interface::Execute_Dash(SelfEnemyPawn))
 	{
 		FinishExecute(true);
 		return EBTNodeResult::Failed;
 	}
 
-	FVector PawnLocation = SelfPawn->GetActorLocation();
+	FVector PawnLocation = SelfEnemyPawn->GetActorLocation();
 	
 	// 先做一个简单悬崖判断
 	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(PawnLocation,
@@ -77,13 +78,24 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 	if (bIsCliff)
 	{
 		FinishExecute(true);
+
+		TArray<FVector> Points;
+		// 判断是否可以直接跳过去？
+		if (USpaceFuncLib::GetJumpPoints(Points, PawnLocation, PlayerPawn->GetActorLocation()))
+		{
+			// 一般下标为 0 是最远的
+			// FVector JumpPoint = Points[0];
+			FVector JumpPoint = Points[0] + SelfEnemyPawn->GetDefaultHalfHeight();
+			SelfEnemyPawn->SetActionMove(JumpPoint - PawnLocation, "JumpHorizontal", SelfEnemyPawn->JumpDuration, true, false, false);
+			return EBTNodeResult::InProgress;
+		}
 		return EBTNodeResult::Failed;
 	}
 	
 	FHitResult OutHit;
 	// 向玩家位置做一个射线检测，判断能否直接看见
-	bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(SelfPawn->GetWorld(), PawnLocation, PlayerPawn->GetActorLocation(),
-	TraceTypeQuery1, false, {SelfPawn},
+	bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(SelfEnemyPawn->GetWorld(), PawnLocation, PlayerPawn->GetActorLocation(),
+	TraceTypeQuery1, false, {SelfEnemyPawn},
 			EDrawDebugTrace::None, OutHit, true,
 			FLinearColor::Red, FLinearColor::Green, 1.0f);
 
@@ -100,7 +112,7 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
 	}
 	
-	bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfPawn->GetActorLocation(),TargetLocation,
+	bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfEnemyPawn->GetActorLocation(),TargetLocation,
 						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance());
 	if (bIsCliff)
 	{

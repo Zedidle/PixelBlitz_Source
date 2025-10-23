@@ -3,6 +3,7 @@
 
 #include "Utilitys/SpaceFuncLib.h"
 
+#include "CollisionDebugDrawingPublic.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Enemy/BaseEnemy.h"
 #include "Kismet/GameplayStatics.h"
@@ -135,9 +136,8 @@ bool USpaceFuncLib::CheckCliff(const FVector& StartLocation, const float CliffHe
 	// TraceTypeQuery1 是可视即可
 	
 	FHitResult OutHit;
-	TArray<AActor*> ActorsToIgnore;
 	bool hit = UKismetSystemLibrary::LineTraceSingle(World, StartLocation, EndLocation,
-		TraceTypeQuery1, false, ActorsToIgnore,
+		TraceTypeQuery1, false, {},
 				EDrawDebugTrace::None, OutHit, true,
 				FLinearColor::Red, FLinearColor::Green, 1.0f);
 
@@ -160,6 +160,41 @@ bool USpaceFuncLib::CheckCliffProcess(const FVector& StartLocation, const FVecto
 		CurDistance *= CheckRate;
 	}
 	return false;
+}
+
+bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartLocation, const FVector& TargetLocation, float HigherDistance, float LowerDistance, float PerCheckDistance)
+{
+	if (PerCheckDistance <= 0) return false;
+	
+	const UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!IsValid(World)) return false;
+
+	FVector CheckDirection = (TargetLocation - StartLocation).GetSafeNormal2D();
+	float RemDistance = (TargetLocation - StartLocation).Size() - 10;
+	
+	while (RemDistance > PerCheckDistance)
+	{
+		FVector HorizontalVector = StartLocation + CheckDirection * RemDistance;
+		FVector CheckStart = HorizontalVector + FVector(0,0,HigherDistance);
+		FVector CheckEnd = HorizontalVector - FVector(0,0,LowerDistance);
+		
+		TArray<FHitResult> OutHits;
+		bool bHit = UKismetSystemLibrary::LineTraceMulti(World, CheckStart, CheckEnd, TraceTypeQuery1, false, {},
+			EDrawDebugTrace::None, OutHits, true, FLinearColor::Red, FLinearColor::Green, 2.0f
+		);
+
+		if (bHit)
+		{
+			for (auto& Hit : OutHits)
+			{
+				Points.Add(Hit.Location);
+			}
+		}
+
+		RemDistance -= PerCheckDistance;
+	}
+
+	return Points.Num() > 0;
 }
 
 

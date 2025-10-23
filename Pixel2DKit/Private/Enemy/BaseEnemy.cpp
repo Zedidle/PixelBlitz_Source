@@ -324,6 +324,11 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	}
 }
 
+bool ABaseEnemy::IsActionMoving() const
+{
+	return ActionMove.bActionMoving;
+}
+
 void ABaseEnemy::Initialize_Implementation(FName Level)
 {
 	EnemyLevel = Level;
@@ -353,18 +358,24 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bFloat, bool bInterrupt)
+void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bFloat, bool bInterrupt, bool bCabBeInterrupt)
 {
 	if (!GetCapsuleComponent()) return;
+	if (CurveName.IsNone()) return;
 	if (SustainTime <= 0.0f) return;
+	if (ActionMove.bActionMoving && !ActionMove.bCabBeInterrupt) return;
 	if (ActionMove.bActionMoving && !bInterrupt) return;
 
 	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
-	FVector StartLocation = GetActorLocation();
-
 	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
+	UCurveVector* Curve = ActionMoveCurveData.Curve.LoadSynchronous();
+	if (!IsValid(Curve)) return;
+	
+	if (ActionMoveCurveData.Curve.IsNull()) return;
+
+	FVector StartLocation = GetActorLocation();
 	if (ActionMoveCurveData.CheckBehindDistance > 0)
 	{
 		FHitResult OutHit;
@@ -404,8 +415,9 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	ActionMove.SustainTime = SustainTime;
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
-	ActionMove.CurveVector = ActionMoveCurveData.Curve.LoadSynchronous();
+	ActionMove.CurveVector = Curve;
 	ActionMove.bFloat = bFloat;
+	ActionMove.bCabBeInterrupt = bCabBeInterrupt;
 	
 	if (GetCharacterMovement())
 	{
@@ -1013,19 +1025,36 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 {
 	if (bDead) return;
 	if (!ActionMove.bActionMoving) return;
+	if (!ActionMove.CurveVector) return;
 
 	ActionMove.CurTime += DeltaSeconds;
 	float MovePercent = ActionMove.CurTime / ActionMove.SustainTime;
 
 	if (MovePercent <= 1)
 	{
-		if (ActionMove.CurveVector)
-		{
-			FVector CurCurveVector = ActionMove.CurveVector->GetVectorValue(MovePercent);
-			FVector CurLocation;
-			CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
-			CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
+		float HalfHeight = GetDefaultHalfHeight();
+		
+		// 为了避免 陷入/上飘 浮动的地面，要做一个检测上浮
+		FHitResult OutHit;
+		bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
+			GetActorLocation() + FVector(0, 0, -5 * HalfHeight),
+		TraceTypeQuery1, false, {this},
+				EDrawDebugTrace::ForDuration, OutHit, true,
+				FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
 
+		float NotFloatZ = OutHit.Location.Z + HalfHeight;
+		
+		FVector CurCurveVector = ActionMove.CurveVector->GetVectorValue(MovePercent);
+		FVector CurLocation;
+		CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
+		CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
+
+		if (!ActionMove.bFloat && bHitFloor)
+		{
+			CurLocation.Z = NotFloatZ;
+		}
+		else
+		{
 			if (CurCurveVector.Z > 1)
 			{
 				CurLocation.Z = ActionMove.TargetLocation.Z + CurCurveVector.Z;
@@ -1034,38 +1063,14 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 			{
 				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, CurCurveVector.Z);
 			}
-			
-			SetActorLocation(CurLocation, false);
 		}
-		else
-		{
-			SetActorLocation(FMath::Lerp( ActionMove.StartLocation, ActionMove.TargetLocation, MovePercent), false);
-		}
-
-		if (GetCapsuleComponent())
-		{
-			float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-			
-			// 为了避免 陷入/上飘 浮动的地面，要做一个检测上浮
-			FHitResult OutHit;
-			bool bCheckedFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
-				GetActorLocation() + FVector(0, 0, -20 * HalfHeight),
-			TraceTypeQuery1, false, {this},
-					EDrawDebugTrace::None, OutHit, true,
-					FLinearColor::Red, FLinearColor::Green, 1.0f);
-			if (bCheckedFloor)
-			{
-				float FixHeight = HalfHeight - OutHit.Distance;
-				if (FixHeight < 0 || !ActionMove.bFloat)
-				{
-					AddActorWorldOffset(FVector(0,0, FixHeight));
-				}
-			}
-		}
+		
+		SetActorLocation(CurLocation, false);
 	}
 	else
 	{
 		ActionMove.bActionMoving = false;
+		ActionMove.bCabBeInterrupt = true;
 		if (GetCharacterMovement())
 		{
 			GetCharacterMovement()->SetActive(true, false);
