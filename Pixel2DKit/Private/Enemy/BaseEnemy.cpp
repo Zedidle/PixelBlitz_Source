@@ -367,7 +367,7 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 }
 
-void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bFloat, bool bInterrupt, bool bCabBeInterrupt)
+void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bInterrupt, bool bCabBeInterrupt)
 {
 	if (!GetCapsuleComponent()) return;
 	if (CurveName.IsNone()) return;
@@ -424,7 +424,6 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
 	ActionMove.CurveVector = Curve;
-	ActionMove.bFloat = bFloat;
 	ActionMove.bCabBeInterrupt = bCabBeInterrupt;
 	
 	if (GetCharacterMovement())
@@ -472,12 +471,9 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	{
 		CurveName = "JumpToLower";
 	}
-	else
-	{
-		UDebugFuncLab::ScreenMessage("超出跳跃范围");
-		return;
-	}
 
+	if (CurveName.IsNone()) return;
+	
 	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
@@ -493,7 +489,6 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
 	ActionMove.CurveVector = Curve;
-	ActionMove.bFloat = true;
 	ActionMove.bCabBeInterrupt = false;
 	
 	if (GetCharacterMovement())
@@ -1134,41 +1129,30 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 		// 为了避免 陷入/上飘 浮动的地面，要做一个检测上浮
 		FHitResult OutHit;
 		bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
-			GetActorLocation() + FVector(0, 0, -5 * HalfHeight),
+			GetActorLocation() + FVector(0, 0, -HalfHeight),
 		TraceTypeQuery1, false, {this},
 				EDrawDebugTrace::None, OutHit, true,
 				FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
 
-		float NotFloatZ = OutHit.Location.Z + HalfHeight;
-		
 		FVector CurCurveVector = ActionMove.CurveVector->GetVectorValue(MovePercent);
 		FVector CurLocation;
 		CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
 		CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
 
-
-		// 跳跃的话（包括小跳，大跳），bFloat 需要设定为 true
-		if (!ActionMove.bFloat && bHitFloor)
+		if (bHitFloor)
 		{
-			CurLocation.Z = NotFloatZ;
+			CurLocation.Z =  OutHit.Location.Z + HalfHeight;
+		}
+		else if (CurCurveVector.Z >= 1.5)
+		{
+			// 水平小跳模式
+			CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;
 		}
 		else
 		{
-			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z): %f"), FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z)));
-			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("P: %f"), P));
-
-			if (CurCurveVector.Z >= 1.5)
-			{
-				// 水平小跳模式
-				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;
-			}
-			else
-			{
-				// 跨平台跳跃模式
-				float P = FMath::Max(50, FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z) / 2);
-				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z * P;
-			}
-			
+			// 跨平台跳跃模式
+			float P = FMath::Max(50, FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z) / 2);
+			CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z * P;
 		}
 		
 		SetActorLocation(CurLocation, false);

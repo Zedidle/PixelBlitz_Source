@@ -102,10 +102,6 @@ struct FActionMove
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
 	float SustainTime = 0.5f;
 
-	// 是否飘起？ 起跳，浮空技能， 需要设为 true
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
-	bool bFloat = false;
-
 	// 是否能被打断？
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
 	bool bCabBeInterrupt = true;
@@ -174,7 +170,7 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable)
-	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false, bool bInterrupt = false, bool bCabBeInterrupt = false);
+	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bInterrupt = false, bool bCabBeInterrupt = false);
 
 	UFUNCTION(BlueprintCallable)
 	void TryJumpToOtherPlatform(const FVector& StartLocation, const FVector& TargetLocation);

@@ -22,7 +22,7 @@ void UZDANS_ActionMove::OnNotifyBegin_Implementation(UPaperZDAnimInstance* Ownin
 			if (EActionMoveDirectionType::FromSelf == ActionMoveDirectionType)
 			{
 				MoveVector = FRotator(0, DirectionYaw, 0).RotateVector(Enemy->GetHorizontalDirectionToPlayer() * Distance);
-				Enemy->SetActionMove(MoveVector, CurveName, Duration, bFloat, bInterrupt);
+				Enemy->SetActionMove(MoveVector, CurveName, Duration, bInterrupt, false);
 			}
 			else if (EActionMoveDirectionType::FromTarget == ActionMoveDirectionType)
 			{
@@ -31,7 +31,7 @@ void UZDANS_ActionMove::OnNotifyBegin_Implementation(UPaperZDAnimInstance* Ownin
 				MoveVector = FRotator(0, DirectionYaw, 0).RotateVector(- Enemy->GetHorizontalDirectionToPlayer() * Distance);
 				MoveVector = Target->GetActorLocation() + MoveVector - Enemy->GetActorLocation();
 				
-				Enemy->SetActionMove(MoveVector, CurveName, Duration, bFloat, bInterrupt);
+				Enemy->SetActionMove(MoveVector, CurveName, Duration, bInterrupt, false);
 			}
 		}
 	}
