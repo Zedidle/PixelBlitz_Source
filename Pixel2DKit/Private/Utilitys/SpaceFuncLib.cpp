@@ -197,6 +197,48 @@ bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartL
 	return Points.Num() > 0;
 }
 
+FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation, FVector& Direction, float RemDistance, float CliffHeight, float PerCheckDistance)
+{
+	if (PerCheckDistance <= 0) return FVector::ZeroVector;
+	
+	const UWorld* World = GEngine->GetCurrentPlayWorld();
+	if (!IsValid(World)) return FVector::ZeroVector;
+	
+	// 目标水平方向的墙体检测
+	FHitResult OutHit;
+	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(World, StartLocation,StartLocation + RemDistance * Direction,
+	TraceTypeQuery1, false, {},
+			EDrawDebugTrace::ForDuration, OutHit, true,
+			FLinearColor::Red, FLinearColor::Blue, 3.0f);
+
+	if (bWallBlock)
+	{
+		if (OutHit.Distance < PerCheckDistance) return FVector::ZeroVector;
+
+		FVector NewEndLocation = OutHit.Location + OutHit.Normal * PerCheckDistance;
+
+		Direction = (NewEndLocation - StartLocation).GetSafeNormal2D();
+		RemDistance = (NewEndLocation - StartLocation).Size();
+	}
+
+	while (RemDistance > PerCheckDistance)
+	{
+		FVector CheckStart = StartLocation + Direction * RemDistance;
+		FVector CheckEnd = CheckStart - FVector(0,0,CliffHeight);
+		
+		FHitResult HitResult;
+		bool bHit = UKismetSystemLibrary::LineTraceSingle(World, CheckStart, CheckEnd, TraceTypeQuery1, false, {},
+			EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 2.0f
+		);
+
+		if (bHit) return HitResult.Location;
+		
+		RemDistance -= PerCheckDistance;
+	}
+
+	return FVector::ZeroVector;
+}
+
 
 FVector USpaceFuncLib::GetDirection2DFromPlayerViewPoint(const int PlayerIndex)
 {

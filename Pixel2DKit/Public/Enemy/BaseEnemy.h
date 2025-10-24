@@ -175,6 +175,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bFloat = false, bool bInterrupt = false, bool bCabBeInterrupt = false);
+
+	UFUNCTION(BlueprintCallable)
+	void TryJumpToOtherPlatform(const FVector& StartLocation, const FVector& TargetLocation);
 	
 	UFUNCTION(BlueprintNativeEvent)
 	void Initialize(FName Level);
@@ -392,7 +395,8 @@ public:
 	
 	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
 	virtual bool InAttackRange() override;
-
+	virtual bool InAttackRange_Vertical();
+	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnAttack();
 

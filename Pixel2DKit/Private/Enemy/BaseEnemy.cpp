@@ -397,10 +397,9 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 		if (bBlock) return;
 	}
 
-
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 	FVector TargetLocation = StartLocation + MoveVector;
-	
+
 	// 目标水平方向的墙体检测
 	FHitResult OutHit;
 	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,TargetLocation,
@@ -433,6 +432,76 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 		GetCharacterMovement()->SetActive(false, false);
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	}
+}
+
+void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVector& TargetLocation)
+{
+	if (ActionMove.bActionMoving) return;
+	if (!GetCapsuleComponent()) return;
+	if (JumpDuration <= 0.0f) return;
+	
+	float VerticalDistanceToPlayer = GetVerticalDistanceToPlayer();
+	
+	FName CurveName;
+	if (FMath::Abs(VerticalDistanceToPlayer) < 50)
+	{
+		CurveName = "JumpHorizontal";
+	}
+	else if (VerticalDistanceToPlayer >= 50 && VerticalDistanceToPlayer <= 150)
+	{
+		FHitResult HitResult_Ceil;
+		bool bHitCeil = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation, StartLocation + FVector(0,0,150),
+		TraceTypeQuery1, false, {},
+				EDrawDebugTrace::None, HitResult_Ceil, true,
+				FLinearColor::Black, FLinearColor::Gray, 1.0f);
+
+		FVector HalfHorizontalVector = (TargetLocation - StartLocation).GetSafeNormal2D() * (TargetLocation - StartLocation).Size2D() / 2;
+		HalfHorizontalVector.Z = 100;
+
+		bHitCeil |= UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation, StartLocation + HalfHorizontalVector,
+		TraceTypeQuery1, false, {},
+				EDrawDebugTrace::None, HitResult_Ceil, true,
+				FLinearColor::Red, FLinearColor::Green, 1.0f);
+		
+		if (!bHitCeil)
+		{
+			CurveName = "JumpToHigher";
+		}
+	}
+	else if (VerticalDistanceToPlayer  <= -50 && VerticalDistanceToPlayer >= -150)
+	{
+		CurveName = "JumpToLower";
+	}
+	else
+	{
+		UDebugFuncLab::ScreenMessage("超出跳跃范围");
+		return;
+	}
+
+	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
+
+	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
+	UCurveVector* Curve = ActionMoveCurveData.Curve.LoadSynchronous();
+	if (!IsValid(Curve)) return;
+	
+	if (ActionMoveCurveData.Curve.IsNull()) return;
+
+	ActionMove.bActionMoving = true;
+	ActionMove.CurTime = 0;
+	ActionMove.SustainTime = JumpDuration;
+	ActionMove.StartLocation = StartLocation;
+	ActionMove.TargetLocation = TargetLocation;
+	ActionMove.CurveVector = Curve;
+	ActionMove.bFloat = true;
+	ActionMove.bCabBeInterrupt = false;
+	
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetActive(false, false);
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	}
+	
 }
 
 float ABaseEnemy::GetDefaultHalfHeight() const
@@ -651,7 +720,7 @@ bool ABaseEnemy::InAttackRange()
 		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
 		if (!ActionFieldsCanAttack.HasTag(ActionField)) return false;
 
-		if (FMath::Abs(GetVerticalDistanceToPlayer()) > 50)
+		if (!InAttackRange_Vertical())
 		{
 			return false;
 		}
@@ -660,6 +729,11 @@ bool ABaseEnemy::InAttackRange()
 		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
 	}
 	return false;
+}
+
+bool ABaseEnemy::InAttackRange_Vertical()
+{
+	return FMath::Abs(GetVerticalDistanceToPlayer()) < GetDefaultHalfHeight() * 2;
 }
 
 void ABaseEnemy::DelayLosePlayer_Implementation()
@@ -1083,7 +1157,7 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z): %f"), FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z)));
 			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("P: %f"), P));
 
-			if (CurCurveVector.Z >= 1)
+			if (CurCurveVector.Z >= 1.5)
 			{
 				// 水平小跳模式
 				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;

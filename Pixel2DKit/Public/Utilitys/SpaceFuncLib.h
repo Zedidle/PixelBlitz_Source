@@ -68,10 +68,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool CheckCliffProcess(const FVector& StartLocation, const FVector& EndLocation, float CliffHeight = 50, float CheckRate = 0.8, float MinDirSwitchDistance = 5);
 
-	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool GetJumpPoints(TArray<FVector>& Points, const FVector& StartLocation, const FVector& TargetLocation, float HigherDistance = 100, float LowerDistance = 200, float PerCheckDistance = 30);
 
+	// 获取某方向距离上可以移动的最远位置（检测 墙体 和 悬崖）
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static FVector GetHorizontalFarestPosition(const FVector& StartLocation, FVector& Direction, float RemDistance, float CliffHeight = 50, float PerCheckDistance = 30);
+	
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static FVector GetDirection2DFromPlayerViewPoint(const int PlayerIndex = 0);
