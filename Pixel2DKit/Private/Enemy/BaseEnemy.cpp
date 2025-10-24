@@ -1080,16 +1080,21 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 		}
 		else
 		{
-			// 曲线的 Z 值针对跳跃必须一开始就大于 1
-			CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;
+			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z): %f"), FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z)));
+			// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("P: %f"), P));
+
+			if (CurCurveVector.Z >= 1)
+			{
+				// 水平小跳模式
+				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;
+			}
+			else
+			{
+				// 跨平台跳跃模式
+				float P = FMath::Max(50, FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z) / 2);
+				CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z * P;
+			}
 			
-			// if (CurCurveVector.Z > 1)
-			// {
-			// }
-			// else
-			// {
-			// 	CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, CurCurveVector.Z);
-			// }
 		}
 		
 		SetActorLocation(CurLocation, false);

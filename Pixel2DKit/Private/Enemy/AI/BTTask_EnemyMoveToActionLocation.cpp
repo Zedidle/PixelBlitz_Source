@@ -79,8 +79,10 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 
 	float VerticalDistanceToPlayer = SelfEnemyPawn->GetVerticalDistanceToPlayer();
 
+	bool PlayerOnGround = PlayerPawn->GetMovementComponent() && PlayerPawn->GetMovementComponent()->IsMovingOnGround();
+	
 	// 中间隔了悬崖，或者高度差超过某数值，触发跳跃
-	if (bIsCliff || FMath::Abs(VerticalDistanceToPlayer) >= 50 )
+	if (bIsCliff || FMath::Abs(VerticalDistanceToPlayer) >= 50 && PlayerOnGround)
 	{
 		// 跳跃的前提是在站在地面上
 		if (!SelfEnemyPawn->GetCharacterMovement() || !SelfEnemyPawn->GetCharacterMovement()->IsWalking())
