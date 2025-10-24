@@ -398,20 +398,9 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	}
 
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
-	FVector TargetLocation = StartLocation + MoveVector;
+	FVector Direction = MoveVector.GetSafeNormal2D();
+	FVector TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(GetActorLocation(), Direction, MoveVector.Size2D(), 50, Radius);
 
-	// 目标水平方向的墙体检测
-	FHitResult OutHit;
-	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,TargetLocation,
-	TraceTypeQuery1, false, {this},
-			EDrawDebugTrace::None, OutHit, true,
-			FLinearColor::Red, FLinearColor::Green, 1.0f);
-	if (bWallBlock)
-	{
-		if (OutHit.Distance < Radius * 2) return;
-		
-		TargetLocation = OutHit.Location + OutHit.Normal * Radius;
-	}
 
 	if (EnemyAIComponent)
 	{
@@ -1124,26 +1113,13 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 
 	if (MovePercent <= 1)
 	{
-		float HalfHeight = GetDefaultHalfHeight();
-		
-		// 为了避免 陷入/上飘 浮动的地面，要做一个检测上浮
-		FHitResult OutHit;
-		bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), GetActorLocation(),
-			GetActorLocation() + FVector(0, 0, -HalfHeight),
-		TraceTypeQuery1, false, {this},
-				EDrawDebugTrace::None, OutHit, true,
-				FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
 
 		FVector CurCurveVector = ActionMove.CurveVector->GetVectorValue(MovePercent);
 		FVector CurLocation;
 		CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
 		CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
 
-		if (bHitFloor)
-		{
-			CurLocation.Z =  OutHit.Location.Z + HalfHeight;
-		}
-		else if (CurCurveVector.Z >= 1.5)
+		if (CurCurveVector.Z >= 1.5)
 		{
 			// 水平小跳模式
 			CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z;
@@ -1153,6 +1129,20 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 			// 跨平台跳跃模式
 			float P = FMath::Max(50, FMath::Abs(ActionMove.StartLocation.Z - ActionMove.TargetLocation.Z) / 2);
 			CurLocation.Z = FMath::Lerp(ActionMove.StartLocation.Z , ActionMove.TargetLocation.Z, MovePercent) + CurCurveVector.Z * P;
+		}
+
+		float HalfHeight = GetDefaultHalfHeight();
+		// 为了避陷入浮动的地面
+		FHitResult OutHit;
+		bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), CurLocation,
+			CurLocation + FVector(0, 0, -HalfHeight),
+		TraceTypeQuery1, false, {this},
+				EDrawDebugTrace::None, OutHit, true,
+				FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
+		
+		if (bHitFloor)
+		{
+			CurLocation.Z =  OutHit.Location.Z + HalfHeight;
 		}
 		
 		SetActorLocation(CurLocation, false);

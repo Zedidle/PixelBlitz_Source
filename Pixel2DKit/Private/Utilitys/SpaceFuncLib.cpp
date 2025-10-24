@@ -162,7 +162,7 @@ bool USpaceFuncLib::CheckCliffProcess(const FVector& StartLocation, const FVecto
 	return false;
 }
 
-bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartLocation, const FVector& TargetLocation, float HigherDistance, float LowerDistance, float PerCheckDistance)
+bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartLocation, const FVector& TargetLocation, float MaxHorizontalDistance, float HigherDistance, float LowerDistance, float PerCheckDistance)
 {
 	if (PerCheckDistance <= 0) return false;
 	
@@ -170,7 +170,7 @@ bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartL
 	if (!IsValid(World)) return false;
 
 	FVector CheckDirection = (TargetLocation - StartLocation).GetSafeNormal2D();
-	float RemDistance = (TargetLocation - StartLocation).Size() - 10;
+	float RemDistance = FMath::Min(MaxHorizontalDistance,  (TargetLocation - StartLocation).Size() - 10);
 	
 	while (RemDistance > PerCheckDistance)
 	{
@@ -208,8 +208,8 @@ FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation,
 	FHitResult OutHit;
 	bool bWallBlock = UKismetSystemLibrary::LineTraceSingle(World, StartLocation,StartLocation + RemDistance * Direction,
 	TraceTypeQuery1, false, {},
-			EDrawDebugTrace::ForDuration, OutHit, true,
-			FLinearColor::Red, FLinearColor::Blue, 3.0f);
+			EDrawDebugTrace::None, OutHit, true,
+			FLinearColor::Red, FLinearColor::Green, 2.0f);
 
 	if (bWallBlock)
 	{
@@ -228,7 +228,7 @@ FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation,
 		
 		FHitResult HitResult;
 		bool bHit = UKismetSystemLibrary::LineTraceSingle(World, CheckStart, CheckEnd, TraceTypeQuery1, false, {},
-			EDrawDebugTrace::ForDuration, HitResult, true, FLinearColor::Red, FLinearColor::Green, 2.0f
+			EDrawDebugTrace::None, HitResult, true, FLinearColor::Red, FLinearColor::Green, 2.0f
 		);
 
 		if (bHit) return HitResult.Location;

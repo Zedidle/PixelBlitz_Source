@@ -70,27 +70,26 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
-	FVector PawnLocation = SelfEnemyPawn->GetActorLocation();
+	FVector SelfEnemyPawnLocation = SelfEnemyPawn->GetActorLocation();
+	FVector PlayerPawnLocation = PlayerPawn->GetActorLocation();
 	
-	// 先做一个简单悬崖判断
-	bool bIsCliff = USpaceFuncLib::CheckCliffProcess(PawnLocation,
-		PawnLocation + (PlayerPawn->GetActorLocation() - PawnLocation).GetSafeNormal2D() * EnemyAIComponent->GetMinDirSwitchDistance() * 2,
-						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance() / 2);
+	bool bHasCliff = USpaceFuncLib::CheckCliffProcess(SelfEnemyPawnLocation, PlayerPawnLocation,
+					EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance() / 2);
 
 	bool PlayerOnGround = PlayerPawn->GetMovementComponent() && PlayerPawn->GetMovementComponent()->IsMovingOnGround();
-	bool SelfEnemyOnGround = SelfEnemyPawn->GetMovementComponent() && SelfEnemyPawn->GetMovementComponent()->IsMovingOnGround();
-	
-	if (bIsCliff || !SelfEnemyPawn->InAttackRange_Vertical() && PlayerOnGround && SelfEnemyOnGround)
+	bool SelfEnemyOnGround = SelfEnemyPawn->GetCharacterMovement() && SelfEnemyPawn->GetCharacterMovement()->IsWalking();
+
+	if (bHasCliff || !SelfEnemyPawn->InAttackRange_Vertical() && PlayerOnGround && SelfEnemyOnGround)
 	{
 		TArray<FVector> Points;
 		// 判断是否可以直接跳过去？
-		if (USpaceFuncLib::GetJumpPoints(Points, PawnLocation, PlayerPawn->GetActorLocation()))
+		if (USpaceFuncLib::GetJumpPoints(Points, SelfEnemyPawnLocation, PlayerPawnLocation, SelfEnemyPawn->MaxHorizontalDistance))
 		{
 			// 一般下标为 0 的最远
 			TArray<FVector> PointsMaybe;
 			for (FVector& P : Points)
 			{
-				if (FMath::Abs(P.Z - PlayerPawn->GetActorLocation().Z) < 50)
+				if (FMath::Abs(P.Z - PlayerPawnLocation.Z) < 50)
 				{
 					PointsMaybe.Add(P);
 				}
@@ -104,53 +103,84 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 
 			if (PointsMaybe.IsEmpty())
 			{
-				FinishExecute(false);
-				return EBTNodeResult::Failed;
+				FVector TargetLocation;
+				FVector MoveVectorToTarget;
+				if (EnemyAIComponent->GetPlayerPathPoint(TargetLocation))
+				{
+					MoveVectorToTarget = TargetLocation - SelfEnemyPawnLocation;
+				}
+				else
+				{
+					MoveVectorToTarget = PlayerPawnLocation - SelfEnemyPawnLocation;
+				}
+
+				FVector MoveVectorToTargetDirection2D = MoveVectorToTarget.GetSafeNormal2D();
+				FVector FarestPositionOnPlatform = USpaceFuncLib::GetHorizontalFarestPosition(SelfEnemyPawnLocation,
+					MoveVectorToTargetDirection2D,MoveVectorToTarget.Size2D());
+
+				if (FarestPositionOnPlatform.IsZero())
+				{
+					FinishExecute(false);
+					return EBTNodeResult::Failed;
+				}
+
+				EnemyAIController->SimpleMoveToLocation(FarestPositionOnPlatform);
 			}
+			else
+			{
+				FVector JumpPoint = PointsMaybe[FMath::RandRange(0, PointsMaybe.Num() - 1)] + SelfEnemyPawn->GetDefaultHalfHeight();
 
-			FVector JumpPoint = PointsMaybe[FMath::RandRange(0, PointsMaybe.Num() - 1)] + SelfEnemyPawn->GetDefaultHalfHeight();
+				SelfEnemyPawn->TryJumpToOtherPlatform(SelfEnemyPawnLocation, JumpPoint);
 
-			SelfEnemyPawn->TryJumpToOtherPlatform(PawnLocation, JumpPoint);
-
-			FinishExecute(true);
-			return EBTNodeResult::InProgress;
+				FinishExecute(true);
+				return EBTNodeResult::InProgress;
+			}
 		}
 
 		FinishExecute(false);
 		return EBTNodeResult::Failed;
 	}
-	
-	FHitResult OutHit;
-	// 向玩家位置做一个射线检测，判断能否直接看见
-	bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(SelfEnemyPawn->GetWorld(), PawnLocation, PlayerPawn->GetActorLocation(),
-	TraceTypeQuery1, false, {SelfEnemyPawn},
-			EDrawDebugTrace::None, OutHit, true,
-			FLinearColor::Red, FLinearColor::Green, 1.0f);
+	else
+	{
+		FHitResult OutHit;
+		// 向玩家位置做一个射线检测，判断能否直接看见
+		bool bLostSeePlayer = UKismetSystemLibrary::LineTraceSingle(SelfEnemyPawn->GetWorld(), SelfEnemyPawnLocation, PlayerPawnLocation,
+		TraceTypeQuery1, false, {SelfEnemyPawn},
+				EDrawDebugTrace::None, OutHit, true,
+				FLinearColor::Red, FLinearColor::Green, 1.0f);
 
-	FVector TargetLocation;
-	bool bFoundPathPoint = false;
-	if (bLostSeePlayer)
-	{
-		bFoundPathPoint = EnemyAIComponent->GetPlayerPathPoint(TargetLocation);
-		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation, 50);
-	}
-	if (!bFoundPathPoint)
-	{
-		TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
-		TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawn->GetActorLocation() - TargetLocation);
-	}
+		FVector TargetLocation;
+		bool bFoundPathPoint = false;
+		if (bLostSeePlayer)
+		{
+			bFoundPathPoint = EnemyAIComponent->GetPlayerPathPoint(TargetLocation);
+			EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation, 50);
+		}
+		if (!bFoundPathPoint)
+		{
+			TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
+			TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawnLocation - TargetLocation);
+		}
 	
-	bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfEnemyPawn->GetActorLocation(),TargetLocation,
-						EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance());
-	if (bIsCliff)
-	{
+		bool bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfEnemyPawnLocation,TargetLocation,
+							EnemyAIComponent->GetCheckCliffHeight(), 0.9, EnemyAIComponent->GetMinDirSwitchDistance());
+		if (bIsCliff)
+		{
+			FVector MoveVectorToTarget = TargetLocation - SelfEnemyPawnLocation;
+			FVector MoveVectorToTargetDirection2D = MoveVectorToTarget.GetSafeNormal2D();
+			TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(SelfEnemyPawnLocation, MoveVectorToTargetDirection2D,MoveVectorToTarget.Size2D());
+
+			if (TargetLocation.IsZero())
+			{
+				FinishExecute(true);
+				return EBTNodeResult::Failed;
+			}
+		}
+
+		EnemyAIController->SimpleMoveToLocation(TargetLocation);
 		FinishExecute(true);
-		return EBTNodeResult::Failed;
+		return EBTNodeResult::InProgress;
 	}
-
-	EnemyAIController->SimpleMoveToLocation(TargetLocation);
-	FinishExecute(true);
-	return EBTNodeResult::InProgress;
 }
 
 void UBTTask_EnemyMoveToActionLocation::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
