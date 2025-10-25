@@ -408,9 +408,6 @@ void ABasePXCharacter::RemoveCameraOffset(FName OffsetName)
 
 void ABasePXCharacter::LoadAbility_Implementation()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
-	if (AbilityComponent->AbilityDataTables.IsEmpty()) return;
-
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);
 	
@@ -421,7 +418,7 @@ void ABasePXCharacter::LoadAbility_Implementation()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
 
 	// 暂且什么都不用做
-
+	
 }
 
 ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
@@ -489,8 +486,17 @@ void ABasePXCharacter::BeginPlay()
 	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
 	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
 
-	
 	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+
+	if (TalentComponent)
+	{
+		TalentComponent->InitTalents();
+	}
+	if (AbilityComponent)
+	{
+		AbilityComponent->InitAbilities();
+	}
+	
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -1483,11 +1489,6 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 	{
 		TalentComponent->OnDashEnd();
 	}
-}
-
-UAbilityComponent* ABasePXCharacter::GetAbilityComponent_Implementation()
-{
-	return AbilityComponent;
 }
 
 bool ABasePXCharacter::FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result)

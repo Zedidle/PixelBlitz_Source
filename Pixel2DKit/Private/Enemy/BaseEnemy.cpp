@@ -317,7 +317,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
-	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
+	// AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 
 	AbilitySystem = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
@@ -775,10 +775,10 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 		}
 	}
 
-	if (AbilityComponent)
-	{
-		AbilityComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
-	}
+	// if (AbilityComponent)
+	// {
+	// 	AbilityComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
+	// }
 
 	// 暂时默认防御减半伤害
 	if (bInDefendState)
@@ -895,10 +895,6 @@ void ABaseEnemy::OnAttackEffectEnd_Implementation()
 		}, BasicAttackInterval);
 }
 
-UAbilityComponent* ABaseEnemy::GetAbilityComponent_Implementation()
-{
-	return AbilityComponent;
-}
 
 bool ABaseEnemy::FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result)
 {

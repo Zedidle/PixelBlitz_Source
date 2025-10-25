@@ -2,8 +2,11 @@
 
 
 #include "Player/PXCharacterPlayerState.h"
+
+#include "Pixel2DKit.h"
 #include "GAS/PXCharacterASComponent.h"
 #include "Character/BasePXCharacter.h"
+#include "Enemy/BaseEnemy.h"
 #include "GAS/AttributeSet/PXCharacterAttributeSet.h"
 
 
@@ -26,15 +29,6 @@ UPXAttributeSet* APXCharacterPlayerState::GetCharacterAttributeSet() const
 	return CharacterAttributeSet;
 }
 
-UAbilityComponent* APXCharacterPlayerState::GetAbilityComponent_Implementation()
-{
-	if (ABasePXCharacter* PXCharacter = GetPawn<ABasePXCharacter>())
-	{
-		return PXCharacter->AbilityComponent;
-	}
-	
-	return nullptr;
-}
 
 APawn* APXCharacterPlayerState::GetPawn_Implementation()
 {

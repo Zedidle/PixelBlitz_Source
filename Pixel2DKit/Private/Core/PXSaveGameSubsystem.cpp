@@ -150,7 +150,6 @@ void UPXSaveGameSubsystem::Main_AddResult(float Result)
 void UPXSaveGameSubsystem::Main_SyncLevel()
 {
     MainSaveGame->CurLevelToChoiceAbility = MainSaveGame->CurLevelName;
-    MainSaveGame->PreLevelClearAllMonster = false;
 }
 
 void UPXSaveGameSubsystem::SaveBasicBuildData()

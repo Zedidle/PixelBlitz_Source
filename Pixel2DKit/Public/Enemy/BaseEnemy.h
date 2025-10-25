@@ -155,8 +155,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UFightComponent> FightComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UAbilityComponent> AbilityComponent;
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	// TObjectPtr<UAbilityComponent> AbilityComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UBuffComponent> BuffComponent;
@@ -361,7 +361,6 @@ public:
 	virtual void OnDefendEffectEnd_Implementation() override;
 	virtual void OnAttackEffectBegin_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
-	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackInterval_Implementation() override;

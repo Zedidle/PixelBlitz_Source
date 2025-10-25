@@ -36,13 +36,15 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 	
 #pragma endregion
 
-	UFUNCTION()
-	void InitTalents();
+
 	
 public:	
 	// Sets default values for this component's properties
 	UTalentComponent();
 
+	UFUNCTION()
+	void InitTalents();
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

@@ -1,7 +1,6 @@
 #pragma once
 #include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
-#include "Character/Components/AbilityComponent.h"
 #include "Fight_Interface.generated.h"
 
 UINTERFACE(MinimalAPI, Blueprintable)
@@ -96,9 +95,6 @@ public:
     void OnAttackEffectBegin();
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnAttackEffectEnd();
-
-    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    UAbilityComponent* GetAbilityComponent();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     bool FindEffectGameplayTag(const FGameplayTag    Tag, float& Result);
