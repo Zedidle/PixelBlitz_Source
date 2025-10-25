@@ -44,7 +44,9 @@ public class Pixel2DKit : ModuleRules
 			"GameSubtitles", 
 			"GameSettings",
 			"CommonGame", 
-			"GameplayMessageRuntime"
+			"GameplayMessageRuntime",
+			"AudioModulation",
+			"AudioMixer"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
@@ -73,8 +75,6 @@ public class Pixel2DKit : ModuleRules
 			"GameSettings",
 			"CommonUser",
 			"GameSubtitles",
-			"AudioMixer",
-			"AudioModulation",
 			"UIExtension",
 			"EngineSettings",
 			"Json"

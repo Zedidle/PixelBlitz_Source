@@ -2,6 +2,9 @@
 
 
 #include "Character/Components/AbilityComponent.h"
+
+#include <strmif.h>
+
 #include "AbilitySystemComponent.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/PXCharacterDataAsset.h"
@@ -59,21 +62,12 @@ void UAbilityComponent::BeginPlay()
 
 	PXCharacter = Cast<ABasePXCharacter>(Owner);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
-
-	if (!PXCharacter->DataAsset->AbilityDataTables.IsEmpty()) {
-		for (auto& AbilityDataTable: PXCharacter->DataAsset->AbilityDataTables)
-		{
-			AbilityDataTables.Add(AbilityDataTable.LoadSynchronous());
-		}
-	}
 
 	if (UPXASComponent* PXASComponent = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent()))
 	{
 		CachedASC = PXASComponent;
 	}
 
-	InitAbilities();
 }
 
 
@@ -85,14 +79,111 @@ void UAbilityComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	// ...
 }
 
+void UAbilityComponent::RefreshAbilitiesCanChoice()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
+
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+	
+	AbilitiesCanChoice.Empty();
+
+	for (auto& Table: PXCharacter->DataAsset->AbilityDataTables)
+	{
+		UDataTable* AbilityTable = Table.LoadSynchronous();
+		if (!AbilityTable) continue;
+
+		TArray<FAbility> Abilities = DataTableSubsystem->GetRowMap<FAbility>(AbilityTable);
+
+		for (auto& Ability: Abilities)
+		{
+			if (CanLearnAbility(Ability))
+			{
+				AbilitiesCanChoice.Add(Ability.AbilityTag, Ability);
+			}
+			else
+			{
+				BackupAbilities.Add(Ability.AbilityTag, Ability);
+			}
+		}
+	}
+}
+
 void UAbilityComponent::InitAbilities()
 {
-	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
-	if (MainSave)
+	if (UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this))
 	{
 		ChosenAbilities = MainSave->ChosenAbilities;
 		TakeEffectAbilities = MainSave->TakeEffectAbilities;
 	}
+
+	// 天赋需要在此之前加载完成
+	float GoldenBlessRadioPlus;
+	if (IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("TalentSet.GoldenBless"), GoldenBlessRadioPlus))
+	{
+		GoldenRadio += GoldenBlessRadioPlus;
+	}
+
+	float LegendBlessRadioPlus;
+	if (IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("TalentSet.LegendBless"), LegendBlessRadioPlus))
+	{
+		GoldenRadio += LegendBlessRadioPlus;
+		LegendRadio += LegendBlessRadioPlus;
+	}
+	
+	RefreshAbilitiesCanChoice();
+}
+
+FGameplayTag UAbilityComponent::GetAbilityToLearn()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, FGameplayTag())
+
+	UPXSaveGameSubsystem* SaveGameSubsystem = PXCharacter->GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, FGameplayTag())
+	
+	UPXMainSaveGame* MainSave = SaveGameSubsystem->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSave, FGameplayTag())
+
+	if (MainSave->RemRefreshPoints <= 0) return FGameplayTag();
+
+	TArray<FGameplayTag> Tags;
+	AbilitiesCanChoice.GetKeys(Tags);
+
+	if (Tags.Num() <= 0) return FGameplayTag();
+
+	int LoopTimes = 10;
+	
+	while (--LoopTimes > 0)
+	{
+		float RandRadio = FMath::RandRange(0.0f, 1.0f);
+		EAbilityQuality Quality;
+		if (RandRadio < LegendRadio)
+		{
+			Quality = EAbilityQuality::Level3;
+		}
+		else if (RandRadio < GoldenRadio)
+		{
+			Quality = EAbilityQuality::Level2;
+		}
+		else
+		{
+			Quality = EAbilityQuality::Level1;
+		}
+
+		FGameplayTag MaybeTag = Tags[FMath::RandRange(0, Tags.Num() - 1)];
+		FAbility AbilityData = AbilitiesCanChoice.FindRef(MaybeTag);
+
+		if (AbilityData.AbilityQuality == Quality)
+		{
+			return MaybeTag;
+		}
+	}
+
+	return Tags[FMath::RandRange(0, Tags.Num() - 1)];
 }
 
 void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
@@ -266,9 +357,7 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSaveGame, false)
-
-	// 通过分表，不再需要角色判断
-	// if (MainSaveGame->CurCharacterName != Ability.CharacterName && Ability.CharacterName != FName()) return false;
+	
 	
 	if (ChosenAbilities.Contains(AbilityTag)) return false;
 
@@ -298,6 +387,20 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 		}
 	}
 	return true;
+}
+
+void UAbilityComponent::OnItemRefresh(const FGameplayTag& Tag, int& RemRefreshPoints)
+{
+	if (!Tag.IsValid()) return;
+
+	AbilitiesCanChoice.Remove(Tag);
+
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave)
+
+	MainSave->RemRefreshPoints--;
+
+	RemRefreshPoints = MainSave->RemRefreshPoints;
 }
 
 void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)

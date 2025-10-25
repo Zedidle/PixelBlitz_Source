@@ -96,20 +96,20 @@ void APXGameState::DealStatics_Implementation()
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	
-	UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(World);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
 
-	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(World);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame);
+	UPXBasicBuildSaveGame* BasicBuildSave = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSave);
 
-	UPXTalentsSaveGame* TalentSaveGame = UPXSaveGameSubSystemFuncLib::GetTalentsData(World);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSaveGame);
+	UPXTalentsSaveGame* TalentSave = UPXSaveGameSubSystemFuncLib::GetTalentsData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSave);
 	
 	
-	MainSaveGame->RoundGoldNum += MainSaveGame->JustPickedGolds;
-	BasicBuildSaveGame->RemainGoldNum += MainSaveGame->JustPickedGolds;
-	TalentSaveGame->TotalPickupGolds += MainSaveGame->JustPickedGolds;
-	MainSaveGame->JustPickedGolds = 0;
+	MainSave->RoundGoldNum += MainSave->JustPickedGolds;
+	BasicBuildSave->RemainGoldNum += MainSave->JustPickedGolds;
+	TalentSave->TotalPickupGolds += MainSave->JustPickedGolds;
+	MainSave->JustPickedGolds = 0;
 
 	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
 	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
@@ -119,8 +119,15 @@ void APXGameState::DealStatics_Implementation()
 	{
 		AchievementSubsystem->Achievement_LevelTransition();
 	}
-
-
+	
+	if (!IsAllMonsterDie())
+	{
+		MainSave->bTotalMonsterClear = false;
+	}
+	else
+	{
+		MainSave->RemRefreshPoints++;
+	}
 }
 
 void APXGameState::PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange, float TransitionDuration, FName _ForceWeatherIndex)
@@ -160,6 +167,24 @@ void APXGameState::SetWeather(FName WeatherRowName)
 	WeatherEffect = WeatherData->WeatherEffect;
 
 	BP_SetWeather(WeatherData->WeatherSetting);
+}
+
+bool APXGameState::IsAllMonsterDie()
+{
+	UWorld* World = GetWorld();
+	if (!World) return false;
+	
+	for (ABaseEnemy* Enemy : TActorRange<ABaseEnemy>(World))
+	{
+		if (Enemy && Enemy->IsValidLowLevel())
+		{
+			if (!Enemy->bDead)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 
@@ -309,5 +334,10 @@ void APXGameState::OnEnemyDie_Implementation(ABaseEnemy* Enemy)
 	if (IFight_Interface::Execute_GetOwnCamp(Enemy).HasTag(TAG("Enemy.BOSS")))
 	{
 		OnEnemyBossDie();
+	}
+
+	if (IsAllMonsterDie())
+	{
+		
 	}
 }

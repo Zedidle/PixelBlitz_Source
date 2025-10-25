@@ -52,10 +52,10 @@ class PIXEL2DKIT_API UAchievementSubsystem : public UGameInstanceSubsystem
 	
 public:
 	/** Implement this for initialization of instances of the system */
-	virtual void Initialize(FSubsystemCollectionBase& Collection);
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	/** Implement this for deinitialization of instances of the system */
-	virtual void Deinitialize();
+	virtual void Deinitialize() override;
 
 	UFUNCTION()
 	void LoadAchievementData();
