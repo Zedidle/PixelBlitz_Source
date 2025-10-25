@@ -102,22 +102,12 @@ void UAbilityComponent::RefreshAbilitiesCanChoice()
 			{
 				AbilitiesCanChoice.Add(Ability.AbilityTag, Ability);
 			}
-			else
-			{
-				BackupAbilities.Add(Ability.AbilityTag, Ability);
-			}
 		}
 	}
 }
 
 void UAbilityComponent::InitAbilities()
 {
-	if (UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this))
-	{
-		ChosenAbilities = MainSave->ChosenAbilities;
-		TakeEffectAbilities = MainSave->TakeEffectAbilities;
-	}
-
 	// 天赋需要在此之前加载完成
 	float GoldenBlessRadioPlus;
 	if (IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("TalentSet.GoldenBless"), GoldenBlessRadioPlus))
@@ -131,8 +121,9 @@ void UAbilityComponent::InitAbilities()
 		GoldenRadio += LegendBlessRadioPlus;
 		LegendRadio += LegendBlessRadioPlus;
 	}
-	
-	RefreshAbilitiesCanChoice();
+
+	// 目前放在AbilityChoice界面调用
+	// RefreshAbilitiesCanChoice();
 }
 
 FAbility UAbilityComponent::GetAbilityToLearn()
@@ -203,15 +194,18 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 
+	UPXMainSaveGame* MainSave = GameInstance->GetSubsystem<UPXSaveGameSubsystem>()->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
+
 	AbilitiesShowing.Remove(AbilityTag);
 	AbilitiesCanChoice.Remove(AbilityTag);
-	ChosenAbilities.Add(AbilityTag);
+	MainSave->ChosenAbilities.Add(AbilityTag);
 	
 	const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(AbilityTag);
 
 	if (!AbilityData.PreLevelAbility.IsValid())
 	{
-		TakeEffectAbilities.AddUnique(AbilityTag);
+		MainSave->TakeEffectAbilities.AddUnique(AbilityTag);
 		// 由于同一技能的不同等级都使用相同的GA，只是数值不同，就只用在学习第一个技能是GiveAbility
 		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
@@ -222,12 +216,11 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 			}
 		}
 	}
-	else if (TakeEffectAbilities.Contains(AbilityData.PreLevelAbility))
+	else if (MainSave->TakeEffectAbilities.Contains(AbilityData.PreLevelAbility))
 	{
-		TakeEffectAbilities.Remove(AbilityData.PreLevelAbility);
-		TakeEffectAbilities.AddUnique(AbilityTag);
+		MainSave->TakeEffectAbilities.Remove(AbilityData.PreLevelAbility);
+		MainSave->TakeEffectAbilities.AddUnique(AbilityTag);
 	}
-	
 }
 
 void UAbilityComponent::LoadAbilities()
@@ -241,15 +234,18 @@ void UAbilityComponent::LoadAbilities()
 	
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
+
+	UPXMainSaveGame* MainSave = GameInstance->GetSubsystem<UPXSaveGameSubsystem>()->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
 	for (auto& Tag : TempTestAbilities)
 	{
-		TakeEffectAbilities.AddUnique(Tag);
+		MainSave->TakeEffectAbilities.AddUnique(Tag);
 	}
 	
-	for (auto Tag : TakeEffectAbilities)
+	for (auto Tag : MainSave->TakeEffectAbilities)
 	{
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
 		if (!AbilityData.AbilityTag.IsValid()) continue;
@@ -334,21 +330,18 @@ void UAbilityComponent::LoadAbilities()
 	{
 		PXCharacter->LoadAbility();
 	}
-
-	// 通过GameInstance存档
-	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame)
-	MainSaveGame->ChosenAbilities = ChosenAbilities;
-	MainSaveGame->TakeEffectAbilities = TakeEffectAbilities;
-
-	SaveGameSubsystem->SaveMainData();
+	
+	UPXSaveGameSubSystemFuncLib::SaveMainData(this);
 }
 
 bool UAbilityComponent::HasChosenAbility(const FGameplayTag& AbilityTag)
 {
-	return ChosenAbilities.Contains(AbilityTag);
+	if (UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this))
+	{
+		return MainSave->ChosenAbilities.Contains(AbilityTag);
+	}
+	
+	return false;
 }
 
 bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
@@ -365,35 +358,31 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, false)
 
-	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSaveGame, false)
+	UPXMainSaveGame* MainSave = SaveGameSubsystem->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSave, false)
 	
-	
-	if (ChosenAbilities.Contains(AbilityTag)) return false;
+	if (MainSave->ChosenAbilities.Contains(AbilityTag)) return false;
 
-	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->GetBasicBuildData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSaveGame, false)
+	UPXBasicBuildSaveGame* BasicBuildSave = SaveGameSubsystem->GetBasicBuildData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSave, false)
 
-	if (Ability.DefaultLock && !BasicBuildSaveGame->UnlockedAbilities.Contains(AbilityTag)) return false;
+	if (Ability.DefaultLock && !BasicBuildSave->UnlockedAbilities.Contains(AbilityTag)) return false;
 
-	if (Ability.PreLevelAbility.IsValid())
-	{
-		if (!TakeEffectAbilities.Contains(Ability.PreLevelAbility)) return false;
-	}
+	if (Ability.PreLevelAbility.IsValid() && !MainSave->TakeEffectAbilities.Contains(Ability.PreLevelAbility)) return false;
 	
 	if (!Ability.RequiredAbilities.IsEmpty())
 	{
 		for (auto& RequiredAbility : Ability.RequiredAbilities)
 		{
-			if (!TakeEffectAbilities.Contains(RequiredAbility)) return false;
+			if (!MainSave->ChosenAbilities.Contains(RequiredAbility)) return false;
 		}
 	}
 
 	if (!Ability.RequiredTalents.IsEmpty())
 	{
-		for (auto& RequiredAbility : Ability.RequiredAbilities)
+		for (auto& RequiredTalent : Ability.RequiredTalents)
 		{
-			if (!TakeEffectAbilities.Contains(RequiredAbility)) return false;
+			if (!BasicBuildSave->ChosenTalents.Contains(RequiredTalent)) return false;
 		}
 	}
 	return true;

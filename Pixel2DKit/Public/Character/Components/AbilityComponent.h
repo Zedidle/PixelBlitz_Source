@@ -36,9 +36,6 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 	UArrowLineWidget* ArrowLineWidget;
 	
 
-	// 由于某些条件未达成而不能选择的技能
-	UPROPERTY()
-	TMap<FGameplayTag, FAbility> BackupAbilities;
 	// 当前可选的技能库
 	UPROPERTY()
 	TMap<FGameplayTag, FAbility> AbilitiesCanChoice;
@@ -66,13 +63,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FGameplayTag> TempTestAbilities;
 	
-	// 选择了的技能列表
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FGameplayTag> ChosenAbilities;
-	
-	// 生效的技能列表（同一系列的技能，高等级会覆盖低等级的）
-	UPROPERTY(BlueprintReadWrite)
-	TArray<FGameplayTag> TakeEffectAbilities;
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
@@ -103,6 +93,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// 开局初始化角色当前可以选择的技能
+	UFUNCTION(BlueprintCallable)
 	void RefreshAbilitiesCanChoice();
 	
 	UFUNCTION()
