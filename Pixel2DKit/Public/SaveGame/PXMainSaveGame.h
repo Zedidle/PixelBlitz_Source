@@ -26,9 +26,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int MaxLife = 5;
 
+	// 技能选择的剩余点数
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RemSkillPoints = 0;
 
+	// 技能选择的剩余刷新点数
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int RemRefreshPoints = 0;
 	

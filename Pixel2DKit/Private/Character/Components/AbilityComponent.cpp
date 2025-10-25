@@ -135,22 +135,31 @@ void UAbilityComponent::InitAbilities()
 	RefreshAbilitiesCanChoice();
 }
 
-FGameplayTag UAbilityComponent::GetAbilityToLearn()
+FAbility UAbilityComponent::GetAbilityToLearn()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, FGameplayTag())
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, FAbility())
 
-	UPXSaveGameSubsystem* SaveGameSubsystem = PXCharacter->GetGameInstance()->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, FGameplayTag())
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, FAbility())
+	
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, FAbility())
+	
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, FAbility())
 	
 	UPXMainSaveGame* MainSave = SaveGameSubsystem->GetMainData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSave, FGameplayTag())
-
-	if (MainSave->RemRefreshPoints <= 0) return FGameplayTag();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSave, FAbility())
 
 	TArray<FGameplayTag> Tags;
 	AbilitiesCanChoice.GetKeys(Tags);
 
-	if (Tags.Num() <= 0) return FGameplayTag();
+	for (auto& TagShowing: AbilitiesShowing)
+	{
+		Tags.Remove(TagShowing);
+	}
+	
+	if (Tags.Num() <= 0) return FAbility();
 
 	int LoopTimes = 10;
 	
@@ -171,16 +180,18 @@ FGameplayTag UAbilityComponent::GetAbilityToLearn()
 			Quality = EAbilityQuality::Level1;
 		}
 
-		FGameplayTag MaybeTag = Tags[FMath::RandRange(0, Tags.Num() - 1)];
+		const FGameplayTag& MaybeTag = Tags[FMath::RandRange(0, Tags.Num() - 1)];
+
 		FAbility AbilityData = AbilitiesCanChoice.FindRef(MaybeTag);
 
 		if (AbilityData.AbilityQuality == Quality)
 		{
-			return MaybeTag;
+			return DataTableSubsystem->GetAbilityDataByTag(MaybeTag);
 		}
 	}
 
-	return Tags[FMath::RandRange(0, Tags.Num() - 1)];
+	FGameplayTag RandTag = Tags[FMath::RandRange(0, Tags.Num() - 1)];
+	return DataTableSubsystem->GetAbilityDataByTag(RandTag);
 }
 
 void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
@@ -192,6 +203,8 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 
+	AbilitiesShowing.Remove(AbilityTag);
+	AbilitiesCanChoice.Remove(AbilityTag);
 	ChosenAbilities.Add(AbilityTag);
 	
 	const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(AbilityTag);
@@ -386,18 +399,46 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 	return true;
 }
 
-void UAbilityComponent::OnItemRefresh(const FGameplayTag& Tag, int& RemRefreshPoints)
+void UAbilityComponent::OnItemRefresh(const FGameplayTag& NewTag, const FGameplayTag& PreShowingAbility, int& RemRefreshPoints)
 {
-	if (!Tag.IsValid()) return;
+	if (!NewTag.IsValid()) return;
 
-	AbilitiesCanChoice.Remove(Tag);
-
+	AbilitiesShowing.Add(NewTag);
+	
 	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave)
 
-	MainSave->RemRefreshPoints--;
+	if (PreShowingAbility.IsValid())
+	{
+		MainSave->RemRefreshPoints--;
+		AbilitiesShowing.Remove(PreShowingAbility);
+	}
 
 	RemRefreshPoints = MainSave->RemRefreshPoints;
+}
+
+bool UAbilityComponent::ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoints)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, false)
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, false)
+
+	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, false)
+
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSave, false)
+	
+	const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
+
+	if (MainSave->RemSkillPoints < AbilityData.Price) return false;
+
+	MainSave->RemSkillPoints -= AbilityData.Price;
+	RemSkillPoints = MainSave->RemSkillPoints;
+
+	LearnAbility(Tag);
+		
+	return true;
 }
 
 void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)

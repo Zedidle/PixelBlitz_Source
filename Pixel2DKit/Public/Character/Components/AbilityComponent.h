@@ -36,11 +36,15 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 	UArrowLineWidget* ArrowLineWidget;
 	
 
+	// 由于某些条件未达成而不能选择的技能
 	UPROPERTY()
 	TMap<FGameplayTag, FAbility> BackupAbilities;
+	// 当前可选的技能库
 	UPROPERTY()
 	TMap<FGameplayTag, FAbility> AbilitiesCanChoice;
-
+	// 正在显示让选的技能（三个）
+	UPROPERTY()
+	TArray<FGameplayTag> AbilitiesShowing;
 	
 public:	
 	// Sets default values for this component's properties
@@ -105,9 +109,8 @@ public:
 	void InitAbilities();
 
 	UFUNCTION(BlueprintPure, Blueprintable)
-	FGameplayTag GetAbilityToLearn();
+	FAbility GetAbilityToLearn();
 
-	
 	UFUNCTION(BlueprintCallable)
 	void LearnAbility(const FGameplayTag& AbilityTag);
 	
@@ -121,10 +124,11 @@ public:
 	bool CanLearnAbility(const FAbility& Ability);
 
 	UFUNCTION(BlueprintCallable)
-	void OnItemRefresh(const FGameplayTag& Tag, int& RemRefreshPoints);
+	void OnItemRefresh(const FGameplayTag& NewTag, const FGameplayTag& PreShowingAbility, int& RemRefreshPoints);
 
 	
-
+	UFUNCTION(BlueprintCallable)
+	bool ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoints);
 
 
 
