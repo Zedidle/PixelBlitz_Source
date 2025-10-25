@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "EngineUtils.h"
-#include "Pixel2DKit.h"
 #include "Interfaces/Fight_Interface.h"
+#include "Kismet/GameplayStatics.h"
+#include "UObject/NoExportTypes.h"
 #include "SpaceFuncLib.generated.h"
 
 UENUM(BlueprintType)
@@ -120,7 +121,7 @@ T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AAc
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, nullptr)
 
 	T* Result = nullptr;
-	float TmpCurDistance = BIG_NUMBER;
+	float TmpCurDistance = MAX_FLOAT;
 	
 	for (TActorIterator<T> It(World); It; ++It)
 	{

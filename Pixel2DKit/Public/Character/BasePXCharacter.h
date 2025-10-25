@@ -494,6 +494,7 @@ public:
 	virtual void OnAttackEffectEnd_Implementation() override;
 	virtual void OnDashEffectBegin_Implementation() override;
 	virtual void OnDashEffectEnd_Implementation() override;
+	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackInterval_Implementation() override;

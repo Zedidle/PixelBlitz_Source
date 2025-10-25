@@ -142,11 +142,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GameState | Monster")
 	void OnEnemyDie(ABaseEnemy* Enemy);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameState | Monster")
-	bool IsAllMonsterDie();
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAllMonsterDie", Category = "GameState | Monster")
-	void BP_OnAllMonsterDie();
-	
+
 	UFUNCTION(BlueprintNativeEvent, Category = "GameState | Currency")
 	void DealStatics();
 

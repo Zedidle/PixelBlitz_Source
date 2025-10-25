@@ -21,10 +21,7 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	// 黄金品阶技能刷出的概率
-	float GoldenRadio = 0.25;
-	// 传说品阶技能刷出的概率
-	float LegendRadio = 0.1;
+
 
 	UPROPERTY()
 	ABasePXCharacter* PXCharacter;
@@ -35,16 +32,13 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 	UPROPERTY()
 	UArrowLineWidget* ArrowLineWidget;
 	
-
-	UPROPERTY()
-	TMap<FGameplayTag, FAbility> BackupAbilities;
-	UPROPERTY()
-	TMap<FGameplayTag, FAbility> AbilitiesCanChoice;
-
 	
 public:	
 	// Sets default values for this component's properties
 	UAbilityComponent();
+
+	UPROPERTY()
+	TArray<UDataTable*> AbilityDataTables;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UKeyPressCountDownWidget> KeyPressCountdownWidgetClass;
@@ -52,7 +46,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UArrowLineWidget> ArrowLineWidgetClass;
 
-
+	
+	
 	UPROPERTY(BlueprintReadOnly)
 	AActor* HurtMaker;
 	UPROPERTY(BlueprintReadOnly)
@@ -72,10 +67,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
-
-
-	
-
 
 	
 protected:
@@ -98,15 +89,8 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// 开局初始化角色当前可以选择的技能
-	void RefreshAbilitiesCanChoice();
-	
 	UFUNCTION()
 	void InitAbilities();
-
-	UFUNCTION(BlueprintPure, Blueprintable)
-	FGameplayTag GetAbilityToLearn();
-
 	
 	UFUNCTION(BlueprintCallable)
 	void LearnAbility(const FGameplayTag& AbilityTag);
@@ -120,17 +104,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool CanLearnAbility(const FAbility& Ability);
 
-	UFUNCTION(BlueprintCallable)
-	void OnItemRefresh(const FGameplayTag& Tag, int& RemRefreshPoints);
-
-	
-
-
-
-
-
-
-	
 	UFUNCTION(BlueprintCallable)
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce);
 

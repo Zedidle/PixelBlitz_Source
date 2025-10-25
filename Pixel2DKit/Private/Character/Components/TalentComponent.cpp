@@ -9,7 +9,6 @@
 #include "Fight/Components/EnergyComponent.h"
 #include "Fight/Components/HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GAS/PXASComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
@@ -86,6 +85,7 @@ void UTalentComponent::BeginPlay()
 	}
 	
 	
+	InitTalents();
 
 	// 对 OnPlayerAttack 的绑定，在玩家发起攻击时的事件
 	PXCharacter->OnPlayerAttackStart.AddDynamic(this, &UTalentComponent::Event_OnPlayerAttackStart);

@@ -9,8 +9,6 @@
 #include "EnemyAIComponent.generated.h"
 
 
-class ABaseEnemy;
-
 UENUM(BlueprintType)
 enum class EPlayerMovementType : uint8
 {

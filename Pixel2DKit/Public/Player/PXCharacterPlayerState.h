@@ -11,7 +11,6 @@
 #include "PXCharacterPlayerState.generated.h"
 
 
-class ABaseEnemy;
 class UPXAttributeSet;
 class URGAbilitySystemComponent;
 class UAbilityComponent;
@@ -43,7 +42,7 @@ public:
 #pragma region IFight_Interface
 	virtual bool GetIsAttacking() override;
 	virtual bool GetIsDefending() override;
-
+	virtual UAbilityComponent* GetAbilityComponent_Implementation() override;
 	virtual APawn* GetPawn_Implementation() override;
 #pragma endregion
 

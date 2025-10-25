@@ -304,7 +304,7 @@ FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
 	FVector PlayerLocation = PXCharacter->GetActorLocation();
 	FVector EastDir = PXCharacter->GetRightVectorWithBlendYaw();
 
-	float CurDistance = BIG_NUMBER;
+	float CurDistance = MAX_FLOAT;
 	FVector Result = EnemyLocation;
 	FVector TmpPoint;
 	
