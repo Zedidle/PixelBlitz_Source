@@ -198,94 +198,83 @@ void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 		Velocity = GetCharacterMovement()->GetCurrentAcceleration();
 	}
 
-	float d = FVector::DotProduct(Velocity.GetSafeNormal2D(0.1f), GetVectorFaceToCamera());
-	float cz = FVector::CrossProduct(Velocity.GetSafeNormal2D(0.1f), GetVectorFaceToCamera()).Z;
+	float Dot_VelocityToCamera = FVector::DotProduct(Velocity.GetSafeNormal2D(MinDot_VelocityToCamera), GetVectorFaceToCamera().GetSafeNormal2D());
+	float CP_VelocityToCamera_Z = FVector::CrossProduct(Velocity.GetSafeNormal2D(MinCP_VelocityToCamera), GetVectorFaceToCamera().GetSafeNormal2D()).Z;
 
-	float toLeft = FMath::GetMappedRangeValueClamped(
-		FVector2D(-0.5, 0.5),
-		FVector2D(45, -45), d) + CurBlendYaw - 180;
+	bool MoveForward = Dot_VelocityToCamera < -0.1f;
+	bool MoveBack = Dot_VelocityToCamera > 0.1f;
+	bool MoveLeft = CP_VelocityToCamera_Z < -0.01f;
+	bool MoveRight = CP_VelocityToCamera_Z > 0.01f;
 
-	float toRight = FMath::GetMappedRangeValueClamped(
-		FVector2D(-0.5, 0.5),
-		FVector2D(-45, 45), d) + CurBlendYaw;
-	
-	float tmpYaw;
-	if (DeltaBlendYaw != 0)
+	if (MoveForward)
 	{
-		if (DeltaBlendYaw > 0)
+		if (TurnRight)
 		{
-			tmpYaw = (d > 0 ? -90 : 0) + toLeft + (d > 0 && cz > 0 ? -60 : 0);
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
 		}
-		else
+		else if (TurnLeft)
 		{
-			tmpYaw = (d > 0 ? 90 : 0) + toRight + (d > 0 && cz < 0 ? 60 : 0);
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+		}
+		else if (MoveRight)
+		{
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+		}
+		else if (MoveLeft)
+		{
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+		}
+	}
+	else if (MoveBack)
+	{
+		if (TurnRight)
+		{
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+		}
+		else if (TurnLeft)
+		{
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+		}
+		else if (MoveRight)
+		{
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+		}
+		else if (MoveLeft)
+		{
+			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
 		}
 	}
 	else
 	{
-		float d2 = FVector::DotProduct(Velocity.GetSafeNormal2D(), GetRightVectorWithBlendYaw());
-		if (d != 0)
+		if (MoveRight)
 		{
-			if (d2 < 0)
-			{
-				if (PreSpriteLeft)
-				{
-					tmpYaw = toLeft;
-				}
-				else
-				{
-					if (d2 < -0.1)
-					{
-						tmpYaw = toLeft;
-						PreSpriteLeft = true;
-					}
-					else
-					{
-						tmpYaw = toRight;
-					}
-				}
-			}
-			else
-			{
-				if (PreSpriteLeft)
-				{
-					if (d2 > 0.1)
-					{
-						tmpYaw = toRight;
-						PreSpriteLeft = false;
-					}
-					else
-					{
-						tmpYaw = toLeft;
-					}
-				}
-				else
-				{
-					tmpYaw = toRight;
-				}
-			}
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw, 0));
 		}
-		else
+		else if (MoveLeft)
 		{
-			if (d2 == 1)
-			{
-				tmpYaw = toRight;
-				PreSpriteLeft = false;
-
-			}
-			else if (d2 == -1)
-			{
-				tmpYaw = toLeft;
-				PreSpriteLeft = true;
-			}
-			else
-			{
-				return;
-			}
+			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + 180, 0));
 		}
 	}
 
-	GetSprite()->SetWorldRotation(FRotator(0, tmpYaw, 0));
+	
+	if (DeltaBlendYaw > 0.1f)
+	{
+		TurnLeft = true;
+		TurnRight = false;
+	}
+	else if (DeltaBlendYaw < -0.1f)
+	{
+		TurnLeft = false;
+		TurnRight = true;
+	}
 	DeltaBlendYaw = 0;
 }
 
@@ -302,10 +291,8 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	CurDot_VelocityToCamera = FMath::Lerp(CurDot_VelocityToCamera, FVector::DotProduct(GetVectorFaceToCamera(), Velocity.GetSafeNormal()), DeltaSeconds);
 
 	// 镜头偏转
-	float pitch = FMath::Clamp(CurDot_VelocityToCamera,-0.2, 0.45) * -15 + CurBlendPitch;
-	
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
-	SpringArm->SetRelativeRotation(FRotator(pitch, yaw, 0));
+	SpringArm->SetRelativeRotation(FRotator(CurBlendPitch, yaw, 0));
 
 
 	// 镜头偏移
@@ -1159,7 +1146,8 @@ void ABasePXCharacter::AddViewYaw(const FInputActionValue& Value)
 {
 	float AxisValue = Value.Get<float>();
 	if (AxisValue == 0) return;
-	
+
+	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("AddViewYaw: %f"), AxisValue));	
 	AddViewYaw(AxisValue);
 }
 

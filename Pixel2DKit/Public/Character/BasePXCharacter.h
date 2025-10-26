@@ -162,6 +162,14 @@ public:
 	virtual void Tick_SaveFallingStartTime(float DeltaSeconds);
 	virtual void Tick_SpriteRotation(float DeltaSeconds); // 漂移式偏转
 	virtual void Tick_SpringArmMotivation(float DeltaSeconds);
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float MinDot_VelocityToCamera = 0.1f;
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float MinCP_VelocityToCamera = 0.1f;
+
+	bool TurnLeft;
+	bool TurnRight;
 	
 	FVector CurCameraOffset;
 	TMap<FName, FVector> CameraOffsetMap;
