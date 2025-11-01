@@ -202,9 +202,6 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;
 
-	// 跳跃时长， 其实应该取决于距离和自身的速度
-	float JumpDuration = 1.0f;
-
 	// 最大水平跳跃距离，应该取决于自身速度
 	float MaxHorizontalDistance = 200;
 	
