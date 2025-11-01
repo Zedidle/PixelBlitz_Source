@@ -44,7 +44,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			UGameSettingValueScalarDynamic* Setting = NewObject<UGameSettingValueScalarDynamic>();
 			Setting->SetDevName(TEXT("ViewPointSensitivityYaw"));
 			Setting->SetDisplayName(LOCTEXT("ViewPointSensitivityYaw_Name", "水平视角旋转灵敏度"));
-			Setting->SetDescriptionRichText(LOCTEXT("MouseSensitivityPitch_Desc", "设置水平方向上视角旋转的灵敏度，设置得越高会转得越快."));
+			Setting->SetDescriptionRichText(LOCTEXT("ViewPointSensitivityYaw_Desc", "设置水平方向上视角旋转的灵敏度，设置得越高会转得越快."));
 
 			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetViewPointSensitivityYaw_Mouse));
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityYaw_Mouse));
@@ -68,7 +68,7 @@ UGameSettingCollection* UPXGameSettingRegistry::InitializeMouseAndKeyboardSettin
 			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetViewPointSensitivityPitch_Mouse));
 			Setting->SetDefaultValue(GetDefault<UPXSettingsShared>()->GetViewPointSensitivityPitch_Mouse());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::RawTwoDecimals);
-			Setting->SetSourceRangeAndStep(TRange<double>(0, 0.5), 0.01);
+			Setting->SetSourceRangeAndStep(TRange<double>(0.5, 4), 0.01);
 			Setting->SetMinimumLimit(0.01);
 			
 			Sensitivity->AddSetting(Setting);

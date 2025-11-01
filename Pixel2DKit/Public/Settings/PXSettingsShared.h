@@ -420,7 +420,7 @@ private:
 
 	// Mouse
 	UPROPERTY()
-	double ViewPointSensitivityPitch_Mouse = 0.1;
+	double ViewPointSensitivityPitch_Mouse = 0.5;
 	UPROPERTY()
 	double ViewPointSensitivityYaw_Mouse = 1;
 	UPROPERTY()
