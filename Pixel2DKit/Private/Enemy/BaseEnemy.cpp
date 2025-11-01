@@ -243,7 +243,6 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 	BasicAttackInterval = EnemyData.AttackInterval;
 	
 	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(DataAsset->ActionFieldsCanAttack);
-	EnemyAIComponent->AttackRange = EnemyData.AttackRange;
 	EnemyAIComponent->SetActionFieldDistance(EnemyData.ActionFieldDistance);
 	GetCharacterMovement()->MaxAcceleration = EnemyData.MoveAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = EnemyData.MoveSpeed;
@@ -694,19 +693,21 @@ bool ABaseEnemy::CanMove_Implementation()
 
 bool ABaseEnemy::InAttackRange()
 {
-	if (IsValid(EnemyAIComponent))
-	{
-		FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
-		if (!ActionFieldsCanAttack.HasTag(ActionField)) return false;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(EnemyAIComponent, false)
+	if (!InAttackRange_Vertical()) return false;
+	
+	FGameplayTag ActionField = EnemyAIComponent->GetActionFieldByPlayer();
+	if (!ActionFieldsCanAttack.HasTag(ActionField)) return false;
 
-		if (!InAttackRange_Vertical())
+	float distance = GetHorizontalDistanceToPlayer();
+	for (auto& range: EnemyAIComponent->AttackRange)
+	{
+		if (range.X < distance && distance < range.Y)
 		{
-			return false;
+			return true;
 		}
-		
-		float distance = GetHorizontalDistanceToPlayer();
-		return EnemyAIComponent->AttackRange.X < distance && distance < EnemyAIComponent->AttackRange.Y;
 	}
+	
 	return false;
 }
 

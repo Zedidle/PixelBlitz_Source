@@ -38,25 +38,24 @@ void UEnemyAIComponent::SetActionFieldDistance(const FActionFieldDistance& actio
 		if (TagString.Contains("Near"))
 		{
 			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceNear.X + ActionFieldDistance.DistanceNear.Y) / 2);
+			AttackRange.Add({ActionFieldDistance.DistanceNear.X + 5, ActionFieldDistance.DistanceNear.Y - 5});
 		}
 		else if (TagString.Contains("Mid"))
 		{
 			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceMid.X + ActionFieldDistance.DistanceMid.Y) / 2);
+			AttackRange.Add({ActionFieldDistance.DistanceMid.X + 5, ActionFieldDistance.DistanceMid.Y - 5});
 		}
 		else if (TagString.Contains("Far"))
 		{
 			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceFar.X + ActionFieldDistance.DistanceFar.Y) / 2);
+			AttackRange.Add({ActionFieldDistance.DistanceFar.X + 5, ActionFieldDistance.DistanceFar.Y - 5});
 		}
 		else if (TagString.Contains("Remote"))
 		{
 			DirDistanceToActionPoint.Add(ActionFieldTag, (ActionFieldDistance.DistanceRemote.X + ActionFieldDistance.DistanceRemote.Y) / 2);
-
+			AttackRange.Add({ActionFieldDistance.DistanceRemote.X + 5, ActionFieldDistance.DistanceRemote.Y - 5});
 		}
 	}
-
-
-	
-	
 }
 
 void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)

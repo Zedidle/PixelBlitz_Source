@@ -119,18 +119,6 @@ public:
 	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-
-
-
-
-
-
-
-
-
-
-
 	
 	
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
@@ -145,9 +133,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
 	ABasePXCharacter* PXCharacter;
 	
-	// 最远的攻击距离, 20 - 50 为默认小怪攻击距离；
+	// 最远的攻击距离, 20 - 50 为默认近战小怪攻击距离；
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
-	FVector2D AttackRange = {20.0f, 50.0f};  
+	TArray<FVector2D> AttackRange = {{20.0f, 60.0f}};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy)
 	TEnumAsByte<ETraceTypeQuery> EnemyTrace;
