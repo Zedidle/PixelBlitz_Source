@@ -27,13 +27,13 @@ struct FActionFieldDistance
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D DistanceNear = {0, 100};
+	FVector2D DistanceNear = {0, 60};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D DistanceMid = {100, 300};
+	FVector2D DistanceMid = {60, 240};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D DistanceFar = {300, 600};
+	FVector2D DistanceFar = {240, 600};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D DistanceRemote = {600, 3000};
+	FVector2D DistanceRemote = {600, 2000};
 };
 
 

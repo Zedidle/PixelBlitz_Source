@@ -78,7 +78,10 @@ void ABaseEnemy::SetPXCharacter(AActor* Character)
 
 void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 {
-	if (PXCharacter == nullptr)
+	bool bPrePlayerNull = PXCharacter == nullptr;
+	SetPXCharacter(PlayerActor);
+	
+	if (bPrePlayerNull)
 	{
 		// 受惊
 		// 后续可能要配置受惊距离
@@ -88,7 +91,6 @@ void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 		}
 	}
 
-	SetPXCharacter(PlayerActor);
 	BP_OnSensingPlayer(PlayerActor);
 }
 
