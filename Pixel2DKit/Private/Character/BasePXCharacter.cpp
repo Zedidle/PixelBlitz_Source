@@ -685,11 +685,10 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 	}
 
 	FVector V = GetVelocity();
-	
 	FVector RepelByVelocity = {
-		FMath::Pow(V.X, 0.9),
-		FMath::Pow(V.Y, 0.9),
-		FMath::Pow(V.Z, 0.8)
+		(V.X < 0 ? -1 : 1) * FMath::Pow(FMath::Abs(V.X), 0.9),
+		(V.Y < 0 ? -1 : 1) * FMath::Pow(FMath::Abs(V.Y), 0.9),
+		 (V.Z < 0 ? -1 : 1) * FMath::Pow(FMath::Abs(V.Z), 0.8)
 	};
 	
 	return FVector(Value) + RepelByVelocity * VelocityRepelFactor;

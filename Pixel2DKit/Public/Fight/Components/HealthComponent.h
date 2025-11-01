@@ -121,7 +121,7 @@ public:
 	float GetHPPercent();
 	
 	UFUNCTION(BlueprintCallable, Category="Health")
-	virtual void DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce = false);
+	virtual void DecreaseHP(int Damage, AActor* Maker, const FVector KnockbackForce = FVector(50), bool bForce = false);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
 	virtual void IncreaseHP(int32 value, AActor* Instigator);

@@ -4,7 +4,6 @@
 #include "Fight/Components/HealthComponent.h"
 
 #include "PaperFlipbookComponent.h"
-#include "Character/BasePXCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "Interfaces/Fight_Interface.h"
@@ -13,10 +12,7 @@
 #include "AbilitySystemGlobals.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "Controller/PXPlayerController.h"
-#include "Core/PXSaveGameSubSystemFuncLib.h"
-#include "Player/PXLocalPlayer.h"
-#include "SaveGame/PXSettingSaveGame.h"
+#include "Pixel2DKit.h"
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
@@ -285,7 +281,7 @@ float UHealthComponent::GetHPPercent()
 	return float(GetCurrentHP()) / float(GetMaxHP());
 }
 
-void UHealthComponent::DecreaseHP(int Damage, const FVector KnockbackForce, AActor* Maker, bool bForce)
+void UHealthComponent::DecreaseHP(int Damage, AActor* Maker, const FVector KnockbackForce, bool bForce)
 {
 	if (Damage <= 0) return;
 	AActor* Owner = GetOwner();

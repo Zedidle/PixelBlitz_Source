@@ -73,7 +73,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 				{
 					UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, CurHitEffect, hit.ImpactPoint);
 					// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("FightComponent.Tick Hit: %s"), *HitActor->GetName()));
-					HealthComponent->DecreaseHP(CurMeleeDamage, CurKnockbackForceMelee, Owner);
+					HealthComponent->DecreaseHP(CurMeleeDamage, Owner, CurKnockbackForceMelee);
 					IFight_Interface::Execute_OnAttackHiting(Owner);
 				}
 			}

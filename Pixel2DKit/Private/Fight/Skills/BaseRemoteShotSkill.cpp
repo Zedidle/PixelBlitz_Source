@@ -168,7 +168,7 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
 
 	if (UHealthComponent* HealthComponent = HitTarget->GetComponentByClass<UHealthComponent>())
 	{
-		HealthComponent->DecreaseHP(Damage, Knockback, Owner, false);
+		HealthComponent->DecreaseHP(Damage, Owner, Knockback, false);
 		IFight_Interface::Execute_OnAttackHiting(Owner);
 		ActorsEffected.Add(HitTarget);
 	}

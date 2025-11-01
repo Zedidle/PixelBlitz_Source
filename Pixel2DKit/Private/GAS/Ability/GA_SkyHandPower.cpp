@@ -6,7 +6,6 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Character/BasePXCharacter.h"
 #include "Character/Components/AbilityComponent.h"
-#include "Components/CapsuleComponent.h"
 #include "Enemy/BaseEnemy.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
@@ -86,7 +85,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Enemy->SetActorLocation(EnemyNewLocation);
 	PXCharacter->SetActorLocation(PreEnemyLocation);
 
-	EnemyHealthComponent->DecreaseHP(Damage, PlayerCameraOffset, PXCharacter, true);
+	EnemyHealthComponent->DecreaseHP(Damage, PXCharacter, PlayerCameraOffset, true);
 
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
