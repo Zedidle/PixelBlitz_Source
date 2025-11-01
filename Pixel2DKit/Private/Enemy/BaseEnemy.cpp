@@ -427,7 +427,7 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	if (!GetCapsuleComponent()) return;
 	if (EnemyData.MoveSpeed <= 0.0f) return;
 	
-	float JumpDuration = 0.1 + 0.5 * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.MoveSpeed;
+	float JumpDuration = FMath::FRandRange(0.1f, 0.2f) + FMath::FRandRange(0.5f, 0.55f) * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.MoveSpeed;
 	
 	float VerticalDistanceToPlayer = GetVerticalDistanceToPlayer();
 	
