@@ -79,7 +79,7 @@ void AEnemyAIController::SimpleMoveToLocation(const FVector& Dest)
 		.SetCanStrafe(true)
 		.SetReachTestIncludesAgentRadius(false)
 		.SetReachTestIncludesGoalRadius(false)
-		.SetAcceptanceRadius(-1)
+		.SetAcceptanceRadius(2)
 		.SetUserData(nullptr)
 		.SetUserFlags(0);
 

@@ -129,12 +129,11 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 			else
 			{
 				FVector JumpPoint = PointsMaybe[FMath::RandRange(0, PointsMaybe.Num() - 1)] + SelfEnemyPawn->GetDefaultHalfHeight();
-
 				SelfEnemyPawn->TryJumpToOtherPlatform(SelfEnemyPawnLocation, JumpPoint);
-
-				FinishExecute(true);
-				return EBTNodeResult::InProgress;
 			}
+			
+			FinishExecute(true);
+			return EBTNodeResult::InProgress;
 		}
 
 		FinishExecute(false);

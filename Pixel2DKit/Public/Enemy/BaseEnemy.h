@@ -406,8 +406,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	void Tick_KeepFaceToPixelCharacter(float DeltaSeconds);
-
 	void Tick_ActionMove(float DeltaSeconds);
+	void Tick_SnapOnPlatform(float DeltaSeconds);
 	
 
 

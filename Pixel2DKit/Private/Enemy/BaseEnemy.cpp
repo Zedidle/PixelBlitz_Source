@@ -505,6 +505,16 @@ void ABaseEnemy::OnDie_Implementation()
 {
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+
+	if (AEnemyAIController* EnemyAI = GetController<AEnemyAIController>())
+	{
+		EnemyAI->StopAI();
+	}
+
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+	}
 	
 	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
 	DropSubsystem->SpawnItems(EnemyData.DropID_Rate, GetActorLocation());
@@ -563,11 +573,6 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 	}
 	else
 	{
-		if (AEnemyAIController* EnemyAI = GetController<AEnemyAIController>())
-		{
-			EnemyAI->StopAI();
-		}
-		
 		if (DataAsset)
 		{
 			if (USoundCue* DieSound = DataAsset->DieSound.LoadSynchronous())
@@ -1151,12 +1156,29 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 	}
 }
 
+void ABaseEnemy::Tick_SnapOnPlatform(float DeltaSeconds)
+{
+	if (!bDead) return;
+
+	FVector CurLocation = GetActorLocation();
+	float HalfHeight = GetDefaultHalfHeight();
+	
+	FHitResult OutHit;
+	bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), CurLocation,
+		CurLocation + FVector(0, 0, -5 * HalfHeight),
+	TraceTypeQuery1, false, {this},
+			EDrawDebugTrace::None, OutHit, true,
+			FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
+
+	AddActorWorldOffset(FVector(0, 0, HalfHeight - OutHit.Distance));
+}
+
 void ABaseEnemy::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Tick_KeepFaceToPixelCharacter(DeltaSeconds);
 	Tick_ActionMove(DeltaSeconds);
-
+	Tick_SnapOnPlatform(DeltaSeconds);
 	
 	// 目前只有 HealthWidget
 	if (UWidgetComponent* Widget = FindComponentByClass<UWidgetComponent>())
