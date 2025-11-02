@@ -142,7 +142,7 @@ void UArrowLineWidget::Tick_Update()
 		return;
 	}
 
-	if (!USpaceFuncLib::IsActorInScreen(World, StartActor, StartOffset) || !USpaceFuncLib::IsActorInScreen(World, EndActor))
+	if (!USpaceFuncLib::IsActorInScreen(World, StartActor, 0.0f, StartOffset) || !USpaceFuncLib::IsActorInScreen(World, EndActor, 0.0f))
 	{
 		SetHide(true);
 		return;

@@ -80,10 +80,10 @@ public:
 
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
-	static bool IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0), float BufferPercentage = 0.05);
+	static bool IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, float BufferPercentage = 0.0f, FVector Offset = FVector(0));
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
-	static bool IsPointInScreen(const UObject* WorldContextObject, const FVector& Point, float BufferPercentage = 0.05);
+	static bool IsPointInScreen(const UObject* WorldContextObject, const FVector& Point, float BufferPercentage = 0.0f);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
 	static FVector2D GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0));

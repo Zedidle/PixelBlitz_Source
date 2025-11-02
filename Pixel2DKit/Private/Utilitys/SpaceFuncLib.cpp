@@ -255,7 +255,7 @@ FVector USpaceFuncLib::GetDirection2DFromPlayerViewPoint(const int PlayerIndex)
 	return (PlayerCharacterLocation - outLocation).GetSafeNormal2D(0.1);
 }
 
-bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset, float BufferPercentage)
+bool USpaceFuncLib::IsActorInScreen(const UObject* WorldContextObject, AActor* Actor, float BufferPercentage, FVector Offset)
 {
 	if (!Actor) return false;
 	return IsPointInScreen(WorldContextObject, Actor->GetActorLocation() + Offset, BufferPercentage);
