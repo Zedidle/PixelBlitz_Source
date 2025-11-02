@@ -61,10 +61,9 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 	bool PreBlockYawDirection = false;
 
 	// 阻挡因子，动态改变，该值越大时默认偏转角度越大
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float BlockValue = 0.0f; 
 
-	// 方向惯性因子
+	// 方向惯性因子, 每次移动保留上一次移动方向的比例
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float PreDirectionPercent = 0.7f;
 

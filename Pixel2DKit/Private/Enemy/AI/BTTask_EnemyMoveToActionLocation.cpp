@@ -147,15 +147,12 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		if (bLostSeePlayer)
 		{
 			bFoundPathPoint = EnemyAIComponent->GetPlayerPathPoint(TargetLocation);
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetPlayerPathPoint: %s"), *TargetLocation.ToString()));
 			EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation, 50);
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("MoveCheckAllies: %s"), *TargetLocation.ToString()));
 		}
 		if (!bFoundPathPoint)
 		{
 			TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetNearestActionFieldCanAttackLocation: %s"), *TargetLocation.ToString()));
-			TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawnLocation - TargetLocation);
+			TargetLocation += FMath::RandRange(0.2f ,0.8f) * (PlayerPawnLocation - TargetLocation);
 		}
 	
 		bool bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfEnemyPawnLocation,TargetLocation,
@@ -165,7 +162,6 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 			FVector MoveVectorToTarget = TargetLocation - SelfEnemyPawnLocation;
 			FVector MoveVectorToTargetDirection2D = MoveVectorToTarget.GetSafeNormal2D();
 			TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(SelfEnemyPawnLocation, MoveVectorToTargetDirection2D,MoveVectorToTarget.Size2D(), 50, 10);
-			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetHorizontalFarestPosition: %s"), *TargetLocation.ToString()));
 		}
 
 		EnemyAIController->SimpleMoveToLocation(TargetLocation);
