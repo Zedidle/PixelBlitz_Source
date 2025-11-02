@@ -10,9 +10,10 @@
 UENUM(BlueprintType)
 enum class EPlatformMoveType : uint8
 {
-	None,
+	None UMETA(DisplayName = "静止"),
 	LandToPass UMETA(DisplayName = "触碰传递"),
 	Float UMETA(DisplayName = "浮动"),
+	CloseToFloatUP UMETA(DisplayName = "接近上浮")
 };
 
 

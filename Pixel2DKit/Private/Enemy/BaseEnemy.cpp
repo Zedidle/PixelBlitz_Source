@@ -1168,12 +1168,19 @@ void ABaseEnemy::Tick_SnapOnPlatform(float DeltaSeconds)
 	
 	FHitResult OutHit;
 	bool bHitFloor = UKismetSystemLibrary::LineTraceSingle(GetWorld(), CurLocation,
-		CurLocation + FVector(0, 0, -5 * HalfHeight),
+		CurLocation + FVector(0, 0, -2 * HalfHeight),
 	TraceTypeQuery1, false, {this},
 			EDrawDebugTrace::None, OutHit, true,
 			FLinearColor::Yellow, FLinearColor::Blue, 1.0f);
 
-	AddActorWorldOffset(FVector(0, 0, HalfHeight - OutHit.Distance));
+	if (bHitFloor)
+	{
+		AddActorWorldOffset(FVector(0, 0, HalfHeight - OutHit.Distance));
+	}
+	else
+	{
+		AddActorWorldOffset(FVector(0, 0, GetCharacterMovement()->GetGravityZ() * DeltaSeconds));
+	}
 }
 
 void ABaseEnemy::Tick(float DeltaSeconds)
