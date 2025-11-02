@@ -95,8 +95,9 @@ public:
 	void StartTrace();
 	
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 
 public:
 	// Called every frame
@@ -104,17 +105,16 @@ public:
 
 
 
-
-
-
-
 	
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector FindNextTargetDirection();
+
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void OnHitTarget(AActor* HitTarget);
+	void OnHitTarget(AActor* OverlappedActor, AActor* HitTarget);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnHitObstacle(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
 
 
 	bool OnSplit();

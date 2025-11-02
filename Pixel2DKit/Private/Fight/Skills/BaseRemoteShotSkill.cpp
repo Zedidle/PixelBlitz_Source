@@ -57,7 +57,20 @@ void ABaseRemoteShotSkill::BeginPlay()
 
 	SetLifeSpan(NewTargetLifeSpan);
 	StartTrace();
+
+	
+	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnHitTarget);
+	OnActorHit.AddDynamic(this, &ThisClass::OnHitObstacle);
 }
+
+void ABaseRemoteShotSkill::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	OnActorBeginOverlap.RemoveDynamic(this, &ThisClass::OnHitTarget);
+	OnActorHit.RemoveDynamic(this, &ThisClass::OnHitObstacle);
+}
+
 
 // Called every frame
 void ABaseRemoteShotSkill::Tick(float DeltaTime)
@@ -80,6 +93,64 @@ FVector ABaseRemoteShotSkill::FindNextTargetDirection()
 	}
 	
 	return FVector::ZeroVector;
+}
+
+void ABaseRemoteShotSkill::OnHitObstacle_Implementation(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse,
+	const FHitResult& Hit)
+{
+	ReinitializeNiagara();
+	RemHitNum -- ;
+}
+
+
+void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* OverlappedActor, AActor* HitTarget)
+{
+	if (ActorsEffected.Contains(HitTarget)) return;
+	if (!Owner || HitTarget == Owner) return;
+	
+	if (!CanDamageEffect(HitTarget))
+	{
+		if (HitTarget->ActorHasTag("Obstacle"))
+		{
+			if (HitNiagara)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), FRotator(0,0,0),  GetActorScale3D());
+			}
+			// 由于目前没做大部分的技能消失效果，先直接Destroy
+			Destroy();
+
+			// OnSkillEnd();
+		}
+		return;
+	}
+
+
+	if (UHealthComponent* HealthComponent = HitTarget->GetComponentByClass<UHealthComponent>())
+	{
+		HealthComponent->DecreaseHP(Damage, Owner, Knockback, false);
+		IFight_Interface::Execute_OnAttackHiting(Owner);
+		ActorsEffected.Add(HitTarget);
+	}
+
+	Damage *= 1 - DamageDecreasePercentPerHit;
+
+	if (--RemHitNum <= 0 || Damage <= 0)
+	{
+		OnSkillEnd();
+	}
+	else
+	{
+		if (OnSplit() | OnSpring())
+		{
+			AddActorWorldOffset(ProjectileComp->Velocity.GetSafeNormal() * 20);
+			ReinitializeNiagara();
+		}
+	}
+	
+	if (HitNiagara)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), FRotator(0,0,0),  GetActorScale3D());
+	}
 }
 
 bool ABaseRemoteShotSkill::OnSplit()
@@ -143,53 +214,3 @@ bool ABaseRemoteShotSkill::OnSpring()
 	return true;
 }
 
-
-void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* HitTarget)
-{
-	if (ActorsEffected.Contains(HitTarget)) return;
-	if (!Owner || HitTarget == Owner) return;
-	
-	if (!CanDamageEffect(HitTarget))
-	{
-		if (HitTarget->ActorHasTag("Obstacle"))
-		{
-			if (HitNiagara)
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), FRotator(0,0,0),  GetActorScale3D());
-			}
-			// 由于目前没做大部分的技能消失效果，先直接Destroy
-			Destroy();
-
-			// OnSkillEnd();
-		}
-		return;
-	}
-
-
-	if (UHealthComponent* HealthComponent = HitTarget->GetComponentByClass<UHealthComponent>())
-	{
-		HealthComponent->DecreaseHP(Damage, Owner, Knockback, false);
-		IFight_Interface::Execute_OnAttackHiting(Owner);
-		ActorsEffected.Add(HitTarget);
-	}
-
-	Damage *= 1 - DamageDecreasePercentPerHit;
-
-	if (--RemHitNum <= 0 || Damage <= 0)
-	{
-		OnSkillEnd();
-	}
-	else
-	{
-		if (OnSplit() | OnSpring())
-		{
-			AddActorWorldOffset(ProjectileComp->Velocity.GetSafeNormal() * 20);
-			ReinitializeNiagara();
-		}
-	}
-	
-	if (HitNiagara)
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), FRotator(0,0,0),  GetActorScale3D());
-	}
-}
