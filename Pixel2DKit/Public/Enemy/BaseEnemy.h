@@ -212,7 +212,7 @@ public:
 	float BasicAttackInterval = 2.0f;
 
 	UPROPERTY(BlueprintReadOnly);
-	float LostEnemyTime = 5.0f;
+	float LostEnemyTime = 10.0f;
 
 	UPROPERTY(BlueprintReadOnly)
 	int InjuredNum;

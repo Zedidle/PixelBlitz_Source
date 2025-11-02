@@ -1179,7 +1179,10 @@ void ABaseEnemy::Tick_SnapOnPlatform(float DeltaSeconds)
 	}
 	else
 	{
-		AddActorWorldOffset(FVector(0, 0, GetCharacterMovement()->GetGravityZ() * DeltaSeconds));
+		if (GetCharacterMovement())
+		{
+			AddActorWorldOffset(FVector(0, 0, GetCharacterMovement()->GetGravityZ() * DeltaSeconds));
+		}
 	}
 }
 
