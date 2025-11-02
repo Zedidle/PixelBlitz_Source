@@ -45,6 +45,22 @@ void ABaseTraceProjectileSkill::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	if (bEnding) return;
+
+	if (ProjectileComp)
+	{
+		FHitResult OutHit;
+		bool bTraced = UKismetSystemLibrary::LineTraceSingle(this, GetActorLocation(), GetActorLocation() + ProjectileComp->Velocity,
+			TraceObstacleChannel, false, {},
+				EDrawDebugTrace::None, OutHit, true,
+				FLinearColor::Red, FLinearColor::Green, 1.0f);
+
+		if (bTraced)
+		{
+			ProjectileComp->Velocity += OutHit.Normal * DeltaTime * 
+				FMath::GetMappedRangeValueClamped(FVector2D(25, 1000000), FVector2D(500.0, 1), FMath::Pow(OutHit.Distance, 2));
+		}
+	}
+
 	
 	if (Target)
 	{

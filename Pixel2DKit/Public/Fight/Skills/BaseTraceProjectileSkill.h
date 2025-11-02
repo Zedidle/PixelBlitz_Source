@@ -51,7 +51,6 @@ struct FTraceProjectileData
 
 
 
-
 // 追踪弹（法术），命中目标后可以寻找下一个目标，直至消耗完所有命中机会，可以在追踪图中转换目标
 // 如果在命中目标后，找不到下一个目标就会消失
 UCLASS()
@@ -63,7 +62,8 @@ class PIXEL2DKIT_API ABaseTraceProjectileSkill : public ABaseSkill
 	int DamagePlusPer100Meter = 0;
 	FVector DistanceDamageInitLocation;
 
-
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Skill | Projectile", meta = (AllowPrivateAccess = true))
+	TEnumAsByte<ETraceTypeQuery> TraceObstacleChannel = TraceTypeQuery5;
 
 	
 public:
