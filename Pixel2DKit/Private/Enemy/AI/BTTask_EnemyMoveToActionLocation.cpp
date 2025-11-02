@@ -116,13 +116,7 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 
 				FVector MoveVectorToTargetDirection2D = MoveVectorToTarget.GetSafeNormal2D();
 				FVector FarestPositionOnPlatform = USpaceFuncLib::GetHorizontalFarestPosition(SelfEnemyPawnLocation,
-					MoveVectorToTargetDirection2D,MoveVectorToTarget.Size2D());
-
-				if (FarestPositionOnPlatform.IsZero())
-				{
-					FinishExecute(false);
-					return EBTNodeResult::Failed;
-				}
+					MoveVectorToTargetDirection2D,50);
 
 				EnemyAIController->SimpleMoveToLocation(FarestPositionOnPlatform);
 			}
@@ -153,11 +147,14 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		if (bLostSeePlayer)
 		{
 			bFoundPathPoint = EnemyAIComponent->GetPlayerPathPoint(TargetLocation);
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetPlayerPathPoint: %s"), *TargetLocation.ToString()));
 			EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation, 50);
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("MoveCheckAllies: %s"), *TargetLocation.ToString()));
 		}
 		if (!bFoundPathPoint)
 		{
 			TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetNearestActionFieldCanAttackLocation: %s"), *TargetLocation.ToString()));
 			TargetLocation += FMath::RandRange(0.0f ,0.1f) * (PlayerPawnLocation - TargetLocation);
 		}
 	
@@ -167,13 +164,8 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		{
 			FVector MoveVectorToTarget = TargetLocation - SelfEnemyPawnLocation;
 			FVector MoveVectorToTargetDirection2D = MoveVectorToTarget.GetSafeNormal2D();
-			TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(SelfEnemyPawnLocation, MoveVectorToTargetDirection2D,MoveVectorToTarget.Size2D());
-
-			if (TargetLocation.IsZero())
-			{
-				FinishExecute(true);
-				return EBTNodeResult::Failed;
-			}
+			TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(SelfEnemyPawnLocation, MoveVectorToTargetDirection2D,MoveVectorToTarget.Size2D(), 50, 10);
+			UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("GetHorizontalFarestPosition: %s"), *TargetLocation.ToString()));
 		}
 
 		EnemyAIController->SimpleMoveToLocation(TargetLocation);

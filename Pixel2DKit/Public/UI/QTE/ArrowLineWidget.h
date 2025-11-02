@@ -23,12 +23,6 @@ class PIXEL2DKIT_API UArrowLineWidget : public UUserWidget
 	int TmpMaxBodyNum = 0;
 	int TmpIndex = 0;
 	
-	UPROPERTY()
-	TObjectPtr<UUserWidget> TmpWidgetObj;
-	
-
-
-	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess, ExposeOnSpawn))
 	bool TwoWay = true;
@@ -70,7 +64,7 @@ protected:
 	void Tick_Update();
 	
 	UFUNCTION()
-	void UpdateWidget();
+	void UpdateWidget(UUserWidget* Widget);
 
 	
 public:

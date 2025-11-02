@@ -70,9 +70,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static bool GetJumpPoints(TArray<FVector>& Points, const FVector& StartLocation, const FVector& TargetLocation, float MaxHorizontalDistance = 200, float HigherDistance = 100, float LowerDistance = 200, float PerCheckDistance = 30);
 
-	// 获取某方向距离上可以移动的最远位置（检测 墙体 和 悬崖）
+	// 获取同一平台某方向距离上可以移动的最远位置（检测 墙体 和 悬崖）
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
-	static FVector GetHorizontalFarestPosition(const FVector& StartLocation, FVector& Direction, float RemDistance, float CliffHeight = 50, float PerCheckDistance = 30);
+	static FVector GetHorizontalFarestPosition(const FVector& StartLocation, FVector& Direction, float RemDistance, float CliffHeight = 50, float PerCheckDistance = 20);
 	
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")

@@ -199,10 +199,10 @@ bool USpaceFuncLib::GetJumpPoints(TArray<FVector>& Points, const FVector& StartL
 
 FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation, FVector& Direction, float RemDistance, float CliffHeight, float PerCheckDistance)
 {
-	if (PerCheckDistance <= 0) return FVector::ZeroVector;
+	if (PerCheckDistance <= 0) return StartLocation;
 	
 	const UWorld* World = GEngine->GetCurrentPlayWorld();
-	if (!IsValid(World)) return FVector::ZeroVector;
+	if (!IsValid(World)) return StartLocation;
 	
 	// 目标水平方向的墙体检测
 	FHitResult OutHit;
@@ -213,7 +213,7 @@ FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation,
 
 	if (bWallBlock)
 	{
-		if (OutHit.Distance < PerCheckDistance) return FVector::ZeroVector;
+		if (OutHit.Distance < PerCheckDistance) return StartLocation;
 
 		FVector NewEndLocation = OutHit.Location + OutHit.Normal * PerCheckDistance;
 
@@ -221,6 +221,7 @@ FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation,
 		RemDistance = (NewEndLocation - StartLocation).Size();
 	}
 
+	FVector CurFarestPosition = StartLocation;
 	while (RemDistance > PerCheckDistance)
 	{
 		FVector CheckStart = StartLocation + Direction * RemDistance;
@@ -231,12 +232,22 @@ FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation,
 			EDrawDebugTrace::None, HitResult, true, FLinearColor::Red, FLinearColor::Green, 2.0f
 		);
 
-		if (bHit) return HitResult.Location;
+		if (bHit)
+		{
+			if (StartLocation == CurFarestPosition)
+			{
+				CurFarestPosition = HitResult.Location;
+			}
+		}
+		else
+		{
+			CurFarestPosition = StartLocation;
+		}
 		
 		RemDistance -= PerCheckDistance;
 	}
 
-	return FVector::ZeroVector;
+	return CurFarestPosition;
 }
 
 

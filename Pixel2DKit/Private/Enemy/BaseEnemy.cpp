@@ -87,7 +87,7 @@ void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 		// 后续可能要配置受惊距离
 		if (PlayerActor->GetDistanceTo(this) < 100.0f)
 		{
-			SetActionMove(GetHorizontalDirectionToPlayer() * -20, "Startled", 0.5, true);
+			SetActionMove(GetHorizontalDirectionToPlayer() * -20, "Startled", FMath::RandRange(0.3f, 0.4f), true);
 		}
 	}
 
@@ -402,7 +402,6 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	FVector Direction = MoveVector.GetSafeNormal2D();
 	FVector TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(GetActorLocation(), Direction, MoveVector.Size2D(), 50, Radius);
 
-
 	if (EnemyAIComponent)
 	{
 		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation);
@@ -428,8 +427,6 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	if (ActionMove.bActionMoving) return;
 	if (!GetCapsuleComponent()) return;
 	if (EnemyData.MoveSpeed <= 0.0f) return;
-	
-	float JumpDuration = FMath::FRandRange(0.1f, 0.2f) + FMath::FRandRange(0.5f, 0.55f) * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.MoveSpeed;
 	
 	float VerticalDistanceToPlayer = GetVerticalDistanceToPlayer();
 	
@@ -475,6 +472,8 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	
 	if (ActionMoveCurveData.Curve.IsNull()) return;
 
+	float JumpDuration = FMath::FRandRange(0.15f, 0.25f) + FMath::FRandRange(0.4f, 0.45f) * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.MoveSpeed;
+	
 	ActionMove.bActionMoving = true;
 	ActionMove.CurTime = 0;
 	ActionMove.SustainTime = JumpDuration;

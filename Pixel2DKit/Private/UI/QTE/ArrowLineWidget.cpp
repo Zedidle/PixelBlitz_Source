@@ -142,7 +142,7 @@ void UArrowLineWidget::Tick_Update()
 		return;
 	}
 
-	if (!USpaceFuncLib::IsActorInScreen(World, StartActor, 0.0f, StartOffset) || !USpaceFuncLib::IsActorInScreen(World, EndActor, 0.0f))
+	if (!USpaceFuncLib::IsActorInScreen(World, StartActor, -0.02f, StartOffset) || !USpaceFuncLib::IsActorInScreen(World, EndActor, -0.02f))
 	{
 		SetHide(true);
 		return;
@@ -159,8 +159,7 @@ void UArrowLineWidget::Tick_Update()
 		if (i < TmpMaxBodyNum)
 		{
 			TmpIndex = i;
-			TmpWidgetObj = ArrowParts[i];
-			UpdateWidget();
+			UpdateWidget(ArrowParts[i]);
 		}
 		else
 		{
@@ -176,30 +175,29 @@ void UArrowLineWidget::Tick_Update()
 		}
 
 		TmpIndex = TmpMaxBodyNum - 1;
-		TmpWidgetObj = ArrowHeadAntiWidget;
-		UpdateWidget();
+		UpdateWidget(ArrowHeadAntiWidget);
 	}
 	
 }
 
-void UArrowLineWidget::UpdateWidget()
+void UArrowLineWidget::UpdateWidget(UUserWidget* Widget)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TmpWidgetObj);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Widget);
 	
-	TmpWidgetObj->SetVisibility(ESlateVisibility::HitTestInvisible);
-	if (TmpWidgetObj->Implements<UUI_Interface>())
+	Widget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (Widget->Implements<UUI_Interface>())
 	{
 		FVector2D Distance2D = USpaceFuncLib::GetDistance2D_InScreen(EndActor, StartActor, 0,  FVector::ZeroVector, StartOffset);
 		
 		bool StartActorAtRight = Distance2D.X < 0;
 		float Angle = (StartActorAtRight ? -1 : 1) * USpaceFuncLib::CalAngle2D(Distance2D, FVector2D(0, -1));
 		
-		IUI_Interface::Execute_SetAngle(TmpWidgetObj, Angle);
+		IUI_Interface::Execute_SetAngle(Widget, Angle);
 
 		FVector2D StartPosition = USpaceFuncLib::GetActorPositionInScreen(GetWorld(), StartActor, StartOffset);
 		FVector2D WidgetPosition = StartPosition + Distance2D * FVector2D(float(TmpMaxBodyNum - TmpIndex) / float(TmpMaxBodyNum + 1) );
 		
-		TmpWidgetObj->SetPositionInViewport(WidgetPosition);
+		Widget->SetPositionInViewport(WidgetPosition);
 	}	
 }
 
