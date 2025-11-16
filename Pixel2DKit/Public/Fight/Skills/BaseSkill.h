@@ -20,8 +20,9 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	USoundBase* BeginSound = nullptr;
-	
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	bool bActive = true;
 
 	
 protected:
@@ -31,7 +32,11 @@ protected:
 	bool bEnding = false;
 	
 public:
-
+	UFUNCTION(BlueprintCallable)
+	void SetActive(bool v);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsActive() const;
 	
 	// 一般来说，每个技能都会有对应的Tag
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Skill")

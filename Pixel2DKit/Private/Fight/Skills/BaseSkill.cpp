@@ -29,6 +29,28 @@ void ABaseSkill::BeginPlay()
 	
 }
 
+void ABaseSkill::SetActive(bool v)
+{
+	bActive = v;
+	if (bActive)
+	{
+		SetActorTickEnabled(true);
+		SetActorEnableCollision(true);
+		SetActorHiddenInGame(false);
+	}
+	else
+	{
+		SetActorTickEnabled(false);
+		SetActorEnableCollision(false);
+		SetActorHiddenInGame(true);
+	}
+}
+
+bool ABaseSkill::IsActive() const
+{
+	return bActive;
+}
+
 void ABaseSkill::OnSkillEnd()
 {
 	bEnding = true;
