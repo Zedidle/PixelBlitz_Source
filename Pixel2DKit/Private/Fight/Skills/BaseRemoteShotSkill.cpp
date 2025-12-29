@@ -84,7 +84,8 @@ FVector ABaseRemoteShotSkill::FindNextTargetDirection()
 	ABaseEnemy* Enemy = USpaceFuncLib::FindActorInRangeRandomOne<ABaseEnemy>(GetWorld(), this, ActorsEffected, FVector2D(0, MaxTraceDistance));
 	if (Enemy)
 	{
-		SetLifeSpan(LifeSpan);
+		SetSkillLifeTimer(true);
+		
 		return (Enemy->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 	}
 

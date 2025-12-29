@@ -89,10 +89,12 @@ void ABaseTraceProjectileSkill::SetActive(bool v)
 
 	if (v)
 	{
+		bEnding = false;
 		SetNewTarget(Target, bIdle);
 	}
 	else
 	{
+		bEnding = true;
 		ProjectileComp->bIsHomingProjectile = false;
 		ProjectileComp->Velocity = FVector::ZeroVector;
 	}
@@ -105,7 +107,6 @@ void ABaseTraceProjectileSkill::OnSkillEnd()
 	if (ProjectileComp)
 	{
 		ProjectileComp->bIsHomingProjectile = false;
-		Target = nullptr;
 	}
 
 	// 还需要触发Niagara的消失效果
@@ -185,8 +186,12 @@ void ABaseTraceProjectileSkill::SetNewTarget(AActor* TargetActor, bool Idle)
 
 	Target = TargetActor;
 	bIdle = Idle;
-	SetLifeSpan(bIdle ? 0 : LifeSpan);
 
+	if (!bIdle)
+	{
+		SetSkillLifeTimer(true);
+	}
+	
 	if (USceneComponent* TargetRootComponent = TargetActor->GetRootComponent())
 	{
 		ProjectileComp->HomingTargetComponent = TargetRootComponent;

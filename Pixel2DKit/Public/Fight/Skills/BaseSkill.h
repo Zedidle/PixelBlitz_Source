@@ -29,6 +29,7 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 protected:
 	virtual void BeginPlay() override;
 
+	// 用于判断技能在自行消失生命或伤害结算后将要进入 Waiting状态 倒计时（一般是0.5秒）触发消失特效的阶段
 	UPROPERTY(BlueprintReadWrite)
 	bool bEnding = false;
 	
