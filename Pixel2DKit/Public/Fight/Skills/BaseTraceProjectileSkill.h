@@ -86,14 +86,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
+	virtual void SetActive(bool v) override;
+	
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	AActor* Target = nullptr;
 	
 	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	bool bIdle = false;
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
-	float NewTargetLifeSpan = 2.0f;
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float CurMagnitude = 3000.0f;
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
@@ -115,7 +114,7 @@ public:
 
 	
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
-	int Damage = 0;
+	int Damage = 1;
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
 	int RemHitNum = 1;	
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
@@ -142,7 +141,7 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable)
-	void SetNewTarget(AActor* Actor, bool Idle = false);
+	void SetNewTarget(AActor* TargetActor, bool Idle = false);
 	
 	UFUNCTION()
 	void OnEnemyDie(ABaseEnemy* Enemy);

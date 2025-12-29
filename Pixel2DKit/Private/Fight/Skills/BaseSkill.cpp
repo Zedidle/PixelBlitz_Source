@@ -29,9 +29,7 @@ void ABaseSkill::BeginPlay()
 
 void ABaseSkill::SetActive(bool v)
 {
-	bActive = v;
-
-	if (bActive)
+	if (v)
 	{
 		SetActorTickEnabled(true);
 		SetActorEnableCollision(true);
@@ -54,6 +52,8 @@ void ABaseSkill::SetActive(bool v)
 			SkillManager->DeactivateSkill(this);
 		}
 	}
+
+	bActive = v;
 }
 
 void ABaseSkill::SetSkillLifeTimer(bool bActivate)

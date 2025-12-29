@@ -5,12 +5,12 @@
 #include "Fight/Skills/BaseSkill.h"
 #include "Engine/World.h"
 #include "Fight/Skills/BaseRemoteShotSkill.h"
+#include "Fight/Skills/BaseTraceProjectileSkill.h"
 #include "Utilitys/DebugFuncLab.h"
 
 void USkillManager::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
-    UE_LOG(LogTemp, Log, TEXT("SkillManager Subsystem Initialized"));
 }
 
 void USkillManager::Deinitialize()
@@ -19,14 +19,23 @@ void USkillManager::Deinitialize()
     for (auto& Pair : SkillPoolMap)
     {
         FSkillPool& Pool = Pair.Value;
-        for (ABaseSkill* Skill : Pool.SkillDoubleLinkedList)
+        for (auto& Skill : Pool.SkillsWaiting)
         {
-            if (IsValid(Skill))
+            if (Skill.IsValid())
             {
                 Skill->Destroy();
             }
         }
-        Pool.SkillDoubleLinkedList.Empty();
+        for (auto& Skill : Pool.SkillsActivated)
+        {
+            if (Skill.IsValid())
+            {
+                Skill->Destroy();
+            }
+        }
+
+        Pool.SkillsWaiting.Empty();
+        Pool.SkillsActivated.Empty();
     }
     SkillPoolMap.Empty();
     
@@ -42,10 +51,7 @@ void USkillManager::PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int
     {
         if (ABaseSkill* NewSkill = CreateNewSkill(SkillClass))
         {
-            // 新技能直接加入队头（失效池）
-            NewSkill->SetActive(false);
-            Pool.SkillDoubleLinkedList.AddHead(NewSkill);
-            Pool.TotalCount++;
+            Pool.SkillsWaiting.Add(NewSkill);
         }
     }
 }
@@ -61,36 +67,18 @@ ABaseSkill* USkillManager::ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, con
         if (!Pool) return nullptr;
     }
 
-    // 从对头获取失效待用的技能
-    ABaseSkill* AvailableSkill = nullptr;
-    if (auto Head = Pool->SkillDoubleLinkedList.GetHead())
-    {
-        ABaseSkill* Skill = Head->GetValue();
-        if (Skill && !Skill->IsActive())
-        {
-            AvailableSkill = Skill;
-            Pool->SkillDoubleLinkedList.RemoveNode(Head);
-        }
-    }
+    ABaseSkill* AvailableSkill = Pool->GetAvailableSkill().Get();
 
-    // 如果没有可用技能，创建新实例
     if (!AvailableSkill)
     {
         AvailableSkill = CreateNewSkill(SkillClass);
-        if (AvailableSkill)
-        {
-            Pool->TotalCount++;
-        }
+        Pool->SkillsActivated.Add(AvailableSkill);
     }
 
-    if (AvailableSkill)
-    {
-        InitializeSkill(AvailableSkill, SpawnTransform);
-        
-        Pool->SkillDoubleLinkedList.AddTail(AvailableSkill);
-        Pool->ActiveCount++;
-        UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("USkillManager::ActivateSkill : %s,  Pool TotalCount: %d   ActiveCount: %d"), *AvailableSkill->GetActorNameOrLabel(), Pool->TotalCount, Pool->ActiveCount));
-    }
+    InitializeSkill(AvailableSkill, SpawnTransform);
+
+    UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("USkillManager::ActivateSkill : %s,  Pool Waiting: %d   Active: %d"),
+        *AvailableSkill->GetActorNameOrLabel(), Pool->SkillsWaiting.Num(), Pool->SkillsActivated.Num()));
 
     return AvailableSkill;
 }
@@ -120,9 +108,44 @@ ABaseRemoteShotSkill* USkillManager::ActivateRemoteShotSkill(TSubclassOf<ABaseRe
     RemoteShotSkill->RemSpringNum = RemSpringNum;
     RemoteShotSkill->RemSplitNum = RemSplitNum;
 
-    RemoteShotSkill->StartTrace();
+    RemoteShotSkill->SetActive(true);
     
     return RemoteShotSkill;
+}
+
+ABaseTraceProjectileSkill* USkillManager::ActivateTraceProjectileSkill(TSubclassOf<ABaseTraceProjectileSkill> SkillClass,
+    const FTransform& SpawnTransform, AActor* Owner, UNiagaraSystem* HitNiagara, AActor* Target, bool bIdle,
+    float NewTargetLifeSpan, float CurMagnitude, float InRangeNear, float MagnitudeScaleNear, float MagnitudeScaleFar,
+    float InitSpeed, float MaxSpeed, float MaxTraceDistance, int Damage, int RemHitNum, bool bForce,
+    float DamageDecreasePercentPerHit, FVector Knockback)
+{
+    UClass* BaseSkillClass = SkillClass.Get();
+    ABaseSkill* BaseSkill = ActivateSkill(TSubclassOf<ABaseSkill>(BaseSkillClass), SpawnTransform);
+    ABaseTraceProjectileSkill* TraceProjectileSkill = Cast<ABaseTraceProjectileSkill>(BaseSkill);
+
+    CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(TraceProjectileSkill, nullptr);
+
+    TraceProjectileSkill->Owner = Owner;
+    TraceProjectileSkill->HitNiagara = HitNiagara;
+    TraceProjectileSkill->Target = Target;
+    TraceProjectileSkill->bIdle = bIdle;
+    TraceProjectileSkill->LifeSpan = NewTargetLifeSpan;
+    TraceProjectileSkill->CurMagnitude = CurMagnitude;
+    TraceProjectileSkill->InRangeNear = InRangeNear;
+    TraceProjectileSkill->MagnitudeScaleNear = MagnitudeScaleNear;
+    TraceProjectileSkill->MagnitudeScaleFar = MagnitudeScaleFar;
+    TraceProjectileSkill->InitSpeed = InitSpeed;
+    TraceProjectileSkill->MaxSpeed = MaxSpeed;
+    TraceProjectileSkill->MaxTraceDistance = MaxTraceDistance;
+    TraceProjectileSkill->Damage = Damage;
+    TraceProjectileSkill->RemHitNum = RemHitNum;
+    TraceProjectileSkill->bForce = bForce;
+    TraceProjectileSkill->DamageDecreasePercentPerHit = DamageDecreasePercentPerHit;
+    TraceProjectileSkill->Knockback = Knockback;
+
+    TraceProjectileSkill->SetActive(true);
+    
+    return TraceProjectileSkill;
 }
 
 void USkillManager::DeactivateSkill(ABaseSkill* SkillActor)
@@ -130,47 +153,36 @@ void USkillManager::DeactivateSkill(ABaseSkill* SkillActor)
     if (!SkillActor) return;
 
     TSubclassOf<ABaseSkill> SkillClass = SkillActor->GetClass();
-    FSkillPool* Pool = SkillPoolMap.Find(SkillClass);
-    
-    if (Pool && Pool->ActiveCount > 0)
+    if (FSkillPool* Pool = SkillPoolMap.Find(SkillClass))
     {
-        // 从当前位置移除
-        Pool->SkillDoubleLinkedList.RemoveNode(SkillActor);
-        
-        // 重置技能状态
-        ResetSkill(SkillActor);
-        
-        // 添加到队头（失效池）
-        Pool->SkillDoubleLinkedList.AddHead(SkillActor);
-        Pool->ActiveCount--;
+        Pool->ReturnSkill(SkillActor);
+        UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("USkillManager::DeactivateSkill : %s,  Pool Waiting: %d   Active: %d"),
+        *SkillActor->GetActorNameOrLabel(), Pool->SkillsWaiting.Num(), Pool->SkillsActivated.Num()));
     }
 }
 
 void USkillManager::GetPoolStats(TSubclassOf<ABaseSkill> SkillClass, int32& OutTotalCount, int32& OutActiveCount)
 {
-    FSkillPool* Pool = SkillPoolMap.Find(SkillClass);
-    if (Pool)
+    if (FSkillPool* Pool = SkillPoolMap.Find(SkillClass))
     {
-        OutTotalCount = Pool->TotalCount;
-        OutActiveCount = Pool->ActiveCount;
+        OutTotalCount = Pool->SkillsActivated.Num() + Pool->SkillsWaiting.Num();
+        OutActiveCount = Pool->SkillsActivated.Num();
     }
 }
 
 ABaseSkill* USkillManager::CreateNewSkill(TSubclassOf<ABaseSkill> SkillClass)
 {
     ABaseSkill* SkillActor = GetWorld()->SpawnActor<ABaseSkill>(SkillClass);
-    SkillActor->SetActive(false);
+    // SkillActor->SetActive(false);
     return SkillActor;
 }
 
 void USkillManager::InitializeSkill(ABaseSkill* Skill, const FTransform& SpawnTransform)
 {
-    Skill->SetActorTransform(SpawnTransform);
-}
-
-void USkillManager::ResetSkill(ABaseSkill* Skill)
-{
-    // Skill->SetActive(false);
+    if (Skill)
+    {
+        Skill->SetActorTransform(SpawnTransform);
+    }
 }
 
 FSkillPool& USkillManager::GetOrCreateSkillPool(TSubclassOf<ABaseSkill> SkillClass)

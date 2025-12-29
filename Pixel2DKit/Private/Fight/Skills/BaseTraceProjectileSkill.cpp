@@ -83,6 +83,22 @@ void ABaseTraceProjectileSkill::Tick(float DeltaTime)
 	
 }
 
+void ABaseTraceProjectileSkill::SetActive(bool v)
+{
+	Super::SetActive(v);
+
+	if (v)
+	{
+		SetNewTarget(Target, bIdle);
+	}
+	else
+	{
+		ProjectileComp->bIsHomingProjectile = false;
+		ProjectileComp->Velocity = FVector::ZeroVector;
+	}
+	
+}
+
 void ABaseTraceProjectileSkill::OnSkillEnd()
 {
 	Super::OnSkillEnd();
@@ -147,7 +163,7 @@ void ABaseTraceProjectileSkill::StartPlusDamageByDistance(int _DamagePlusPer100M
 void ABaseTraceProjectileSkill::SetTraceData(const FTraceProjectileData& Data)
 {
 	bIdle = Data.bIdle;
-	NewTargetLifeSpan = Data.NewTargetLifeSpan;
+	LifeSpan = Data.NewTargetLifeSpan;
 	CurMagnitude = Data.CurMagnitude;
 	InRangeNear = Data.InRangeNear;
 	MagnitudeScaleNear= Data.MagnitudeScaleNear;
@@ -157,9 +173,9 @@ void ABaseTraceProjectileSkill::SetTraceData(const FTraceProjectileData& Data)
 	MaxTraceDistance = Data.MaxTraceDistance;
 }
 
-void ABaseTraceProjectileSkill::SetNewTarget(AActor* Actor, bool Idle)
+void ABaseTraceProjectileSkill::SetNewTarget(AActor* TargetActor, bool Idle)
 {
-	if (!Actor)
+	if (!TargetActor)
 	{
 		OnSkillEnd();
 		return;
@@ -167,11 +183,11 @@ void ABaseTraceProjectileSkill::SetNewTarget(AActor* Actor, bool Idle)
 
 	if (bEnding) return;
 
-	Target = Actor;
+	Target = TargetActor;
 	bIdle = Idle;
-	SetLifeSpan(bIdle ? 0 : NewTargetLifeSpan);
+	SetLifeSpan(bIdle ? 0 : LifeSpan);
 
-	if (USceneComponent* TargetRootComponent = Actor->GetRootComponent())
+	if (USceneComponent* TargetRootComponent = TargetActor->GetRootComponent())
 	{
 		ProjectileComp->HomingTargetComponent = TargetRootComponent;
 		ProjectileComp->Velocity += ProjectileComp->Velocity * (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();

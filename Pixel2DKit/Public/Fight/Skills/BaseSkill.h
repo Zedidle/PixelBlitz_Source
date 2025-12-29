@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
+#include "UObject/FastReferenceCollector.h"
 #include "BaseSkill.generated.h"
 
 
@@ -39,6 +40,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void SetActive(bool v);
 
+	virtual bool IsAvailableForReuse() const 
+	{ 
+		return !bActive && IsValidLowLevel() && !IsPendingKillPending(); 
+	}
+	
 	UFUNCTION(BlueprintCallable)
 	void SetSkillLifeTimer(bool bActivate);
 	

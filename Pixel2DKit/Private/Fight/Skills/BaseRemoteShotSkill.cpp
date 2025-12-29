@@ -41,17 +41,6 @@ void ABaseRemoteShotSkill::SetDamageData(int _Damage, FVector _Knockback, int _R
 	RemSplitNum = _RemSplitNum;
 }
 
-void ABaseRemoteShotSkill::StartTrace()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ProjectileComp)
-	
-	ProjectileComp->InitialSpeed = InitSpeed;
-	ProjectileComp->MaxSpeed = MaxSpeed;
-	ProjectileComp->Velocity = Direction * InitSpeed;
-
-	SetActive(true);
-}
-
 // Called when the game starts or when spawned
 void ABaseRemoteShotSkill::BeginPlay()
 {
@@ -81,6 +70,11 @@ void ABaseRemoteShotSkill::SetActive(bool v)
 	Super::SetActive(v);
 	if (v)
 	{
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ProjectileComp)
+	
+		ProjectileComp->InitialSpeed = InitSpeed;
+		ProjectileComp->MaxSpeed = MaxSpeed;
+		ProjectileComp->Velocity = Direction * InitSpeed;
 		ActorsEffected.Empty();
 	}
 }
@@ -201,7 +195,7 @@ bool ABaseRemoteShotSkill::OnSplit()
 			NewSkill->SetDamageData(Damage * 0.6, Knockback * 0.8, RemHitNum, DamageDecreasePercentPerHit, RemSplitNum, RemSplitNum);
 
 			UGameplayStatics::FinishSpawningActor(NewSkill, NewTrans);
-			NewSkill->StartTrace();
+			NewSkill->SetActive(true);
 		}
 
 		ProjectileComp->Velocity =  FRotator(0, -TmpSplitRotation, 0).RotateVector(ProjectileComp->Velocity);
