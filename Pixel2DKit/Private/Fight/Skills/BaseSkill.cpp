@@ -4,6 +4,9 @@
 #include "Fight/Skills/BaseSkill.h"
 
 #include "Interfaces/Fight_Interface.h"
+#include "Subsystems/SkillManager.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
 
 bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
@@ -21,28 +24,52 @@ bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
 void ABaseSkill::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	if (BeginSound)
-	{
-		USoundFuncLib::PlaySoundAtLocation(BeginSound, GetActorLocation());
-	}
-	
+
 }
 
 void ABaseSkill::SetActive(bool v)
 {
 	bActive = v;
+
 	if (bActive)
 	{
 		SetActorTickEnabled(true);
 		SetActorEnableCollision(true);
 		SetActorHiddenInGame(false);
+		SetSkillLifeTimer(true);
+		if (BeginSound)
+		{
+			USoundFuncLib::PlaySoundAtLocation(BeginSound, GetActorLocation());
+		}
 	}
 	else
 	{
 		SetActorTickEnabled(false);
 		SetActorEnableCollision(false);
 		SetActorHiddenInGame(true);
+		SetSkillLifeTimer(false);
+
+		if (USkillManager* SkillManager = GetGameInstance()->GetSubsystem<USkillManager>())
+		{
+			SkillManager->DeactivateSkill(this);
+		}
+	}
+}
+
+void ABaseSkill::SetSkillLifeTimer(bool bActivate)
+{
+	FName TimerName = FName(GetActorNameOrLabel() + "_Skill.SetActive");
+	if (bActivate)
+	{
+		UTimerSubsystemFuncLib::SetRetriggerableDelay(this, TimerName,[WeakThis = TWeakObjectPtr(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+			WeakThis->SetActive(false);
+		}, LifeSpan);
+	}
+	else
+	{
+		UTimerSubsystemFuncLib::CancelDelay(this, TimerName);
 	}
 }
 
@@ -55,8 +82,7 @@ void ABaseSkill::OnSkillEnd()
 {
 	bEnding = true;
 	SetActorEnableCollision(false);
-	
-	SetLifeSpan(2.0f);
+	SetSkillLifeTimer(true);
 
 	BP_OnSkillEnd();
 }

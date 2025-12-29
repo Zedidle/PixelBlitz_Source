@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Subsystems/SkillManager.h"
+#include "Pixel2DKit.h"
 #include "Fight/Skills/BaseSkill.h"
 #include "Engine/World.h"
+#include "Fight/Skills/BaseRemoteShotSkill.h"
+#include "Utilitys/DebugFuncLab.h"
 
 void USkillManager::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -41,6 +43,7 @@ void USkillManager::PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int
         if (ABaseSkill* NewSkill = CreateNewSkill(SkillClass))
         {
             // 新技能直接加入队头（失效池）
+            NewSkill->SetActive(false);
             Pool.SkillDoubleLinkedList.AddHead(NewSkill);
             Pool.TotalCount++;
         }
@@ -53,7 +56,7 @@ ABaseSkill* USkillManager::ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, con
     if (!Pool)
     {
         // 如果没有对应的池，先创建一个
-        PreallocateSkillPool(SkillClass, 1);
+        PreallocateSkillPool(SkillClass);
         Pool = SkillPoolMap.Find(SkillClass);
         if (!Pool) return nullptr;
     }
@@ -86,9 +89,40 @@ ABaseSkill* USkillManager::ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, con
         
         Pool->SkillDoubleLinkedList.AddTail(AvailableSkill);
         Pool->ActiveCount++;
+        UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("USkillManager::ActivateSkill : %s,  Pool TotalCount: %d   ActiveCount: %d"), *AvailableSkill->GetActorNameOrLabel(), Pool->TotalCount, Pool->ActiveCount));
     }
 
     return AvailableSkill;
+}
+
+ABaseRemoteShotSkill* USkillManager::ActivateRemoteShotSkill(TSubclassOf<ABaseRemoteShotSkill> SkillClass,
+    const FTransform& SpawnTransform, AActor* Owner, UNiagaraSystem* HitNiagara, float NewTargetLifeSpan,
+    float InitSpeed, float MaxSpeed, float MaxTraceDistance, FVector Direction, int Damage, int RemHitNum,
+    float DamageDecreasePercentPerHit, FVector Knockback, int RemSpringNum, int RemSplitNum)
+{
+    UClass* BaseSkillClass = SkillClass.Get();
+    ABaseSkill* BaseSkill = ActivateSkill(TSubclassOf<ABaseSkill>(BaseSkillClass), SpawnTransform);
+    ABaseRemoteShotSkill* RemoteShotSkill = Cast<ABaseRemoteShotSkill>(BaseSkill);
+
+    CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(RemoteShotSkill, nullptr);
+
+    RemoteShotSkill->Owner = Owner;
+    RemoteShotSkill->HitNiagara = HitNiagara;
+    RemoteShotSkill->LifeSpan = NewTargetLifeSpan;
+    RemoteShotSkill->InitSpeed = InitSpeed;
+    RemoteShotSkill->MaxSpeed = MaxSpeed;
+    RemoteShotSkill->MaxTraceDistance = MaxTraceDistance;
+    RemoteShotSkill->Direction = Direction;
+    RemoteShotSkill->Damage = Damage;
+    RemoteShotSkill->RemHitNum = RemHitNum;
+    RemoteShotSkill->DamageDecreasePercentPerHit = DamageDecreasePercentPerHit;
+    RemoteShotSkill->Knockback = Knockback;
+    RemoteShotSkill->RemSpringNum = RemSpringNum;
+    RemoteShotSkill->RemSplitNum = RemSplitNum;
+
+    RemoteShotSkill->StartTrace();
+    
+    return RemoteShotSkill;
 }
 
 void USkillManager::DeactivateSkill(ABaseSkill* SkillActor)
@@ -124,7 +158,9 @@ void USkillManager::GetPoolStats(TSubclassOf<ABaseSkill> SkillClass, int32& OutT
 
 ABaseSkill* USkillManager::CreateNewSkill(TSubclassOf<ABaseSkill> SkillClass)
 {
-    return GetWorld()->SpawnActor<ABaseSkill>(SkillClass);
+    ABaseSkill* SkillActor = GetWorld()->SpawnActor<ABaseSkill>(SkillClass);
+    SkillActor->SetActive(false);
+    return SkillActor;
 }
 
 void USkillManager::InitializeSkill(ABaseSkill* Skill, const FTransform& SpawnTransform)
@@ -134,7 +170,7 @@ void USkillManager::InitializeSkill(ABaseSkill* Skill, const FTransform& SpawnTr
 
 void USkillManager::ResetSkill(ABaseSkill* Skill)
 {
-    Skill->SetActive(false);
+    // Skill->SetActive(false);
 }
 
 FSkillPool& USkillManager::GetOrCreateSkillPool(TSubclassOf<ABaseSkill> SkillClass)

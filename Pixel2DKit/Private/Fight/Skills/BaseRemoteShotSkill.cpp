@@ -23,7 +23,7 @@ ABaseRemoteShotSkill::ABaseRemoteShotSkill()
 
 void ABaseRemoteShotSkill::SetTraceData(const FRemoteShotData& Data)
 {
-	NewTargetLifeSpan = Data.NewTargetLifeSpan;
+	LifeSpan = Data.NewTargetLifeSpan;
 	InitSpeed = Data.InitSpeed;
 	MaxSpeed = Data.MaxSpeed;
 	MaxTraceDistance = Data.MaxTraceDistance;
@@ -44,20 +44,18 @@ void ABaseRemoteShotSkill::SetDamageData(int _Damage, FVector _Knockback, int _R
 void ABaseRemoteShotSkill::StartTrace()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ProjectileComp)
-
+	
 	ProjectileComp->InitialSpeed = InitSpeed;
 	ProjectileComp->MaxSpeed = MaxSpeed;
 	ProjectileComp->Velocity = Direction * InitSpeed;
+
+	SetActive(true);
 }
 
 // Called when the game starts or when spawned
 void ABaseRemoteShotSkill::BeginPlay()
 {
 	Super::BeginPlay();
-
-	SetLifeSpan(NewTargetLifeSpan);
-	StartTrace();
-
 	
 	OnActorBeginOverlap.AddDynamic(this, &ThisClass::OnHitTarget);
 	OnActorHit.AddDynamic(this, &ThisClass::OnHitObstacle);
@@ -78,12 +76,21 @@ void ABaseRemoteShotSkill::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ABaseRemoteShotSkill::SetActive(bool v)
+{
+	Super::SetActive(v);
+	if (v)
+	{
+		ActorsEffected.Empty();
+	}
+}
+
 FVector ABaseRemoteShotSkill::FindNextTargetDirection()
 {
 	ABaseEnemy* Enemy = USpaceFuncLib::FindActorInRangeRandomOne<ABaseEnemy>(GetWorld(), this, ActorsEffected, FVector2D(0, MaxTraceDistance));
 	if (Enemy)
 	{
-		SetLifeSpan(NewTargetLifeSpan);
+		SetLifeSpan(LifeSpan);
 		return (Enemy->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 	}
 
@@ -116,10 +123,13 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* OverlappedActor, A
 			{
 				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitNiagara, GetActorLocation(), FRotator(0,0,0),  GetActorScale3D());
 			}
+
 			// 由于目前没做大部分的技能消失效果，先直接Destroy
-			Destroy();
+			// Destroy();
 
 			// OnSkillEnd();
+			
+			SetActive(false);
 		}
 		return;
 	}
@@ -183,7 +193,7 @@ bool ABaseRemoteShotSkill::OnSplit()
 			FRemoteShotData Data;
 			Data.InitSpeed = InitSpeed * 0.9;
 			Data.MaxSpeed = MaxSpeed * 0.9;
-			Data.NewTargetLifeSpan = NewTargetLifeSpan * 0.9;
+			Data.NewTargetLifeSpan = LifeSpan * 0.9;
 			Data.MaxTraceDistance = MaxTraceDistance * 0.9;
 			Data.Direction = NewDir;
 				

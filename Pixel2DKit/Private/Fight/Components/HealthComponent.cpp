@@ -362,7 +362,6 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	Repel = (1 - InRockPercent) * CalRepel(Repel, Maker) * KnockBackMultiplier;
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())
 	{
-		UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("DecreaseHP, Repel: %s"), *Repel.ToString()));
 		MovementComponent->AddImpulse(Repel , true);
 	}
 

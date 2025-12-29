@@ -57,8 +57,7 @@ public:
 	TArray<AActor*> ActorsEffected;
 
 
-	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
-	float NewTargetLifeSpan = 2.0f;
+
 	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile",meta = (ExposeOnSpawn))
 	float InitSpeed = 500.0f;
 	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile",meta = (ExposeOnSpawn))
@@ -73,7 +72,7 @@ public:
 
 	
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
-	int Damage = 0;
+	int Damage = 1;
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
 	int RemHitNum = 1;	
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
@@ -103,9 +102,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-
-
-	
+	virtual void SetActive(bool v) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FVector FindNextTargetDirection();

@@ -70,12 +70,19 @@ public:
 
 	// 预分配技能池
 	UFUNCTION(BlueprintCallable, Category = "Skill System")
-	void PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int32 Count);
+	void PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int32 Count = 1);
 
 	// 激活技能（从池中获取或创建新实例）
 	UFUNCTION(BlueprintCallable, Category = "Skill System")
 	ABaseSkill* ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform);
-
+	
+	// 激活技能（从池中获取或创建新实例）
+	UFUNCTION(BlueprintCallable, Category = "Skill System")
+	ABaseRemoteShotSkill* ActivateRemoteShotSkill(TSubclassOf<ABaseRemoteShotSkill> SkillClass, const FTransform& SpawnTransform
+		,AActor* Owner, UNiagaraSystem* HitNiagara = nullptr, float NewTargetLifeSpan = 2.0f, float InitSpeed = 500.f, float MaxSpeed = 1000.f
+		,float MaxTraceDistance = 400.f, FVector Direction = FVector(1, 0, 0), int Damage = 1, int RemHitNum = 2
+		,float DamageDecreasePercentPerHit = 0.1, FVector Knockback = FVector(50, 50, 100), int RemSpringNum = 0, int RemSplitNum = 0);
+	
 	// 回收技能
 	UFUNCTION(BlueprintCallable, Category = "Skill System")
 	void DeactivateSkill(ABaseSkill* SkillActor);
@@ -85,7 +92,6 @@ public:
 	void GetPoolStats(TSubclassOf<ABaseSkill> SkillClass, int32& OutTotalCount, int32& OutActiveCount);
 
 private:
-
 
 	// 技能类别到池的映射
 	UPROPERTY()

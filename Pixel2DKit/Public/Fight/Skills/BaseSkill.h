@@ -32,8 +32,15 @@ protected:
 	bool bEnding = false;
 	
 public:
+
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
+	float LifeSpan = 2.0f;
+	
 	UFUNCTION(BlueprintCallable)
-	void SetActive(bool v);
+	virtual void SetActive(bool v);
+
+	UFUNCTION(BlueprintCallable)
+	void SetSkillLifeTimer(bool bActivate);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsActive() const;
