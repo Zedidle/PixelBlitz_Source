@@ -294,6 +294,7 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	float yaw = FVector::DotProduct(GetRightVectorWithBlendYaw(), Velocity.GetSafeNormal()) * 5 + CurBlendYaw - 90;
 	SpringArm->SetRelativeRotation(FRotator(CurBlendPitch, yaw, 0));
 
+	
 
 	// 镜头偏移
 	if (Velocity.Size() > 0)
@@ -336,7 +337,11 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 
 	TArray<FVector> OffsetValues;
 	CameraOffsetMap.GenerateValueArray(OffsetValues);
-
+	
+	// FVector DefaultSpringArmZOffset = {0,0,(PreSpringArmZ - SpringArm->GetComponentLocation().Z)};
+	// OffsetValues.Add(DefaultSpringArmZOffset);
+	
+	// 一般都是计算水平偏移，与Z无关
 	FVector NewTargetCameraOffset;
 	if (UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset))
 	{
@@ -346,8 +351,12 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	{
 		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds);
 	}
-	SpringArm->SetWorldLocation(GetActorLocation() + CurCameraOffset);
 
+	FVector NewSpringArmLocation = GetActorLocation() + CurCameraOffset;
+	NewSpringArmLocation.Z = FMath::Lerp(PreSpringArmZ, NewSpringArmLocation.Z, 0.1);
+	
+	SpringArm->SetWorldLocation(NewSpringArmLocation);
+	PreSpringArmZ = NewSpringArmLocation.Z;
 	
 	// 攻击命中导致的视野下降
 	if (AttackHitComboNum > 0)
@@ -453,6 +462,12 @@ void ABasePXCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	InitScale = GetActorScale3D();
+
+	if (SpringArm)
+	{
+		PreSpringArmZ = SpringArm->GetComponentLocation().Z;
+	}
+	
 	if (GetCharacterMovement())
 	{
 		SetFalling(GetCharacterMovement()->IsFalling());

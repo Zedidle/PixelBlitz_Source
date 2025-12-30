@@ -52,28 +52,6 @@ void APlatformFight::Tick(float DeltaTime)
 
 	float FightCameraOffsetPoint = FMath::Pow(DistanceCenterToPlayer, 0.8) / PXCharacter->CurSpringArmLength;
 	PXCharacter->AddCameraOffset(FName("PlatformFight"), FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint);
-
-
-	
-	// 设置镜头偏转
-	
-	// APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
-	// FVector EyeViewPoint; FRotator _;
-	// CameraManager->GetActorEyesViewPoint(EyeViewPoint, _);
-
-	// FVector CenterToViewPoint =  TmpCenterLocation - EyeViewPoint;
-	// float cal2 = PXCharacter->CurSpringArmLength + FMath::GetMappedRangeValueClamped(FVector2D(InRangeA, PXCharacter->CurSpringArmLength * 0.7),
-	// 	FVector2D(0.0f, 100.0f), DistanceCenterToPlayer);
-	//
-	// if (CenterToViewPoint.Size() < cal2)
-	// {
-	// 	float CrossZ = FVector::CrossProduct(CenterToViewPoint.GetSafeNormal(), (PlayerLocation - EyeViewPoint).GetSafeNormal()).Z;
-	// 	if (FMath::Abs(CrossZ) > ViewRotateFactor)
-	// 	{
-	// 		PXCharacter->AddViewYaw(HorizontalInvert * CrossZ * FMath::GetMappedRangeValueClamped(FVector2D(0, 300),
-	// 				FVector2D(-1.8, OutRangeB), PXCharacter->GetVelocity().Size() / 2 ));
-	// 	}
-	// }
 }
 
 void APlatformFight::RegisterEnemies_Implementation()
@@ -152,6 +130,7 @@ bool APlatformFight::ActivateFight_Implementation(bool bActivate)
 	{
 		if (Enemies.IsEmpty()) return false;
 
+		SetActorTickEnabled(true);
 		ShowCountWidget();
 		return true;
 	}
@@ -169,7 +148,6 @@ void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 	
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
 	{
-		SetActorTickEnabled(true);
 		PXCharacter = C;
 		if (!PXCharacter->OnPlayerDie.IsAlreadyBound(this, &ThisClass::FightEnd))
 		{

@@ -248,6 +248,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
 	float GetEffectGameplayTag(const FGameplayTag Tag) const;
 #pragma endregion
+
+	float PreSpringArmZ = 0.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
 	FVector FrontViewFactor = {0.4, 0.4, 0.1};
