@@ -86,6 +86,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+	virtual void RepelFromActor(AActor* Other) override;
+
+	
 	virtual void SetActive(bool v) override;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))

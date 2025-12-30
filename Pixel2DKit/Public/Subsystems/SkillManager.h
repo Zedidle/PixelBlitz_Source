@@ -144,7 +144,8 @@ public:
 		,AActor* Owner, UNiagaraSystem* HitNiagara = nullptr, AActor* Target = nullptr, bool bIdle = true, float NewTargetLifeSpan = 2.0f, float CurMagnitude = 3000.0f
 		,float InRangeNear = 1000.0f, float MagnitudeScaleNear = 2.0f, float MagnitudeScaleFar = 1.0f, float InitSpeed = 500.0f
 		,float MaxSpeed = 1000.0f, float MaxTraceDistance = 600.0f, int Damage = 1, int RemHitNum = 1, bool bForce = false
-		,float DamageDecreasePercentPerHit = 0.1, FVector Knockback = FVector(50, 50, 100));
+		,float DamageDecreasePercentPerHit = 0.1, FVector Knockback = FVector(50, 50, 100)
+		,float RepelSameSpeed = 0.0f, float RepelSameDistance = 50.0f);
 	
 	// 回收技能
 	UFUNCTION(BlueprintCallable, Category = "Skill System")
@@ -164,4 +165,8 @@ private:
 	ABaseSkill* CreateNewSkill(TSubclassOf<ABaseSkill> SkillClass);
 	void InitializeSkill(ABaseSkill* Skill, const FTransform& SpawnTransform);
 	FSkillPool& GetOrCreateSkillPool(TSubclassOf<ABaseSkill> SkillClass);
+
+
+
+	void Tick_SameSkillFarFromEach();
 };

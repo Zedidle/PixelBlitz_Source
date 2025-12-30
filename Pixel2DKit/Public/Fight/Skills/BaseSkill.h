@@ -38,6 +38,15 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
 	float LifeSpan = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn, ClampMin=0.0, ClampMax=1.0))
+	float RepelSameSpeed = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn))
+	float RepelSameDistance = 50;
+
+	UFUNCTION(BlueprintCallable)
+	virtual void RepelFromActor(AActor* Other);
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void SetActive(bool v);
@@ -71,8 +80,6 @@ public:
 	// 静止所有 碰撞/伤害 生效，触发Niagara消除效果
 	UFUNCTION(BlueprintCallable)
 	virtual void OnSkillEnd();
-
-
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Skill | Niagara")
 	void SetColor(FLinearColor Color);

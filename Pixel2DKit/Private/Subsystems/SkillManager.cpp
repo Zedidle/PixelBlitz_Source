@@ -6,15 +6,19 @@
 #include "Engine/World.h"
 #include "Fight/Skills/BaseRemoteShotSkill.h"
 #include "Fight/Skills/BaseTraceProjectileSkill.h"
+#include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 
 void USkillManager::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
+
 }
 
 void USkillManager::Deinitialize()
 {
+    UTimerSubsystemFuncLib::CancelDelay(GetWorld(),"USkillManager_SameSkillFarFromEach");
+    
     // 清理所有技能实例
     for (auto& Pair : SkillPoolMap)
     {
@@ -46,6 +50,14 @@ void USkillManager::PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int
 {
     if (!SkillClass || Count <= 0) return;
 
+    if (SkillPoolMap.IsEmpty())
+    {
+        if (!UTimerSubsystemFuncLib::HasTimer(GetWorld(), "USkillManager_SameSkillFarFromEach"))
+        {
+            UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "USkillManager_SameSkillFarFromEach", this, &ThisClass::Tick_SameSkillFarFromEach, 0.1);
+        }
+    }
+    
     FSkillPool& Pool = GetOrCreateSkillPool(SkillClass);
     for (int32 i = 0; i < Count; i++)
     {
@@ -117,7 +129,7 @@ ABaseTraceProjectileSkill* USkillManager::ActivateTraceProjectileSkill(TSubclass
     const FTransform& SpawnTransform, AActor* Owner, UNiagaraSystem* HitNiagara, AActor* Target, bool bIdle,
     float NewTargetLifeSpan, float CurMagnitude, float InRangeNear, float MagnitudeScaleNear, float MagnitudeScaleFar,
     float InitSpeed, float MaxSpeed, float MaxTraceDistance, int Damage, int RemHitNum, bool bForce,
-    float DamageDecreasePercentPerHit, FVector Knockback)
+    float DamageDecreasePercentPerHit, FVector Knockback, float RepelSameSpeed, float RepelSameDistance)
 {
     UClass* BaseSkillClass = SkillClass.Get();
     ABaseSkill* BaseSkill = ActivateSkill(TSubclassOf<ABaseSkill>(BaseSkillClass), SpawnTransform);
@@ -142,6 +154,8 @@ ABaseTraceProjectileSkill* USkillManager::ActivateTraceProjectileSkill(TSubclass
     TraceProjectileSkill->bForce = bForce;
     TraceProjectileSkill->DamageDecreasePercentPerHit = DamageDecreasePercentPerHit;
     TraceProjectileSkill->Knockback = Knockback;
+    TraceProjectileSkill->RepelSameSpeed = RepelSameSpeed;
+    TraceProjectileSkill->RepelSameDistance = RepelSameDistance;
 
     TraceProjectileSkill->SetActive(true);
     
@@ -187,4 +201,26 @@ void USkillManager::InitializeSkill(ABaseSkill* Skill, const FTransform& SpawnTr
 FSkillPool& USkillManager::GetOrCreateSkillPool(TSubclassOf<ABaseSkill> SkillClass)
 {
     return SkillPoolMap.FindOrAdd(SkillClass);
+}
+
+void USkillManager::Tick_SameSkillFarFromEach()
+{
+    for (auto& Pair : SkillPoolMap)
+    {
+        FSkillPool& Pool = Pair.Value;
+        for (auto& SkillA : Pool.SkillsActivated)
+        {
+            if (SkillA->RepelSameSpeed <= 0) continue;
+            
+            for (auto& SkillB : Pool.SkillsActivated)
+            {
+                if (SkillA == SkillB) continue;
+                
+                float Distance = SkillA->GetDistanceTo(SkillB.Get());
+                if (Distance > SkillA->RepelSameDistance) continue;
+
+                SkillA->RepelFromActor(SkillB.Get());
+            }
+        }
+    }
 }

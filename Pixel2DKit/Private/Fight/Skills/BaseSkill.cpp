@@ -27,6 +27,11 @@ void ABaseSkill::BeginPlay()
 
 }
 
+
+void ABaseSkill::RepelFromActor(AActor* Other)
+{
+}
+
 void ABaseSkill::SetActive(bool v)
 {
 	if (v)

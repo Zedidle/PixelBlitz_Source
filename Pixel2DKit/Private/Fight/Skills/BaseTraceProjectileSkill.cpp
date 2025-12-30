@@ -83,6 +83,20 @@ void ABaseTraceProjectileSkill::Tick(float DeltaTime)
 	
 }
 
+void ABaseTraceProjectileSkill::RepelFromActor(AActor* Other)
+{
+	Super::RepelFromActor(Other);
+
+	if (RepelSameSpeed <= 0.0f) return;
+
+	FVector DirVector = GetActorLocation() - Other->GetActorLocation();
+	FVector RepelDirection = DirVector.GetSafeNormal();
+	float Distance = DirVector.Size();
+	
+	ProjectileComp->Velocity += RepelDirection * RepelSameSpeed * 
+		FMath::GetMappedRangeValueClamped(FVector2D(25, 1000000), FVector2D(500.0, 1), FMath::Pow(Distance, 2));
+}
+
 void ABaseTraceProjectileSkill::SetActive(bool v)
 {
 	Super::SetActive(v);
