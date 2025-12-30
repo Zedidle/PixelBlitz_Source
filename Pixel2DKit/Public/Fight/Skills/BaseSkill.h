@@ -7,6 +7,7 @@
 #include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
 #include "UObject/FastReferenceCollector.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "BaseSkill.generated.h"
 
 
@@ -23,7 +24,7 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 	USoundBase* BeginSound = nullptr;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	bool bActive = true;
+	bool bActive = false;
 
 	
 protected:
@@ -42,8 +43,11 @@ public:
 	virtual void SetActive(bool v);
 
 	virtual bool IsAvailableForReuse() const 
-	{ 
-		return !bActive && IsValidLowLevel() && !IsPendingKillPending(); 
+	{
+		bool bValidLowLevel = IsValidLowLevel();
+		bool bKilling = IsPendingKillPending();
+
+		return !bActive && bValidLowLevel && !bKilling; 
 	}
 	
 	UFUNCTION(BlueprintCallable)

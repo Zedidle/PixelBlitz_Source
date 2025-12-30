@@ -173,7 +173,6 @@ void USkillManager::GetPoolStats(TSubclassOf<ABaseSkill> SkillClass, int32& OutT
 ABaseSkill* USkillManager::CreateNewSkill(TSubclassOf<ABaseSkill> SkillClass)
 {
     ABaseSkill* SkillActor = GetWorld()->SpawnActor<ABaseSkill>(SkillClass);
-    // SkillActor->SetActive(false);
     return SkillActor;
 }
 
