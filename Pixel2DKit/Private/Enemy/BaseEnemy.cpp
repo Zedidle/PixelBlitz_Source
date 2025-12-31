@@ -814,8 +814,10 @@ void ABaseEnemy::PowerRepulsion_Implementation(float Power)
 		UTimerSubsystemFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
-
-			WeakThis->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+			if (WeakThis->GetCharacterMovement())
+			{
+				WeakThis->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+			}
 		}, Power / 6000);
 	}
 }
@@ -842,7 +844,10 @@ void ABaseEnemy::OnDefendingHitEffect_Implementation()
 
 void ABaseEnemy::OnAnimDieEnd_Implementation()
 {
-	GetCharacterMovement()->DestroyComponent();
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->DestroyComponent();
+	}
 }
 
 void ABaseEnemy::OnRemoteAttackEffect_Implementation()

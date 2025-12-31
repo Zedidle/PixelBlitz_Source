@@ -13,6 +13,12 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
+
+void UPXGameInstance::SetLevelType(ELevelType _LevelType)
+{
+	LevelType = _LevelType;
+}
+
 void UPXGameInstance::StartNewGame()
 {
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
@@ -21,7 +27,17 @@ void UPXGameInstance::StartNewGame()
 	UDataTableSubsystem* DataTableSubsystem = GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
 
-	UDataTable* LevelData = DataTableSubsystem->GetDataTable("LevelData");
+	FString LevelTableName = "";
+	if (LevelType == ELevelType::Race)
+	{
+		LevelTableName = "LevelData_Race";
+	}
+	else if(LevelType == ELevelType::Arena)
+	{
+		LevelTableName = "LevelData_Arena";
+	}
+	
+	UDataTable* LevelData = DataTableSubsystem->GetDataTable(LevelTableName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(LevelData)
 	
 	PXSG->Main_TotalInit();

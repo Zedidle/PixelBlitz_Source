@@ -2,6 +2,8 @@
 
 
 #include "Subsystems/DataTableSubsystem.h"
+
+#include "GameplayTagsManager.h"
 #include "Engine/AssetManager.h"
 #include "Engine/StreamableManager.h"
 #include "Item/Weapon/BaseWeapon.h"
@@ -126,14 +128,19 @@ const FWeaponData* UDataTableSubsystem::GetWeaponDataByTag(const FGameplayTag& W
 
 void UDataTableSubsystem::LoadLevelData()
 {
-	UDataTable* DataTable = GetDataTable("LevelData");
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
-	
-	TArray<FName> Rownames = DataTable->GetRowNames();
-	for (auto& Row : Rownames)
+	TArray<FString> LevelTableNames = {"LevelData_Race", "LevelData_Arena"};
+
+	for (auto& LevelName : LevelTableNames)
 	{
-		FLevelData* Data = DataTable->FindRow<FLevelData>(Row, "LoadLevelData");
-		LevelData.Add(Data->LevelInstanceName, *Data);
+		UDataTable* DataTable = GetDataTable(LevelName);
+		if (!DataTable) continue;
+	
+		TArray<FName> RowNames = DataTable->GetRowNames();
+		for (auto& Row : RowNames)
+		{
+			FLevelData* Data = DataTable->FindRow<FLevelData>(Row, "LoadLevelData");
+			LevelData.Add(Data->LevelInstanceName, *Data);
+		}
 	}
 }
 

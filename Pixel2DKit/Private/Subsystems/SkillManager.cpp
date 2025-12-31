@@ -88,10 +88,6 @@ ABaseSkill* USkillManager::ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, con
     }
 
     InitializeSkill(AvailableSkill, SpawnTransform);
-
-    UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("USkillManager::ActivateSkill : %s,  Pool Waiting: %d   Active: %d"),
-        *AvailableSkill->GetActorNameOrLabel(), Pool->SkillsWaiting.Num(), Pool->SkillsActivated.Num()));
-
     return AvailableSkill;
 }
 
@@ -170,8 +166,6 @@ void USkillManager::DeactivateSkill(ABaseSkill* SkillActor)
     if (FSkillPool* Pool = SkillPoolMap.Find(SkillClass))
     {
         Pool->ReturnSkill(SkillActor);
-        UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("USkillManager::DeactivateSkill : %s,  Pool Waiting: %d   Active: %d"),
-        *SkillActor->GetActorNameOrLabel(), Pool->SkillsWaiting.Num(), Pool->SkillsActivated.Num()));
     }
 }
 
@@ -210,10 +204,12 @@ void USkillManager::Tick_SameSkillFarFromEach()
         FSkillPool& Pool = Pair.Value;
         for (auto& SkillA : Pool.SkillsActivated)
         {
+            if (!SkillA.IsValid()) continue;
             if (SkillA->RepelSameSpeed <= 0) continue;
             
             for (auto& SkillB : Pool.SkillsActivated)
             {
+                if (!SkillB.IsValid()) continue;
                 if (SkillA == SkillB) continue;
                 
                 float Distance = SkillA->GetDistanceTo(SkillB.Get());

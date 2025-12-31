@@ -1315,7 +1315,11 @@ FVector ABasePXCharacter::GetDashDirection()
 
 bool ABasePXCharacter::IsAlive_Implementation()
 {
-	return HealthComponent->GetCurrentHP() > 0;
+	if (HealthComponent)
+	{
+		return HealthComponent->GetCurrentHP() > 0;
+	}
+	return false;
 }
 
 FGameplayTagContainer ABasePXCharacter::GetOwnCamp_Implementation() const

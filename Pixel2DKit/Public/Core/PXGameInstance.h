@@ -8,9 +8,16 @@
 #include "Utilitys/PXCustomStruct.h"
 #include "PXGameInstance.generated.h"
 
-/**
- * 
- */
+
+UENUM(BlueprintType)
+enum class ELevelType : uint8
+{
+	None UMETA(DisplayName = "无"),
+	Race UMETA(DisplayName = "战斗竞速"),
+	Arena UMETA(DisplayName = "竞技场"),
+};
+
+
 UCLASS()
 class PIXEL2DKIT_API UPXGameInstance : public UGameInstance
 {
@@ -22,6 +29,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Game")
 	bool bGameStarted = false;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Game")
+	ELevelType LevelType = ELevelType::Race;
+
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void SetLevelType(ELevelType _LevelType = ELevelType::Race);
+	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void StartNewGame();
 
