@@ -35,22 +35,25 @@ AEnemyAIController::AEnemyAIController(const FObjectInitializer& ObjectInitializ
 
 void AEnemyAIController::OnPerceptionUpdated(const FActorPerceptionUpdateInfo& UpdateInfo)
 {
-	ABaseEnemy* Enemy = Cast<ABaseEnemy>(GetPawn());
-	if (!Enemy) return;
+	if (!CachedEnemy)
+	{
+		CachedEnemy = Cast<ABaseEnemy>(GetPawn());
+	}
+	if (!CachedEnemy) return;
  
 	AActor* Actor = UpdateInfo.Target.Get();
 	const FAIStimulus& Stimulus = UpdateInfo.Stimulus;
- 
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		if (IsValid(Actor) && !Actor->IsPendingKillPending())
 		{
-			Enemy->OnSensingPlayer(Actor);
+			CachedEnemy->OnSensingPlayer(Actor);
 		}
 	}
 	else
 	{
-		Enemy->DelayLosePlayer();
+		CachedEnemy->DelayLosePlayer();
 	}
 }
 

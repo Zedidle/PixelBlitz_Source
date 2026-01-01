@@ -41,8 +41,6 @@ public:
 	UFUNCTION()
 	void InitData();
 	
-
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<UBuffStateWidget> BuffStateWidgetClass;
 	UPROPERTY()

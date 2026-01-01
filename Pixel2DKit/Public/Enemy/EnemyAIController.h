@@ -16,7 +16,8 @@ class PIXEL2DKIT_API AEnemyAIController : public AAIController
 {
 	GENERATED_BODY()
 
-
+	UPROPERTY()
+	ABaseEnemy* CachedEnemy;
 
 public:
 

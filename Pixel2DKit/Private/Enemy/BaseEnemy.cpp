@@ -726,14 +726,20 @@ bool ABaseEnemy::InAttackRange_Vertical()
 
 void ABaseEnemy::DelayLosePlayer_Implementation()
 {
-	FName TimerName = FName(GetFName() + "_DelayLosePlayer");
+	FName TimerName = FName(GetName() + "_DelayLosePlayer");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-		[WeakThis = TWeakObjectPtr(this)]
+	[WeakThis = TWeakObjectPtr(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		if (WeakThis->InAttackRange())
 		{
-			if (!WeakThis.IsValid()) return;
-			
+			WeakThis->DelayLosePlayer();
+		}
+		else
+		{
 			WeakThis->GoPatrol();
-		}, LostEnemyTime);
+		}
+	}, LostEnemyTime);
 }
 
 void ABaseEnemy::OnAttack_Implementation()
