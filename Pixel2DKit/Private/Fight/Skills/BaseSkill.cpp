@@ -51,7 +51,7 @@ void ABaseSkill::SetActive(bool v)
 		SetActorEnableCollision(false);
 		SetActorHiddenInGame(true);
 		SetSkillLifeTimer(false);
-
+		bIdle = false;
 		if (USkillManager* SkillManager = GetGameInstance()->GetSubsystem<USkillManager>())
 		{
 			SkillManager->DeactivateSkill(this);
@@ -63,12 +63,13 @@ void ABaseSkill::SetActive(bool v)
 
 void ABaseSkill::SetSkillLifeTimer(bool bActivate)
 {
-	FName TimerName = FName(GetActorNameOrLabel() + "_Skill.SetActive");
+	FName TimerName = FName(GetName() + "_Skill.SetActive");
 	if (bActivate)
 	{
-		UTimerSubsystemFuncLib::SetRetriggerableDelay(this, TimerName,[WeakThis = TWeakObjectPtr(this)]
+		UTimerSubsystemFuncLib::SetDelayLoop(this, TimerName,[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
+			if (WeakThis->bIdle) return;
 			WeakThis->SetActive(false);
 		}, LifeSpan);
 	}

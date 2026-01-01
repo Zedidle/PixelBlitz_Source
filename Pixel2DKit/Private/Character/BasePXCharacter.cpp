@@ -806,7 +806,7 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
-	FName TimerName = FName(GetActorNameOrLabel() + "_OutOfControl");
+	FName TimerName = FName(GetName() + "_OutOfControl");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,[WeakThis = TWeakObjectPtr(this)]{
 		if (WeakThis.IsValid())
 		{

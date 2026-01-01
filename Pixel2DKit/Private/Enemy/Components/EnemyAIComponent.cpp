@@ -63,7 +63,7 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	PXCharacter = Character;
 
-	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetActorNameOrLabel() + "_SetPixelCharacter");
+	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetName() + "_SetPixelCharacter");
 	
 	if (PXCharacter)
 	{
@@ -77,7 +77,7 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 
 		Character->OnPlayerAttackStart.AddUniqueDynamic(this, &ThisClass::OnPlayerAttackStart);
 		
-		FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetActorNameOrLabel() + "_CheckPlayerMovement");
+		FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetName() + "_CheckPlayerMovement");
 		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckPlayerMovement, this, &ThisClass::Event_CheckPlayerMovement, 0.1);
 	}
 	else
@@ -110,10 +110,10 @@ void UEnemyAIComponent::UpdatePlayerPaths()
 
 void UEnemyAIComponent::LostPlayer()
 {
-	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetActorNameOrLabel() + "_SetPixelCharacter");
+	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetName() + "_SetPixelCharacter");
 	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerLocation);
 	
-	FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetActorNameOrLabel() + "_CheckPlayerMovement");
+	FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetName() + "_CheckPlayerMovement");
 	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerMovement);
 
 	if (PXCharacter)

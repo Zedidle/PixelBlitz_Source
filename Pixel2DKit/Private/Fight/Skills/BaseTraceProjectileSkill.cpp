@@ -201,16 +201,10 @@ void ABaseTraceProjectileSkill::SetNewTarget(AActor* TargetActor, bool Idle)
 	Target = TargetActor;
 	bIdle = Idle;
 
-	if (!bIdle)
-	{
-		SetSkillLifeTimer(true);
-	}
+	SetSkillLifeTimer(true);
 	
 	if (USceneComponent* TargetRootComponent = TargetActor->GetRootComponent())
 	{
-		ProjectileComp->HomingTargetComponent = TargetRootComponent;
-		ProjectileComp->Velocity += ProjectileComp->Velocity * (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-
 		CurMagnitude *= FMath::RandRange(0.8, 1.2);
 		InRangeNear *= FMath::RandRange(0.8, 1.2);
 		MagnitudeScaleNear *= FMath::RandRange(0.8, 1.2);
@@ -224,6 +218,9 @@ void ABaseTraceProjectileSkill::SetNewTarget(AActor* TargetActor, bool Idle)
 			// 初始速度设置实际可能无效
 			ProjectileComp->InitialSpeed = InitSpeed;
 			ProjectileComp->MaxSpeed = MaxSpeed;
+
+			ProjectileComp->HomingTargetComponent = TargetRootComponent;
+			ProjectileComp->Velocity = InitSpeed * (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 		}
 	}
 

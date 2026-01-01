@@ -726,7 +726,7 @@ bool ABaseEnemy::InAttackRange_Vertical()
 
 void ABaseEnemy::DelayLosePlayer_Implementation()
 {
-	FName TimerName = FName(GetActorNameOrLabel() + "_DelayLosePlayer");
+	FName TimerName = FName(GetFName() + "_DelayLosePlayer");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 		[WeakThis = TWeakObjectPtr(this)]
 		{
@@ -857,7 +857,7 @@ void ABaseEnemy::OnRemoteAttackEffect_Implementation()
 
 void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 {
-	FName TimerName = FName(GetActorNameOrLabel() + "_InAttackState");
+	FName TimerName = FName(GetName() + "_InAttackState");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
 	[WeakThis = TWeakObjectPtr(this)]
 		{
@@ -893,8 +893,8 @@ void ABaseEnemy::OnAttackEffectBegin_Implementation()
 
 void ABaseEnemy::OnAttackEffectEnd_Implementation()
 {
-	SetInAttackEffect(false);
-	FName TimerName = FName(GetActorNameOrLabel() + "_InAttackState");
+	SetInAttackEffect(false); 
+	FName TimerName = FName(GetName() + "_InAttackState");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
 	[WeakThis = TWeakObjectPtr(this)]
 		{

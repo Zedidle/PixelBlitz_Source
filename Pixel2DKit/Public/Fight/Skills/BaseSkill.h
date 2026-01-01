@@ -36,6 +36,10 @@ protected:
 	
 public:
 
+	// 处于不攻击且不能被定时回收的状态
+	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
+	bool bIdle = false;
+
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
 	float LifeSpan = 2.0f;
 

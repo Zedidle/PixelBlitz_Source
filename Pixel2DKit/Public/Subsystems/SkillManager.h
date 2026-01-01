@@ -128,7 +128,6 @@ public:
 	void PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int32 Count = 1);
 
 	// 激活技能（从池中获取或创建新实例）
-	UFUNCTION(BlueprintCallable, Category = "Skill System")
 	ABaseSkill* ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform);
 	
 	// 激活一个远程射击（投掷物）技能

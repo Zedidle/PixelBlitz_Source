@@ -95,8 +95,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	AActor* Target = nullptr;
 	
-	UPROPERTY(BlueprintReadWrite, Category="Skill | Projectile", meta = (ExposeOnSpawn))
-	bool bIdle = false;
 	UPROPERTY(BlueprintReadOnly, Category="Skill | Projectile", meta = (ExposeOnSpawn))
 	float CurMagnitude = 3000.0f;
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
