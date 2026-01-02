@@ -52,11 +52,7 @@ void UDataTableSubsystem::LoadAbilityData()
 		for (auto& Row : Rownames)
 		{
 			FAbility* Data = DataTable->FindRow<FAbility>(Row, "LoadAbilityData");
-			if (AbilityData.Contains(Data->AbilityTag))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Loading Ability Data, 技能Tag重复：%s"), *Data->AbilityTag.ToString());
-			}
-			else
+			if (!AbilityData.Contains(Data->AbilityTag))
 			{
 				AbilityData.Add(Data->AbilityTag, *Data);
 			}
