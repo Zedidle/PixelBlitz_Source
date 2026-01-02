@@ -25,6 +25,7 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bActive = false;
+	
 
 	
 protected:
@@ -40,6 +41,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
 	bool bIdle = false;
 
+	// 是否无视对方受伤的闪烁状态，必定造成伤害
+	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
+	bool bForce = false;
+	
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
 	float LifeSpan = 2.0f;
 

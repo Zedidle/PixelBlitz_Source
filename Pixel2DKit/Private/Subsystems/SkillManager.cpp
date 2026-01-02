@@ -94,7 +94,7 @@ ABaseSkill* USkillManager::ActivateSkill(TSubclassOf<ABaseSkill> SkillClass, con
 ABaseRemoteShotSkill* USkillManager::ActivateRemoteShotSkill(TSubclassOf<ABaseRemoteShotSkill> SkillClass,
     const FTransform& SpawnTransform, AActor* Owner, UNiagaraSystem* HitNiagara, float NewTargetLifeSpan,
     float InitSpeed, float MaxSpeed, float MaxTraceDistance, FVector Direction, int Damage, int RemHitNum,
-    float DamageDecreasePercentPerHit, FVector Knockback, int RemSpringNum, int RemSplitNum)
+    float DamageDecreasePercentPerHit, FVector Knockback, int RemSpringNum, int RemSplitNum, bool bForce)
 {
     UClass* BaseSkillClass = SkillClass.Get();
     ABaseSkill* BaseSkill = ActivateSkill(TSubclassOf<ABaseSkill>(BaseSkillClass), SpawnTransform);
@@ -115,6 +115,7 @@ ABaseRemoteShotSkill* USkillManager::ActivateRemoteShotSkill(TSubclassOf<ABaseRe
     RemoteShotSkill->Knockback = Knockback;
     RemoteShotSkill->RemSpringNum = RemSpringNum;
     RemoteShotSkill->RemSplitNum = RemSplitNum;
+    RemoteShotSkill->bForce = bForce;
 
     RemoteShotSkill->SetActive(true);
     

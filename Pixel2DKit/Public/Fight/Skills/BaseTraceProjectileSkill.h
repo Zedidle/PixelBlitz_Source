@@ -119,8 +119,7 @@ public:
 	int Damage = 1;
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
 	int RemHitNum = 1;	
-	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
-	bool bForce = false;
+
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))
 	float DamageDecreasePercentPerHit = 0.1;
 	UPROPERTY(BlueprintReadWrite, Category="Skill", meta = (ExposeOnSpawn))

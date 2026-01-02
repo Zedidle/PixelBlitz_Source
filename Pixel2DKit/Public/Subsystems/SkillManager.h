@@ -135,7 +135,8 @@ public:
 	ABaseRemoteShotSkill* ActivateRemoteShotSkill(TSubclassOf<ABaseRemoteShotSkill> SkillClass, const FTransform& SpawnTransform
 		,AActor* Owner, UNiagaraSystem* HitNiagara = nullptr, float NewTargetLifeSpan = 2.0f, float InitSpeed = 500.f, float MaxSpeed = 1000.f
 		,float MaxTraceDistance = 400.f, FVector Direction = FVector(1, 0, 0), int Damage = 1, int RemHitNum = 2
-		,float DamageDecreasePercentPerHit = 0.1, FVector Knockback = FVector(50, 50, 100), int RemSpringNum = 0, int RemSplitNum = 0);
+		,float DamageDecreasePercentPerHit = 0.1, FVector Knockback = FVector(50, 50, 100), int RemSpringNum = 0, int RemSplitNum = 0
+		,bool bForce = false);
 
 	// 激活一个远程追踪法术
 	UFUNCTION(BlueprintCallable, Category = "Skill System")

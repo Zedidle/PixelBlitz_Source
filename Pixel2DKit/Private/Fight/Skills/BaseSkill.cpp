@@ -40,6 +40,7 @@ void ABaseSkill::SetActive(bool v)
 		SetActorEnableCollision(true);
 		SetActorHiddenInGame(false);
 		SetSkillLifeTimer(true);
+		ReinitializeNiagara();
 		if (BeginSound)
 		{
 			USoundFuncLib::PlaySoundAtLocation(BeginSound, GetActorLocation());
