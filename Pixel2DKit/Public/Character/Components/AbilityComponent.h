@@ -42,6 +42,9 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
 	// 正在显示让选的技能（三个）
 	UPROPERTY()
 	TArray<FGameplayTag> AbilitiesShowing;
+
+
+	
 	
 public:	
 	// Sets default values for this component's properties
@@ -67,10 +70,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
 
-
-	
-
-
+	UPROPERTY()
+	TMap<EAbilityTiming, FGameplayTagArray> AbilitiesTiming;
 	
 protected:
 	// Called when the game starts
@@ -121,9 +122,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoints);
 
-
-
-
+	
+	UFUNCTION(BlueprintCallable)
+	void ActivateTalentByTiming(EAbilityTiming Timing);
 
 	
 	UFUNCTION(BlueprintCallable)

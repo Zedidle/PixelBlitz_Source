@@ -45,15 +45,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "DefenseSkill")
 	UDefenseSkillDataAsset* DataAsset;
 
-	UPROPERTY(BlueprintReadOnly, Category = "DefenseSkill")
-	int Priority = 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "DefenseSkill")
 	bool StopPropagation = false;
-	
-	// 技能的使用者被攻击时通过主体反馈触发
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "DefenseSkill")
-	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool& Stop);
 	
 	// 技能自身的防御 Box碰撞触发
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "DefenseSkill")

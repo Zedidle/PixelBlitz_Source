@@ -76,11 +76,14 @@ void ABaseTraceProjectileSkill::Tick(float DeltaTime)
 			}
 		}
 
-		// 避免贴近依然没有造成伤害，导致一直贴住抖动
-		float HitRadius = Target->GetSimpleCollisionRadius() + GetSimpleCollisionRadius();
-		if (Target->GetDistanceTo(this) < HitRadius)
+		if (!bIdle)
 		{
-			OnHitTarget(Target);
+			// 避免贴近依然没有造成伤害，导致一直贴住抖动
+			float HitRadius = Target->GetSimpleCollisionRadius() + GetSimpleCollisionRadius();
+			if (Target->GetDistanceTo(this) < HitRadius)
+			{
+				OnHitTarget(Target);
+			}
 		}
 	}
 	else

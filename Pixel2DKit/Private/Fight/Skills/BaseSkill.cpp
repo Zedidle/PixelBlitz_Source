@@ -3,6 +3,7 @@
 
 #include "Fight/Skills/BaseSkill.h"
 
+#include "RayTracingDebugVisualizationMenuCommands.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Subsystems/SkillManager.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
@@ -94,3 +95,138 @@ void ABaseSkill::OnSkillEnd()
 	BP_OnSkillEnd();
 }
 
+void ABaseSkill::SetActivateTiming(EAbilityTiming Timing)
+{
+	ActivateTiming = Timing;
+}
+
+bool ABaseSkill::OnAttackStart()
+{
+	if (ActivateTiming != EAbilityTiming::AttackStart) return false;
+	BP_OnAttackStart();
+	return true;
+}
+
+bool ABaseSkill::OnAttackHit()
+{
+	if (ActivateTiming != EAbilityTiming::AttackHit) return false;
+	BP_OnAttackHit();
+	return true;
+}
+
+bool ABaseSkill::OnAttackFinish()
+{
+	if (ActivateTiming != EAbilityTiming::AttackFinish) return false;
+	BP_OnAttackFinish();
+	return true;
+}
+
+bool ABaseSkill::OnAttackSkill()
+{
+	if (ActivateTiming != EAbilityTiming::AttackSkill) return false;
+	BP_OnAttackSkill();
+	return true;
+}
+
+bool ABaseSkill::OnSkillStart()
+{
+	if (ActivateTiming != EAbilityTiming::SkillStart) return false;
+	BP_OnSkillStart();
+	return true;
+}
+
+bool ABaseSkill::OnSkillHit()
+{
+	if (ActivateTiming != EAbilityTiming::SkillHit) return false;
+	BP_OnSkillHit();
+	return true;
+}
+
+bool ABaseSkill::OnSkillFinish()
+{
+	if (ActivateTiming != EAbilityTiming::SkillFinish) return false;
+	BP_OnSkillFinish();
+	return true;
+}
+
+bool ABaseSkill::OnKillEnemy()
+{
+	if (ActivateTiming != EAbilityTiming::KillEnemy) return false;
+	BP_OnKillEnemy();
+	return true;
+}
+
+bool ABaseSkill::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool& Stop)
+{
+	if (ActivateTiming != EAbilityTiming::BeAttacked) return false;
+	return BP_OnBeAttacked(Maker, InDamage, OutDamage, Stop);
+}
+
+bool ABaseSkill::OnBeAttackedInvulnerable()
+{
+	if (ActivateTiming != EAbilityTiming::BeAttackedInvulnerable) return false;
+	BP_OnBeAttackedInvulnerable();
+	return true;
+}
+
+bool ABaseSkill::OnBeDamaged()
+{
+	if (ActivateTiming != EAbilityTiming::BeDamaged) return false;
+	BP_OnBeDamaged();
+	return true;
+}
+
+bool ABaseSkill::OnJumpStart()
+{
+	if (ActivateTiming != EAbilityTiming::JumpStart) return false;
+	BP_OnJumpStart();
+	return true;
+}
+
+bool ABaseSkill::OnLanding()
+{
+	if (ActivateTiming != EAbilityTiming::Landing) return false;
+	BP_OnLanding();
+	return true;
+}
+
+bool ABaseSkill::OnDefenseStart()
+{
+	if (ActivateTiming != EAbilityTiming::DefenseStart) return false;
+	BP_OnDefenseStart();
+	return true;
+}
+
+bool ABaseSkill::OnDefenseSuccess()
+{
+	if (ActivateTiming != EAbilityTiming::DefenseSuccess) return false;
+	BP_OnDefenseSuccess();
+	return true;
+}
+
+bool ABaseSkill::OnDefenseFinish()
+{
+	if (ActivateTiming != EAbilityTiming::DefenseFinish) return false;
+	BP_OnDefenseFinish();
+	return true;
+}
+
+bool ABaseSkill::OnDying()
+{
+	if (ActivateTiming != EAbilityTiming::Dying) return false;
+	BP_OnDying();
+	return true;
+}
+
+bool ABaseSkill::OnPickGold()
+{
+	if (ActivateTiming != EAbilityTiming::PickGold) return false;
+	BP_OnPickGold();
+	return true;
+}
+
+// bool ABaseSkill::ActivateByTiming(EAbilityTiming Timing)
+// {
+// 	if (ActivateTiming != Timing) return false;
+// 	BP_ActivateByTiming();
+// }

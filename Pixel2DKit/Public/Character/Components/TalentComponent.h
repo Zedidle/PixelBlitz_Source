@@ -9,6 +9,7 @@
 #include "TalentComponent.generated.h"
 
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 {
@@ -24,10 +25,14 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 	UPROPERTY()
 	TArray<ABaseDefenseSkill*> DefenseSkills;
 
+	UPROPERTY()
+	TMap<EAbilityTiming, FGameplayTagArray> AbilitiesTiming;
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ABaseSkill>> AbilitiesHolding;
+	
 #pragma region TalentSet
 
-	// 摇摆拳
-	bool SwingFistPower = false;
 
 	// 热身
 	int WarmUP_Power = 0;
@@ -87,13 +92,15 @@ public:
 	int GetAttackDamagePlus();
 
 	
-#pragma region Talents
+	UFUNCTION()
+	void ActivateTalentByTiming(EAbilityTiming Timing);
+
+
+#pragma region Talents专项处理
 	
 	UFUNCTION()
 	void MoveWarmingUP();
 
-	UFUNCTION()
-	void MakeSwingFistPower();
 
 	UFUNCTION()
 	void MakeMiracleWalker();
@@ -101,6 +108,6 @@ public:
 	UFUNCTION()
 	void MakeImmortalPower(bool First);
 	
-#pragma endregion
+#pragma endregion 
 
 };

@@ -3,11 +3,6 @@
 
 #include "Fight/Skills/BaseDefenseSkill.h"
 
-void ABaseDefenseSkill::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool& Stop)
-{
-	OutDamage = InDamage;
-	Stop = false;
-}
 
 void ABaseDefenseSkill::OnDefenseEffect_Implementation(AActor* Actor)
 {

@@ -6,11 +6,11 @@
 #include "GameplayTagContainer.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
-#include "Fight/Skills/BaseSkill.h"
 #include "PXCustomStruct.generated.h"
 
 class USoundCue;
 class ABasePXCharacter;
+class ABaseSkill;
 
 UCLASS()
 class PIXEL2DKIT_API UPXCustomStruct : public UObject
@@ -19,6 +19,23 @@ class PIXEL2DKIT_API UPXCustomStruct : public UObject
 	
 };
 
+USTRUCT(BlueprintType)
+struct FNameArray
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FName> Names;
+};
+
+USTRUCT(BlueprintType)
+struct FGameplayTagArray
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FGameplayTag> Tags;
+};
 
 USTRUCT(BlueprintType)
 struct FDefaultEmptyMessage
@@ -68,6 +85,56 @@ enum class EAttackType : uint8
 };
 #pragma endregion
 
+#pragma region ETalentType 天赋分类
+UENUM(BlueprintType)
+enum class ETalentType : uint8
+{
+	None UMETA(DisplayName = "无"),
+	Attack UMETA(DisplayName = "进攻类"),
+	Survive UMETA(DisplayName = "生存类"),
+	Moving UMETA(DisplayName = "移动类"),
+	Agility UMETA(DisplayName = "技巧类"),
+	Special UMETA(DisplayName = "特殊"),
+};
+#pragma endregion
+
+#pragma region ETalentType
+UENUM(BlueprintType)
+enum class EAbilityBelongTo : uint8
+{
+	None UMETA(DisplayName = "无"),
+	Common UMETA(DisplayName = "公用"),
+	Saber UMETA(DisplayName = "剑客"),
+	Archer UMETA(DisplayName = "弓箭手"),
+};
+#pragma endregion
+
+#pragma region EAbilityTiming
+UENUM(BlueprintType)
+enum class EAbilityTiming : uint8
+{
+	None UMETA(DisplayName = "直接触发"),
+	AttackStart UMETA(DisplayName = "攻击开始"),
+	AttackHit UMETA(DisplayName = "攻击命中"),
+	AttackFinish UMETA(DisplayName = "攻击结束"),
+	AttackSkill UMETA(DisplayName = "攻击预备/蓄力 阶段发起技能"),
+	SkillStart UMETA(DisplayName = "技能发起"),
+	SkillHit UMETA(DisplayName = "技能命中"),
+	SkillFinish UMETA(DisplayName = "技能结束"),
+	KillEnemy UMETA(DisplayName = "击杀小怪"),
+	BeAttacked UMETA(DisplayName = "被攻击"),
+	BeAttackedInvulnerable UMETA(DisplayName = "躲过攻击/伤害"),
+	BeDamaged UMETA(DisplayName = "受到伤害"),
+	JumpStart UMETA(DisplayName = "起跳"),
+	Landing UMETA(DisplayName = "落地"),
+	DefenseStart  UMETA(DisplayName = "防御开始"),
+	DefenseSuccess  UMETA(DisplayName = "防御成功抵挡伤害"),
+	DefenseFinish  UMETA(DisplayName = "防御结束"),
+	Dying  UMETA(DisplayName = "死亡时"),
+	PickGold  UMETA(DisplayName = "拾取金币时"),
+	Loop  UMETA(DisplayName = "周期性持续（可不配置）"),
+};
+#pragma endregion
 
 
 #pragma region EWeather
@@ -183,6 +250,10 @@ struct FAbility: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FGameplayTag AbilityTag;
 
+	// 技能归属
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	EAbilityBelongTo AbilityBelongTo = EAbilityBelongTo::Common;
+	
 	// 技能名称本地化
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FText AbilityName;
@@ -215,8 +286,13 @@ struct FAbility: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
 
+	// 实际所执行的技能
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
+
+	// 技能触发时机，如果有 AbilityClass 的话，需要配置
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	EAbilityTiming Timing = EAbilityTiming::None;
 };
 
 
@@ -381,12 +457,15 @@ struct FTalent: public FTableRowBase
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	FGameplayTag TalentTag;
-	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
-	FText TalentName;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	int Price = 3;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	ETalentType TalentType = ETalentType::None;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	FText TalentName;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	FText TalentDesc;
@@ -409,6 +488,10 @@ struct FTalent: public FTableRowBase
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FGameplayTag BuffTagOnWidget;
+
+	// 技能触发时机，如果有 AbilityClass 的话，需要配置
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	EAbilityTiming Timing = EAbilityTiming::None;
 };
 #pragma endregion
 

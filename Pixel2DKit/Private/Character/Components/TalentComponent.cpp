@@ -2,7 +2,6 @@
 
 
 #include "Character/Components/TalentComponent.h"
-
 #include "Character/Components/BuffComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
@@ -53,10 +52,29 @@ void UTalentComponent::InitTalents()
 				CachedASC->GiveAbility(Spec);
 			}
 		}
+		
 		if (TalentData.CommonInit)
 		{
-			SpawnSkill(TalentData.SkillClass);
-			PXCharacter->BuffComponent->AddBuffByTag(TalentData.BuffTagOnWidget);
+			if (ABaseSkill* Skill = SpawnSkill(TalentData.SkillClass))
+			{
+				Skill->SetActivateTiming(TalentData.Timing);
+				AbilitiesHolding.Add(Skill);
+				if (PXCharacter->BuffComponent)
+				{
+					PXCharacter->BuffComponent->AddBuffByTag(TalentData.BuffTagOnWidget);
+				}
+			}
+		}
+		
+		if (TalentData.Timing != EAbilityTiming::None)
+		{
+			if (!AbilitiesTiming.Contains(TalentData.Timing))
+			{
+				AbilitiesTiming.Add(TalentData.Timing);
+			}
+			
+			FGameplayTagArray TagArray = AbilitiesTiming.FindRef(TalentData.Timing);
+			TagArray.Tags.Add(TalentData.TalentTag);
 		}
 	}
 }
@@ -113,8 +131,13 @@ void UTalentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UTalentComponent::Event_OnPlayerAttackStart(EAttackType Type, FVector Direction)
 {
-	MakeSwingFistPower();
-	
+	for (auto& Ability : AbilitiesHolding)
+	{
+		if (Ability.IsValid())
+		{
+			Ability->OnAttackStart();
+		}
+	}
 }
 
 void UTalentComponent::RegisterDefenseSkill(ABaseDefenseSkill* Skill)
@@ -291,17 +314,8 @@ void UTalentComponent::LoadTalents()
 			this, &UTalentComponent::MoveWarmingUP, 0.2);
 	}
 
-	// 摇摆拳
-	TalentTag = TAG("Buff.Talent.SwingFist");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		MakeSwingFistPower();
-	}
-
 	// 不灭
 	MakeImmortalPower(true);
-
-
 	
 }
 
@@ -335,7 +349,7 @@ void UTalentComponent::OnBuffCalDamage()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
-	// 清楚热身运动
+	// 清除热身运动
 	if (WarmUP_Power > 0)
 	{
 		IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.Warmup"), true);
@@ -345,7 +359,7 @@ void UTalentComponent::OnBuffCalDamage()
 	}
 
 	MakeMiracleWalker();
-	MakeImmortalPower(false);
+	MakeImmor	talPower(false);
 
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.StaticPower"), true);
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.DodgeStrike"), true);
@@ -390,8 +404,20 @@ int UTalentComponent::GetAttackDamagePlus()
 	}
 
 	// …… 其它技能
-
 	return LocalPlus;
+}
+
+void UTalentComponent::ActivateTalentByTiming(EAbilityTiming Timing)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	
+	if (!AbilitiesTiming.Contains(Timing)) return;
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(Timing);
+
+	for (const FGameplayTag& Tag : TagArray.Tags)
+	{
+		CachedASC->TryActivateAbilityByTag(Tag);
+	}
 }
 
 void UTalentComponent::MoveWarmingUP()
@@ -426,40 +452,6 @@ void UTalentComponent::MoveWarmingUP()
 	IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, WarmUP_Tag, PlusPowerPercent, 0, 999);
 	IBuff_Interface::Execute_AddBuff(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
 		FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
-}
-
-void UTalentComponent::MakeSwingFistPower()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	
-	FGameplayTag DecreaseTag = TAG("TalentSet.SwingPunch.AttackDamage_DecreasePercent");
-	FGameplayTag IncreaseTag = TAG("TalentSet.SwingPunch.AttackDamage_IncreasePercent");
-
-	if (!EffectGameplayTags.Contains(DecreaseTag) || !EffectGameplayTags.Contains(IncreaseTag)) return;
-
-
-
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
-
-	SwingFistPower = !SwingFistPower;
-	
-	FGameplayTag SwingFistTag = TAG("Buff.Talent.SwingFist");
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
-
-	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
-	if (SwingFistPower)
-	{
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[IncreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
-			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
-	}
-	else
-	{
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[DecreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
-			FLinearColor(1.0, 0.296138, 0.0, 1), false);
-	}
 }
 
 void UTalentComponent::MakeMiracleWalker()
