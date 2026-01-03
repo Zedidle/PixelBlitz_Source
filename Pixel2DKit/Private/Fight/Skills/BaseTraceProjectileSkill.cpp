@@ -188,7 +188,7 @@ void ABaseTraceProjectileSkill::StartPlusDamageByDistance(int _DamagePlusPer100M
 void ABaseTraceProjectileSkill::SetTraceData(const FTraceProjectileData& Data)
 {
 	bIdle = Data.bIdle;
-	LifeSpan = Data.NewTargetLifeSpan;
+	LifeTime = Data.NewTargetLifeSpan;
 	CurMagnitude = Data.CurMagnitude;
 	InRangeNear = Data.InRangeNear;
 	MagnitudeScaleNear= Data.MagnitudeScaleNear;

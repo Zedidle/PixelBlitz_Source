@@ -184,13 +184,13 @@ void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage,
 	
 	int RemDamage = InDamage;
 
-	for (int Index = 0; Index < DefenseSkills.Num(); ++Index)
+	for (auto& Skill : DefenseSkills)
 	{
-		if (!DefenseSkills[Index]) continue;
+		if (!Skill) continue;
 	
 		bool stop;
 		int _OutDamage;
-		DefenseSkills[Index]->OnBeAttacked(Maker, RemDamage, _OutDamage, stop);
+		Skill->OnBeAttacked(Maker, RemDamage, _OutDamage, stop);
 
 		// 某些防御性技能不只是削减伤害
 		if (!bForce)
@@ -226,13 +226,6 @@ void UTalentComponent::LoadTalents()
 	Loaded = true;
 
 	FGameplayTag TalentTag;
-
-	// 起死回生 / 被怪物击杀的复活次数
-	TalentTag = TAG("TalentSet.ReviveTimesPlus");
-	if (EffectGameplayTags.Contains(TalentTag))
-	{
-		PXCharacter->HereReviveTimes += FMath::RoundToInt(EffectGameplayTags[TalentTag]);
-	}
 
 	// 基础移动速度
 	TalentTag = TAG("TalentSet.SpeedPlusPercent");
@@ -319,17 +312,17 @@ void UTalentComponent::LoadTalents()
 	
 }
 
-ABaseSkill* UTalentComponent::SpawnSkill(TSubclassOf<ABaseSkill> Skill_Class, const FTransform& SpawnTransform)
+ABaseSkill* UTalentComponent::SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform)
 {
 	UWorld* World = GetWorld();
 	if (!World) return nullptr;
-	if (!Skill_Class) return nullptr;
+	if (!SkillClass) return nullptr;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = PXCharacter;
 	SpawnParams.Instigator = PXCharacter;
 	
-	if (ABaseSkill* Skill = World->SpawnActor<ABaseSkill>(Skill_Class, SpawnTransform, SpawnParams))
+	if (ABaseSkill* Skill = World->SpawnActor<ABaseSkill>(SkillClass, SpawnTransform, SpawnParams))
 	{
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
 		Skill->AttachToActor(PXCharacter, AttachmentRules);
@@ -359,14 +352,28 @@ void UTalentComponent::OnBuffCalDamage()
 	}
 
 	MakeMiracleWalker();
-	MakeImmor	talPower(false);
+	MakeImmortalPower(false);
 
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.StaticPower"), true);
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.DodgeStrike"), true);
-	
 }
 
-void UTalentComponent::OnDashEnd()
+void UTalentComponent::OnDying(int& RemReviveTimes)
+{
+	int MaxReviveTimes = -1;
+	for (auto& Skill : AbilitiesHolding)
+	{
+		int TmpReviveTimes = -1;
+		Skill->OnDying(TmpReviveTimes);
+		if (MaxReviveTimes < TmpReviveTimes)
+		{
+			MaxReviveTimes = TmpReviveTimes;
+		}
+	}
+	RemReviveTimes = MaxReviveTimes;
+}
+
+void UTalentComponent::OnSkillFinish()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
@@ -405,19 +412,6 @@ int UTalentComponent::GetAttackDamagePlus()
 
 	// …… 其它技能
 	return LocalPlus;
-}
-
-void UTalentComponent::ActivateTalentByTiming(EAbilityTiming Timing)
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-	
-	if (!AbilitiesTiming.Contains(Timing)) return;
-	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(Timing);
-
-	for (const FGameplayTag& Tag : TagArray.Tags)
-	{
-		CachedASC->TryActivateAbilityByTag(Tag);
-	}
 }
 
 void UTalentComponent::MoveWarmingUP()

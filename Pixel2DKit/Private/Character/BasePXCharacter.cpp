@@ -992,30 +992,20 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 	{
 		bInAttackEffect = false;
 		SetAttackAnimToggle(false);
+		SetDead(true);
+
+		int RemReviveTimes = -1;
+		if (TalentComponent)
+		{
+			TalentComponent->OnDying(RemReviveTimes);
+		}
 		
-		if (HereReviveTimes > 0 && !HealthComponent->DieByFalling)
+		if (RemReviveTimes >= 0 && !HealthComponent->DieByFalling)
 		{
 			// 原地复活
-			HereReviveTimes --;
-			if (HereReviveTimes == 0)
+			if (RemReviveTimes == 0)
 			{
 				Execute_RemoveBuff(this, FGameplayTag::RequestGameplayTag("Buff.Talent.Revive"), true);
-			}
-
-			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-
-			const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
-			
-			if (UNiagaraSystem* NS_Revive = ResourceDataAsset->NS_Revive.LoadSynchronous())
-			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), NS_Revive, GetActorLocation());
-
-			}
-			if (USoundCue* SC_Revive = ResourceDataAsset->SC_Revive.LoadSynchronous())
-			{
-				USoundFuncLib::PlaySound2D(SC_Revive);
 			}
 			
 			if (APXPlayerController* PC = GetController<APXPlayerController>())
@@ -1099,7 +1089,6 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 
 void ABasePXCharacter::OnDie_Implementation()
 {
-	SetDead(true);
 	
 	if (GetCharacterMovement())
 	{
@@ -1493,7 +1482,7 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 
 	if (TalentComponent)
 	{
-		TalentComponent->OnDashEnd();
+		TalentComponent->OnSkillFinish();
 	}
 }
 

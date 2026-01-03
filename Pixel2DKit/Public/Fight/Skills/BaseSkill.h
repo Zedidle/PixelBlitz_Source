@@ -54,7 +54,7 @@ public:
 	bool bForce = false;
 	
 	UPROPERTY(BlueprintReadWrite, meta = (ExposeOnSpawn))
-	float LifeSpan = 2.0f;
+	float LifeTime = 2.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn, ClampMin=0.0, ClampMax=1.0))
 	float RepelSameSpeed = 0;
@@ -191,9 +191,9 @@ public:
 	virtual bool OnDefenseFinish();
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnDying")
-	bool BP_OnDying();
+	bool BP_OnDying(int& RemReviveTimes);
 	UFUNCTION(Category="Skill | Timing")
-	virtual bool OnDying();
+	virtual bool OnDying(int& RemReviveTimes);
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnPickGold")
 	bool BP_OnPickGold();

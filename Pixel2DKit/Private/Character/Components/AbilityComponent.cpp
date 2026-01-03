@@ -441,18 +441,6 @@ bool UAbilityComponent::ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoin
 	return true;
 }
 
-void UAbilityComponent::ActivateTalentByTiming(EAbilityTiming Timing)
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-
-	if (!AbilitiesTiming.Contains(Timing)) return;
-	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(Timing);
-
-	for (const FGameplayTag& Tag : TagArray.Tags)
-	{
-		CachedASC->TryActivateAbilityByTag(Tag);
-	}
-}
 
 void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {

@@ -146,10 +146,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	int PerfectDodgeTimes = 0;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Talent)
-	int HereReviveTimes = 0;
-	
+
 	UPROPERTY(BlueprintReadWrite, Category = Achievement)
 	bool HasOneHealthPoint = false;
 

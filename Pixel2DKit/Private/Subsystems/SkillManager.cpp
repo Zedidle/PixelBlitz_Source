@@ -104,7 +104,7 @@ ABaseRemoteShotSkill* USkillManager::ActivateRemoteShotSkill(TSubclassOf<ABaseRe
 
     RemoteShotSkill->Owner = Owner;
     RemoteShotSkill->HitNiagara = HitNiagara;
-    RemoteShotSkill->LifeSpan = NewTargetLifeSpan;
+    RemoteShotSkill->LifeTime = NewTargetLifeSpan;
     RemoteShotSkill->InitSpeed = InitSpeed;
     RemoteShotSkill->MaxSpeed = MaxSpeed;
     RemoteShotSkill->MaxTraceDistance = MaxTraceDistance;
@@ -138,7 +138,7 @@ ABaseTraceProjectileSkill* USkillManager::ActivateTraceProjectileSkill(TSubclass
     TraceProjectileSkill->HitNiagara = HitNiagara;
     TraceProjectileSkill->Target = Target;
     TraceProjectileSkill->bIdle = bIdle;
-    TraceProjectileSkill->LifeSpan = NewTargetLifeSpan;
+    TraceProjectileSkill->LifeTime = NewTargetLifeSpan;
     TraceProjectileSkill->CurMagnitude = CurMagnitude;
     TraceProjectileSkill->InRangeNear = InRangeNear;
     TraceProjectileSkill->MagnitudeScaleNear = MagnitudeScaleNear;

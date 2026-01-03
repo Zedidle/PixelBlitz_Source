@@ -79,21 +79,20 @@ public:
 	void LoadTalents();
 
 	UFUNCTION()
-	ABaseSkill* SpawnSkill(TSubclassOf<ABaseSkill> Skill_Class, const FTransform& SpawnTransform = FTransform());
+	ABaseSkill* SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform = FTransform());
 
 	// 成功造成伤害时……
 	UFUNCTION(BlueprintCallable)
 	void OnBuffCalDamage();
 
 	UFUNCTION(BlueprintCallable)
-	void OnDashEnd();
+	void OnDying(int& RemReviveTimes);
+	
+	UFUNCTION(BlueprintCallable)
+	void OnSkillFinish();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetAttackDamagePlus();
-
-	
-	UFUNCTION()
-	void ActivateTalentByTiming(EAbilityTiming Timing);
 
 
 #pragma region Talents专项处理

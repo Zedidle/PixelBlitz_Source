@@ -124,10 +124,6 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable)
-	void ActivateTalentByTiming(EAbilityTiming Timing);
-
-	
-	UFUNCTION(BlueprintCallable)
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce);
 
 

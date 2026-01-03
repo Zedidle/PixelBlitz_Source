@@ -23,7 +23,7 @@ ABaseRemoteShotSkill::ABaseRemoteShotSkill()
 
 void ABaseRemoteShotSkill::SetTraceData(const FRemoteShotData& Data)
 {
-	LifeSpan = Data.NewTargetLifeSpan;
+	LifeTime = Data.NewTargetLifeSpan;
 	InitSpeed = Data.InitSpeed;
 	MaxSpeed = Data.MaxSpeed;
 	MaxTraceDistance = Data.MaxTraceDistance;
@@ -188,7 +188,7 @@ bool ABaseRemoteShotSkill::OnSplit()
 			FRemoteShotData Data;
 			Data.InitSpeed = InitSpeed * 0.9;
 			Data.MaxSpeed = MaxSpeed * 0.9;
-			Data.NewTargetLifeSpan = LifeSpan * 0.9;
+			Data.NewTargetLifeSpan = LifeTime * 0.9;
 			Data.MaxTraceDistance = MaxTraceDistance * 0.9;
 			Data.Direction = NewDir;
 				

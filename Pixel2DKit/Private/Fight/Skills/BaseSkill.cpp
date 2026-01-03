@@ -73,7 +73,7 @@ void ABaseSkill::SetSkillLifeTimer(bool bActivate)
 			if (!WeakThis.IsValid()) return;
 			if (WeakThis->bIdle) return;
 			WeakThis->SetActive(false);
-		}, LifeSpan);
+		}, LifeTime);
 	}
 	else
 	{
@@ -211,10 +211,10 @@ bool ABaseSkill::OnDefenseFinish()
 	return true;
 }
 
-bool ABaseSkill::OnDying()
+bool ABaseSkill::OnDying(int& RemReviveTimes)
 {
 	if (ActivateTiming != EAbilityTiming::Dying) return false;
-	BP_OnDying();
+	BP_OnDying(RemReviveTimes);
 	return true;
 }
 
