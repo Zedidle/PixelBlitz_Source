@@ -25,10 +25,10 @@ public:
 	bool StopPropagation = false;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
-	TSoftObjectPtr<UNiagaraSystem> NS_OnEffect;
+	UNiagaraSystem* NS_OnEffect;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
-	TSoftObjectPtr<USoundCue> SC_OnEffect;
+	USoundCue* SC_OnEffect;
 };
 
 
