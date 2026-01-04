@@ -1485,7 +1485,18 @@ void ABasePXCharacter::OnPickGold_Implementation()
 
 void ABasePXCharacter::OnDashEffectBegin_Implementation()
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
+	
 	InDashEffect = true;
+	AbilityComponent->OnSkillStart();
+	if (bAttackStartup)
+	{
+		SetAttackAnimToggle(false);
+		bAttackStartup = false;
+		bInAttackEffect = false;
+		
+		AbilityComponent->OnAttackSkill();
+	}
 }
 
 void ABasePXCharacter::OnDashEffectEnd_Implementation()

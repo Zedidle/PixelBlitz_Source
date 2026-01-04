@@ -60,6 +60,17 @@ void UAbilityComponent::BeginPlay()
 	PXCharacter = Cast<ABasePXCharacter>(Owner);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 
+	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
+
+	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
+
+	UPXMainSaveGame* MainSave = SaveGameSubsystem->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave)
+
+	MainSave->TakeEffectAbilities.Append(AbilitiesDefaultOwn);
+	
 	if (UPXASComponent* PXASComponent = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent()))
 	{
 		CachedASC = PXASComponent;
@@ -240,11 +251,6 @@ void UAbilityComponent::LoadAbilities()
 	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	for (auto& Tag : TempTestAbilities)
-	{
-		MainSave->TakeEffectAbilities.AddUnique(Tag);
-	}
-	
 	for (auto Tag : MainSave->TakeEffectAbilities)
 	{
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
@@ -367,7 +373,7 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 	UPXMainSaveGame* MainSave = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MainSave, false)
 	
-	if (MainSave->ChosenAbilities.Contains(AbilityTag)) return false;
+	if (MainSave->TakeEffectAbilities.Contains(AbilityTag)) return false;
 
 	UPXBasicBuildSaveGame* BasicBuildSave = SaveGameSubsystem->GetBasicBuildData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(BasicBuildSave, false)
@@ -484,6 +490,24 @@ void UAbilityComponent::OnLanding()
 	{
 		CachedASC->TryActivateAbilityByTag(Tag);
 	}
+}
+
+void UAbilityComponent::OnSkillStart()
+{
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::SkillStart);
+	for (auto& Tag : TagArray.Tags)
+	{
+		CachedASC->TryActivateAbilityByTag(Tag);
+	}	
+}
+
+void UAbilityComponent::OnAttackSkill()
+{
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::AttackSkill);
+	for (auto& Tag : TagArray.Tags)
+	{
+		CachedASC->TryActivateAbilityByTag(Tag);
+	}	
 }
 
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)

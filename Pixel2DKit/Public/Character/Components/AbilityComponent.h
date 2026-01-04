@@ -64,7 +64,7 @@ public:
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FGameplayTag> TempTestAbilities;
+	TArray<FGameplayTag> AbilitiesDefaultOwn;
 	
 
 	UFUNCTION(BlueprintCallable)
@@ -129,7 +129,12 @@ public:
 	UFUNCTION()
 	void OnLanding();
 
+	UFUNCTION()
+	void OnSkillStart();
 
+	UFUNCTION()
+	void OnAttackSkill();
+	
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
 	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);
 
