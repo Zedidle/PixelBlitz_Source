@@ -130,7 +130,7 @@ void UBuffComponent::BeginPlay()
 	}
 
 	TimerName_CheckBuffEnd = FName("BuffComponent" + FGuid::NewGuid().ToString());
-	UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckBuffEnd, this, &UBuffComponent::CheckBuffExpire, 0.1, true);
+	UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckBuffEnd, this, &UBuffComponent::CheckBuffExpire, 0.1, -1);
 }
 
 void UBuffComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -172,7 +172,7 @@ void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
 
 	if (Owner && Owner->Implements<UBuff_Interface>())
 	{
-		Execute_BuffUpdate_Speed(Owner);
+		Execute_BuffUpdate_Attack(Owner);
 	}
 
 
@@ -208,7 +208,7 @@ void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
 
 	if (Owner && Owner->Implements<UBuff_Interface>())
 	{
-		Execute_BuffUpdate_Sight(Owner);
+		Execute_BuffUpdate_Speed(Owner);
 	}
 	
 }
@@ -325,7 +325,7 @@ void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Per
 		Tag2Niagara.Remove(Tag);
 	}
 	
-	if (Percent > 0 && Value > 0)
+ 	if (Percent > 0 && Value > 0)
 	{
 		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
@@ -385,13 +385,6 @@ void UBuffComponent::BuffUpdate_Attack_Implementation()
 
 void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
-	// 思考是否 同一个 Tag，Percent和Value都一定一样，如果是，则可以取消注释，删除下面的RemoveBuff_xxx
-	// if (Tag2BuffEffect_Sight.Contains(Tag))
-	// {
-	// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
-	// 	Tag2BuffEndTime_Sight[Tag] = SustainTime + Now;
-	// 	return;
-	// }
 	if (!Tag.IsValid()) return;
 	
 	RemoveBuff_Sight(Tag);
