@@ -1443,7 +1443,6 @@ void ABasePXCharacter::OnAnimVulnerableEnd_Implementation()
 
 void ABasePXCharacter::OnAttackEffect_Implementation()
 {
-	IFight_Interface::OnAttackEffect_Implementation();
 	if (Weapon)
 	{
 		Weapon->Use();
@@ -1597,7 +1596,7 @@ int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
 	int LocalDamage = InDamage;
 	if (BuffComponent)
 	{
-		LocalDamage += InDamage * (BuffComponent->EffectedPercent_Attack);
+		LocalDamage += InDamage * BuffComponent->EffectedPercent_Attack;
 		LocalDamage += BuffComponent->EffectedValue_Attack;
 	}
 	

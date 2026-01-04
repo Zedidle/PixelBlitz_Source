@@ -162,7 +162,7 @@ bool UBuffComponent::BuffExist(FGameplayTag Tag) const
 void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
 {
 	if (!Tag2BuffEffect_Attack.Contains(Tag)) return;
-	
+
 	FBuffValueEffect Effect = Tag2BuffEffect_Attack[Tag];
 	EffectedPercent_Attack -= Effect.EffectedPercent;
 	EffectedValue_Attack -= Effect.EffectedValue;
@@ -174,8 +174,7 @@ void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
 	{
 		Execute_BuffUpdate_Attack(Owner);
 	}
-
-
+	
 }
 
 void UBuffComponent::RemoveBuff_Sight(FGameplayTag Tag)
@@ -360,7 +359,6 @@ void UBuffComponent::BuffUpdate_Speed_Implementation()
 void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
 {
 	if (!Tag.IsValid()) return;
-
 	
 	RemoveBuff_Attack(Tag);
 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
@@ -368,7 +366,7 @@ void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Pe
 
 	EffectedPercent_Attack += Percent;
 	EffectedValue_Attack += Value;
-
+	
 	Tag2BuffEffect_Attack.Add(Tag, FBuffValueEffect(Percent, Value));
 
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
@@ -457,30 +455,23 @@ void UBuffComponent::AddBuffOnWidget_Implementation(FGameplayTag Tag, const FStr
 			{
 				if (Widget->BuffName != BuffName)
 				{
-					Execute_RemoveBuff(this, Tag, true);
+					Execute_RemoveBuffOnWidget(this, Tag, true);
 				}
 			}
 			
 			BuffStateWidget->BuffIn(Tag, BuffName, TextColor);
 		}
 	}
-	
-	
 }
 
-void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
+void UBuffComponent::RemoveBuffOnWidget_Implementation(FGameplayTag Tag, bool OnlySelf)
 {
-	if (!Tag.IsValid()) return;
-	
 	if (OnlySelf)
 	{
 		if (IsValid(BuffStateWidget))
 		{
 			BuffStateWidget->BuffOut(Tag);
 		}
-
-		RemoveBuff_EffectAll(Tag);
-		
 	}
 	else
 	{
@@ -494,7 +485,28 @@ void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
 			{
 				BuffStateWidget->BuffOut(T);
 			}
+		}
+	}
+}
 
+void UBuffComponent::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
+{
+	if (!Tag.IsValid()) return;
+
+	Execute_RemoveBuffOnWidget(this, Tag, OnlySelf);
+	
+	if (OnlySelf)
+	{
+		RemoveBuff_EffectAll(Tag);
+	}
+	else
+	{
+		FGameplayTagContainer TagContainer = UGameplayTagsManager::Get().RequestGameplayTagChildren(Tag);
+		TArray<FGameplayTag> Tags;
+		TagContainer.GetGameplayTagArray(Tags);
+	
+		for (auto& T : Tags)
+		{
 			RemoveBuff_EffectAll(T);
 		}
 	}

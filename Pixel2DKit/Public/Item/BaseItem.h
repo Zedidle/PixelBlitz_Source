@@ -34,11 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Weapon")
 	void Use();
 	virtual void Use_Implementation();
-
-
-
-
+	
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
-
 };

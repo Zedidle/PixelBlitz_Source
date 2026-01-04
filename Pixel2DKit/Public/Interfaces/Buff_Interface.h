@@ -45,6 +45,9 @@ public:
 	void AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
+	void RemoveBuffOnWidget(FGameplayTag Tag, bool OnlySelf);
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
 	void RemoveBuff(FGameplayTag Tag, bool OnlySelf = true);
 
 
