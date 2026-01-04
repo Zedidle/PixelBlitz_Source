@@ -43,13 +43,13 @@ void ATalentSkillSwingFist::MakeSwingFistPower()
 	if (SwingFistPower)
 	{
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[IncreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
+		IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[DecreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuff(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
+		IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
 }

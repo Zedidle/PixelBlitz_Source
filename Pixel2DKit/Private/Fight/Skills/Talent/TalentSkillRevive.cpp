@@ -41,6 +41,7 @@ void ATalentSkillRevive::Tick(float DeltaTime)
 bool ATalentSkillRevive::OnDying(int& _RemReviveTimes)
 {
 	if (!Super::OnDying(_RemReviveTimes)) return false;
+	if (!Owner) return false;
 	
 	if (RemReviveTimes > 0)
 	{
@@ -51,7 +52,7 @@ bool ATalentSkillRevive::OnDying(int& _RemReviveTimes)
 		
 		if (UNiagaraSystem* NS_Revive = ResourceDataAsset->NS_Revive.LoadSynchronous())
 		{
-			UNiagaraFunctionLibrary::SpawnSystemAttached(NS_Revive, GetRootComponent(), FName(""), FVector::Zero(), FRotator(), EAttachLocation::Type::KeepRelativeOffset, true);
+			UNiagaraFunctionLibrary::SpawnSystemAttached(NS_Revive, Owner->GetRootComponent(), FName(""), FVector::Zero(), FRotator(), EAttachLocation::Type::KeepRelativeOffset, true);
 		}
 		if (USoundCue* SC_Revive = ResourceDataAsset->SC_Revive.LoadSynchronous())
 		{

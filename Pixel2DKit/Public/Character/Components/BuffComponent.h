@@ -111,7 +111,7 @@ public:
 	virtual void BuffUpdate_Sight_Implementation() override;
 	virtual int32 Buff_CalInitDamage_Implementation(int32 InDamage) override;
 	// 仅仅用作在界面的显示，后续可能需要改名为 AddBuffOnWidget
-	virtual void AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent) override;
+	virtual void AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent) override;
 	virtual void RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf) override;
 	virtual float GetShortSightResistancePercent_Implementation() override;
 	virtual float GetSlowDownResistancePercent_Implementation() override;

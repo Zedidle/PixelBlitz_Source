@@ -3,6 +3,7 @@
 
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "GameplayEffectExtension.h"
+#include "Pixel2DKit.h"
 #include "Core/PXGameState.h"
 #include "Fight/Components/HealthComponent.h"
 #include "Interfaces/Fight_Interface.h"

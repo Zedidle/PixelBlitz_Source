@@ -439,7 +439,7 @@ int32 UBuffComponent::Buff_CalInitDamage_Implementation(int32 InDamage)
 	return InDamage;
 }
 
-void UBuffComponent::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
+void UBuffComponent::AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
 	bool Permanent)
 {
 	if (!Tag.IsValid()) return;
@@ -525,7 +525,7 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 	const FBuffOnWidget* Data = DataTableSubsystem->GetBuffOnWidgetDataByTag(Tag);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Data)
 	
-	Execute_AddBuff(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
+	Execute_AddBuffOnWidget(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
 }
 
 void UBuffComponent::ExpireBuff(FGameplayTag Tag)

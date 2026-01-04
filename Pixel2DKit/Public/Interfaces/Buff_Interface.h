@@ -42,7 +42,7 @@ public:
 	int32 Buff_CalInitDamage(int32 InDamage);
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
-	void AddBuff(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
+	void AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
 	void RemoveBuff(FGameplayTag Tag, bool OnlySelf = true);

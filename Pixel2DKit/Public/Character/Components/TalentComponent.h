@@ -29,7 +29,7 @@ class PIXEL2DKIT_API UTalentComponent : public UActorComponent
 	TMap<EAbilityTiming, FGameplayTagArray> AbilitiesTiming;
 
 	UPROPERTY()
-	TArray<TWeakObjectPtr<ABaseSkill>> AbilitiesHolding;
+	TArray<TWeakObjectPtr<ABaseSkill>> SkillsHolding;
 	
 #pragma region TalentSet
 

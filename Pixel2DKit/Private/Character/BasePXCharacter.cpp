@@ -994,12 +994,12 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		SetDead(true);
 
 		int RemReviveTimes = -1;
-		if (TalentComponent)
+		if (TalentComponent && !HealthComponent->DieByFalling)
 		{
 			TalentComponent->OnDying(RemReviveTimes);
 		}
 		
-		if (RemReviveTimes >= 0 && !HealthComponent->DieByFalling)
+		if (RemReviveTimes >= 0)
 		{
 			// 原地复活
 			if (RemReviveTimes == 0)
@@ -1610,13 +1610,13 @@ int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
 	return LocalDamage;
 }
 
-void ABasePXCharacter::AddBuff_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
+void ABasePXCharacter::AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
 	bool Permanent)
 {
-	IBuff_Interface::AddBuff_Implementation(Tag, BuffName, TextColor, Permanent);
+	IBuff_Interface::AddBuffOnWidget_Implementation(Tag, BuffName, TextColor, Permanent);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
-		Execute_AddBuff(BuffComponent, Tag, BuffName, TextColor, Permanent);
+		Execute_AddBuffOnWidget(BuffComponent, Tag, BuffName, TextColor, Permanent);
 	}
 }
 

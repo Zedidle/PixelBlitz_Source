@@ -58,11 +58,11 @@ void UTalentComponent::InitTalents()
 			if (ABaseSkill* Skill = SpawnSkill(TalentData.SkillClass))
 			{
 				Skill->SetActivateTiming(TalentData.Timing);
-				AbilitiesHolding.Add(Skill);
-				if (PXCharacter->BuffComponent)
-				{
-					PXCharacter->BuffComponent->AddBuffByTag(TalentData.BuffTagOnWidget);
-				}
+				SkillsHolding.Add(Skill);
+			}
+			if (PXCharacter->BuffComponent)
+			{
+				PXCharacter->BuffComponent->AddBuffByTag(TalentData.BuffTagOnWidget);
 			}
 		}
 		
@@ -131,11 +131,11 @@ void UTalentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UTalentComponent::Event_OnPlayerAttackStart(EAttackType Type, FVector Direction)
 {
-	for (auto& Ability : AbilitiesHolding)
+	for (auto& Skill : SkillsHolding)
 	{
-		if (Ability.IsValid())
+		if (Skill.IsValid())
 		{
-			Ability->OnAttackStart();
+			Skill->OnAttackStart();
 		}
 	}
 }
@@ -205,11 +205,11 @@ void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage,
 
 void UTalentComponent::OnPickGold()
 {
-	if (AbilitiesHolding.Num() > 0)
+	for (auto& Skill : SkillsHolding)
 	{
-		for (auto& Ability : AbilitiesHolding)
+		if (Skill.IsValid())
 		{
-			Ability->OnPickGold();
+			Skill->OnPickGold();
 		}
 	}
 }
@@ -372,7 +372,7 @@ void UTalentComponent::OnBuffCalDamage()
 void UTalentComponent::OnDying(int& RemReviveTimes)
 {
 	int MaxReviveTimes = -1;
-	for (auto& Skill : AbilitiesHolding)
+	for (auto& Skill : SkillsHolding)
 	{
 		int TmpReviveTimes = -1;
 		Skill->OnDying(TmpReviveTimes);
@@ -386,26 +386,13 @@ void UTalentComponent::OnDying(int& RemReviveTimes)
 
 void UTalentComponent::OnSkillFinish()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
-
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	// 闪避突袭
-	FGameplayTag DamagePlus_AfterDashTag = TAG("TalentSet.DamagePlus_AfterDash");
-	if (EffectGameplayTags.Contains(DamagePlus_AfterDashTag))
+	for (auto& Skill : SkillsHolding)
 	{
-		FGameplayTag Tag = TAG("Buff.Talent.DodgeStrike");
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, Tag, 0.0f,
-			EffectGameplayTags[DamagePlus_AfterDashTag], 999.0f
-		);
-
-		if (PXCharacter->BuffComponent)
+		if (Skill.IsValid())
 		{
-			PXCharacter->BuffComponent->AddBuffByTag(Tag);
+			Skill->OnSkillFinish();
 		}
 	}
-	
-
 }
 
 int UTalentComponent::GetAttackDamagePlus()
@@ -455,7 +442,7 @@ void UTalentComponent::MoveWarmingUP()
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
 	
 	IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, WarmUP_Tag, PlusPowerPercent, 0, 999);
-	IBuff_Interface::Execute_AddBuff(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
+	IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
 		FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
 }
 

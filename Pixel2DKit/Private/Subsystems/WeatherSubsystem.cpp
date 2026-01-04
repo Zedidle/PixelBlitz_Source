@@ -77,7 +77,7 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		{
 			DayTimeNameString = DayTimeName.ToString();
 			IBuff_Interface::Execute_RemoveBuff(BuffComp, DayTimeTag, true);
-			IBuff_Interface::Execute_AddBuff(BuffComp, DayTimeTag, DayTimeNameString, FLinearColor::White, false);
+			IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, DayTimeTag, DayTimeNameString, FLinearColor::White, false);
 			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, DayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
 		}
 
@@ -86,7 +86,7 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		{
 			WeatherNameString = GS->WeatherName.ToString();
 			IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
-			IBuff_Interface::Execute_AddBuff(BuffComp, WeatherTag, WeatherNameString, FLinearColor::White, false);
+			IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, WeatherTag, WeatherNameString, FLinearColor::White, false);
 			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
 			IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, WeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
 		}
