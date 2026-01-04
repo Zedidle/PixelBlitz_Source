@@ -45,9 +45,6 @@ public:
 	TSoftObjectPtr<UPXResourceDataAsset> ResourceDataAsset;
 
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
-	TSoftObjectPtr<UPXSkillsDataAsset> SkillsDataAsset;
-
-	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXWidgetsDataAsset> WidgetsDataAsset;
 
 	

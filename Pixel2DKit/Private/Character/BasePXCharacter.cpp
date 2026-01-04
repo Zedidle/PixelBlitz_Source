@@ -137,7 +137,6 @@ void ABasePXCharacter::LoadData()
 		for (auto Effect : InitEffects)
 		{
 			if (!Effect) continue;
-			UGameplayEffect* GameplayEffect = Effect->GetDefaultObject<UGameplayEffect>();
 			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
 				Effect, 
 				1.0f, 
