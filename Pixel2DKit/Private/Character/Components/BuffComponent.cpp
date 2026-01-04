@@ -413,7 +413,7 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	FVector Location = Owner->GetActorLocation();
 	if (Percent < 0 || Value < 0)
 	{
-		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Myopia", "远视"),
+		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Myopia", "短视"),
 			Location + FVector(10.0, 0, 20),
 			FLinearColor::White,
 			FVector2D(0.9, 0.9)
@@ -421,7 +421,7 @@ void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Per
 	}
 	else
 	{
-		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Hyperopia", "短视"),
+		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Hyperopia", "远视"),
 			Location + FVector(-50, 0, 20),
 			FLinearColor::Gray);
 	}

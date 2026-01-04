@@ -123,4 +123,5 @@ void UBuffStateWidget::BuffExpire_Implementation(FGameplayTag Tag)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffFloatingTextWidget);
 	
 	BuffFloatingTextWidget->DispearOut();
+	Tag2Widget_In.Remove(Tag);
 }

@@ -271,13 +271,8 @@ void UAbilityComponent::LoadAbilities()
 
 		if (AbilityData.Timing != EAbilityTiming::None)
 		{
-			if (!AbilitiesTiming.Contains(AbilityData.Timing))
-			{
-				AbilitiesTiming.Add(AbilityData.Timing);
-			}
-			
-			FGameplayTagArray TagArray = AbilitiesTiming.FindRef(AbilityData.Timing);
-			TagArray.Tags.Add(AbilityData.AbilityTag);
+			FGameplayTagArray& TagArray = AbilitiesTiming.FindOrAdd(AbilityData.Timing);
+			TagArray.Tags.Add(TAG(*Parent));
 		}
 	}
 
@@ -480,6 +475,15 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 	}
 
 	OutDamage = RemDamage; 
+}
+
+void UAbilityComponent::OnLanding()
+{
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::Landing);
+	for (auto& Tag : TagArray.Tags)
+	{
+		CachedASC->TryActivateAbilityByTag(Tag);
+	}
 }
 
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)

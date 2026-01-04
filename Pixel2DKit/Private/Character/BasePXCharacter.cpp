@@ -592,6 +592,11 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnLanding();
+	}
+	
 	if (DataAsset && DataAsset->LandedSound)
 	{
 		USoundFuncLib::PlaySoundAtLocation(DataAsset->LandedSound.Get(), GetActorLocation());
@@ -609,6 +614,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 			UGameplayStatics::PlayWorldCameraShake(GetWorld(), DA->PlayerLandedShake, GetActorLocation(), 0.0f, 500.0f, 0.0f, true);
 		}
 	}
+	
 	if (bDead)
 	{
 		if (GetCharacterMovement())

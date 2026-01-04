@@ -37,6 +37,10 @@ void UBuffFloatingTextWidget::PlayOut()
 	{
 		PlayAnimationForward(FloatOut, PlaySpeed);
 	}
+	if (FloatIn)
+	{
+		StopAnimation(FloatIn);
+	}
 }
 
 void UBuffFloatingTextWidget::DispearOut()

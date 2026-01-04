@@ -126,6 +126,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce);
 
+	UFUNCTION()
+	void OnLanding();
 
 
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
