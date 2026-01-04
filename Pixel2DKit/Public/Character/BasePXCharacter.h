@@ -499,6 +499,7 @@ public:
 	virtual void OnAttackEffect_Implementation() override;
 	virtual void OnAttackEffectBegin_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
+	virtual void OnPickGold_Implementation() override;
 	virtual void OnDashEffectBegin_Implementation() override;
 	virtual void OnDashEffectEnd_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;

@@ -73,7 +73,9 @@ public:
 	
 	UFUNCTION()
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce = false);
-	
+
+	UFUNCTION()
+	void OnPickGold();
 	
 	UFUNCTION(BlueprintCallable)
 	void LoadTalents();

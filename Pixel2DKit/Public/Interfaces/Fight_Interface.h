@@ -95,7 +95,9 @@ public:
     void OnAttackEffectBegin();
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnAttackEffectEnd();
-
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnPickGold();
+    
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     bool FindEffectGameplayTag(const FGameplayTag    Tag, float& Result);
     

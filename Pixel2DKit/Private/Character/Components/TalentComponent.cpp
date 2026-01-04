@@ -203,6 +203,17 @@ void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage,
 	OutDamage = RemDamage;
 }
 
+void UTalentComponent::OnPickGold()
+{
+	if (AbilitiesHolding.Num() > 0)
+	{
+		for (auto& Ability : AbilitiesHolding)
+		{
+			Ability->OnPickGold();
+		}
+	}
+}
+
 void UTalentComponent::LoadTalents()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)

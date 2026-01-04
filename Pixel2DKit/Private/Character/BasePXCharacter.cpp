@@ -1471,6 +1471,14 @@ void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 	bInAttackEffect = false;
 }
 
+void ABasePXCharacter::OnPickGold_Implementation()
+{
+	if (TalentComponent)
+	{
+		TalentComponent->OnPickGold();
+	}
+}
+
 void ABasePXCharacter::OnDashEffectBegin_Implementation()
 {
 	InDashEffect = true;
