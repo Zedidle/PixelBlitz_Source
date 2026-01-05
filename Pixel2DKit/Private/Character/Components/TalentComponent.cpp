@@ -178,6 +178,7 @@ void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage,
 		return;
 	}
 
+	ActivateAbilityByTiming(EAbilityTiming::BeAttacked);
 	
 	int RemDamage = InDamage;
 

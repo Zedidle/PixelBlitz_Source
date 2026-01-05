@@ -462,8 +462,7 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 	
 	HurtMaker = Maker;
 	
-	// 触发黑荆棘
-	CachedASC->TryActivateAbilityByTagName("Ability.Blackthorn");
+	ActivateAbilityByTiming(EAbilityTiming::BeAttacked);
 
 	// 所有涉及到 RemDamage 的都需要判断 bForce
 	if (!bForce)

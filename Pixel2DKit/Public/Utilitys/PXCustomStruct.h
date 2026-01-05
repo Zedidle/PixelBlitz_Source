@@ -113,7 +113,7 @@ enum class EAbilityBelongTo : uint8
 UENUM(BlueprintType)
 enum class EAbilityTiming : uint8
 {
-	None UMETA(DisplayName = "直接触发"),
+	None UMETA(DisplayName = "直接触发/特殊处理"),
 	AttackStart UMETA(DisplayName = "攻击开始"),
 	AttackHit UMETA(DisplayName = "攻击命中"),
 	AttackFinish UMETA(DisplayName = "攻击结束"),
