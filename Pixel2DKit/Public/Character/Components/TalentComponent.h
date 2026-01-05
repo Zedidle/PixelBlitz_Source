@@ -93,6 +93,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void OnSkillFinish();
 
+	UFUNCTION(BlueprintCallable)
+	void OnKillEnemy();
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetAttackDamagePlus();
 

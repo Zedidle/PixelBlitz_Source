@@ -515,6 +515,9 @@ public:
 	void OnAttackRelease();
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnAttackHoldingRelease();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnKillEnemy();
 	
 #pragma region IBuff_Interface
 	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999) override;

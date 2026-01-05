@@ -1549,6 +1549,18 @@ void ABasePXCharacter::OnAttackHoldingRelease_Implementation()
 	SetAttackHolding(false);
 }
 
+void ABasePXCharacter::OnKillEnemy_Implementation()
+{
+	if (TalentComponent)
+	{
+		TalentComponent->OnKillEnemy();
+	}
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnKillEnemy();
+	}
+}
+
 void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
 	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);

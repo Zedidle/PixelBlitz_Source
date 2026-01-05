@@ -510,6 +510,15 @@ void UAbilityComponent::OnAttackSkill()
 	}	
 }
 
+void UAbilityComponent::OnKillEnemy()
+{
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::KillEnemy);
+	for (auto& Tag : TagArray.Tags)
+	{
+		CachedASC->TryActivateAbilityByTag(Tag);
+	}	
+}
+
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 {
 	OnHurtInstigatorDead(nullptr);

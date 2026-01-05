@@ -395,6 +395,17 @@ void UTalentComponent::OnSkillFinish()
 	}
 }
 
+void UTalentComponent::OnKillEnemy()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnKillEnemy();
+		}
+	}
+}
+
 int UTalentComponent::GetAttackDamagePlus()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, 0)

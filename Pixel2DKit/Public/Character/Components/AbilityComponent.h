@@ -134,6 +134,9 @@ public:
 
 	UFUNCTION()
 	void OnAttackSkill();
+
+	UFUNCTION()
+	void OnKillEnemy();
 	
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
 	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);
