@@ -33,8 +33,7 @@ bool UPXActivatableWidget::NativeOnHandleBackAction()
 }
 void UPXActivatableWidget::Close()
 {
-	UUIManager* UIManager = UUIManager::GetSelfInstance(this);
-	if (UIManager)
+	if (UUIManager* UIManager = UUIManager::GetSelfInstance(this))
 	{
 		UIManager->CloseUI(UIName);
 	}

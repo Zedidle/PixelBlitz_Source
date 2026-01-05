@@ -54,10 +54,6 @@ void APXPlayerController::OnGameStart()
 {
 	GameAlreadyStart = true;
 	OnCharacterControl(true);
-
-	SetShowMouseCursor(false);
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
 	
 	if (PXCharacter)
 	{
@@ -76,10 +72,16 @@ void APXPlayerController::OnCharacterControl(bool On)
 	{
 		const FModifyContextOptions Options;
 		Subsystem->AddMappingContext(IMC_Default, 1, Options);
+		SetShowMouseCursor(false);
+		FInputModeGameOnly InputMode;
+		SetInputMode(InputMode);
 	}
 	else
 	{
 		Subsystem->RemoveMappingContext(IMC_Default);
+		SetShowMouseCursor(true);
+		FInputModeUIOnly InputMode;
+		SetInputMode(InputMode);
 	}
 	FlushPressedKeys();
 }

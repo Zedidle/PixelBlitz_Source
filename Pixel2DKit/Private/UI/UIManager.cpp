@@ -301,8 +301,6 @@ void UUIManager::InitRoot()
 	
 	if (FUIConfigData ConfigData; GetUIConfigData("UIRoot", ConfigData))
 	{
-		FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-
 		if (const auto& UIRoot = UWidgetBlueprintLibrary::Create(World, ConfigData.UI_WidgetClass, nullptr))
 		{
 			Root = Cast<UPXUIRoot>(UIRoot);
