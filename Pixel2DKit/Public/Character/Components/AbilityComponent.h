@@ -127,16 +127,20 @@ public:
 	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce);
 
 	UFUNCTION()
-	void OnLanding();
+	void OnLanding();// 后续可能会补充参数
 
 	UFUNCTION()
-	void OnSkillStart();
+	void OnSkillStart();// 后续可能会补充参数
 
 	UFUNCTION()
-	void OnAttackSkill();
+	void OnAttackSkill();// 后续可能会补充参数
 
 	UFUNCTION()
-	void OnKillEnemy();
+	void OnKillEnemy(); // 后续可能会补充参数
+
+	UFUNCTION()
+	void ActivateAbilityByTiming(EAbilityTiming Timing);
+
 	
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
 	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);

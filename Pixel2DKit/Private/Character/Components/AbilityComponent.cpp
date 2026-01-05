@@ -485,38 +485,33 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 
 void UAbilityComponent::OnLanding()
 {
-	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::Landing);
-	for (auto& Tag : TagArray.Tags)
-	{
-		CachedASC->TryActivateAbilityByTag(Tag);
-	}
+	ActivateAbilityByTiming(EAbilityTiming::Landing);
 }
 
 void UAbilityComponent::OnSkillStart()
 {
-	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::SkillStart);
-	for (auto& Tag : TagArray.Tags)
-	{
-		CachedASC->TryActivateAbilityByTag(Tag);
-	}	
+	ActivateAbilityByTiming(EAbilityTiming::SkillStart);
 }
 
 void UAbilityComponent::OnAttackSkill()
 {
-	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::AttackSkill);
-	for (auto& Tag : TagArray.Tags)
-	{
-		CachedASC->TryActivateAbilityByTag(Tag);
-	}	
+	ActivateAbilityByTiming(EAbilityTiming::AttackSkill);
 }
 
 void UAbilityComponent::OnKillEnemy()
 {
-	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(EAbilityTiming::KillEnemy);
+	ActivateAbilityByTiming(EAbilityTiming::KillEnemy);
+}
+
+void UAbilityComponent::ActivateAbilityByTiming(EAbilityTiming Timing)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(Timing);
 	for (auto& Tag : TagArray.Tags)
 	{
 		CachedASC->TryActivateAbilityByTag(Tag);
-	}	
+	}
 }
 
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)

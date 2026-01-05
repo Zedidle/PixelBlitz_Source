@@ -63,7 +63,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-	void Event_OnPlayerAttackStart(EAttackType Type, FVector Direction);
+	void OnAttackStart(EAttackType Type, FVector Direction);
 
 	UFUNCTION()
 	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);
@@ -95,6 +95,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void OnKillEnemy();
+	
+	UFUNCTION(BlueprintCallable)
+	void ActivateAbilityByTiming(EAbilityTiming Timing);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetAttackDamagePlus();

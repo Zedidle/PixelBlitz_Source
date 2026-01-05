@@ -68,12 +68,7 @@ void UTalentComponent::InitTalents()
 		
 		if (TalentData.Timing != EAbilityTiming::None)
 		{
-			if (!AbilitiesTiming.Contains(TalentData.Timing))
-			{
-				AbilitiesTiming.Add(TalentData.Timing);
-			}
-			
-			FGameplayTagArray TagArray = AbilitiesTiming.FindRef(TalentData.Timing);
+			FGameplayTagArray& TagArray = AbilitiesTiming.FindOrAdd(TalentData.Timing);
 			TagArray.Tags.Add(TalentData.TalentTag);
 		}
 	}
@@ -106,7 +101,7 @@ void UTalentComponent::BeginPlay()
 	
 
 	// 对 OnPlayerAttack 的绑定，在玩家发起攻击时的事件
-	PXCharacter->OnPlayerAttackStart.AddDynamic(this, &UTalentComponent::Event_OnPlayerAttackStart);
+	PXCharacter->OnPlayerAttackStart.AddDynamic(this, &UTalentComponent::OnAttackStart);
 }
 
 void UTalentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -117,7 +112,7 @@ void UTalentComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), "Talent_WarmingUP");
 	
-	PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &UTalentComponent::Event_OnPlayerAttackStart);
+	PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &UTalentComponent::OnAttackStart);
 }
 
 
@@ -129,7 +124,7 @@ void UTalentComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UTalentComponent::Event_OnPlayerAttackStart(EAttackType Type, FVector Direction)
+void UTalentComponent::OnAttackStart(EAttackType Type, FVector Direction)
 {
 	for (auto& Skill : SkillsHolding)
 	{
@@ -138,6 +133,8 @@ void UTalentComponent::Event_OnPlayerAttackStart(EAttackType Type, FVector Direc
 			Skill->OnAttackStart();
 		}
 	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::AttackStart);
 }
 
 void UTalentComponent::RegisterDefenseSkill(ABaseDefenseSkill* Skill)
@@ -212,6 +209,8 @@ void UTalentComponent::OnPickGold()
 			Skill->OnPickGold();
 		}
 	}
+
+	ActivateAbilityByTiming(EAbilityTiming::PickGold);
 }
 
 void UTalentComponent::LoadTalents()
@@ -382,6 +381,8 @@ void UTalentComponent::OnDying(int& RemReviveTimes)
 		}
 	}
 	RemReviveTimes = MaxReviveTimes;
+
+	ActivateAbilityByTiming(EAbilityTiming::Dying);
 }
 
 void UTalentComponent::OnSkillFinish()
@@ -393,6 +394,8 @@ void UTalentComponent::OnSkillFinish()
 			Skill->OnSkillFinish();
 		}
 	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::SkillFinish);
 }
 
 void UTalentComponent::OnKillEnemy()
@@ -404,7 +407,21 @@ void UTalentComponent::OnKillEnemy()
 			Skill->OnKillEnemy();
 		}
 	}
+
+	ActivateAbilityByTiming(EAbilityTiming::KillEnemy);
 }
+
+void UTalentComponent::ActivateAbilityByTiming(EAbilityTiming Timing)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	
+	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(Timing);
+	for (auto& Tag : TagArray.Tags)
+	{
+		CachedASC->TryActivateAbilityByTag(Tag);
+	}
+}
+
 
 int UTalentComponent::GetAttackDamagePlus()
 {
