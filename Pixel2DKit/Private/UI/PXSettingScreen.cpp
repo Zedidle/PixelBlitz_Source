@@ -41,9 +41,11 @@ bool UPXSettingScreen::NativeOnHandleBackAction()
 	}
 
 	ApplyChanges();
-	
-	UUIManager* UIManager = UUIManager::GetSelfInstance(this);
-	UIManager->CloseUI(UIName);
+
+	if (UUIManager* UIManager = UUIManager::GetSelfInstance(this))
+	{
+		UIManager->CloseUI(UIName);
+	}
 	return true;
 }
 

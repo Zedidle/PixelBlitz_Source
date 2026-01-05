@@ -18,6 +18,7 @@
 #include "Subsystems/PXAudioSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
+#include "UI/UIManager.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
 
@@ -86,6 +87,28 @@ void APXGameState::RandomWeather()
 
 void APXGameState::DealUI_Implementation()
 {
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+	
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(World);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
+
+	UUIManager* UIManager = UUIManager::GetSelfInstance(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(UIManager);
+	
+	
+	if (MainSave->RemLevels.IsEmpty())
+	{
+		UIManager->OpenUI("LevelFinish");
+	}
+	else
+	{
+		UIManager->OpenUI("LevelTransition");
+	}
+	
 }
 
 void APXGameState::DealStatics_Implementation()

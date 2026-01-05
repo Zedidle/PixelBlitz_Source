@@ -105,14 +105,7 @@ void APXPlayerController::OnLevelLoaded_Implementation(FGameplayTag Channel, con
 {
 	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
-	
-	if (MainSave->CurLevel == 1)
-	{
-		OnCharacterControl(false);
-	}
-	else
-	{
-		OnCharacterControl(true);
-	}
+
+	OnCharacterControl(false);
 }
 
