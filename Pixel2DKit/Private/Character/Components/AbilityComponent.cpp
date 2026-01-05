@@ -253,9 +253,15 @@ void UAbilityComponent::LoadAbilities()
 	
 	for (auto Tag : MainSave->TakeEffectAbilities)
 	{
+		FString Parent;
+		FString Level;
+		Tag.ToString().Split(".Level", &Parent, &Level);
+
+		if (CachedASC->HasAbility(TAG(*Parent))) continue;
+		
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
 		if (!AbilityData.AbilityTag.IsValid()) continue;
-		
+
 		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
@@ -270,9 +276,6 @@ void UAbilityComponent::LoadAbilities()
 			EffectGameplayTags.SetData(D.Key, D.Value);
 		}
 
-		FString Parent;
-		FString Level;
-		Tag.ToString().Split(".Level", &Parent, &Level);
 		PXCharacter->BuffComponent->AddBuffByTag(TAG(*Parent));
 
 		if (AbilityData.Timing != EAbilityTiming::None)

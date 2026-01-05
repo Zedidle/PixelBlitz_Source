@@ -20,6 +20,10 @@ public:
 	
 	virtual FGameplayEffectSpecHandle MakeOutgoingSpec(TSubclassOf<UGameplayEffect> GameplayEffectClass, float Level, FGameplayEffectContextHandle Context) const override;
 
+
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	bool HasAbility(const FGameplayTag& Tag);
+	
 	UFUNCTION(BlueprintCallable, Category = "PXASC")
 	bool TryActivateAbilities(const FGameplayTagContainer& GameplayTagContainer, FName CDTagName);
 

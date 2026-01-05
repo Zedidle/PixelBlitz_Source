@@ -31,6 +31,18 @@ FGameplayEffectSpecHandle UPXASComponent::MakeOutgoingSpec(TSubclassOf<UGameplay
 	return FGameplayEffectSpecHandle(nullptr);
 }
 
+bool UPXASComponent::HasAbility(const FGameplayTag& Tag)
+{
+	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{		
+		if (Spec.Ability && Spec.Ability->GetAssetTags().HasTagExact(Tag))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool UPXASComponent::TryActivateAbilities(const FGameplayTagContainer& GameplayTagContainer, FName CDTagName)
 {
 	if (HasTag(CDTagName))
