@@ -27,9 +27,6 @@ public:
 	FName CurveName = FName("None");
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
-	bool bFloat = false;
-
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	float Distance = 50.0f;
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
