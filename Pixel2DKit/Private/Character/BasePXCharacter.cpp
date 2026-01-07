@@ -294,7 +294,6 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	SpringArm->SetRelativeRotation(FRotator(CurBlendPitch, yaw, 0));
 
 	
-
 	// 镜头偏移
 	if (Velocity.Size() > 0)
 	{
@@ -336,9 +335,6 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 
 	TArray<FVector> OffsetValues;
 	CameraOffsetMap.GenerateValueArray(OffsetValues);
-	
-	// FVector DefaultSpringArmZOffset = {0,0,(PreSpringArmZ - SpringArm->GetComponentLocation().Z)};
-	// OffsetValues.Add(DefaultSpringArmZOffset);
 	
 	// 一般都是计算水平偏移，与Z无关
 	FVector NewTargetCameraOffset;

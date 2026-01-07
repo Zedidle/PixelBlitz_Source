@@ -60,18 +60,18 @@ void ABaseEnemy::SetPXCharacter(AActor* Character)
 		return;
 	}
 
-	if (IsValid(PXCharacter)) return;
+	if (PXCharacter.IsValid()) return;
 
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(Character))
 	{
 		PXCharacter = C;
 		if (IsValid(EnemyAIComponent))
 		{
-			EnemyAIComponent->SetPXCharacter(PXCharacter);
+			EnemyAIComponent->SetPXCharacter(PXCharacter.Get());
 		}
 		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
 		{
-			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PXCharacter);
+			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PXCharacter.Get());
 		}
 	}
 }
@@ -208,7 +208,7 @@ void ABaseEnemy::SetJumping(const bool V, const float time)
 
 float ABaseEnemy::GetHorizontalDistanceToPlayer() const
 {
-	if (IsValid(PXCharacter))
+	if (PXCharacter.IsValid())
 	{
 		return (PXCharacter->GetActorLocation() - GetActorLocation()).Size2D();
 	}
@@ -217,7 +217,7 @@ float ABaseEnemy::GetHorizontalDistanceToPlayer() const
 
 float ABaseEnemy::GetVerticalDistanceToPlayer() const
 {
-	if (IsValid(PXCharacter))
+	if (PXCharacter.IsValid())
 	{
 		return PXCharacter->GetActorLocation().Z - GetActorLocation().Z;
 	}
@@ -318,7 +318,6 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
-	// AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 
 	AbilitySystem = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
@@ -380,10 +379,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
 	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
-	UCurveVector* Curve = ActionMoveCurveData.Curve.LoadSynchronous();
-	if (!IsValid(Curve)) return;
-	
-	if (ActionMoveCurveData.Curve.IsNull()) return;
+	if (!IsValid(ActionMoveCurveData.Curve)) return;
 
 	FVector StartLocation = GetActorLocation();
 	if (ActionMoveCurveData.CheckBehindDistance > 0)
@@ -412,7 +408,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	ActionMove.SustainTime = SustainTime;
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
-	ActionMove.CurveVector = Curve;
+	ActionMove.CurveVector = ActionMoveCurveData.Curve;
 	ActionMove.bCabBeInterrupt = bCabBeInterrupt;
 	
 	if (GetCharacterMovement())
@@ -467,10 +463,7 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
 	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
-	UCurveVector* Curve = ActionMoveCurveData.Curve.LoadSynchronous();
-	if (!IsValid(Curve)) return;
-	
-	if (ActionMoveCurveData.Curve.IsNull()) return;
+	if (!IsValid(ActionMoveCurveData.Curve)) return;
 
 	float JumpDuration = FMath::FRandRange(0.15f, 0.25f) + FMath::FRandRange(0.4f, 0.45f) * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.MoveSpeed;
 	
@@ -479,7 +472,7 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	ActionMove.SustainTime = JumpDuration;
 	ActionMove.StartLocation = StartLocation;
 	ActionMove.TargetLocation = TargetLocation;
-	ActionMove.CurveVector = Curve;
+	ActionMove.CurveVector = ActionMoveCurveData.Curve;
 	ActionMove.bCabBeInterrupt = false;
 	
 	if (GetCharacterMovement())
@@ -629,7 +622,7 @@ FVector ABaseEnemy::GetHorizontalDirectionToPlayer()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, FVector::ZeroVector)
 
-	if (PXCharacter)
+	if (PXCharacter.IsValid())
 	{
 		return (PXCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
 	}
@@ -690,7 +683,7 @@ bool ABaseEnemy::IsAlive_Implementation()
 
 AActor* ABaseEnemy::GetTarget_Implementation()
 {
-	return PXCharacter;
+	return PXCharacter.Get();
 }
 
 
@@ -756,8 +749,8 @@ void ABaseEnemy::OnAttack_Implementation()
 
 bool ABaseEnemy::CanAttack_Implementation()
 {
-	if (!IsValid(PXCharacter)) return false;
-	if (!Execute_IsAlive(PXCharacter)) return false;
+	if (!PXCharacter.IsValid()) return false;
+	if (!Execute_IsAlive(PXCharacter.Get())) return false;
 	
 	return !bDead && !bInAttackState;
 }
@@ -784,11 +777,6 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 			OutDamage *= 1 + Result;
 		}
 	}
-
-	// if (AbilityComponent)
-	// {
-	// 	AbilityComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
-	// }
 
 	// 暂时默认防御减半伤害
 	if (bInDefendState)
@@ -1080,10 +1068,12 @@ void ABaseEnemy::ActionAtPlayerSouthRemote_Implementation(float Distance)
 
 void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 {
+	if (!EnemyAIComponent) return;
 	if (!Execute_IsAlive(this)) return;
-	if (!IsValid(PXCharacter)) return;
+	if (!PXCharacter.IsValid()) return;
 
-	bool PlayerAtRight = USpaceFuncLib::ActorAtActorRight(PXCharacter,this);
+	
+	bool PlayerAtRight = USpaceFuncLib::ActorAtActorRight(PXCharacter.Get(),this);
 
 	FVector Dir_PlayerRight = PXCharacter->GetRightVectorWithBlendYaw();
 	FVector Dir_PlayerToSelf = (PXCharacter->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
@@ -1093,7 +1083,7 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 
 	float CrossZ = Dir_PlayerRight.Cross(Dir_PlayerToSelf).Z;
 
-	EWorldDirection RelativeDirection_PlayerToSelf = USpaceFuncLib::ActorAtActorWorldDirection(EnemyAIComponent->PXCharacter, this, PXCharacter->CurBlendYaw);
+	EWorldDirection RelativeDirection_PlayerToSelf = USpaceFuncLib::ActorAtActorWorldDirection(EnemyAIComponent->PXCharacter.Get(), this, PXCharacter->CurBlendYaw);
 
 	float InYaw;
 	if (RelativeDirection_PlayerToSelf == North)
@@ -1117,7 +1107,7 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 {
 	if (bDead) return;
 	if (!ActionMove.bActionMoving) return;
-	if (!ActionMove.CurveVector) return;
+	if (!IsValid(ActionMove.CurveVector)) return;
 
 	ActionMove.CurTime += DeltaSeconds;
 	float MovePercent = ActionMove.CurTime / ActionMove.SustainTime;
@@ -1207,11 +1197,8 @@ void ABaseEnemy::Tick(float DeltaSeconds)
 	// 目前只有 HealthWidget
 	if (UWidgetComponent* Widget = FindComponentByClass<UWidgetComponent>())
 	{
-		Widget->SetVisibility(IsValid(PXCharacter));
+		Widget->SetVisibility(PXCharacter.IsValid());
 	}
-
-	
-
 	
 }
 

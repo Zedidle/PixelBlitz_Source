@@ -102,8 +102,7 @@ void UPXSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UPXSaveGameSubsystem::SaveMainData()
 {
-    bool result = UGameplayStatics::SaveGameToSlot(MainSaveGame, SlotName_Main, UserIndex);
-    if (result)
+    if (UGameplayStatics::SaveGameToSlot(MainSaveGame, SlotName_Main, UserIndex))
     {
         UE_LOG(LogTemp,Log,TEXT("UPXSaveGameSubsystem::SaveMainData Success ^ ^"))
     }

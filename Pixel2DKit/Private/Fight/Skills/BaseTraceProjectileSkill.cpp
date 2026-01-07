@@ -121,6 +121,7 @@ void ABaseTraceProjectileSkill::SetActive(bool v)
 		bEnding = true;
 		ProjectileComp->bIsHomingProjectile = false;
 		ProjectileComp->Velocity = FVector::ZeroVector;
+		StartPlusDamageByDistance(false);
 	}
 	
 }

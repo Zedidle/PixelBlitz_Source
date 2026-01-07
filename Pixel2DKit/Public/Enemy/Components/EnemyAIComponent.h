@@ -130,7 +130,7 @@ public:
 
 	// 目标中的玩家
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)
-	ABasePXCharacter* PXCharacter;
+	TWeakObjectPtr<ABasePXCharacter> PXCharacter;
 	
 	// 最远的攻击距离, 20 - 50 为默认近战小怪攻击距离；
 	UPROPERTY(BlueprintReadOnly, Category = Enemy)

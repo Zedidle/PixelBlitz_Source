@@ -16,7 +16,7 @@ struct FCurveFloatData
 	FName CurveFloatName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSoftObjectPtr<UCurveVector> Curve;
+	TObjectPtr<UCurveVector> Curve;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float CheckBehindDistance = 0.0f;

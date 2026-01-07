@@ -91,7 +91,7 @@ struct FActionMove
 	FVector TargetLocation  = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
-	UCurveVector* CurveVector = nullptr;
+	TObjectPtr<UCurveVector> CurveVector = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
 	float SustainTime = 0.5f;
@@ -125,7 +125,7 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	TEnumAsByte<ECollisionChannel> ECC_PlayerPawn; 
 	
 	UPROPERTY()
-	ABasePXCharacter* PXCharacter;
+	TWeakObjectPtr<ABasePXCharacter> PXCharacter;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	UEnemyDataAsset* DataAsset;
@@ -148,9 +148,6 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UFightComponent> FightComponent;
-
-	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	// TObjectPtr<UAbilityComponent> AbilityComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UBuffComponent> BuffComponent;

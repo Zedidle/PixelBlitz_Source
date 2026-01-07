@@ -65,7 +65,7 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 
 	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetName() + "_SetPixelCharacter");
 	
-	if (PXCharacter)
+	if (PXCharacter.IsValid())
 	{
 		if (UTimerSubsystemFuncLib::IsDelayActive(GetWorld(), TimerName_CheckPlayerLocation)) return;
 		
@@ -88,7 +88,7 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 
 void UEnemyAIComponent::UpdatePlayerPaths()
 {
-	if (!PXCharacter) return;
+	if (!PXCharacter.IsValid()) return;
 	if (!OwningEnemy) return;
 			
 	FHitResult OutHit;
@@ -116,7 +116,7 @@ void UEnemyAIComponent::LostPlayer()
 	FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetName() + "_CheckPlayerMovement");
 	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerMovement);
 
-	if (PXCharacter)
+	if (PXCharacter.IsValid())
 	{
 		PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &ThisClass::OnPlayerAttackStart);
 	}
@@ -367,9 +367,9 @@ float UEnemyAIComponent::GetMinDirSwitchDistance()
 
 FGameplayTag UEnemyAIComponent::GetActionFieldByPlayer() const
 {
-	if (!IsValid(PXCharacter) || !OwningEnemy) return FGameplayTag();
+	if (!PXCharacter.IsValid() || !OwningEnemy) return FGameplayTag();
 	
-	EWorldDirection Dir = USpaceFuncLib::ActorAtActorWorldDirection(OwningEnemy, PXCharacter, PXCharacter->CurBlendYaw);
+	EWorldDirection Dir = USpaceFuncLib::ActorAtActorWorldDirection(OwningEnemy, PXCharacter.Get(), PXCharacter->CurBlendYaw);
 	float Distance = (OwningEnemy->GetActorLocation() - PXCharacter->GetActorLocation()).Size2D();
 	
 	if (Dir == East)
@@ -547,7 +547,6 @@ void UEnemyAIComponent::Event_CheckPlayerMovement()
 	}
 
 	PlayerHigher = PXCharacter->GetActorLocation().Z - OwningEnemy->GetActorLocation().Z;
-	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Event_CheckPlayerMovement: %f, CurPlayerMovementType: %d"), PlayerVelocity.Size(), CurPlayerMovementType));
 }
 
 

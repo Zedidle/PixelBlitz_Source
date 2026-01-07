@@ -219,8 +219,7 @@ void APXGameState::ToNextLevel()
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	
-	APXGameMode* GM = UPXGameplayStatics::GetGameMode(World);
-	if (GM)
+	if (APXGameMode* GM = UPXGameplayStatics::GetGameMode(World))
 	{
 		GM->LoadLevel(GameInstance->GetCurLevelName_Simple(true), GetNewLevelInitLocation());
 	}
