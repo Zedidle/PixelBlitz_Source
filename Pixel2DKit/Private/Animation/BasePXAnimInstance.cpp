@@ -18,7 +18,7 @@
 
 void UBasePXAnimInstance::SetActionField(const FGameplayTag& field)
 {
-	CurActionFiled = field;
+	CurActionField = field;
 }
 
 

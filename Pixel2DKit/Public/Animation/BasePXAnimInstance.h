@@ -71,7 +71,7 @@ public:
 	// 一般是怪物专用
 	// 当前相对于玩家角色的行动区间
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	FGameplayTag CurActionFiled;
+	FGameplayTag CurActionField;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
 	bool bInDefendState; // 是否处于防御状态

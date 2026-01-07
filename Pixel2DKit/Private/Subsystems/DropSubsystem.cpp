@@ -37,8 +37,11 @@ void UDropSubsystem::SpawnItems(const FName& DropID, const FVector& SpawnLocatio
 	
 	if (DropData->Items.IsEmpty()) return ;
 
-	ItemDataTable = DataTableSubsystem->GetItemData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ItemDataTable)
+	if (!IsValid(ItemDataTable))
+	{
+		ItemDataTable = DataTableSubsystem->GetItemData();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ItemDataTable)
+	}
 
 	FString UniqueTimerName = FString::Printf(TEXT("UDropSubsystem_SpawnItems_%s"), *FGuid::NewGuid().ToString());
 	
