@@ -452,15 +452,18 @@ struct FTalent: public FTableRowBase
 {
 	GENERATED_BODY()
 
+	// 是否默认未解锁
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	bool DefaultLock = false;
 
+	// 天赋Tag，用于显示BUFF与触发
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	FGameplayTag TalentTag;
 
+	// 选择时所需天赋点
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	int Price = 3;
-	
+
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	ETalentType TalentType = ETalentType::None;
 
@@ -473,6 +476,7 @@ struct FTalent: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	TSoftObjectPtr<UTexture2D> Icon;
 
+	// 相关属性，运行时记录在角色中统一处理
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
 
@@ -486,10 +490,7 @@ struct FTalent: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TSubclassOf<ABaseSkill> SkillClass;
 
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	FGameplayTag BuffTagOnWidget;
-
-	// 技能触发时机，如果有 AbilityClass 的话，需要配置
+	// 技能触发时机，同时触发 SkillActor 和 Ability
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	EAbilityTiming Timing = EAbilityTiming::None;
 };

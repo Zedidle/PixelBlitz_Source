@@ -4,13 +4,14 @@
 #include "Character/Components/BuffComponent.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemInterface.h"
 #include "GameplayTagsManager.h"
 #include "NiagaraCommon.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Blueprint/UserWidget.h"
-#include "Character/BasePXCharacter.h"
 #include "Core/PXGameInstance.h"
+#include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
@@ -103,8 +104,9 @@ void UBuffComponent::CheckBuffExpire()
 void UBuffComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	Owner = Cast<ABasePXCharacter>(GetOwner());
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner);
+	Owner = Cast<ACharacter>(GetOwner());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner->GetController())
 	
 	if (Owner->GetController()->IsLocalPlayerController())
 	{

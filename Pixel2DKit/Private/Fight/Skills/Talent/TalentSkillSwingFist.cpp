@@ -36,7 +36,7 @@ void ATalentSkillSwingFist::MakeSwingFistPower()
 
 	SwingFistPower = !SwingFistPower;
 	
-	FGameplayTag SwingFistTag = TAG("Buff.Talent.SwingFist");
+	FGameplayTag SwingFistTag = TAG("Talent.SwingFist");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
 
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");

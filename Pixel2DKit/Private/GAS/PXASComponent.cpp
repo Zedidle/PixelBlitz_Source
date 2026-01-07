@@ -62,6 +62,8 @@ bool UPXASComponent::TryActivateAbilityByTagName(FName TagName, bool bAllowRemot
 
 bool UPXASComponent::TryActivateAbilityByTag(const FGameplayTag& Tag, bool bAllowRemoteActivation)
 {
+	if (!HasAbility(Tag)) return false;
+	
 	FName CDTagName = FName(Tag.ToString() + ".CD");
 	if (HasTag(CDTagName)) return false;
 

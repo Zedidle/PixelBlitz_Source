@@ -62,7 +62,7 @@ void UTalentComponent::InitTalents()
 			}
 			if (PXCharacter->BuffComponent)
 			{
-				PXCharacter->BuffComponent->AddBuffByTag(TalentData.BuffTagOnWidget);
+				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag);
 			}
 		}
 		
@@ -275,7 +275,7 @@ void UTalentComponent::LoadTalents()
 		if (PXCharacter->BuffComponent->Implements<UBuff_Interface>())
 		{
 			IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
-				TAG("Buff.Talent.EagleEye"), EffectGameplayTags[TalentTag], 0, 999);
+				TAG("Talent.EagleEye"), EffectGameplayTags[TalentTag], 0, 999);
 		}
 	}
 	
@@ -314,7 +314,7 @@ void UTalentComponent::LoadTalents()
 	TalentTag = TAG("TalentSet.Warmup.AttackDamagePlusPercent");
 	if (EffectGameplayTags.Contains(TalentTag))
 	{
-		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Talent_WarmingUP",
+		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Talent_WarmUP",
 			this, &UTalentComponent::MoveWarmingUP, 0.2);
 	}
 
@@ -356,7 +356,7 @@ void UTalentComponent::OnBuffCalDamage()
 	// 清除热身运动
 	if (WarmUP_Power > 0)
 	{
-		IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.Warmup"), true);
+		IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Talent.Warmup"), true);
 		WarmUP_Power = 0 ;
 		WarmUP_MoveDistance = 0;
 		OwnerPreLocation = PXCharacter->GetActorLocation();
@@ -365,8 +365,8 @@ void UTalentComponent::OnBuffCalDamage()
 	MakeMiracleWalker();
 	MakeImmortalPower(false);
 
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.StaticPower"), true);
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Buff.Talent.DodgeStrike"), true);
+	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Talent.StaticPower"), true);
+	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Talent.EvadeStrike"), true);
 }
 
 void UTalentComponent::OnDying(int& RemReviveTimes)
@@ -466,7 +466,7 @@ void UTalentComponent::MoveWarmingUP()
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	float PlusPowerPercent = WarmUP_Power * EffectGameplayTags[AttackDamagePlusPercentTag];
-	FGameplayTag WarmUP_Tag = TAG("Buff.Talent.Warmup");
+	FGameplayTag WarmUP_Tag = TAG("Talent.Warmup");
 	
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
 	
@@ -481,7 +481,7 @@ void UTalentComponent::MakeMiracleWalker()
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
-	FGameplayTag MiracleWalkerTag = TAG("Buff.Talent.MiracleWalker");
+	FGameplayTag MiracleWalkerTag = TAG("Talent.MiracleWalker");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
 
 	FGameplayTag DamagePlusTag = TAG("TalentSet.MiracleWalker.DamagePlus");
@@ -528,7 +528,7 @@ void UTalentComponent::MakeImmortalPower(bool First)
 		!EffectGameplayTags.Contains(IntervalTag) ||
 		!EffectGameplayTags.Contains(MaxHPPlusAfterAttackTag)
 	) return;
-	FGameplayTag ImmortalPowerTag = TAG("Buff.Talent.ImmortalPower");
+	FGameplayTag ImmortalPowerTag = TAG("Talent.Immortal");
 
 	if (First || PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{

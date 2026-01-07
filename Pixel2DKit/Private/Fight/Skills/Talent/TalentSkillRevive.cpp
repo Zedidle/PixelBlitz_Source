@@ -5,6 +5,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
+#include "Interfaces/Buff_Interface.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -60,6 +61,14 @@ bool ATalentSkillRevive::OnDying(int& _RemReviveTimes)
 		}
 		RemReviveTimes--;
 		_RemReviveTimes = RemReviveTimes;
+
+		if (_RemReviveTimes == 0)
+		{
+			if (Owner->Implements<UFight_Interface>())
+			{
+				IBuff_Interface::Execute_RemoveBuff(Owner, TAG("Talent.Revive"), true);
+			}
+		}
 		
 		return true;
 	}

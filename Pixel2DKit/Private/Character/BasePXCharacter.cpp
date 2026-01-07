@@ -1008,11 +1008,6 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		if (RemReviveTimes >= 0)
 		{
 			// 原地复活
-			if (RemReviveTimes == 0)
-			{
-				Execute_RemoveBuff(this, FGameplayTag::RequestGameplayTag("Buff.Talent.Revive"), true);
-			}
-			
 			if (APXPlayerController* PC = GetController<APXPlayerController>())
 			{
 				PC->OnCharacterControl(false);
@@ -1026,7 +1021,6 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				if (!WeakThis.IsValid()) return;
 					WeakThis->Revive();
 			}, 2);
-			
 		}
 		else
 		{

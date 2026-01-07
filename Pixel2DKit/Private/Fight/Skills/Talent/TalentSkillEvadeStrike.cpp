@@ -40,7 +40,7 @@ bool ATalentSkillEvadeStrike::OnSkillFinish()
 	FGameplayTag Tag_DamagePlusAfterSkill = TAG("TalentSet.DamagePlusAfterSkill");
 	if (EffectGameplayTags.Contains(Tag_DamagePlusAfterSkill))
 	{
-		FGameplayTag Tag = TAG("Buff.Talent.DodgeStrike");
+		FGameplayTag Tag = TAG("Talent.DodgeStrike");
 		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, Tag, 0.0f,
 			EffectGameplayTags[Tag_DamagePlusAfterSkill], 999.0f
 		);
