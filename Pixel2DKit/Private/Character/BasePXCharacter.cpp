@@ -706,7 +706,16 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 		 (V.Z < 0 ? -1 : 1) * FMath::Pow(FMath::Abs(V.Z), 0.8)
 	};
 	
-	return FVector(Value) + RepelByVelocity * VelocityRepelFactor;
+	FVector SpriteForwardVector = GetSpriteForwardVector();
+	FVector Result = {
+		SpriteForwardVector.X * Value,
+		SpriteForwardVector.Y * Value,
+		Value
+	};
+
+	Result += RepelByVelocity * VelocityRepelFactor;
+	
+	return Result;
 }
 
 void ABasePXCharacter::Revive_Implementation()
