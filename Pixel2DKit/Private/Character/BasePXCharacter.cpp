@@ -601,7 +601,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	SetJumping(false);
 	SetFalling(false);
 	CurJumpCount = 0;
-
+	
 	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
 	{
 		if (UPXCameraResourceDataAsset* DA = CustomSettings->CameraResourceDataAsset.LoadSynchronous())
@@ -617,8 +617,8 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 			GetCharacterMovement()->DisableMovement();
 		}
 	}
-
-	// 舞空术成就
+	
+#pragma region 舞空术成就
 	if (JumpStartTime > 0 && UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
 	{
 		if (UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>())
@@ -626,6 +626,8 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 			AchievementSubsystem->CompleteAchievement("10");
 		}
 	}
+	JumpStartTime = 0;
+#pragma endregion
 }
 
 void ABasePXCharacter::LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass)
