@@ -37,7 +37,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXLocalPlayer.h"
-#include "SaveGame/PXSettingSaveGame.h"
 #include "Settings/PXSettingsLocal.h"
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"

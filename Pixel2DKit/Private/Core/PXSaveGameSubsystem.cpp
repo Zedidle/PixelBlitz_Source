@@ -7,7 +7,6 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "SaveGame/PXSettingSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "SaveGame/PXTalentsSaveGame.h"
 #include "Settings/PXSettingsLocal.h"
