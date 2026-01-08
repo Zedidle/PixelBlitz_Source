@@ -1460,6 +1460,16 @@ void ABasePXCharacter::OnAttackEffect_Implementation()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ForceFeedbackEffectDataAsset)
 	
 	UPXGameplayStatics::SpawnForceFeedbackAttached(this,ForceFeedbackEffectDataAsset->Attack.LoadSynchronous(), GetOwner()->GetRootComponent());
+
+	if (TalentComponent)
+	{
+		TalentComponent->OnAttackEffect();
+	}
+
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnAttackEffect();
+	}
 }
 
 void ABasePXCharacter::OnAttackEffectBegin_Implementation()

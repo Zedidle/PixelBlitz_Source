@@ -115,6 +115,11 @@ public:
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnAttackStart();
 
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackEffect")
+	bool BP_OnAttackEffect();
+	UFUNCTION(Category="Skill | Timing")
+	virtual bool OnAttackEffect();
+	
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackHit")
 	bool BP_OnAttackHit();
 	UFUNCTION(Category="Skill | Timing")

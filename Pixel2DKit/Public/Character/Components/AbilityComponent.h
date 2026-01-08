@@ -133,6 +133,9 @@ public:
 	void OnSkillStart();// 后续可能会补充参数
 
 	UFUNCTION()
+	void OnAttackEffect();// 后续可能会补充参数
+	
+	UFUNCTION()
 	void OnAttackSkill();// 后续可能会补充参数
 
 	UFUNCTION()

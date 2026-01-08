@@ -105,6 +105,13 @@ bool ABaseSkill::OnAttackStart()
 	return true;
 }
 
+bool ABaseSkill::OnAttackEffect()
+{
+	if (ActivateTiming != EAbilityTiming::AttackEffect) return false;
+	BP_OnAttackEffect();
+	return true;
+}
+
 bool ABaseSkill::OnAttackHit()
 {
 	if (ActivateTiming != EAbilityTiming::AttackHit) return false;

@@ -137,6 +137,19 @@ void UTalentComponent::OnAttackStart(EAttackType Type, FVector Direction)
 	ActivateAbilityByTiming(EAbilityTiming::AttackStart);
 }
 
+void UTalentComponent::OnAttackEffect()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnAttackEffect();
+		}
+	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::AttackEffect);
+}
+
 void UTalentComponent::RegisterDefenseSkill(ABaseDefenseSkill* Skill)
 {
 	DefenseSkills.Add(Skill);

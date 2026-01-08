@@ -495,6 +495,11 @@ void UAbilityComponent::OnSkillStart()
 	ActivateAbilityByTiming(EAbilityTiming::SkillStart);
 }
 
+void UAbilityComponent::OnAttackEffect()
+{
+	ActivateAbilityByTiming(EAbilityTiming::AttackEffect);
+}
+
 void UAbilityComponent::OnAttackSkill()
 {
 	ActivateAbilityByTiming(EAbilityTiming::AttackSkill);

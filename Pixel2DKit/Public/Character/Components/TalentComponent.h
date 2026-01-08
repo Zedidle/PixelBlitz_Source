@@ -66,6 +66,9 @@ public:
 	void OnAttackStart(EAttackType Type, FVector Direction);
 
 	UFUNCTION()
+	void OnAttackEffect();
+	
+	UFUNCTION()
 	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);
 
 	UFUNCTION()
