@@ -185,9 +185,10 @@ void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 	if (!GetCharacterMovement() || GetCharacterMovement()->Velocity.Size2D() < 1.0f) return;
 
 	if (!GetSprite()) return;
+	FVector Acceleration = GetCharacterMovement()->GetCurrentAcceleration();
 
 	FVector Velocity;
-	if (GetCharacterMovement()->IsMovingOnGround())
+	if (Acceleration.IsZero())
 	{
 		Velocity = GetCharacterMovement()->Velocity;
 	}
@@ -829,21 +830,17 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 FVector ABasePXCharacter::CalSkillVelocity(float DashSpeed)
 {
 	if (DashSpeed <= 0) return FVector(0);
-
-	FVector Velocity = DashSpeed * GetDashDirection();
-
-	if (GetCharacterMovement())
-	{
-		FVector MovementVelocity = GetCharacterMovement()->Velocity;
-
-		Velocity.X = Velocity.X * DashInitSpeedPercent + MovementVelocity.X * DashNewDirSpeedPercent;
-		Velocity.Y = Velocity.Y * DashInitSpeedPercent + MovementVelocity.Y * DashNewDirSpeedPercent;
-		Velocity.Z += MovementVelocity.Z * 0.1;
-	}
-
-	Velocity *= GetEffectGameplayTag(TAG("AbilitySet.DashDistancePlusPercent")) + 1;
-
-	return Velocity;
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MovementComponent, FVector(0));
+	
+	FVector Result = DashSpeed * GetDashDirection();
+	FVector MovementVelocity = GetCharacterMovement()->Velocity;
+	Result.X = Result.X * DashInitSpeedPercent + MovementVelocity.X * DashNewDirSpeedPercent;
+	Result.Y = Result.Y * DashInitSpeedPercent + MovementVelocity.Y * DashNewDirSpeedPercent;
+	Result.Z += MovementVelocity.Z * 0.1;
+	
+	Result *= GetEffectGameplayTag(TAG("AbilitySet.DashDistancePlusPercent")) + 1;
+	return Result;
 }
 
 void ABasePXCharacter::SetDead(bool V)
@@ -1284,27 +1281,22 @@ void ABasePXCharacter::ToStartPoint_Implementation()
 
 FVector ABasePXCharacter::GetDashDirection()
 {
+	USceneComponent* SC = GetSprite();
+	if (!SC) return GetActorForwardVector();
+
 	FVector Velocity = GetVelocity();
 	if (Velocity.IsZero())
 	{
-		if (USceneComponent* SC = GetSprite())
-		{
-			return SC->GetForwardVector();
-		}
-		return GetActorForwardVector();
+		return SC->GetForwardVector();
 	}
 
 	FVector	Acceleration = GetCharacterMovement()->GetCurrentAcceleration();
 	if (Acceleration.IsZero())
 	{
-		if (USceneComponent* SC = GetSprite())
-		{
-			return SC->GetForwardVector();
-		}
-		return GetActorForwardVector();
+		return Velocity.GetSafeNormal2D();
 	}
 
-	return (Velocity + Acceleration * 2).GetSafeNormal2D();
+	return Acceleration.GetSafeNormal2D();
 }
 
 bool ABasePXCharacter::IsAlive_Implementation()
