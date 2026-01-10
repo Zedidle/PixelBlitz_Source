@@ -20,9 +20,9 @@ public:
 	TArray<FGameplayTag> ChosenTalents;
 
 
-	// 当前累计可用天赋点
+	// 当前累计可用天赋点，默认为10，Demo为50
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
-	int TotalTalentPoint = 10;
+	int TotalTalentPoint = 50;
 
 	// 天赋点最高上限
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")

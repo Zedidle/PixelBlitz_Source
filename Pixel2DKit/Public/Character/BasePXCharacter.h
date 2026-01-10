@@ -544,6 +544,7 @@ public:
 	void AttackRelease();
 	void TryToJump();
 	void JumpRelease();
+	void Interact();
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="TryUseSkill")
 	void BP_TryUseSkill();

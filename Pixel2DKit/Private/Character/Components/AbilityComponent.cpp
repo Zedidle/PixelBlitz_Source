@@ -530,7 +530,7 @@ void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountdownWidgetClass)
 	KeyPressCountDownWidget = CreateWidget<UKeyPressCountDownWidget>(GetWorld(), KeyPressCountdownWidgetClass);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountDownWidget)
-	KeyPressCountDownWidget->InitializeData(_SustainTime, _Scale, Action_Jump);
+	KeyPressCountDownWidget->InitializeData(_SustainTime, _Scale);
 	KeyPressCountDownWidget->AddToViewport(100);
 
 	
@@ -544,7 +544,7 @@ void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 	ArrowLineWidget->AddToViewport(100);
 }
 
-void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
+void UAbilityComponent::OnInteract(bool& Keep)
 {
 	Keep = true;
 	
@@ -553,8 +553,8 @@ void UAbilityComponent::OnKeyPressed(const FName& TagName, bool& Keep)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset->InputConfig)
 
 	const auto& ActionMap = PXCharacter->DataAsset->InputConfig->ActionMap;
-	FGameplayTag Tag = TAG(TagName);
-	if (!ActionMap.Contains(Tag) || Action_Jump != ActionMap[Tag])
+	FGameplayTag Tag = TAG("InputAction.Interact");
+	if (!ActionMap.Contains(Tag))
 	{
 		Keep = true;
 		return;

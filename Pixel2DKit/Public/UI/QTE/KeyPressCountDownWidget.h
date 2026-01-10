@@ -48,7 +48,7 @@ protected:
 public:
 
 	UFUNCTION()
-	void InitializeData(float _SustainTime, float _Scale, UInputAction* _Action);
+	void InitializeData(float _SustainTime, float _Scale);
 	
 	UFUNCTION(BlueprintCallable)	
 	void OnPressed(bool& Effect);

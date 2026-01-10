@@ -717,7 +717,7 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 	};
 
 	Result += RepelByVelocity * VelocityRepelFactor;
-	
+	Result *= 1 + EffectGameplayTags[TAG("TalentSet.Force.PlusPercent")];
 	return Result;
 }
 
@@ -1727,7 +1727,7 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		EnhancedInput->BindActionByTagName("InputAction.NormalAttack", ETriggerEvent::Completed,this, &ABasePXCharacter::AttackRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Started,this, &ABasePXCharacter::TryToJump);
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Completed,this, &ABasePXCharacter::JumpRelease);
-		
+		EnhancedInput->BindActionByTagName("InputAction.Interact", ETriggerEvent::Started,this, &ABasePXCharacter::Interact);
 		EnhancedInput->BindActionByTagName("InputAction.Skill", ETriggerEvent::Started,this, &ABasePXCharacter::TryUseSkill);
 
 	}
@@ -1800,13 +1800,6 @@ void ABasePXCharacter::AttackRelease()
 
 void ABasePXCharacter::TryToJump()
 {
-	bool CanTry = false;
-	if (AbilityComponent)
-	{
-		AbilityComponent->OnKeyPressed("InputAction.Jump", CanTry);
-	}
-	if (!CanTry) return;
-
 	if (SelfCanJump())
 	{
 		JumpStart();
@@ -1830,6 +1823,19 @@ void ABasePXCharacter::TryToJump()
 void ABasePXCharacter::JumpRelease()
 {
 	StopJumping();
+}
+
+void ABasePXCharacter::Interact()
+{
+	bool CanTry = false;
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnInteract(CanTry);
+	}
+	if (!CanTry) return;
+
+	// 尝试交互
+	
 }
 
 void ABasePXCharacter::TryUseSkill()

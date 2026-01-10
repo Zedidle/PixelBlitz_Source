@@ -80,14 +80,6 @@ protected:
 	UPROPERTY()
 	UPXASComponent* CachedASC;
 
-
-#pragma region InputAction
-	UPROPERTY(EditDefaultsOnly)
-	UInputAction* Action_Jump;
-	
-	
-#pragma	endregion
-	
 	
 public:	
 	// Called every frame
@@ -149,7 +141,7 @@ public:
 	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);
 
 	UFUNCTION(BlueprintCallable)
-	void OnKeyPressed(const FName& TagName, bool& Keep);
+	void OnInteract(bool& Keep);
 
 	UFUNCTION(BlueprintCallable)
 	void OnHurtInstigatorDead(ABaseEnemy* DeadEnemy);

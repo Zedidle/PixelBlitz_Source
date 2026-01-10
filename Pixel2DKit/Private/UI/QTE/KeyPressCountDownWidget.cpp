@@ -17,11 +17,10 @@ void UKeyPressCountDownWidget::NativeConstruct()
 	
 }
 
-void UKeyPressCountDownWidget::InitializeData(float _SustainTime, float _Scale, UInputAction* _Action)
+void UKeyPressCountDownWidget::InitializeData(float _SustainTime, float _Scale)
 {
 	SustainTime = _SustainTime;
 	Scale = _Scale;
-	if (_Action) Action = _Action;
 }
 
 void UKeyPressCountDownWidget::OnPressed(bool& Effect)
