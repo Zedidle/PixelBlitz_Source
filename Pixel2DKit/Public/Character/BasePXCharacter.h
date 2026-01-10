@@ -16,6 +16,7 @@
 #include "UI/Player/BasePlayerStatusWidget.h"
 #include "BasePXCharacter.generated.h"
 
+class ABaseInteractableItem;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 
 // 发起攻击的监听事件
@@ -550,9 +551,13 @@ public:
 	void BP_TryUseSkill();
 	void TryUseSkill();
 	
-	
 #pragma endregion
 
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ABaseInteractableItem>> InteractableItems;
+	void AddInteractableItem(ABaseInteractableItem* Item);
+	void RemoveInteractableItem(ABaseInteractableItem* Item);
+	
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnLevelLoading(FGameplayTag Channel, const FDefaultEmptyMessage& Message);

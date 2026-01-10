@@ -6,6 +6,8 @@
 #include "BaseItem.h"
 #include "BaseInteractableItem.generated.h"
 
+class UBoxComponent;
+
 UCLASS()
 class PIXEL2DKIT_API ABaseInteractableItem : public ABaseItem
 {
@@ -35,25 +37,38 @@ class PIXEL2DKIT_API ABaseInteractableItem : public ABaseItem
 	// 从地面上浮的高度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
 	float GroundHeightFloat = 20.f;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
+	bool bInteracted = false;
 	
 public:
 	// Sets default values for this actor's properties
 	ABaseInteractableItem();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = InteractableItem)
+	TObjectPtr<UBoxComponent> BoxComponent;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = InteractableItem)
+	USoundBase* Sound_OnApproach;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = InteractableItem)
 	USoundBase* Sound_OnInteract;
 	
-	
+
 	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+
+	
 	UFUNCTION()
 	void SetVelocityOnSpawn(float RandomRotateAngle = 20, float Speed = 200);
 
@@ -63,6 +78,12 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintPure, Category = InteractableItem)
 	bool IsOnGround(float& HighUP);
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = InteractableItem)
+	void OnApproachEffect(AActor* OtherActor);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = InteractableItem)
+	void OnLeaveEffect(AActor* OtherActor);
+	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = InteractableItem)
 	void OnInteractEffect(AActor* OtherActor);
 	

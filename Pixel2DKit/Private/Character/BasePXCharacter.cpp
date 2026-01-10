@@ -34,6 +34,7 @@
 #include "GAS/PXASComponent.h"
 #include "GeometryCollection/GeometryCollectionParticlesData.h"
 #include "Input/PXInputComponent.h"
+#include "Item/BaseInteractableItem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXLocalPlayer.h"
@@ -1835,12 +1836,36 @@ void ABasePXCharacter::Interact()
 	if (!CanTry) return;
 
 	// 尝试交互
-	
+	if (!InteractableItems.IsEmpty())
+	{
+		for (int i = InteractableItems.Num() - 1; i >= 0; i--)
+		{
+			auto Item = InteractableItems[i];
+			InteractableItems.RemoveAt(i);
+			if (!Item.IsValid()) continue;
+
+			Item->OnInteractEffect(this);
+			break;
+		}
+	}
 }
 
 void ABasePXCharacter::TryUseSkill()
 {
 	BP_TryUseSkill();
+}
+
+void ABasePXCharacter::AddInteractableItem(ABaseInteractableItem* Item)
+{
+	InteractableItems.Add(Item);
+}
+
+void ABasePXCharacter::RemoveInteractableItem(ABaseInteractableItem* Item)
+{
+	if (InteractableItems.Contains(Item))
+	{
+		InteractableItems.Remove(Item);
+	}
 }
 
 void ABasePXCharacter::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)
