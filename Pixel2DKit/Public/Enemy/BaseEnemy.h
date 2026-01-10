@@ -185,7 +185,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
 	UFUNCTION(BlueprintCallable, Category="Enemy")
-	void SetPXCharacter(AActor* Character);
+	void SetPXCharacter(ABasePXCharacter* Character);
+
+	UFUNCTION()
+	void Event_OnPlayerDie();
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnSensingPlayer")
 	void BP_OnSensingPlayer(AActor* PlayerActor);

@@ -40,9 +40,10 @@ void ABaseInteractableItem::Tick(float DeltaTime)
 		return;
 	}
 
-	float HighUP;
+	float HighUP = 0;
 	if (IsOnGround(HighUP))
 	{
+		PreOnGround = true;
 		if (CurSimVelocity.Z < -5)
 		{
 			// 反弹
@@ -58,7 +59,16 @@ void ABaseInteractableItem::Tick(float DeltaTime)
 	}
 	else
 	{
-		CurSimVelocity.Z += DeltaTime * SimGravity;
+		if (PreOnGround)
+		{
+			// 地面突然消失，会获得向上的弹力，同时避免因为卡帧掉落平台
+			CurSimVelocity.Z = 60;
+			PreOnGround = false;
+		}
+		else
+		{
+			CurSimVelocity.Z += DeltaTime * SimGravity;
+		}
 	}
 	
 	AddActorWorldOffset(CurSimVelocity * DeltaTime);
@@ -103,16 +113,27 @@ bool ABaseInteractableItem::IsOnGround_Implementation(float& HighUP)
 	if (!World) return false;
 
 	FVector StartLocation = GetActorLocation();
+	float StartZ = StartLocation.Z;
 	FVector EndLocation = StartLocation + FVector(0, 0, -GroundHeightCheck);
+
+	StartLocation.Z += GroundHeightCheck;
 
 	FHitResult Hit;
 	TArray<AActor*> ActorsToIgnore;
 	bool bHit = UKismetSystemLibrary::LineTraceSingle(World, StartLocation, EndLocation,
 		TraceTypeQuery1, false, ActorsToIgnore, EDrawDebugTrace::None, Hit,true);
 
-	HighUP = Hit.Location.Z - EndLocation.Z;
+	if (!bHit) return false;
 	
-	return bHit;
+	// 只支持再地面上上浮
+	float TargetZ = Hit.Location.Z + GroundHeightFloat;
+	if (TargetZ > StartZ)
+	{
+		HighUP = TargetZ - StartZ;
+		return true;
+	}
+
+	return false;
 }
 
 

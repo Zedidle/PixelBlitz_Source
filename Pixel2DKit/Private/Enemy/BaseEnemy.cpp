@@ -44,10 +44,14 @@ AActor* ABaseEnemy::GetPixelCharacter()
 	return Cast<AActor>(PXCharacter);
 }
 
-void ABaseEnemy::SetPXCharacter(AActor* Character)
+void ABaseEnemy::SetPXCharacter(ABasePXCharacter* Character)
 {
-	if (Character == nullptr)
+	if (Character == nullptr || !Execute_IsAlive(Character))
 	{
+		if (!PXCharacter.IsValid()) return;
+
+		PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::Event_OnPlayerDie);
+		
 		PXCharacter = nullptr;
 		if (IsValid(EnemyAIComponent))
 		{
@@ -62,24 +66,28 @@ void ABaseEnemy::SetPXCharacter(AActor* Character)
 
 	if (PXCharacter.IsValid()) return;
 
-	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(Character))
+	PXCharacter = Character;
+	PXCharacter->OnPlayerDie.AddUniqueDynamic(this, &ThisClass::Event_OnPlayerDie);
+	
+	if (IsValid(EnemyAIComponent))
 	{
-		PXCharacter = C;
-		if (IsValid(EnemyAIComponent))
-		{
-			EnemyAIComponent->SetPXCharacter(PXCharacter.Get());
-		}
-		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
-		{
-			EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PXCharacter.Get());
-		}
+		EnemyAIComponent->SetPXCharacter(PXCharacter.Get());
 	}
+	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(GetController()))
+	{
+		EnemyAIController->GetBlackboardComponent()->SetValueAsObject(FName("PlayerPawn"), PXCharacter.Get());
+	}
+}
+
+void ABaseEnemy::Event_OnPlayerDie()
+{
+	SetPXCharacter(nullptr);
 }
 
 void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 {
 	bool bPrePlayerNull = PXCharacter == nullptr;
-	SetPXCharacter(PlayerActor);
+	SetPXCharacter(Cast<ABasePXCharacter>(PlayerActor));
 	
 	if (bPrePlayerNull)
 	{

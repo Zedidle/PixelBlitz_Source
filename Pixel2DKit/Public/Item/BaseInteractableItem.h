@@ -13,6 +13,8 @@ class PIXEL2DKIT_API ABaseInteractableItem : public ABaseItem
 
 	FGuid Guid;
 	FVector CurSimVelocity;
+
+	bool PreOnGround = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
 	bool bSimPhysical = true;
@@ -26,8 +28,14 @@ class PIXEL2DKIT_API ABaseInteractableItem : public ABaseItem
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
 	float Elastic  = 0.3;
 
+	// 向下检查地面的距离
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
-	float GroundHeightCheck = 20.f;
+	float GroundHeightCheck = 100.f;
+
+	// 从地面上浮的高度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InteractableItem, meta = (AllowPrivateAccess = "true"))
+	float GroundHeightFloat = 20.f;
+	
 	
 public:
 	// Sets default values for this actor's properties

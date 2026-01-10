@@ -149,10 +149,7 @@ void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
 	{
 		PXCharacter = C;
-		if (!PXCharacter->OnPlayerDie.IsAlreadyBound(this, &ThisClass::FightEnd))
-		{
-			PXCharacter->OnPlayerDie.AddDynamic(this, &ThisClass::FightEnd);
-		}
+		PXCharacter->OnPlayerDie.AddUniqueDynamic(this, &ThisClass::FightEnd);
 		ActivateFight(true);
 		OnPlayerIn();
 	}
