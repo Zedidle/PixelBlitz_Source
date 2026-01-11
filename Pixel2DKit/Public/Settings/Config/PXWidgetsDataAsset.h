@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "UI/Player/ComboWeakPointCountWidget.h"
 #include "PXWidgetsDataAsset.generated.h"
 
 class UAchievementCompleteWidget;
@@ -29,5 +30,7 @@ public:
 	
 	UPROPERTY( EditAnywhere, Category = "Player")
 	TSubclassOf<UUserWidget> NearDeathWidgetClass;
-	
+
+	UPROPERTY( EditAnywhere, Category = "ComboSubsystem")
+	TSubclassOf<UUserWidget> ComboWeakPointCountWidget;
 };

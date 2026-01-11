@@ -7,6 +7,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "EnemyAIController.generated.h"
 
+class ABaseEnemy;
 class UAISenseConfig_Sight;
 /**
  * 
@@ -17,10 +18,9 @@ class PIXEL2DKIT_API AEnemyAIController : public AAIController
 	GENERATED_BODY()
 
 	UPROPERTY()
-	ABaseEnemy* CachedEnemy;
+	TObjectPtr<ABaseEnemy> CachedEnemy;
 
 public:
-
 
 	AEnemyAIController(const FObjectInitializer& ObjectInitializer);
 

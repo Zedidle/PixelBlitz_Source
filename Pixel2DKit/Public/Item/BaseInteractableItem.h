@@ -83,8 +83,10 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = InteractableItem)
 	void OnLeaveEffect(AActor* OtherActor);
-	
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = InteractableItem)
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = InteractableItem, meta = (DisplayName = "OnInteractEffect"))
+	void BP_OnInteractEffect(AActor* OtherActor);
+	UFUNCTION()
 	void OnInteractEffect(AActor* OtherActor);
 	
 };

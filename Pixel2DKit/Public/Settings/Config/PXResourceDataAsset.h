@@ -60,4 +60,7 @@ public:
 	UPROPERTY( EditAnywhere, Category = "Buff | Niagara")
 	TSoftObjectPtr<USoundWave> SW_BeginBGM;
 
+	UPROPERTY( EditAnywhere, Category = "Combo | Sound")
+	TArray<TSoftObjectPtr<USoundBase>> SW_ComboWeakPoints;
+	
 };

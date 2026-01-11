@@ -127,6 +127,19 @@ void ABaseInteractableItem::SetSimPhysical(bool V)
 	}
 }
 
+void ABaseInteractableItem::OnInteractEffect(AActor* OtherActor)
+{
+	if (bInteracted) return;
+	bInteracted = true;
+	
+	if (Sound_OnInteract)
+	{
+		USoundFuncLib::PlaySoundAtLocation(Sound_OnInteract, GetActorLocation());
+	}
+
+	BP_OnInteractEffect(OtherActor);
+}
+
 void ABaseInteractableItem::OnApproachEffect_Implementation(AActor* OtherActor)
 {
 	if (bInteracted) return;
@@ -140,18 +153,6 @@ void ABaseInteractableItem::OnLeaveEffect_Implementation(AActor* OtherActor)
 {
 	
 }
-
-void ABaseInteractableItem::OnInteractEffect_Implementation(AActor* OtherActor)
-{
-	if (bInteracted) return;
-	bInteracted = true;
-	
-	if (Sound_OnInteract)
-	{
-		USoundFuncLib::PlaySoundAtLocation(Sound_OnInteract, GetActorLocation());
-	}
-}
-
 
 
 bool ABaseInteractableItem::IsOnGround_Implementation(float& HighUP)
