@@ -476,12 +476,16 @@ void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage
 			RemDamage = 0;
 		}
 	}
+	
 
-	if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower.QTE"))
-	{
-		ListenHurtInstigatorDead();
+	if (!IFight_Interface::Execute_GetOwnCamp(Maker).HasTag(TAG("Enemy.BOSS")))
+	{	
+		if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower.QTE"))
+		{
+			ListenHurtInstigatorDead();
+		}
 	}
-
+	
 	OutDamage = RemDamage; 
 }
 

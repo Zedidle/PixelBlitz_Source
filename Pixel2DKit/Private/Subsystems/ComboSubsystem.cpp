@@ -82,5 +82,5 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 				}
 			}
 		}, ComboWeakPointSustainTime);
-	return InitDamage + (1.1 + CurComboWeakPoint * 0.03);
+	return InitDamage * (1.1 + CurComboWeakPoint * 0.03);
 }
