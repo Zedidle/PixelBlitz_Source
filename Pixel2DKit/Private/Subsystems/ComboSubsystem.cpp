@@ -14,7 +14,11 @@
 
 float UComboSubsystem::GetDamagePlusPercent()
 {
-	return 0.17 + CurComboWeakPoint * 0.03;
+	if (CurComboWeakPoint > 0)
+	{
+		return 0.17 + CurComboWeakPoint * 0.03;
+	}
+	return 0;	
 }
 
 void UComboSubsystem::Initialize(FSubsystemCollectionBase& Collection)

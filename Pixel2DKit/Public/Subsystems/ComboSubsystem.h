@@ -15,7 +15,6 @@ class PIXEL2DKIT_API UComboSubsystem : public UPXWorldSubsystem
 
 
 
-	float GetDamagePlusPercent();
 
 	
 public:
@@ -35,6 +34,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category="ComboSubsystem")
 	float ComboWeakPointSustainTime = 5;
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="ComboSubsystem")
+	float GetDamagePlusPercent();
 	
 	// 当命中弱点时，累计弱点击破连击次数
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="ComboSubsystem")
