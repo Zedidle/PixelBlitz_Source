@@ -251,6 +251,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	CurAttackDamage = EnemyData.AttackDamage;
 	BasicAttackInterval = EnemyData.AttackInterval;
+	WeakPointRefreshPeriod = EnemyData.WeakPointRefreshPeriod;
 	
 	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(DataAsset->ActionFieldsCanAttack);
 	EnemyAIComponent->SetActionFieldDistance(EnemyData.ActionFieldDistance);

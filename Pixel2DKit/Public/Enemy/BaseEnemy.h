@@ -73,6 +73,8 @@ struct FEnemyData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FActionFieldDistance ActionFieldDistance;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WeakPointRefreshPeriod = 6.0f;
 };
 
 
@@ -210,6 +212,9 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	float BasicAttackInterval = 2.0f;
+
+	UPROPERTY(BlueprintReadWrite)
+	float WeakPointRefreshPeriod = 6.0f;
 
 	UPROPERTY(BlueprintReadOnly);
 	float LostEnemyTime = 10.0f;
