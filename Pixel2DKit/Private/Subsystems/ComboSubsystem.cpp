@@ -12,6 +12,11 @@
 #include "Utilitys/SoundFuncLib.h"
 #include "Utilitys/UserWidgetFuncLib.h"
 
+float UComboSubsystem::GetDamagePlusPercent()
+{
+	return 0.17 + CurComboWeakPoint * 0.03;
+}
+
 void UComboSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -57,7 +62,8 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 		}
 	}
 	CurComboWeakPoint = FMath::Min(CurComboWeakPoint + 1, MaxComboWeakPoint);
-	ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint);
+
+	ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint, GetDamagePlusPercent() * 100);
 	
 	UTimerSubsystemFuncLib::SetDelayLoop(this, "UComboSubsystem::CalDamageByComboWeakPoint",
 		[WeakThis = TWeakObjectPtr(this)]
@@ -73,7 +79,7 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 				}
 				else
 				{
-					WeakThis->ComboWeakPointCountWidget->UpdateCount(WeakThis->CurComboWeakPoint);
+					WeakThis->ComboWeakPointCountWidget->UpdateCount(WeakThis->CurComboWeakPoint, WeakThis->GetDamagePlusPercent() * 100);
 				}
 
 				if (WeakThis->CurComboWeakPoint == 0)
@@ -82,5 +88,7 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 				}
 			}
 		}, ComboWeakPointSustainTime);
-	return InitDamage * (1.1 + CurComboWeakPoint * 0.03);
+
+	
+	return InitDamage * (1 + GetDamagePlusPercent());
 }

@@ -18,7 +18,7 @@ void UComboWeakPointCountWidget::Fade(float Delay)
 		if (!WeakThis.IsValid()) return;
 
 		WeakThis->CurNum = 0;
-		WeakThis->ToNum = 0;
+		WeakThis->CurDamagePlusPercent = 0;
 			
 		if (WeakThis->AnimCount)
 		{
@@ -32,9 +32,12 @@ void UComboWeakPointCountWidget::Fade(float Delay)
 	}, Delay);
 }
 
-void UComboWeakPointCountWidget::UpdateCount(int32 Num)
+
+void UComboWeakPointCountWidget::UpdateCount(int32 Num, int32 DamagePlusPercent)
 {
-	ToNum = Num;
+	CurNum = Num;
+	CurDamagePlusPercent = DamagePlusPercent;
+	
 	if (AnimCount)
 	{
 		PlayAnimation(AnimCount);

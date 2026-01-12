@@ -29,9 +29,10 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	int32 CurNum = 1;
+
 	UPROPERTY(BlueprintReadWrite)
-	int32 ToNum = 0;
-	
+	int32 CurDamagePlusPercent = 0;
+
 	UPROPERTY(BlueprintReadWrite, Transient, meta=(BindWidgetAnim))
 	UWidgetAnimation* AnimShowIn;
 	
@@ -45,6 +46,8 @@ public:
 	void Fade(float Delay = 2);
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateCount(int32 Num);
+	void UpdateCount(int32 Num, int32 DamagePlusPercent);
+
+	
 	
 };

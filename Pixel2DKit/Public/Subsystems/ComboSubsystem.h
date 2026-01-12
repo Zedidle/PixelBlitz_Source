@@ -13,6 +13,11 @@ class PIXEL2DKIT_API UComboSubsystem : public UPXWorldSubsystem
 {
 	GENERATED_BODY()
 
+
+
+	float GetDamagePlusPercent();
+
+	
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
