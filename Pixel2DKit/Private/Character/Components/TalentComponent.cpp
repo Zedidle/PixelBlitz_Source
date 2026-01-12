@@ -13,6 +13,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Utilitys/PXGameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "PX"
 
@@ -62,7 +63,7 @@ void UTalentComponent::InitTalents()
 			}
 			if (PXCharacter->BuffComponent)
 			{
-				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag);
+				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag, true);
 			}
 		}
 		
@@ -137,19 +138,6 @@ void UTalentComponent::OnAttackStart(EAttackType Type, FVector Direction)
 	ActivateAbilityByTiming(EAbilityTiming::AttackStart);
 }
 
-void UTalentComponent::OnAttackEffect()
-{
-	for (auto& Skill : SkillsHolding)
-	{
-		if (Skill.IsValid())
-		{
-			Skill->OnAttackEffect();
-		}
-	}
-	
-	ActivateAbilityByTiming(EAbilityTiming::AttackEffect);
-}
-
 void UTalentComponent::RegisterDefenseSkill(ABaseDefenseSkill* Skill)
 {
 	DefenseSkills.Add(Skill);
@@ -177,55 +165,6 @@ void UTalentComponent::RemoveDefenseSkill(FGameplayTag Tag)
 	}, EAllowShrinking::No);
 }
 
-void UTalentComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
-{
-	if (InDamage <= 0)
-	{
-		OutDamage = 0;
-		return;
-	}
-	
-	if (!Maker)
-	{
-		OutDamage = InDamage;
-		return;
-	}
-
-	ActivateAbilityByTiming(EAbilityTiming::BeAttacked);
-	
-	int RemDamage = InDamage;
-
-	for (auto& Skill : DefenseSkills)
-	{
-		if (!Skill) continue;
-	
-		bool stop;
-		int _OutDamage;
-		Skill->OnBeAttacked(Maker, RemDamage, _OutDamage, stop);
-
-		// 某些防御性技能不只是削减伤害
-		if (!bForce)
-		{
-			RemDamage = _OutDamage;
-		}
-		if (stop) break;
-	}
-	
-	OutDamage = RemDamage;
-}
-
-void UTalentComponent::OnPickGold()
-{
-	for (auto& Skill : SkillsHolding)
-	{
-		if (Skill.IsValid())
-		{
-			Skill->OnPickGold();
-		}
-	}
-
-	ActivateAbilityByTiming(EAbilityTiming::PickGold);
-}
 
 void UTalentComponent::LoadTalents()
 {
@@ -452,6 +391,92 @@ int UTalentComponent::GetAttackDamagePlus()
 
 	// …… 其它技能
 	return LocalPlus;
+}
+
+bool UTalentComponent::GetIsAttacking()
+{
+	return false;
+}
+
+bool UTalentComponent::GetIsDefending()
+{
+	return false;
+}
+
+void UTalentComponent::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
+{
+	if (InDamage <= 0)
+	{
+		OutDamage = 0;
+		return;
+	}
+	
+	if (!Maker)
+	{
+		OutDamage = InDamage;
+		return;
+	}
+
+	ActivateAbilityByTiming(EAbilityTiming::BeAttacked);
+	
+	int RemDamage = InDamage;
+
+	for (auto& Skill : DefenseSkills)
+	{
+		if (!Skill) continue;
+	
+		bool stop;
+		int _OutDamage;
+		Skill->OnBeAttacked(Maker, RemDamage, _OutDamage, stop);
+
+		// 某些防御性技能不只是削减伤害
+		if (!bForce)
+		{
+			RemDamage = _OutDamage;
+		}
+		if (stop) break;
+	}
+	
+	OutDamage = RemDamage;
+}
+
+void UTalentComponent::OnAttackWeakPoint_Implementation(AActor* Receiver)
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnHitWeakPoint(Receiver);
+		}
+	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::AttackWeakPoint);
+}
+
+void UTalentComponent::OnAttackEffect_Implementation()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnAttackEffect();
+		}
+	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::AttackEffect);
+}
+
+void UTalentComponent::OnPickGold_Implementation()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnPickGold();
+		}
+	}
+
+	ActivateAbilityByTiming(EAbilityTiming::PickGold);
 }
 
 void UTalentComponent::MoveWarmingUP()

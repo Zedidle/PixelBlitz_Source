@@ -1370,12 +1370,12 @@ void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, 
 	OutDamage = InDamage;
 	if (AbilityComponent)
 	{
-		AbilityComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
+		Execute_OnBeAttacked(AbilityComponent, Maker, OutDamage, OutDamage, bForce);
 	}
 	
 	if (TalentComponent)
 	{
-		TalentComponent->OnBeAttacked(Maker, OutDamage, OutDamage, bForce);
+		Execute_OnBeAttacked(TalentComponent, Maker, OutDamage, OutDamage, bForce);
 	}
 }
 
@@ -1394,6 +1394,19 @@ int ABasePXCharacter::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 	}
 
 	return Result;
+}
+
+void ABasePXCharacter::OnAttackWeakPoint_Implementation(AActor* Receiver)
+{
+	if (AbilityComponent)
+	{
+		Execute_OnAttackWeakPoint(AbilityComponent, Receiver);
+	}
+	
+	if (TalentComponent)
+	{
+		Execute_OnAttackWeakPoint(TalentComponent, Receiver);
+	}
 }
 
 int ABasePXCharacter::OnDefendingHit_Implementation(int inValue)
@@ -1452,12 +1465,12 @@ void ABasePXCharacter::OnAttackEffect_Implementation()
 
 	if (TalentComponent)
 	{
-		TalentComponent->OnAttackEffect();
+		Execute_OnAttackEffect(TalentComponent);
 	}
 
 	if (AbilityComponent)
 	{
-		AbilityComponent->OnAttackEffect();
+		Execute_OnAttackEffect(AbilityComponent);
 	}
 }
 
@@ -1478,7 +1491,12 @@ void ABasePXCharacter::OnPickGold_Implementation()
 {
 	if (TalentComponent)
 	{
-		TalentComponent->OnPickGold();
+		Execute_OnPickGold(TalentComponent);
+	}
+
+	if (AbilityComponent)
+	{
+		Execute_OnPickGold(AbilityComponent);
 	}
 }
 
@@ -1562,7 +1580,6 @@ void ABasePXCharacter::OnKillEnemy_Implementation()
 
 void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
 {
-	IBuff_Interface::BuffEffect_Speed_Implementation(Tag, Percent, Value, SustainTime);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
 		Execute_BuffEffect_Speed(BuffComponent, Tag, Percent, Value, SustainTime);
@@ -1640,7 +1657,6 @@ int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
 void ABasePXCharacter::AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
 	bool Permanent)
 {
-	IBuff_Interface::AddBuffOnWidget_Implementation(Tag, BuffName, TextColor, Permanent);
 	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
 	{
 		Execute_AddBuffOnWidget(BuffComponent, Tag, BuffName, TextColor, Permanent);
@@ -1849,6 +1865,7 @@ void ABasePXCharacter::Interact()
 		}
 	}
 }
+
 
 void ABasePXCharacter::TryUseSkill()
 {

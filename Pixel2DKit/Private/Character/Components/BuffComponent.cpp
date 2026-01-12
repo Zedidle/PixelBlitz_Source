@@ -525,7 +525,7 @@ float UBuffComponent::GetSlowDownResistancePercent_Implementation()
 	return IBuff_Interface::GetSlowDownResistancePercent_Implementation();
 }
 
-void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
+void UBuffComponent::AddBuffByTag(FGameplayTag Tag, bool bNeedPermanent)
 {
 	if (!Tag.IsValid()) return;
 
@@ -538,6 +538,8 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag)
 
 	const FBuffOnWidget* Data = DataTableSubsystem->GetBuffOnWidgetDataByTag(Tag);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Data)
+
+	if (bNeedPermanent && !Data->Permanent) return;
 	
 	Execute_AddBuffOnWidget(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
 }

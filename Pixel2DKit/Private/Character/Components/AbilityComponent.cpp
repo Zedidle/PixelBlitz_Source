@@ -446,48 +446,6 @@ bool UAbilityComponent::ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoin
 }
 
 
-void UAbilityComponent::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
-{
-	if (InDamage <= 0)
-	{
-		OutDamage = 0;
-		return;
-	}
-	
-	if (!CachedASC || !Maker || !Maker->Implements<UFight_Interface>())
-	{
-		OutDamage = InDamage;
-		return;
-	}
-
-	AcceptDamage = InDamage;
-	int RemDamage = InDamage;
-	
-	HurtMaker = Maker;
-	
-	ActivateAbilityByTiming(EAbilityTiming::BeAttacked);
-
-	// 所有涉及到 RemDamage 的都需要判断 bForce
-	if (!bForce)
-	{
-		// 移形换影
-		if (CachedASC->TryActivateAbilityByTagName("Ability.Mobiliarbus"))
-		{
-			RemDamage = 0;
-		}
-	}
-	
-
-	if (!IFight_Interface::Execute_GetOwnCamp(Maker).HasTag(TAG("Enemy.BOSS")))
-	{	
-		if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower.QTE"))
-		{
-			ListenHurtInstigatorDead();
-		}
-	}
-	
-	OutDamage = RemDamage; 
-}
 
 void UAbilityComponent::OnLanding()
 {
@@ -499,10 +457,6 @@ void UAbilityComponent::OnSkillStart()
 	ActivateAbilityByTiming(EAbilityTiming::SkillStart);
 }
 
-void UAbilityComponent::OnAttackEffect()
-{
-	ActivateAbilityByTiming(EAbilityTiming::AttackEffect);
-}
 
 void UAbilityComponent::OnAttackSkill()
 {
@@ -632,6 +586,69 @@ FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FG
 	}
 	
 	return OutAbilityHandles[0];
+}
+
+bool UAbilityComponent::GetIsAttacking()
+{
+	return false;
+}
+
+bool UAbilityComponent::GetIsDefending()
+{
+	return false;
+}
+
+void UAbilityComponent::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
+{
+	if (InDamage <= 0)
+	{
+		OutDamage = 0;
+		return;
+	}
+	
+	if (!CachedASC || !Maker || !Maker->Implements<UFight_Interface>())
+	{
+		OutDamage = InDamage;
+		return;
+	}
+
+	AcceptDamage = InDamage;
+	int RemDamage = InDamage;
+	
+	HurtMaker = Maker;
+	
+	ActivateAbilityByTiming(EAbilityTiming::BeAttacked);
+
+	// 所有涉及到 RemDamage 的都需要判断 bForce
+	if (!bForce)
+	{
+		// 移形换影
+		if (CachedASC->TryActivateAbilityByTagName("Ability.Mobiliarbus"))
+		{
+			RemDamage = 0;
+		}
+	}
+	
+
+	if (!IFight_Interface::Execute_GetOwnCamp(Maker).HasTag(TAG("Enemy.BOSS")))
+	{	
+		if (CachedASC->TryActivateAbilityByTagName("Ability.SkyHandPower.QTE"))
+		{
+			ListenHurtInstigatorDead();
+		}
+	}
+	
+	OutDamage = RemDamage; 
+}
+
+void UAbilityComponent::OnAttackEffect_Implementation()
+{
+	ActivateAbilityByTiming(EAbilityTiming::AttackEffect);
+}
+
+void UAbilityComponent::OnAttackWeakPoint_Implementation(AActor* Receiver)
+{
+	ActivateAbilityByTiming(EAbilityTiming::AttackWeakPoint);
 }
 
 

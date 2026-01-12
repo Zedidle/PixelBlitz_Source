@@ -11,7 +11,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PIXEL2DKIT_API UTalentComponent : public UActorComponent
+class PIXEL2DKIT_API UTalentComponent : public UActorComponent, public IFight_Interface
 {
 	GENERATED_BODY()
 
@@ -65,20 +65,14 @@ public:
 	UFUNCTION()
 	void OnAttackStart(EAttackType Type, FVector Direction);
 
-	UFUNCTION()
-	void OnAttackEffect();
+
 	
 	UFUNCTION()
 	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);
 
 	UFUNCTION()
 	void RemoveDefenseSkill(FGameplayTag Tag);
-	
-	UFUNCTION()
-	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce = false);
 
-	UFUNCTION()
-	void OnPickGold();
 	
 	UFUNCTION(BlueprintCallable)
 	void LoadTalents();
@@ -106,6 +100,19 @@ public:
 	int GetAttackDamagePlus();
 
 
+#pragma region IFight_Interface
+	virtual bool GetIsAttacking() override;
+	virtual bool GetIsDefending() override;
+	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce = false) override;
+	virtual void OnAttackWeakPoint_Implementation(AActor* Receiver) override;
+	virtual void OnAttackEffect_Implementation() override;
+	virtual void OnPickGold_Implementation() override;
+	
+#pragma endregion
+
+
+
+	
 #pragma region Talents专项处理
 	
 	UFUNCTION()

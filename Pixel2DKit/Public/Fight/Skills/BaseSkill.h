@@ -160,6 +160,11 @@ public:
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool& Stop);
 
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnHitWeakPoint")
+	bool BP_OnHitWeakPoint(AActor* Receiver);
+	UFUNCTION(Category="Skill | Timing")
+	virtual bool OnHitWeakPoint(AActor* Receiver);
+	
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnBeAttackedInvulnerable")
 	bool BP_OnBeAttackedInvulnerable();
 	UFUNCTION(Category="Skill | Timing")

@@ -119,7 +119,7 @@ enum class EAbilityTiming : uint8
 	AttackHit UMETA(DisplayName = "攻击命中"),
 	AttackFinish UMETA(DisplayName = "攻击结束"),
 	AttackSkill UMETA(DisplayName = "攻击预备/蓄力 阶段发起技能"),
-	HitWeakPoint UMETA(DisplayName = "攻击/技能命中弱点"),
+	AttackWeakPoint UMETA(DisplayName = "攻击/技能命中弱点"),
 	SkillStart UMETA(DisplayName = "技能发起"),
 	SkillHit UMETA(DisplayName = "技能命中"),
 	SkillFinish UMETA(DisplayName = "技能结束"),

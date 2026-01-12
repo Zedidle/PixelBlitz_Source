@@ -48,6 +48,9 @@ public:
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnBeAttacked(AActor* Maker, int Damage, int& OutDamage, bool bForce);
+
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnAttackWeakPoint(AActor* Receiver);
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     int DamagePlus(int InDamage, AActor* Receiver);

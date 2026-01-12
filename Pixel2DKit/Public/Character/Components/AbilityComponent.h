@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GAS/PXASComponent.h"
+#include "Interfaces/Fight_Interface.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "UI/QTE/ArrowLineWidget.h"
 #include "UI/QTE/KeyPressCountDownWidget.h"
@@ -17,7 +18,7 @@ class ABaseEnemy;
 class UInputAction;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PIXEL2DKIT_API UAbilityComponent : public UActorComponent
+class PIXEL2DKIT_API UAbilityComponent : public UActorComponent, public IFight_Interface
 {
 	GENERATED_BODY()
 
@@ -115,8 +116,6 @@ public:
 	bool ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoints);
 
 	
-	UFUNCTION(BlueprintCallable)
-	void OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool bForce);
 
 	UFUNCTION()
 	void OnLanding();// 后续可能会补充参数
@@ -124,8 +123,7 @@ public:
 	UFUNCTION()
 	void OnSkillStart();// 后续可能会补充参数
 
-	UFUNCTION()
-	void OnAttackEffect();// 后续可能会补充参数
+
 	
 	UFUNCTION()
 	void OnAttackSkill();// 后续可能会补充参数
@@ -154,6 +152,18 @@ public:
 
 	FGameplayAbilitySpec* GetAbilitySpec(FName TagName);
 
+
+#pragma region IFight_Interface
+	virtual bool GetIsAttacking() override;
+	virtual bool GetIsDefending() override;
+	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce) override;
+	virtual void OnAttackEffect_Implementation() override;
+	virtual void OnAttackWeakPoint_Implementation(AActor* Receiver) override;
+
+#pragma endregion
+
+
+	
 };
 
 inline FGameplayAbilitySpec* UAbilityComponent::GetAbilitySpec(FName TagName)

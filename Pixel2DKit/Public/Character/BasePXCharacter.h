@@ -492,6 +492,7 @@ public:
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce) override;
 	virtual int DamagePlus_Implementation(int InDamage, AActor* Receiver) override;
+	virtual void OnAttackWeakPoint_Implementation(AActor* Receiver) override;
 	virtual int OnDefendingHit_Implementation(int inValue) override;
 	virtual void OnAttackHolding_Implementation() override;
 	virtual void OnDefendingHitEffect_Implementation() override;

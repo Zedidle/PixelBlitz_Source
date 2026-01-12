@@ -167,6 +167,13 @@ bool ABaseSkill::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool&
 	return BP_OnBeAttacked(Maker, InDamage, OutDamage, Stop);
 }
 
+bool ABaseSkill::OnHitWeakPoint(AActor* Receiver)
+{
+	if (ActivateTiming != EAbilityTiming::AttackWeakPoint) return false;
+	BP_OnHitWeakPoint(Receiver);
+	return true;
+}
+
 bool ABaseSkill::OnBeAttackedInvulnerable()
 {
 	if (ActivateTiming != EAbilityTiming::BeAttackedInvulnerable) return false;

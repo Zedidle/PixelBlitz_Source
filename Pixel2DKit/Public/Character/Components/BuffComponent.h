@@ -119,7 +119,7 @@ public:
 #pragma endregion
 
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
-	void AddBuffByTag(FGameplayTag Tag);
+	void AddBuffByTag(FGameplayTag Tag, bool bNeedPermanent = false);
 
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
 	void ExpireBuff(FGameplayTag Tag);
