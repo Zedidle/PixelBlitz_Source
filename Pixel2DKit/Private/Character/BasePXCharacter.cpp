@@ -501,11 +501,8 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	if (UWorld* World = GetWorld())
-	{
-		World->GetTimerManager().ClearTimer(ScaleTimerHandle);
-	}
-
+	UTimerSubsystemFuncLib::CancelDelay(this, "ABasePXCharacter::SetScale");
+	
 	OnPlayerAttackStart.RemoveAll(this);
 	OnPlayerDie.RemoveAll(this);
 	if (HealthComponent)
@@ -1320,18 +1317,26 @@ AActor* ABasePXCharacter::GetTarget_Implementation()
 	return IFight_Interface::GetTarget_Implementation();
 }
 
-void ABasePXCharacter::OnAttackHiting_Implementation()
+void ABasePXCharacter::OnAttackHit_Implementation(AActor* Receiver)
 {
 	AttackHitComboNum++;
-	if (AttackHitTimerHandle.IsValid())
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(this, "Player_AttackHitCombo",
+		[WeakThis = TWeakObjectPtr(this)]
 	{
-		GetWorldTimerManager().ClearTimer(AttackHitTimerHandle);
+		if (WeakThis.IsValid())
+		{
+			WeakThis->AttackHitComboNum = 0;
+		}
+	}, 2);
+	
+	if (TalentComponent)
+	{
+		Execute_OnAttackHit(TalentComponent, Receiver);
 	}
-	FTimerDelegate TimerDelegate = FTimerDelegate::CreateLambda([this]
+	if (AbilityComponent)
 	{
-		AttackHitComboNum = 0;
-	});
-	GetWorldTimerManager().SetTimer(AttackHitTimerHandle, TimerDelegate, 2, false);
+		Execute_OnAttackHit(AbilityComponent, Receiver);
+	}
 }
 
 void ABasePXCharacter::OnSkillHit_Implementation()
@@ -1723,19 +1728,20 @@ void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousF
 void ABasePXCharacter::SetScale(const float targetValue)
 {
 	ScaleLerpValue = 0;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-		[this, targetValue]()
+
+	UTimerSubsystemFuncLib::SetDelayLoop(this, "ABasePXCharacter::SetScale", [WeakThis = TWeakObjectPtr(this), targetValue]
+	{
+		if (!WeakThis.IsValid()) return;
+
+		WeakThis->SetActorScale3D(WeakThis->InitScale * FMath::Lerp(WeakThis->ScaleCurValue, targetValue, WeakThis->ScaleLerpValue));
+		WeakThis->ScaleLerpValue += 0.01f;
+		if (WeakThis->ScaleLerpValue > 1)
 		{
-			SetActorScale3D(InitScale * FMath::Lerp(ScaleCurValue, targetValue, ScaleLerpValue));
-			ScaleLerpValue += 0.01f;
-			if (ScaleLerpValue > 1)
-			{
-				ScaleCurValue = targetValue;
-				SetActorScale3D(InitScale * ScaleCurValue);
-				GetWorldTimerManager().ClearTimer(ScaleTimerHandle);
-			}
-		});
-	GetWorldTimerManager().SetTimer(ScaleTimerHandle, TimerDel, 0.01f, true);
+			WeakThis->ScaleCurValue = targetValue;
+			WeakThis->SetActorScale3D(WeakThis->InitScale * WeakThis->ScaleCurValue);
+			UTimerSubsystemFuncLib::CancelDelay(WeakThis.Get(), "ABasePXCharacter::SetScale");
+		}
+	}, 0.02f);
 }
 
 void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

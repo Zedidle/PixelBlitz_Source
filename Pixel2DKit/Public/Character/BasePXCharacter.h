@@ -128,11 +128,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DashNewDirSpeedPercent = 0.2;
 	
-	FTimerHandle ScaleTimerHandle;
-	FTimerHandle AttackHitTimerHandle;
 	int AttackHitComboNum = 0;
-
-
 
 	float ScaleLerpValue = 0;
 	float ScaleCurValue = 1.0f;
@@ -487,7 +483,7 @@ public:
 	virtual FGameplayTagContainer GetOwnCamp_Implementation() const override;
 	virtual FGameplayTagContainer GetEnemyCamp_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
-	virtual void OnAttackHiting_Implementation() override;
+	virtual void OnAttackHit_Implementation(AActor* Receiver) override;
 	virtual void OnSkillHit_Implementation() override;
 	virtual void PowerRepulsion_Implementation(float Power) override;
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;

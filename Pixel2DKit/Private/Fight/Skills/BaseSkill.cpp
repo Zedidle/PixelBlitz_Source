@@ -112,10 +112,10 @@ bool ABaseSkill::OnAttackEffect()
 	return true;
 }
 
-bool ABaseSkill::OnAttackHit()
+bool ABaseSkill::OnAttackHit(AActor* Receiver)
 {
 	if (ActivateTiming != EAbilityTiming::AttackHit) return false;
-	BP_OnAttackHit();
+	BP_OnAttackHit(Receiver);
 	return true;
 }
 

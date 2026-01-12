@@ -121,9 +121,9 @@ public:
 	virtual bool OnAttackEffect();
 	
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackHit")
-	bool BP_OnAttackHit();
+	bool BP_OnAttackHit(AActor* Receiver);
 	UFUNCTION(Category="Skill | Timing")
-	virtual bool OnAttackHit();
+	virtual bool OnAttackHit(AActor* Receiver);
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackFinish")
 	bool BP_OnAttackFinish();

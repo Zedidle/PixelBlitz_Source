@@ -37,7 +37,7 @@ public:
 
     // 发起攻击命中
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    void OnAttackHiting();  
+    void OnAttackHit(AActor* Receiver);  
 
     // 发起技能命中
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")

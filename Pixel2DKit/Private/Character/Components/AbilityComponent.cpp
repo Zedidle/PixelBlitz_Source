@@ -598,6 +598,11 @@ bool UAbilityComponent::GetIsDefending()
 	return false;
 }
 
+void UAbilityComponent::OnAttackHit_Implementation(AActor* Receiver)
+{
+	ActivateAbilityByTiming(EAbilityTiming::AttackHit);
+}
+
 void UAbilityComponent::OnSkillHit_Implementation()
 {
 	ActivateAbilityByTiming(EAbilityTiming::SkillHit);
