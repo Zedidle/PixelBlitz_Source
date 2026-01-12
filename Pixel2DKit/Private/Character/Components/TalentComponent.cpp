@@ -403,6 +403,19 @@ bool UTalentComponent::GetIsDefending()
 	return false;
 }
 
+void UTalentComponent::OnSkillHit_Implementation()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnSkillHit();
+		}
+	}
+
+	ActivateAbilityByTiming(EAbilityTiming::SkillHit);
+}
+
 void UTalentComponent::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {
 	if (InDamage <= 0)

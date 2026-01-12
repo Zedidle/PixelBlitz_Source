@@ -598,6 +598,11 @@ bool UAbilityComponent::GetIsDefending()
 	return false;
 }
 
+void UAbilityComponent::OnSkillHit_Implementation()
+{
+	ActivateAbilityByTiming(EAbilityTiming::SkillHit);
+}
+
 void UAbilityComponent::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce)
 {
 	if (InDamage <= 0)

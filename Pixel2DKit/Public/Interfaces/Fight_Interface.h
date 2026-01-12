@@ -35,9 +35,13 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     bool IsAlive();
 
-
+    // 发起攻击命中
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    void OnAttackHiting();  // 发起攻击命中
+    void OnAttackHiting();  
+
+    // 发起技能命中
+    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
+    void OnSkillHit();  
     
     // 被强效击退的效果，一般都是一样
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")

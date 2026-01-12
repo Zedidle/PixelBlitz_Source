@@ -140,7 +140,7 @@ public:
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnSkillStart();
 
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnSkillHit")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, DisplayName="OnSkillHit")
 	bool BP_OnSkillHit();
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnSkillHit();

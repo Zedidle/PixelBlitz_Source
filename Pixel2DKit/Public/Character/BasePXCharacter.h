@@ -488,6 +488,7 @@ public:
 	virtual FGameplayTagContainer GetEnemyCamp_Implementation() override;
 	virtual AActor* GetTarget_Implementation() override;
 	virtual void OnAttackHiting_Implementation() override;
+	virtual void OnSkillHit_Implementation() override;
 	virtual void PowerRepulsion_Implementation(float Power) override;
 	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce) override;

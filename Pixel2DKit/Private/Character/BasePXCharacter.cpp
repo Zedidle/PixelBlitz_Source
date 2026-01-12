@@ -1334,6 +1334,18 @@ void ABasePXCharacter::OnAttackHiting_Implementation()
 	GetWorldTimerManager().SetTimer(AttackHitTimerHandle, TimerDelegate, 2, false);
 }
 
+void ABasePXCharacter::OnSkillHit_Implementation()
+{
+	if (TalentComponent)
+	{
+		Execute_OnSkillHit(TalentComponent);
+	}
+	if (AbilityComponent)
+	{
+		Execute_OnSkillHit(AbilityComponent);
+	}
+}
+
 void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
 	bRepulsion = true;
