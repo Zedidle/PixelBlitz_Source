@@ -1007,7 +1007,7 @@ void ABaseEnemy::TryAttack_Implementation()
 		SetAttackAnimToggle(true);
 		SetInAttackState(true);
 
-		// GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->StopMovementImmediately();
 	}
 }
 
