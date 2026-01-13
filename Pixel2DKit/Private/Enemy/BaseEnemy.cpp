@@ -89,10 +89,8 @@ void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 	bool bPrePlayerNull = PXCharacter == nullptr;
 	SetPXCharacter(Cast<ABasePXCharacter>(PlayerActor));
 	
-	if (bPrePlayerNull)
+	if (bPrePlayerNull && Execute_CanMove(this))
 	{
-		// 受惊
-		// 后续可能要配置受惊距离
 		if (PlayerActor->GetDistanceTo(this) < 100.0f)
 		{
 			SetActionMove(GetHorizontalDirectionToPlayer() * -20, "Startled", FMath::RandRange(0.3f, 0.4f), true);
@@ -142,19 +140,35 @@ void ABaseEnemy::SetDead(bool V)
 	}
 }
 
-void ABaseEnemy::SetHurt(bool V, const float duration)
+void ABaseEnemy::SetHurt(bool V, float Duration)
 {
 	bHurt = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
 
 	if (!bHurt) return;
+
+	FName TimerName = FName(GetName() + "_ABaseEnemy::SetHurt");
+
+	// float RemainingTime = UTimerSubsystemFuncLib::GetRemainingTime(GetWorld(), TimerName);
+	// if (RemainingTime > 0)
+	// {
+	// 	if (RemainingTime > Duration)
+	// 	{
+	// 		Duration = Duration / 2 + RemainingTime;
+	// 	}
+	// 	else
+	// 	{
+	// 		Duration = RemainingTime / 2 + Duration;
+	// 	}
+	// }
 	
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-[this]{
-			SetHurt(false, 0);
-	});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, duration, false);
+	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
+	{
+		if (WeakThis.IsValid())
+		{
+			WeakThis->SetHurt(false, 0);
+		}
+	}, Duration);
 }
 
 void ABaseEnemy::SetInAttackState(bool V)
@@ -566,13 +580,13 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 	
 	if (NewValue > 0)
 	{
-		OnHurt(NewValue);
-		
 		if (NewValue < OldValue)
 		{
-			if (OldValue - NewValue > HealthComponent->GetMaxHP() * 0.1)
+			OnHurt(NewValue);
+			int32 ChangedValue = OldValue - NewValue;
+			if (ChangedValue > HealthComponent->GetMaxHP() * 0.1)
 			{
-				SetHurt(true, 0.2f);
+				SetHurt(true, HealthComponent->CalHurtDuration(ChangedValue));
 			}
 		}
 	}
@@ -761,7 +775,7 @@ bool ABaseEnemy::CanAttack_Implementation()
 	if (!PXCharacter.IsValid()) return false;
 	if (!Execute_IsAlive(PXCharacter.Get())) return false;
 	
-	return !bDead && !bInAttackState;
+	return !bDead && !bInAttackState && !bHurt;
 }
 
 bool ABaseEnemy::Dash_Implementation()
@@ -793,7 +807,13 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 		OutDamage *= 0.5;
 	}
 
-	OnSensingPlayer(Maker);
+	UTimerSubsystemFuncLib::SetDelay(this,[WeakThis = TWeakObjectPtr(this), Maker]
+	{
+		if (WeakThis.IsValid())
+		{
+			WeakThis->OnSensingPlayer(Maker);
+		}
+	}, 0.2);
 }
 
 
@@ -986,8 +1006,8 @@ void ABaseEnemy::TryAttack_Implementation()
 	{
 		SetAttackAnimToggle(true);
 		SetInAttackState(true);
-	
-		GetCharacterMovement()->StopMovementImmediately();
+
+		// GetCharacterMovement()->StopMovementImmediately();
 	}
 }
 
@@ -1080,7 +1100,7 @@ void ABaseEnemy::Tick_KeepFaceToPixelCharacter(float DeltaSeconds)
 	if (!EnemyAIComponent) return;
 	if (!Execute_IsAlive(this)) return;
 	if (!PXCharacter.IsValid()) return;
-
+	
 	
 	bool PlayerAtRight = USpaceFuncLib::ActorAtActorRight(PXCharacter.Get(),this);
 

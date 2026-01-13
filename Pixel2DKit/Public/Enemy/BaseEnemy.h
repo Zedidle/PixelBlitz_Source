@@ -265,7 +265,7 @@ public:
 	void SetDead(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
-	void SetHurt(const bool V, const float duration);
+	void SetHurt(const bool V, float Duration);
 	
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetInAttackState(const bool V);

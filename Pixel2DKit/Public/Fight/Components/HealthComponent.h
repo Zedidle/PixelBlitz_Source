@@ -89,7 +89,7 @@ public:
 	void InvulnerableForDuration(float duration);
 
 	UFUNCTION(BlueprintCallable, Category="Health")
-	void FlashForDuration(FLinearColor FlashColor = FLinearColor(0.9, 0.1, 0.1, 0.6), int FlashTimes = 2, float FlashRate = 0.15f) ;
+	void FlashForDuration(float Duration = 0.4f, float FlashRate = 0.1f, FLinearColor FlashColor = FLinearColor(0.9, 0.1, 0.1, 0.6)) ;
 
 	
 	UFUNCTION(BlueprintCallable, Category="Health")
@@ -129,6 +129,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="HealthComponent | Movement")
 	void KnockBack(FVector Repel, AActor* Maker);
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="HealthComponent")
+	float CalHurtDuration(int32 ChangedHP);
 	
-		
 };

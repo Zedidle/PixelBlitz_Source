@@ -30,18 +30,23 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 		return EBTNodeResult::Failed;
 	}
 	
-	APawn* Pawn = AIOwner->GetPawn();
-
-	if (!Pawn ||
-		!Pawn->Implements<UFight_Interface>() ||
-		!IFight_Interface::Execute_IsAlive(Pawn) ||
-		!Pawn->Implements<UEnemyAI_Interface>())
+	ABaseEnemy* SelfEnemyPawn = AIOwner->GetPawn<ABaseEnemy>();
+	if (!SelfEnemyPawn ||
+		!SelfEnemyPawn->Implements<UFight_Interface>() ||
+		!IFight_Interface::Execute_IsAlive(SelfEnemyPawn) ||
+		!SelfEnemyPawn->Implements<UEnemyAI_Interface>())
 	{
 		FinishExecute(false);
 		return EBTNodeResult::Failed;
 	}
 
-	UEnemyAIComponent* EnemyAIComponent = Pawn->GetComponentByClass<UEnemyAIComponent>();
+	if (!IEnemyAI_Interface::Execute_CanMove(SelfEnemyPawn))
+	{
+		FinishExecute(true);
+		return EBTNodeResult::Failed;
+	}
+
+	UEnemyAIComponent* EnemyAIComponent = SelfEnemyPawn->GetComponentByClass<UEnemyAIComponent>();
 	if (!EnemyAIComponent)
 	{
 		FinishExecute(false);
@@ -69,16 +74,16 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 		CurDistance = FMath::Max(CurDistance * DeDistanceRate,   MinDirSwitchDistance * 2);
 	}
 	
-	FVector CurDirection = FRotator(0,bRotateClockwise ? CurRotateValue : -CurRotateValue,0).RotateVector(Pawn->GetActorForwardVector())
+	FVector CurDirection = FRotator(0,bRotateClockwise ? CurRotateValue : -CurRotateValue,0).RotateVector(SelfEnemyPawn->GetActorForwardVector())
 					.GetSafeNormal2D(0.01f);
 
 	// CliffHeight 还需动态依据怪物身高调整
-	FVector CurTargetLocation = Pawn->GetActorLocation() + CurDistance * CurDirection;
+	FVector CurTargetLocation = SelfEnemyPawn->GetActorLocation() + CurDistance * CurDirection;
 
 
 	FHitResult OutHit;
 	TArray<AActor*> ActorsToIgnore;
-	bool bTraceWallHit = UKismetSystemLibrary::LineTraceSingle(World, Pawn->GetActorLocation(), CurTargetLocation,
+	bool bTraceWallHit = UKismetSystemLibrary::LineTraceSingle(World, SelfEnemyPawn->GetActorLocation(), CurTargetLocation,
 		TraceTypeQuery1, false, ActorsToIgnore,
 				EDrawDebugTrace::None, OutHit, true,
 				FLinearColor::Red, FLinearColor::Green, 1.0f);
@@ -89,7 +94,7 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& Owne
 		return EBTNodeResult::Failed;
 	}
 	
-	if (!USpaceFuncLib::CheckCliffProcess( Pawn->GetActorLocation(), CurTargetLocation, CheckCliffHeight, CliffCheckRate, MinDirSwitchDistance))
+	if (!USpaceFuncLib::CheckCliffProcess( SelfEnemyPawn->GetActorLocation(), CurTargetLocation, CheckCliffHeight, CliffCheckRate, MinDirSwitchDistance))
 	{
 		Controller->SimpleMoveToLocation(CurTargetLocation);
 

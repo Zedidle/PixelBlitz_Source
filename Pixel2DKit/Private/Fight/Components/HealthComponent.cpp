@@ -65,10 +65,13 @@ void UHealthComponent::InvulnerableForDuration(float duration)
 	}, duration);
 }
 
-void UHealthComponent::FlashForDuration(FLinearColor FlashColor, int FlashTimes, float FlashRate) 
+void UHealthComponent::FlashForDuration(float Duration, float FlashRate, FLinearColor FlashColor) 
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
+
+	int FlashTimes = Duration / FlashRate;
+	if (FlashTimes % 2 == 1) FlashTimes++;
 	
 	FName TimerName = FName("UHealthComponent::FlashForDuration" + FGuid::NewGuid().ToString());
 	UTimerSubsystemFuncLib::SetDelayLoop(World, TimerName,
@@ -83,7 +86,7 @@ void UHealthComponent::FlashForDuration(FLinearColor FlashColor, int FlashTimes,
 			PF->SetSpriteColor(WeakThis->bFlashing ? FlashColor :
 				FMath::GetMappedRangeValueClamped(FVector2D(0.2f, 1),FVector2D(0.4, 1), WeakThis->GetHPPercent()) * FLinearColor::White
 			);
-		}, FlashRate, -1, FlashTimes * 2);
+		}, FlashRate, -1, FlashTimes);
 }
 
 FVector UHealthComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigator) const
@@ -232,12 +235,14 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void UHealthComponent::Event_OnHPChanged(int OldValue, int NewValue)
 {
-	if (NewValue < OldValue)
+	int32 ChangedHP = OldValue - NewValue;
+	if (ChangedHP > 0)
 	{
-		if (OldValue - NewValue >= 0.1 * GetMaxHP())
+		if (ChangedHP > 0.1 * GetMaxHP())
 		{
+			float HurtDuration = CalHurtDuration(ChangedHP);
 			// 触发受伤闪烁
-			FlashForDuration();
+			FlashForDuration(HurtDuration);
 			// 触发无敌帧
 			OnHurtInvulnerable();
 		}
@@ -362,6 +367,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	Repel = (1 - InRockPercent) * CalRepel(Repel, Maker) * KnockBackMultiplier;
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())
 	{
+		MovementComponent->StopMovementImmediately();
 		MovementComponent->AddImpulse(Repel , true);
 	}
 
@@ -425,6 +431,16 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 		}
 	}
 	
+}
+
+float UHealthComponent::CalHurtDuration(int32 ChangedHP)
+{
+	if (ChangedHP > GetMaxHP() * 0.1)
+	{
+		return 0.18f * (1 + ChangedHP / GetMaxHP());
+	}
+
+	return 0.1f;
 }
 
 #undef LOCTEXT_NAMESPACE
