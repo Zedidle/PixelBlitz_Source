@@ -243,8 +243,7 @@ FVector APXGameState::GetNewLevelInitLocation()
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, FVector::ZeroVector);
 	
-	ABasePXCharacter* Character = UPXGameplayStatics::GetPlayerCharacter(World);
-	if (Character)
+	if (ABasePXCharacter* Character = UPXGameplayStatics::GetPlayerCharacter(World))
 	{
 		return Character->GetActorLocation() - Character->GetVectorFaceToCamera().GetSafeNormal2D() * 240 - FVector(0,0,120);
 	}
