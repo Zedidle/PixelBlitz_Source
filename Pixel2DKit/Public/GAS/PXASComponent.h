@@ -14,7 +14,7 @@ class PIXEL2DKIT_API UPXASComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 
-	TMap<FName, FGameplayTag> TagCache;
+	TMap<FName, FGameplayTag> CacheTags;
 	
 public:
 	
@@ -40,4 +40,14 @@ public:
 	// 检测是否有某个Tag，一般用于检测冷却标记
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC")
 	bool HasTag(FName TagName);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC")
+	bool IsAbilityInCD(const FGameplayTag& AbilityTag);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC")
+	float GetRemainingCD(const FGameplayTag& CooldownTag);
+	
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	void RemoveAbilityCD(const FGameplayTag& AbilityTag);
+	
 };
