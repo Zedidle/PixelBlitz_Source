@@ -417,10 +417,16 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 		if (bBlock) return;
 	}
 
+	// 向下检查的悬崖高度
+	float Height = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 50;
+	// 间距单位
 	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
 	FVector Direction = MoveVector.GetSafeNormal2D();
-	FVector TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(GetActorLocation(), Direction, MoveVector.Size2D(), 50, Radius);
+	FVector TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(StartLocation, Direction, MoveVector.Size2D(), Height, Radius);
 
+	// 该方向没有可行的点位
+	if (StartLocation == TargetLocation) return;
+	
 	if (EnemyAIComponent)
 	{
 		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation);
@@ -1149,6 +1155,10 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 		CurLocation.X = FMath::Lerp(ActionMove.StartLocation.X , ActionMove.TargetLocation.X, CurCurveVector.X);
 		CurLocation.Y = FMath::Lerp(ActionMove.StartLocation.Y , ActionMove.TargetLocation.Y, CurCurveVector.Y);
 
+		// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("CurLocation ActionMove.StartLocation.X: %f, ActionMove.TargetLocation.X: %f, CurCurveVector.X: %f"),
+		// 	ActionMove.StartLocation.X, ActionMove.TargetLocation.X, CurCurveVector.X));
+
+		
 		if (CurCurveVector.Z >= 1.5)
 		{
 			// 水平小跳模式

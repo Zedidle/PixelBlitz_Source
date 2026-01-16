@@ -221,12 +221,14 @@ FVector USpaceFuncLib::GetHorizontalFarestPosition(const FVector& StartLocation,
 		RemDistance = (NewEndLocation - StartLocation).Size();
 	}
 
+	// 垂直方向逐距离检查
 	FVector CurFarestPosition = StartLocation;
 	while (RemDistance > PerCheckDistance)
 	{
 		FVector CheckStart = StartLocation + Direction * RemDistance;
 		FVector CheckEnd = CheckStart - FVector(0,0,CliffHeight);
-		
+
+		// TraceTypeQuery1  Visibility
 		FHitResult HitResult;
 		bool bHit = UKismetSystemLibrary::LineTraceSingle(World, CheckStart, CheckEnd, TraceTypeQuery1, false, {},
 			EDrawDebugTrace::None, HitResult, true, FLinearColor::Red, FLinearColor::Green, 2.0f
