@@ -9,6 +9,7 @@
 #include "TalentSelectItemWidget.generated.h"
 
 
+class UTextBlock;
 class UImage;
 class UTalentTipWidget;
 class UCommonTextBlock;

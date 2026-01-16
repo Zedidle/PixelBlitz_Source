@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Pixel2DKit.h"
 #include "Core/PXGameState.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Utilitys/PXCustomStruct.h"

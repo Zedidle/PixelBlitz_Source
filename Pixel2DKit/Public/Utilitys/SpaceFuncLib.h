@@ -84,9 +84,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
 	static bool IsPointInScreen(const UObject* WorldContextObject, const FVector& Point, float BufferPercentage = 0.0f);
-	
+
+
+	// bClamp 超出屏幕时是否按屏幕边界内的计算
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject"))
-	static FVector2D GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0));
+	static FVector2D GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset = FVector(0), bool bClamp = false, float BufferPercentage = -0.02f);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static float CalAngle(FVector A, FVector B);
