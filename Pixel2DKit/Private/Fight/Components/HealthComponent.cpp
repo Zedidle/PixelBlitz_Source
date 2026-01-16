@@ -95,6 +95,7 @@ FVector UHealthComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigato
 	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel;
 	IncomeRepel.X = IncomeRepel.X > 0 ? FMath::Max(IncomeRepel.X - RepelResistance.X, 0) : FMath::Min(IncomeRepel.X + RepelResistance.X, 0);
 	IncomeRepel.Y = IncomeRepel.Y > 0 ? FMath::Max(IncomeRepel.Y - RepelResistance.Y, 0) : FMath::Min(IncomeRepel.Y + RepelResistance.Y, 0);
+	IncomeRepel.Z = IncomeRepel.Z > 0 ? FMath::Max(IncomeRepel.Z - RepelResistance.Z, 0) : FMath::Min(IncomeRepel.Z + RepelResistance.Z, 0);
 	
 	FVector Result = (GetOwner()->GetActorLocation() - Instigator->GetActorLocation()).GetSafeNormal2D() * IncomeRepel.Size2D();
 	Result.Z = IncomeRepel.Z;

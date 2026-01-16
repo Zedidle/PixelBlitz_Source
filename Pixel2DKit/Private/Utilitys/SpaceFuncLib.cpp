@@ -301,6 +301,8 @@ bool USpaceFuncLib::IsPointInScreen(const UObject* WorldContextObject, const FVe
 
 FVector2D USpaceFuncLib::GetActorPositionInScreen(const UObject* WorldContextObject, AActor* Actor, FVector Offset, bool bClamp, float BufferPercentage)
 {
+	if (!Actor) return FVector2D::ZeroVector;
+
 	UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
 	if (!GameInstance) return FVector2D::ZeroVector;
 
