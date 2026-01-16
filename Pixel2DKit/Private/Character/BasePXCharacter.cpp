@@ -845,6 +845,11 @@ void ABasePXCharacter::SetDead(bool V)
 {
 	bDead = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
+	
+	if(GetCharacterMovement())
+	{	
+		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	}
 }
 
 void ABasePXCharacter::SetHurt(const bool V, const float duration)

@@ -108,13 +108,6 @@ bool UPXASComponent::HasTag(FName TagName)
 bool UPXASComponent::IsAbilityInCD(const FGameplayTag& AbilityTag)
 {
 	FName CDTagName = FName(AbilityTag.ToString() + ".CD");
-
-	if (HasTag(CDTagName))
-	{
-		UDebugFuncLab::ScreenMessage(FString::Printf( TEXT("InCD CDTagName: %s"), *CDTagName.ToString()));
-		return true;
-	}
-	
 	return HasTag(CDTagName);
 }
 
