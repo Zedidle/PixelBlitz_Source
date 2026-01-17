@@ -126,10 +126,10 @@ bool ABaseSkill::OnAttackFinish()
 	return true;
 }
 
-bool ABaseSkill::OnAttackSkill()
+bool ABaseSkill::OnAttackDash()
 {
 	if (ActivateTiming != EAbilityTiming::AttackSkill) return false;
-	BP_OnAttackSkill();
+	BP_OnAttackDash();
 	return true;
 }
 

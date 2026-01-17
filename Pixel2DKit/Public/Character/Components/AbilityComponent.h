@@ -13,6 +13,7 @@
 #include "AbilityComponent.generated.h"
 
 
+class ABaseDefenseSkill;
 class ABasePXCharacter;
 class ABaseEnemy;
 class UInputAction;
@@ -44,8 +45,28 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent, public IFight_I
 	UPROPERTY()
 	TArray<FGameplayTag> AbilitiesShowing;
 
+	bool TalentLoaded = false;
+
+	FVector OwnerPreLocation;
+	
+	UPROPERTY()
+	TArray<ABaseDefenseSkill*> DefenseSkills;
+
+	UPROPERTY()
+	TMap<EAbilityTiming, FGameplayTagArray> AbilitiesTiming;
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<ABaseSkill>> SkillsHolding;
+	
+#pragma region TalentSet
+
+
+	// 热身
+	int WarmUP_Power = 0;
+	int WarmUP_MoveDistance = 0;
 
 	
+#pragma endregion
 	
 public:	
 	// Sets default values for this component's properties
@@ -70,14 +91,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
-
-	UPROPERTY()
-	TMap<EAbilityTiming, FGameplayTagArray> AbilitiesTiming;
 	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	UPROPERTY()
 	UPXASComponent* CachedASC;
 
@@ -89,10 +109,38 @@ public:
 	// 开局初始化角色当前可以选择的技能
 	UFUNCTION(BlueprintCallable)
 	void RefreshAbilitiesCanChoice();
+
+	UFUNCTION(BlueprintCallable)
+	void LoadTalents();
+
+#pragma region Talents专项处理
+	
+	UFUNCTION()
+	void MoveWarmingUP();
+
+	UFUNCTION()
+	void MakeMiracleWalker();
+
+	UFUNCTION()
+	void MakeImmortalPower(bool First);
+	
+#pragma endregion 
+	
+	UFUNCTION()
+	void InitTalents();
 	
 	UFUNCTION()
 	void InitAbilities();
 
+	UFUNCTION()
+	ABaseSkill* SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform = FTransform());
+
+	UFUNCTION()
+	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);
+
+	UFUNCTION()
+	void RemoveDefenseSkill(const FGameplayTag& Tag);
+	
 	UFUNCTION(BlueprintPure, Blueprintable)
 	FAbility GetAbilityToLearn();
 
@@ -123,14 +171,24 @@ public:
 	UFUNCTION()
 	void OnSkillStart();// 后续可能会补充参数
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	int GetAttackDamagePlus();
 
+	UFUNCTION()
+	void OnAttackStart(EAttackType Type, FVector Direction);
 	
 	UFUNCTION()
-	void OnAttackSkill();// 后续可能会补充参数
+	void OnAttackDash();// 后续可能会补充参数
 
 	UFUNCTION()
 	void OnKillEnemy(); // 后续可能会补充参数
 
+	UFUNCTION(BlueprintCallable)
+	void OnBuffCalDamage();
+	
+	UFUNCTION(BlueprintCallable)
+	void OnDying(int& RemReviveTimes);
+	
 	UFUNCTION()
 	void ActivateAbilityByTiming(EAbilityTiming Timing);
 
@@ -161,7 +219,9 @@ public:
 	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce) override;
 	virtual void OnAttackEffect_Implementation() override;
 	virtual void OnAttackWeakPoint_Implementation(AActor* Receiver) override;
-
+	virtual void OnPickGold_Implementation() override;
+	virtual void OnDashEffectEnd_Implementation() override;
+	
 #pragma endregion
 
 

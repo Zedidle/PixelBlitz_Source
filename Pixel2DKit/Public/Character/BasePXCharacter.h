@@ -222,9 +222,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UBuffComponent> BuffComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UTalentComponent> TalentComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<USpringArmComponent> SpringArm;

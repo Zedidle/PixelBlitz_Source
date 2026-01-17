@@ -6,8 +6,6 @@
 #include "Pixel2DKit.h"
 #include "GAS/PXCharacterASComponent.h"
 #include "Character/BasePXCharacter.h"
-#include "Character/Components/AbilityComponent.h"
-#include "Character/Components/TalentComponent.h"
 #include "Enemy/BaseEnemy.h"
 #include "GAS/AttributeSet/PXCharacterAttributeSet.h"
 

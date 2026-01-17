@@ -25,7 +25,6 @@
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
-#include "Character/Components/TalentComponent.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
@@ -421,7 +420,6 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
-	TalentComponent = CreateDefaultSubobject<UTalentComponent>(TEXT("TalentComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bEnableCameraLag = true;
@@ -485,16 +483,11 @@ void ABasePXCharacter::BeginPlay()
 	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
 
 	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
-
-	if (TalentComponent)
-	{
-		TalentComponent->InitTalents();
-	}
+	
 	if (AbilityComponent)
 	{
 		AbilityComponent->InitAbilities();
 	}
-	
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -656,12 +649,9 @@ void ABasePXCharacter::LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass)
 
 void ABasePXCharacter::ReadyToStart_Implementation()
 {
-	if (TalentComponent)
-	{
-		TalentComponent->LoadTalents();
-	}
 	if (AbilityComponent)
 	{
+		AbilityComponent->LoadTalents();
 		AbilityComponent->LoadAbilities();
 	}
 	if (BuffComponent)
@@ -715,7 +705,7 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 	};
 
 	Result += RepelByVelocity * VelocityRepelFactor;
-	Result *= 1 + EffectGameplayTags[TAG("TalentSet.Force.PlusPercent")];
+	Result *= 1 + EffectGameplayTags[TAG("Ability.Force.Set.PlusPercent")];
 	return Result;
 }
 
@@ -1006,9 +996,9 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		SetDead(true);
 
 		int RemReviveTimes = -1;
-		if (TalentComponent && !HealthComponent->DieByFalling)
+		if (AbilityComponent && !HealthComponent->DieByFalling)
 		{
-			TalentComponent->OnDying(RemReviveTimes);
+			AbilityComponent->OnDying(RemReviveTimes);
 		}
 		
 		if (RemReviveTimes >= 0)
@@ -1334,10 +1324,6 @@ void ABasePXCharacter::OnAttackHit_Implementation(AActor* Receiver)
 		}
 	}, 2);
 	
-	if (TalentComponent)
-	{
-		Execute_OnAttackHit(TalentComponent, Receiver);
-	}
 	if (AbilityComponent)
 	{
 		Execute_OnAttackHit(AbilityComponent, Receiver);
@@ -1346,10 +1332,6 @@ void ABasePXCharacter::OnAttackHit_Implementation(AActor* Receiver)
 
 void ABasePXCharacter::OnSkillHit_Implementation()
 {
-	if (TalentComponent)
-	{
-		Execute_OnSkillHit(TalentComponent);
-	}
 	if (AbilityComponent)
 	{
 		Execute_OnSkillHit(AbilityComponent);
@@ -1394,11 +1376,6 @@ void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, 
 	{
 		Execute_OnBeAttacked(AbilityComponent, Maker, OutDamage, OutDamage, bForce);
 	}
-	
-	if (TalentComponent)
-	{
-		Execute_OnBeAttacked(TalentComponent, Maker, OutDamage, OutDamage, bForce);
-	}
 }
 
 
@@ -1423,11 +1400,6 @@ void ABasePXCharacter::OnAttackWeakPoint_Implementation(AActor* Receiver)
 	if (AbilityComponent)
 	{
 		Execute_OnAttackWeakPoint(AbilityComponent, Receiver);
-	}
-	
-	if (TalentComponent)
-	{
-		Execute_OnAttackWeakPoint(TalentComponent, Receiver);
 	}
 }
 
@@ -1485,11 +1457,6 @@ void ABasePXCharacter::OnAttackEffect_Implementation()
 	
 	UPXGameplayStatics::SpawnForceFeedbackAttached(this,ForceFeedbackEffectDataAsset->Attack.LoadSynchronous(), GetOwner()->GetRootComponent());
 
-	if (TalentComponent)
-	{
-		Execute_OnAttackEffect(TalentComponent);
-	}
-
 	if (AbilityComponent)
 	{
 		Execute_OnAttackEffect(AbilityComponent);
@@ -1511,11 +1478,6 @@ void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 
 void ABasePXCharacter::OnPickGold_Implementation()
 {
-	if (TalentComponent)
-	{
-		Execute_OnPickGold(TalentComponent);
-	}
-
 	if (AbilityComponent)
 	{
 		Execute_OnPickGold(AbilityComponent);
@@ -1534,7 +1496,7 @@ void ABasePXCharacter::OnDashEffectBegin_Implementation()
 		bAttackStartup = false;
 		bInAttackEffect = false;
 		
-		AbilityComponent->OnAttackSkill();
+		AbilityComponent->OnAttackDash();
 	}
 }
 
@@ -1542,9 +1504,9 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 {
 	InDashEffect = false;
 
-	if (TalentComponent)
+	if (AbilityComponent)
 	{
-		TalentComponent->OnSkillFinish();
+		Execute_OnDashEffectEnd(AbilityComponent);
 	}
 }
 
@@ -1590,10 +1552,6 @@ void ABasePXCharacter::OnAttackHoldingRelease_Implementation()
 
 void ABasePXCharacter::OnKillEnemy_Implementation()
 {
-	if (TalentComponent)
-	{
-		TalentComponent->OnKillEnemy();
-	}
 	if (AbilityComponent)
 	{
 		AbilityComponent->OnKillEnemy();
@@ -1667,10 +1625,10 @@ int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
 		LocalDamage += BuffComponent->EffectedValue_Attack;
 	}
 	
-	if (TalentComponent)
+	if (AbilityComponent)
 	{
-		TalentComponent->OnBuffCalDamage();
-		LocalDamage += TalentComponent->GetAttackDamagePlus();
+		AbilityComponent->OnBuffCalDamage();
+		LocalDamage += AbilityComponent->GetAttackDamagePlus();
 	}
 
 	return LocalDamage;
@@ -1707,7 +1665,7 @@ float ABasePXCharacter::GetSlowDownResistancePercent_Implementation()
 {
 	float Result = 0.0f;
 	
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("TalentSet.SpeedDownResistance");
+	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("CommonSet.SpeedDownResistance");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		Result += EffectGameplayTags[Tag];

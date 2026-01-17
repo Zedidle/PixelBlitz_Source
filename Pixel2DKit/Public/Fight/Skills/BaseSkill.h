@@ -131,9 +131,9 @@ public:
 	virtual bool OnAttackFinish();
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackSkill")
-	bool BP_OnAttackSkill();
+	bool BP_OnAttackDash();
 	UFUNCTION(Category="Skill | Timing")
-	virtual bool OnAttackSkill();
+	virtual bool OnAttackDash();
 
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnSkillStart")
 	bool BP_OnSkillStart();
