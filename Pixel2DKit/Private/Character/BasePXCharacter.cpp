@@ -1811,6 +1811,13 @@ void ABasePXCharacter::TryToAttack()
 		bAttackStartup = true;
 		SetAttackAnimToggle(true);
 
+		if (GetCharacterMovement())
+		{
+			GetCharacterMovement()->Velocity.X /= 1.5;
+			GetCharacterMovement()->Velocity.Y /= 1.5;
+			GetCharacterMovement()->Velocity.Z /= 5;
+		}
+		
 		// 近战时按下按键时 广播
 		if (DataAsset && DataAsset->NormalAttackType == EAttackType::Melee)
 		{
