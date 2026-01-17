@@ -1843,21 +1843,18 @@ void ABasePXCharacter::TryToJump()
 	if (SelfCanJump())
 	{
 		JumpStart();
+		return;
 	}
-	else
+	
+	UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(),"TryToJump",[WeakThis = TWeakObjectPtr(this)]
 	{
-		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(),"TryToJump",
-	[WeakThis = TWeakObjectPtr(this)]{
-			if (WeakThis.IsValid())
-			{
-				if (WeakThis->SelfCanJump())
-				{
-					WeakThis->JumpStart();
-					UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
-				}
-			}
-		}, 0.016f, 0.2f);
-	}
+		if (!WeakThis.IsValid()) return;
+		if (WeakThis->SelfCanJump())
+		{
+			WeakThis->JumpStart();
+			UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
+		}
+	}, 0.01f, 0.15f);
 }
 
 void ABasePXCharacter::JumpRelease()
