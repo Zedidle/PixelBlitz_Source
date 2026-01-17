@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Fight/Skills/Talent/TalentSkillSwingFist.h"
+#include "Fight/Skills/Talent/Skill_SwingFist.h"
 
 #include "Pixel2DKit.h"
 #include "Character/BasePXCharacter.h"
@@ -9,20 +9,20 @@
 #define LOCTEXT_NAMESPACE "PX"
 
 // Sets default values
-ATalentSkillSwingFist::ATalentSkillSwingFist()
+ASkill_SwingFist::ASkill_SwingFist()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
-void ATalentSkillSwingFist::BeginPlay()
+void ASkill_SwingFist::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-void ATalentSkillSwingFist::MakeSwingFistPower()
+void ASkill_SwingFist::MakeSwingFistPower()
 {
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(GetOwner());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
@@ -55,12 +55,12 @@ void ATalentSkillSwingFist::MakeSwingFistPower()
 }
 
 // Called every frame
-void ATalentSkillSwingFist::Tick(float DeltaTime)
+void ASkill_SwingFist::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-bool ATalentSkillSwingFist::OnAttackStart()
+bool ASkill_SwingFist::OnAttackStart()
 {
 	if (Super::OnAttackStart())
 	{

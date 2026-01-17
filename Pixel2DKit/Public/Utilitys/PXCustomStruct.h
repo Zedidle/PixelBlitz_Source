@@ -276,13 +276,10 @@ struct FAbility: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	FGameplayTag PreLevelAbility;
 	
-	// 前置所需学习的技能 GameplayTag
+	// 前置所需学习的技能 与 前置选择的天赋 GameplayTag
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TArray<FGameplayTag> RequiredAbilities;
-
-	// 前置选择的天赋 GameplayTag
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	TArray<FGameplayTag> RequiredTalents;
+	
 	
 	// 技能的特殊附加值，以GameplayTag为前缀
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")

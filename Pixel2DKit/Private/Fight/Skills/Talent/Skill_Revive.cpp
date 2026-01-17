@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Fight/Skills/Talent/TalentSkillRevive.h"
+#include "Fight/Skills/Talent/Skill_Revive.h"
 
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
@@ -15,31 +15,31 @@
 
 class UPXCustomSettings;
 // Sets default values
-ATalentSkillRevive::ATalentSkillRevive()
+ASkill_Revive::ASkill_Revive()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
-void ATalentSkillRevive::BeginPlay()
+void ASkill_Revive::BeginPlay()
 {
 	Super::BeginPlay();
 	if (Owner && Owner->Implements<UFight_Interface>())
 	{
 		float Result = 0;
-		IFight_Interface::Execute_FindEffectGameplayTag(Owner, TAG("TalentSet.ReviveTimesPlus"), Result);
+		IFight_Interface::Execute_FindEffectGameplayTag(Owner, TAG("Ability.Revive.Set.Times"), Result);
 		RemReviveTimes = Result;
 	}
 }
 
 // Called every frame
-void ATalentSkillRevive::Tick(float DeltaTime)
+void ASkill_Revive::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-bool ATalentSkillRevive::OnDying(int& _RemReviveTimes)
+bool ASkill_Revive::OnDying(int& _RemReviveTimes)
 {
 	if (!Super::OnDying(_RemReviveTimes)) return false;
 	if (!Owner) return false;
@@ -66,7 +66,7 @@ bool ATalentSkillRevive::OnDying(int& _RemReviveTimes)
 		{
 			if (Owner->Implements<UFight_Interface>())
 			{
-				IBuff_Interface::Execute_RemoveBuff(Owner, TAG("Talent.Revive"), true);
+				IBuff_Interface::Execute_RemoveBuff(Owner, TAG("Ability.Revive"), true);
 			}
 		}
 		

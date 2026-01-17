@@ -121,20 +121,17 @@ void UAbilityComponent::InitAbilities()
 {
 	// 天赋需要在此之前加载完成
 	float GoldenBlessRadioPlus;
-	if (IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("TalentSet.GoldenBless"), GoldenBlessRadioPlus))
+	if (Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.GoldenBless.Set.RatePlus"), GoldenBlessRadioPlus))
 	{
 		GoldenRadio += GoldenBlessRadioPlus;
 	}
 
 	float LegendBlessRadioPlus;
-	if (IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("TalentSet.LegendBless"), LegendBlessRadioPlus))
+	if (Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.LegendBless.Set.RatePlus"), LegendBlessRadioPlus))
 	{
 		GoldenRadio += LegendBlessRadioPlus;
 		LegendRadio += LegendBlessRadioPlus;
 	}
-
-	// 目前放在AbilityChoice界面调用
-	// RefreshAbilitiesCanChoice();
 }
 
 FAbility UAbilityComponent::GetAbilityToLearn()
@@ -257,7 +254,10 @@ void UAbilityComponent::LoadAbilities()
 		FString Level;
 		Tag.ToString().Split(".Level", &Parent, &Level);
 
-		if (CachedASC->HasAbility(TAG(*Parent))) continue;
+		FGameplayTag AbilityTag = TAG(*Parent);
+		
+		if (CachedASC->HasAbility(AbilityTag)) continue;
+		EffectGameplayTags.SetData(AbilityTag, 1);
 		
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
 		if (!AbilityData.AbilityTag.IsValid()) continue;
@@ -387,19 +387,12 @@ bool UAbilityComponent::CanLearnAbility(const FAbility& Ability)
 	
 	if (!Ability.RequiredAbilities.IsEmpty())
 	{
-		for (auto& RequiredAbility : Ability.RequiredAbilities)
+		for (auto& RequiredTag : Ability.RequiredAbilities)
 		{
-			if (!MainSave->ChosenAbilities.Contains(RequiredAbility)) return false;
+			if (!MainSave->ChosenAbilities.Contains(RequiredTag) && !BasicBuildSave->ChosenTalents.Contains(RequiredTag)) return false;
 		}
 	}
 
-	if (!Ability.RequiredTalents.IsEmpty())
-	{
-		for (auto& RequiredTalent : Ability.RequiredTalents)
-		{
-			if (!BasicBuildSave->ChosenTalents.Contains(RequiredTalent)) return false;
-		}
-	}
 	return true;
 }
 

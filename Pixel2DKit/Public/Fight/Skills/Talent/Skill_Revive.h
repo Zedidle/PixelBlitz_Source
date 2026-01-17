@@ -4,33 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Fight/Skills/BaseSkill.h"
-#include "TalentSkillSwingFist.generated.h"
+#include "Skill_Revive.generated.h"
 
 UCLASS()
-class PIXEL2DKIT_API ATalentSkillSwingFist : public ABaseSkill
+class PIXEL2DKIT_API ASkill_Revive : public ABaseSkill
 {
 	GENERATED_BODY()
 
-
-	// 摇摆拳增强状态
-	bool SwingFistPower = false;
+	int RemReviveTimes = 0;
 	
 public:
 	// Sets default values for this actor's properties
-	ATalentSkillSwingFist();
+	ASkill_Revive();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
-	UFUNCTION()
-	void MakeSwingFistPower();
 	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual bool OnAttackStart() override;
-	
+	virtual bool OnDying(int& _RemReviveTimes) override;
+
 };

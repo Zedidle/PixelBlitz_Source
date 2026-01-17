@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Fight/Skills/Talent/TalentSkillEvadeStrike.h"
+#include "Fight/Skills/Talent/Skill_EvadeStrike.h"
 
 #include "Pixel2DKit.h"
 #include "Character/BasePXCharacter.h"
@@ -9,26 +9,26 @@
 
 
 // Sets default values
-ATalentSkillEvadeStrike::ATalentSkillEvadeStrike()
+ASkill_EvadeStrike::ASkill_EvadeStrike()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 // Called when the game starts or when spawned
-void ATalentSkillEvadeStrike::BeginPlay()
+void ASkill_EvadeStrike::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ATalentSkillEvadeStrike::Tick(float DeltaTime)
+void ASkill_EvadeStrike::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-bool ATalentSkillEvadeStrike::OnSkillFinish()
+bool ASkill_EvadeStrike::OnSkillFinish()
 {
 	if (!Super::OnSkillFinish()) return false;
 

@@ -4,28 +4,24 @@
 
 #include "CoreMinimal.h"
 #include "Fight/Skills/BaseSkill.h"
-#include "TalentSkillRevive.generated.h"
+#include "Skill_EvadeStrike.generated.h"
 
 UCLASS()
-class PIXEL2DKIT_API ATalentSkillRevive : public ABaseSkill
+class PIXEL2DKIT_API ASkill_EvadeStrike : public ABaseSkill
 {
 	GENERATED_BODY()
 
-	int RemReviveTimes = 0;
-	
 public:
 	// Sets default values for this actor's properties
-	ATalentSkillRevive();
+	ASkill_EvadeStrike();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual bool OnDying(int& _RemReviveTimes) override;
-
+	virtual bool OnSkillFinish() override;
 };

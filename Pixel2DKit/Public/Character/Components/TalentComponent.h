@@ -120,7 +120,6 @@ public:
 	UFUNCTION()
 	void MoveWarmingUP();
 
-
 	UFUNCTION()
 	void MakeMiracleWalker();
 
