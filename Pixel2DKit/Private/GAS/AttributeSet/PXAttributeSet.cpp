@@ -8,6 +8,7 @@
 #include "Fight/Components/StateComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Utilitys/CommonFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 
 void UPXAttributeSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -112,9 +113,9 @@ void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, f
 		{
 			if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Actor))
 			{
-				if (UStateComponent* HealthComp = Pawn->GetComponentByClass<UStateComponent>())
+				if (UStateComponent* StateComponent = Pawn->GetComponentByClass<UStateComponent>())
 				{
-					HealthComp->OnHPChanged.Broadcast(OldValue, NewValue);
+					StateComponent->OnHPChanged.Broadcast(OldValue, NewValue);
 				}
 			}
 		}

@@ -294,7 +294,7 @@ public:
 	void TryAttack();
 
 	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
-	void OnEnemyHPChanged(int32 OldValue, int32 NewValue);
+	void OnHPChanged(int32 OldValue, int32 NewValue);
 
 	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
 	void OnHurt(int RemainHP);

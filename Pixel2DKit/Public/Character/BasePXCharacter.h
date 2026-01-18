@@ -193,9 +193,6 @@ public:
 
 	UPROPERTY()
 	TWeakObjectPtr<class UPXAttributeSet> AttributeSetBase;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<UGameplayEffect>> InitEffects;

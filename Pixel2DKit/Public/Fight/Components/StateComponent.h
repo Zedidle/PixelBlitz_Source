@@ -73,11 +73,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "StateComponent|Health")
 	FOnHPChangedSignature OnHPChanged;
 	
-public:	
 	// Sets default values for this component's properties
 	UStateComponent();
-	UStateComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	~UStateComponent();
 	
 	UPROPERTY(BlueprintReadOnly)
 	bool bInvulnerable = false; // 是否处于无敌帧

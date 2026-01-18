@@ -338,7 +338,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
 	
-	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
+	// StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
@@ -372,9 +372,11 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	StateComponent = NewObject<UStateComponent>(this, TEXT("StateComponent"));
 	if (StateComponent)
 	{
-		StateComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+		StateComponent->RegisterComponent();
+		StateComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnHPChanged);
 	}
 }
 
@@ -386,7 +388,7 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	if (StateComponent)
 	{
-		StateComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+		StateComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnHPChanged);
 	}
 }
 
@@ -575,7 +577,7 @@ void LoadLookDeterrence(int32 Level)
 }
 
 
-void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
+void ABaseEnemy::OnHPChanged_Implementation(int32 OldValue, int32 NewValue)
 {
 	if (bDead) return;
 	if (OldValue == NewValue) return;

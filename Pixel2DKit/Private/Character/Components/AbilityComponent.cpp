@@ -603,7 +603,7 @@ void UAbilityComponent::LoadAbilities()
 
 		FGameplayTag AbilityTag = TAG(*Parent);
 		
-		if (CachedASC->HasAbility(AbilityTag)) continue;
+		if (EffectGameplayTags.Contains(AbilityTag)) continue;
 		EffectGameplayTags.SetData(AbilityTag, 1);
 		
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);

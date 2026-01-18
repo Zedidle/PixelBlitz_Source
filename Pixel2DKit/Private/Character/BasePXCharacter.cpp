@@ -114,12 +114,11 @@ void ABasePXCharacter::LoadData()
 	}
 
 #pragma region GAS
-	InitAbilitiesToGive.Append(DataAsset->InitAbilitiesToGive);
 	InitEffects.Append(DataAsset->InitEffects);
 	// AttributeSet 初始化
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
 	{
-		for (auto Ability : InitAbilitiesToGive)
+		for (auto Ability : DataAsset->InitAbilitiesToGive)
 		{
 			AbilitySystem->K2_GiveAbility(Ability);
 		}
@@ -413,7 +412,7 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
+	// StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->bEnableCameraRotationLag = true;
@@ -448,6 +447,14 @@ float ABasePXCharacter::GetEffectGameplayTag(const FGameplayTag Tag) const
 void ABasePXCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 莫名其妙在构造函数生成的会失效
+	StateComponent = NewObject<UStateComponent>(this, TEXT("StateComponent"));
+	if (StateComponent)
+	{
+		StateComponent->RegisterComponent();
+	}
+	
 	InitScale = GetActorScale3D();
 
 	if (SpringArm)
