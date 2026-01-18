@@ -8,7 +8,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "AbilitySystemInterface.h"
 #include "Abilities/GameplayAbility.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Buff_Interface.h"
@@ -30,8 +30,7 @@ class UBuffComponent;
 class UTalentComponent;
 
 class UPXASComponent;
-class UHealthComponent;
-class UEnergyComponent;
+class UStateComponent;
 class UFightComponent;
 
 class UCameraComponent;
@@ -208,35 +207,32 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = GAS)
 	UPXAttributeSet* GetAttributeSet() const;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UHealthComponent> HealthComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UStateComponent* StateComponent;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UEnergyComponent> EnergyComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UFightComponent> FightComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UFightComponent* FightComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UAbilityComponent> AbilityComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UAbilityComponent* AbilityComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UBuffComponent> BuffComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UBuffComponent* BuffComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<USpringArmComponent> SpringArm;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USpringArmComponent* SpringArm;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UCameraComponent> Camera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UCameraComponent* Camera;
 	
 #pragma region EffectGameplayTags
 	UPROPERTY()
 	FEffectGameplayTags EffectGameplayTags;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool HasEffectGameplayTag(const FGameplayTag Tag) const;
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Fight)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetEffectGameplayTag(const FGameplayTag Tag) const;
 #pragma endregion
 
@@ -270,10 +266,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void ReadyToStart();
 
-	UPROPERTY(BlueprintReadOnly, Category = Fight)
+	UPROPERTY(BlueprintReadOnly)
 	ABaseWeapon* Weapon;
 	
-	UFUNCTION(BlueprintCallable, Category = Fight)
+	UFUNCTION(BlueprintCallable)
 	void LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass = nullptr);
 	
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
@@ -384,10 +380,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bMoving;
 
-	UPROPERTY(BlueprintReadWrite, Category = Fight)
+	UPROPERTY(BlueprintReadWrite)
 	float BasicRepelValue;
 	
-	UPROPERTY(BlueprintReadWrite, Category = Fight)
+	UPROPERTY(BlueprintReadWrite)
 	int	BasicAttackValue = 10;
 
 	

@@ -4,7 +4,7 @@
 #include "Fight/Components/FightComponent.h"
 
 #include "NiagaraFunctionLibrary.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -69,7 +69,7 @@ void UFightComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 				if (!HitActor->Implements<UFight_Interface>()) continue;					
 				if (!IFight_Interface::Execute_GetOwnCamp(HitActor).HasAny(EnemyTags)) continue;
 
-				if (UHealthComponent* HealthComponent = HitActor->GetComponentByClass<UHealthComponent>())
+				if (UStateComponent* HealthComponent = HitActor->GetComponentByClass<UStateComponent>())
 				{
 					UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, CurHitEffect, hit.ImpactPoint);
 					HealthComponent->DecreaseHP(CurMeleeDamage, Owner, CurKnockbackForceMelee);

@@ -11,7 +11,7 @@
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "Engine/DataTable.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "GAS/PXEnemyASComponent.h"
 #include "BaseEnemy.generated.h"
 
@@ -107,7 +107,7 @@ struct FActionMove
 
 class UAIPerceptionComponent;
 class UEnemyAIComponent;
-class UHealthComponent;
+class UStateComponent;
 class UFightComponent;
 class UEnemyDataAsset;
 class ABasePXCharacter;
@@ -139,10 +139,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
 	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
-
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
-	TObjectPtr<UHealthComponent> HealthComponent;
+	TObjectPtr<UStateComponent> StateComponent;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
 	TObjectPtr<UFightComponent> FightComponent;

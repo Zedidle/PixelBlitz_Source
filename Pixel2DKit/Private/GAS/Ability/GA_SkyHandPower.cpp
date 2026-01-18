@@ -7,7 +7,7 @@
 #include "Character/BasePXCharacter.h"
 #include "Character/Components/AbilityComponent.h"
 #include "Enemy/BaseEnemy.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -56,7 +56,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		K2_EndAbility();
 		return;
 	}
-	UHealthComponent* EnemyHealthComponent = Enemy->GetComponentByClass<UHealthComponent>();
+	UStateComponent* EnemyHealthComponent = Enemy->GetComponentByClass<UStateComponent>();
 	if (!EnemyHealthComponent)
 	{
 		K2_EndAbility();
@@ -70,7 +70,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	}
 
 	float MultiPercent;
-	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.SkyHandPower.Set.DamageOnAttackDamagePercent"), MultiPercent);
+	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.SkyHandPower.Set.AttackDamagePercent"), MultiPercent);
 	
 	int Damage = MultiPercent * IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
 	FVector PreEnemyLocation = Enemy->GetActorLocation();

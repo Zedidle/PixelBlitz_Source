@@ -9,8 +9,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Enemy/BaseEnemy.h"
-#include "Fight/Components/EnergyComponent.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "Fight/Skills/BaseDefenseSkill.h"
 #include "Fight/Skills/BaseSkill.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -140,6 +139,7 @@ void UAbilityComponent::LoadTalents()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->StateComponent)
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
@@ -192,11 +192,8 @@ void UAbilityComponent::LoadTalents()
 	Tag = TAG("CommonSet.SightPlusPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		if (PXCharacter->BuffComponent->Implements<UBuff_Interface>())
-		{
-			IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
-				TAG("Ability.EagleEye"), EffectGameplayTags[Tag], 0, 999);
-		}
+		IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
+			TAG("Ability.EagleEye"), EffectGameplayTags[Tag], 0, 999);
 	}
 	
 
@@ -204,23 +201,15 @@ void UAbilityComponent::LoadTalents()
 	Tag = TAG("CommonSet.MaxHPPlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		if (PXCharacter->HealthComponent)
-		{
-			PXCharacter->HealthComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
-		}
+		PXCharacter->StateComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
 	}
 
 	// 最大体力值
 	Tag = TAG("CommonSet.MaxEPPlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		if (UEnergyComponent* EnergyComponent = PXCharacter->EnergyComponent)
-		{
-			EnergyComponent->SetMaxEP(EffectGameplayTags[Tag] + EnergyComponent->GetMaxEP());
-		}
+		PXCharacter->StateComponent->SetMaxEP(EffectGameplayTags[Tag] + PXCharacter->StateComponent->GetMaxEP());
 	}
-
-
 
 	// 体型 / 蚁人
 	Tag = TAG("CommonSet.BodySizePlusPercent");
@@ -316,7 +305,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->HealthComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->StateComponent)
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
@@ -338,13 +327,13 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 		{
 			if (!WeakThis.IsValid()) return;
 			if (!WeakThis->PXCharacter) return;
-			if (!WeakThis->PXCharacter->HealthComponent) return;
+			if (!WeakThis->PXCharacter->StateComponent) return;
 		
 			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
 			if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
 												
 			IBuff_Interface::Execute_BuffEffect_Attack(WeakThis->PXCharacter, ImmortalPowerTag, 0.0f,
-				FMath::RoundToInt(WeakThis->PXCharacter->HealthComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]),
+				FMath::RoundToInt(WeakThis->PXCharacter->StateComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]),
 				999.f
 			);
 			if (WeakThis->PXCharacter->BuffComponent)
@@ -361,7 +350,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 	if (!First && PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{
 		IBuff_Interface::Execute_RemoveBuff(PXCharacter, ImmortalPowerTag, true);
-		PXCharacter->HealthComponent->ModifyMaxHP(1, EStatChange::Increase, true);
+		PXCharacter->StateComponent->ModifyMaxHP(1, EStatChange::Increase, true);
 	}
 }
 
@@ -643,7 +632,7 @@ void UAbilityComponent::LoadAbilities()
 		}
 	}
 
-	UHealthComponent* HealthComponent = PXCharacter->GetComponentByClass<UHealthComponent>();
+	UStateComponent* HealthComponent = PXCharacter->GetComponentByClass<UStateComponent>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
 	UBuffComponent* BuffComponent = PXCharacter->GetComponentByClass<UBuffComponent>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent)
@@ -811,14 +800,14 @@ void UAbilityComponent::OnSkillStart()
 int UAbilityComponent::GetAttackDamagePlus()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, 0)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter->HealthComponent, 0)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter->StateComponent, 0)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 
 	int LocalPlus = 0;
 	FGameplayTag Tag = TAG("Ability.Wushu.Set.AttackDamagePlusOnCurHPPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->HealthComponent->GetCurrentHP()) ;
+		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->StateComponent->GetCurrentHP()) ;
 	}
 
 	// …… 其它技能

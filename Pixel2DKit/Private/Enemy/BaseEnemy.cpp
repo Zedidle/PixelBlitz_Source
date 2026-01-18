@@ -18,7 +18,7 @@
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/EnemyDataAsset.h"
 #include "Fight/Components/FightComponent.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/AttributeSet/PXEnemyAttributeSet.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -258,7 +258,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	EnemyData = DataTableManager->FindRow<FEnemyData>(DataTable, EnemyLevel);
 
-	HealthComponent->ModifyMaxHP(EnemyData.HP, EStatChange::Reset, true);
+	StateComponent->ModifyMaxHP(EnemyData.HP, EStatChange::Reset, true);
 	SetActorScale3D(FVector(EnemyData.BodyScale));
 
 	LoadLookDeterrence(EnemyData.LookDeterrence);
@@ -281,7 +281,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 	
 	LostEnemyTime = EnemyData.LostEnemyTime;
 
-	HealthComponent->RepelResistance = EnemyData.RepelResistance;
+	StateComponent->RepelResistance = EnemyData.RepelResistance;
 
 	
 #pragma region GAS
@@ -338,7 +338,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
 	
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
@@ -372,9 +372,9 @@ void ABaseEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+		StateComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
 }
 
@@ -384,9 +384,9 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	OnEnemyDie.RemoveAll(this);
 	
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
+		StateComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnEnemyHPChanged);
 	}
 }
 
@@ -582,7 +582,7 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 	
 	UGameInstance* GameInstance = GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(StateComponent)
 	
 	if (NewValue > 0)
 	{
@@ -590,9 +590,9 @@ void ABaseEnemy::OnEnemyHPChanged_Implementation(int32 OldValue, int32 NewValue)
 		{
 			OnHurt(NewValue);
 			int32 ChangedValue = OldValue - NewValue;
-			if (ChangedValue > HealthComponent->GetMaxHP() * 0.1)
+			if (ChangedValue > StateComponent->GetMaxHP() * 0.1)
 			{
-				SetHurt(true, HealthComponent->CalHurtDuration(ChangedValue));
+				SetHurt(true, StateComponent->CalHurtDuration(ChangedValue));
 			}
 		}
 	}
@@ -974,17 +974,17 @@ FVector ABaseEnemy::GetAttackRepel_Implementation()
 
 void ABaseEnemy::OnAnimVulnerableBegin_Implementation()
 {
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->SetInvulnerable(true);
+		StateComponent->SetInvulnerable(true);
 	}
 }
 
 void ABaseEnemy::OnAnimVulnerableEnd_Implementation()
 {
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->SetInvulnerable(false);
+		StateComponent->SetInvulnerable(false);
 	}
 }
 

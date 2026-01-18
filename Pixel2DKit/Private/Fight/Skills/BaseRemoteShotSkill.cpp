@@ -130,7 +130,7 @@ void ABaseRemoteShotSkill::OnHitTarget_Implementation(AActor* OverlappedActor, A
 	}
 
 
-	if (UHealthComponent* HealthComponent = HitTarget->GetComponentByClass<UHealthComponent>())
+	if (UStateComponent* HealthComponent = HitTarget->GetComponentByClass<UStateComponent>())
 	{
 		HealthComponent->DecreaseHP(Damage, Owner, Knockback, bForce);
 		IFight_Interface::Execute_OnAttackHit(Owner, HitTarget);

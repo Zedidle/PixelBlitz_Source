@@ -5,7 +5,7 @@
 #include "GameplayEffectExtension.h"
 #include "Pixel2DKit.h"
 #include "Core/PXGameState.h"
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXGameplayStatics.h"
@@ -112,7 +112,7 @@ void UPXAttributeSet::PostAttributeChange(const FGameplayAttribute& Attribute, f
 		{
 			if (APawn* Pawn = IFight_Interface::Execute_GetPawn(Actor))
 			{
-				if (UHealthComponent* HealthComp = Pawn->GetComponentByClass<UHealthComponent>())
+				if (UStateComponent* HealthComp = Pawn->GetComponentByClass<UStateComponent>())
 				{
 					HealthComp->OnHPChanged.Broadcast(OldValue, NewValue);
 				}

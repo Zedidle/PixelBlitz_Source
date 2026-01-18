@@ -251,7 +251,7 @@ void ABaseTraceProjectileSkill::OnHitTarget_Implementation(AActor* HitTarget)
 {
 	if (HitTarget != Target) return;
 
-	if (UHealthComponent* HealthComponent = Target->GetComponentByClass<UHealthComponent>())
+	if (UStateComponent* HealthComponent = Target->GetComponentByClass<UStateComponent>())
 	{
 		int DistanceDamage = bPlusDamageByDistance ? FVector::Distance(DistanceDamageInitLocation, GetActorLocation()) * DamagePlusPer100Meter / 100 : 0;
 		HealthComponent->DecreaseHP(Damage + DistanceDamage, Owner, Knockback, bForce);

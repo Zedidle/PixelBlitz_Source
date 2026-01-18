@@ -11,7 +11,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
-#include "NiagaraFunctionLibrary.h"
 #include "PXGameplayTags.h"
 #include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
@@ -20,8 +19,7 @@
 #include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"
 #include "Fight/Components/FightComponent.h"
-#include "Fight/Components/HealthComponent.h"
-#include "Fight/Components/EnergyComponent.h"
+#include "Fight/Components/StateComponent.h"
 #include "Subsystems/PXAnimSubsystem.h"
 #include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
@@ -94,22 +92,18 @@ void ABasePXCharacter::LoadData()
 	BasicAttackValue = Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue;
 	BasicAttackInterval = Attribute.BasicAttackInterval + InheritAttribute.BasicAttackInterval;
 
-	if (EnergyComponent)
+	if (StateComponent)
 	{
-		EnergyComponent->SetMaxEP(Attribute.MaxEP + InheritAttribute.MaxEP);
+		StateComponent->SetMaxEP(Attribute.MaxEP + InheritAttribute.MaxEP);
+		StateComponent->ModifyMaxHP(Attribute.MaxHP + InheritAttribute.MaxHP, EStatChange::Reset, true);
+		StateComponent->RepelResistancePercent = Attribute.RepelResistPercent + InheritAttribute.RepelResistPercent;
 	}
-
-	if (HealthComponent)
-	{
-		HealthComponent->ModifyMaxHP(Attribute.MaxHP + InheritAttribute.MaxHP, EStatChange::Reset, true);
-		HealthComponent->RepelResistancePercent = Attribute.RepelResistPercent + InheritAttribute.RepelResistPercent;
-	}
-
 	
 	MaxWalkSpeed = Attribute.MaxWalkSpeed + InheritAttribute.MaxWalkSpeed;
 	MaxAcceleration = Attribute.MaxAcceleration + InheritAttribute.MaxAcceleration;
 	JumpZVelocity = Attribute.JumpZVelocity + InheritAttribute.JumpZVelocity;
 	GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
+	
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
@@ -415,12 +409,11 @@ void ABasePXCharacter::LoadAbility_Implementation()
 ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
-	EnergyComponent = CreateDefaultSubobject<UEnergyComponent>(TEXT("EnergyComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bEnableCameraLag = true;
 	SpringArm->bEnableCameraRotationLag = true;
@@ -472,11 +465,10 @@ void ABasePXCharacter::BeginPlay()
 	LoadData();
 	LoadWeapon();
 	
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->OnHPChanged.AddDynamic(this, &ABasePXCharacter::OnHPChanged);
+		StateComponent->OnHPChanged.AddDynamic(this, &ABasePXCharacter::OnHPChanged);
 	}
-
 
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
@@ -498,9 +490,9 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	OnPlayerAttackStart.RemoveAll(this);
 	OnPlayerDie.RemoveAll(this);
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->OnHPChanged.RemoveAll(this);
+		StateComponent->OnHPChanged.RemoveAll(this);
 	}
 
 
@@ -711,16 +703,14 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 
 void ABasePXCharacter::Revive_Implementation()
 {
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->SetHP(HealthComponent->GetMaxHP());
+		StateComponent->SetHP(StateComponent->GetMaxHP());
+		StateComponent->SetEP(StateComponent->GetMaxEP() * 0.5);
+		
 	}
 	CheckNearDeath();
 	
-	if (EnergyComponent)
-	{
-		EnergyComponent->SetEP(EnergyComponent->GetMaxEP() * 0.5);
-	}
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
@@ -899,7 +889,7 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 
 void ABasePXCharacter::CheckNearDeath_Implementation()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(StateComponent)
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
 
@@ -908,7 +898,7 @@ void ABasePXCharacter::CheckNearDeath_Implementation()
 
 	if (WidgetsDataAsset->NearDeathWidgetClass)
 	{
-		if (HealthComponent->GetHPPercent() < 0.3)
+		if (StateComponent->GetHPPercent() < 0.3)
 		{
 			UUserWidgetFuncLib::AddWidget(WidgetsDataAsset->NearDeathWidgetClass, ESlateVisibility::HitTestInvisible, false);
 		}
@@ -926,10 +916,10 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(StateComponent)
 
 	int ChangedValue = OldValue - NewValue;
-	float ChangedHPPercent = static_cast<float>(ChangedValue) / HealthComponent->GetMaxHP();
+	float ChangedHPPercent = static_cast<float>(ChangedValue) / StateComponent->GetMaxHP();
 	
 	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CustomSettings)
@@ -996,7 +986,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 		SetDead(true);
 
 		int RemReviveTimes = -1;
-		if (AbilityComponent && !HealthComponent->DieByFalling)
+		if (AbilityComponent && !StateComponent->DieByFalling)
 		{
 			AbilityComponent->OnDying(RemReviveTimes);
 		}
@@ -1008,9 +998,9 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			{
 				PC->OnCharacterControl(false);
 			}
-			if (HealthComponent)
+			if (StateComponent)
 			{
-				HealthComponent->InvulnerableForDuration(2.5);
+				StateComponent->InvulnerableForDuration(2.5);
 			}
 			UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 			{
@@ -1038,9 +1028,9 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				{
 					BuffComponent->DestroyComponent();
 				}
-				if (HealthComponent)
+				if (StateComponent)
 				{
-					HealthComponent->DestroyComponent();
+					StateComponent->DestroyComponent();
 				}
 				UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 				{
@@ -1078,7 +1068,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			Execute_OnDie(this);
 		}
 
-		HealthComponent->DieByFalling = false;
+		StateComponent->DieByFalling = false;
 	}
 }
 
@@ -1429,17 +1419,17 @@ void ABasePXCharacter::OnDefendingHitEffect_Implementation()
 
 void ABasePXCharacter::OnAnimVulnerableBegin_Implementation()
 {
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->SetInvulnerable(true);
+		StateComponent->SetInvulnerable(true);
 	}
 }
 
 void ABasePXCharacter::OnAnimVulnerableEnd_Implementation()
 {
-	if (HealthComponent)
+	if (StateComponent)
 	{
-		HealthComponent->SetInvulnerable(false);
+		StateComponent->SetInvulnerable(false);
 	}
 }
 

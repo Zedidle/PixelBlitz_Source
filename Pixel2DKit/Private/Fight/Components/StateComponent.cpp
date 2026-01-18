@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Fight/Components/HealthComponent.h"
+#include "Fight/Components/StateComponent.h"
 
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -13,6 +13,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
+#include "Core/PXGameState.h"
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
@@ -26,7 +27,7 @@
 
 class ULegacyCameraShake;
 
-int UHealthComponent::CalAcceptDamage(int InDamage, AActor* Maker)
+int UStateComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 {
 	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Owner, InDamage)
@@ -42,7 +43,7 @@ int UHealthComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 	return InDamage + DamagePlus;
 }
 
-void UHealthComponent::OnHurtInvulnerable()
+void UStateComponent::OnHurtInvulnerable()
 {
 	SetInvulnerable(false);
 	FName TimerName = FName( GetReadableName()+ "_OnHurtInvulnerable");
@@ -55,7 +56,7 @@ void UHealthComponent::OnHurtInvulnerable()
 	}, OnHurtInvulnerableDelay);
 }
 
-void UHealthComponent::InvulnerableForDuration(float duration)
+void UStateComponent::InvulnerableForDuration(float duration)
 {
 	SetInvulnerable(true);
 	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
@@ -65,7 +66,7 @@ void UHealthComponent::InvulnerableForDuration(float duration)
 	}, duration);
 }
 
-void UHealthComponent::FlashForDuration(float Duration, float FlashRate, FLinearColor FlashColor) 
+void UStateComponent::FlashForDuration(float Duration, float FlashRate, FLinearColor FlashColor) 
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
@@ -89,7 +90,7 @@ void UHealthComponent::FlashForDuration(float Duration, float FlashRate, FLinear
 		}, FlashRate, -1, FlashTimes);
 }
 
-FVector UHealthComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigator) const
+FVector UStateComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigator) const
 {
 	if (!IsValid(Instigator)) return IncomeRepel;
 	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel;
@@ -103,7 +104,7 @@ FVector UHealthComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigato
 }
 
 // Sets default values for this component's properties
-UHealthComponent::UHealthComponent()
+UStateComponent::UStateComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -112,21 +113,21 @@ UHealthComponent::UHealthComponent()
 	// ...
 }
 
-UHealthComponent::UHealthComponent(const FObjectInitializer& ObjectInitializer)
+UStateComponent::UStateComponent(const FObjectInitializer& ObjectInitializer)
 {
 }
 
-UHealthComponent::~UHealthComponent()
+UStateComponent::~UStateComponent()
 {
 }
 
 
-void UHealthComponent::SetInvulnerable(const bool v)
+void UStateComponent::SetInvulnerable(const bool v)
 {
 	bInvulnerable = v;
 }
 
-void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current)
+void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current)
 {
 	AActor* Owner = GetOwner();
 	if (!IsValid(Owner)) return;
@@ -166,7 +167,7 @@ void UHealthComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, co
 	}
 }
 
-void UHealthComponent::SetHP(const int32 value, const bool broadcast)
+void UStateComponent::SetHP(const int32 value, const bool broadcast)
 {
 	AActor* TargetActor = GetOwner();
 	if (!IsValid(TargetActor)) return;
@@ -183,7 +184,7 @@ void UHealthComponent::SetHP(const int32 value, const bool broadcast)
 
 
 
-void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
+void UStateComponent::IncreaseHP(int32 value, AActor* Instigator)
 {
 	AActor* Owner = GetOwner();
 	if (!IsValid(Owner)) return;
@@ -206,16 +207,16 @@ void UHealthComponent::IncreaseHP(int32 value, AActor* Instigator)
 
 
 // Called when the game starts
-void UHealthComponent::BeginPlay()
+void UStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
 	
-	OnHPChanged.AddDynamic(this, &UHealthComponent::Event_OnHPChanged);
+	OnHPChanged.AddDynamic(this, &UStateComponent::Event_OnHPChanged);
 }
 
-void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UStateComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
@@ -225,7 +226,7 @@ void UHealthComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 
 // Called every frame
-void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -234,7 +235,7 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 
 
-void UHealthComponent::Event_OnHPChanged(int OldValue, int NewValue)
+void UStateComponent::Event_OnHPChanged(int OldValue, int NewValue)
 {
 	int32 ChangedHP = OldValue - NewValue;
 	if (ChangedHP > 0)
@@ -250,7 +251,7 @@ void UHealthComponent::Event_OnHPChanged(int OldValue, int NewValue)
 	}
 }
 
-int UHealthComponent::GetCurrentHP()
+int UStateComponent::GetCurrentHP()
 {
 	if (const AActor* TargetActor = GetOwner())
 	{
@@ -266,7 +267,7 @@ int UHealthComponent::GetCurrentHP()
 	return 0;
 }
 
-int UHealthComponent::GetMaxHP()
+int UStateComponent::GetMaxHP()
 {
 	if (const AActor* TargetActor = GetOwner())
 	{
@@ -282,12 +283,12 @@ int UHealthComponent::GetMaxHP()
 	return 100;
 }
 
-float UHealthComponent::GetHPPercent()
+float UStateComponent::GetHPPercent()
 {
 	return float(GetCurrentHP()) / float(GetMaxHP());
 }
 
-void UHealthComponent::DecreaseHP(int Damage, AActor* Maker, const FVector KnockbackForce, bool bForce)
+void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector KnockbackForce, bool bForce)
 {
 	if (Damage <= 0) return;
 	AActor* Owner = GetOwner();
@@ -355,7 +356,7 @@ void UHealthComponent::DecreaseHP(int Damage, AActor* Maker, const FVector Knock
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
 }
 
-void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
+void UStateComponent::KnockBack(FVector Repel, AActor* Maker)
 {
 	if (InRockPercent > 0.0f)
 	{
@@ -434,7 +435,7 @@ void UHealthComponent::KnockBack(FVector Repel, AActor* Maker)
 	
 }
 
-float UHealthComponent::CalHurtDuration(int32 ChangedHP)
+float UStateComponent::CalHurtDuration(int32 ChangedHP)
 {
 	if (ChangedHP > GetMaxHP() * 0.1)
 	{
@@ -442,6 +443,133 @@ float UHealthComponent::CalHurtDuration(int32 ChangedHP)
 	}
 
 	return 0.1f;
+}
+
+int32 UStateComponent::CalEPCustomInFact(int32 Amount)
+{
+	APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GS, Amount)
+	
+	return FMath::RoundToInt(Amount * (GS->GetEPConsumePlusPercent() + 1.0f));
+}
+
+bool UStateComponent::DecreaseEP(int32 Amount)
+{
+	APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GS, false)
+	
+	int32 Consume = CalEPCustomInFact(Amount);
+
+	if (!IsEPEnough(Consume, true)) return false;
+
+	if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()))
+	{
+		if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+		{
+			float CurValue = PixelAS->GetEP();
+			
+			if (CurValue >= Consume)
+			{
+				CurValue -= Consume;
+				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), CurValue);
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void UStateComponent::IncreaseEP(int32 Amount)
+{
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			{
+				float NewValue = FMath::Min(PixelAS->GetEP() + Amount, PixelAS->GetMaxEP());
+				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
+			}
+		}
+	}
+}
+
+void UStateComponent::SetEP(int32 NewValue)
+{
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
+		}
+	}
+}
+
+int32 UStateComponent::GetCurrentEP()
+{
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			{
+				return PixelAS->GetEP();
+			}
+		}
+	}
+	return 0;
+}
+
+int32 UStateComponent::GetMaxEP()
+{
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			{
+				return PixelAS->GetMaxEP();
+			}
+		}
+	}
+	return 100;
+}
+
+void UStateComponent::SetMaxEP(int32 NewValue)
+{
+	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner());
+	if (!IsValid(TargetASC)) return;
+	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	if (!IsValid(PixelAS)) return;
+
+	NewValue = FMath::Max(NewValue, 0);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxEPAttribute(), NewValue);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
+}
+
+bool UStateComponent::IsEPEnough(int32 Cost, bool bNeedTip)
+{
+	Cost = CalEPCustomInFact(Cost);
+
+	if (const AActor* TargetActor = GetOwner())
+	{
+		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+		{
+			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
+			{
+				return PixelAS->GetEP() >= Cost;
+			}
+		}
+	}
+
+	if (bNeedTip)
+	{
+		UCommonFuncLib::SpawnCenterTip(LOCTEXT("EP_NOT_ENOUGH", "体力不足"),
+			FLinearColor::White, FVector2D(0, 300));
+	}
+
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE

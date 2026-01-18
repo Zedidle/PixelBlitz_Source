@@ -28,8 +28,8 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	FGameplayTag DecreaseTag = TAG("Ability.SwingPunch.Set.AttackDamage_DecreasePercent");
-	FGameplayTag IncreaseTag = TAG("Ability.SwingPunch.Set.AttackDamage_IncreasePercent");
+	FGameplayTag DecreaseTag = TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
+	FGameplayTag IncreaseTag = TAG("Ability.SwingFist.Set.AttackDamageMinusPercent");
 
 	if (!EffectGameplayTags.Contains(DecreaseTag) || !EffectGameplayTags.Contains(IncreaseTag)) return;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
