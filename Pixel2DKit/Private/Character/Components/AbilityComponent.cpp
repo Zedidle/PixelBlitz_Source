@@ -158,13 +158,11 @@ void UAbilityComponent::LoadTalents()
 	if (TalentLoaded) return;
 	TalentLoaded = true;
 
-	FGameplayTag TalentTag;
-
 	// 基础移动速度
-	TalentTag = TAG("CommonSet.SpeedPlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
+	FGameplayTag Tag = TAG("CommonSet.SpeedPlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->MaxWalkSpeed = PXCharacter->MaxWalkSpeed * (1 + EffectGameplayTags[TalentTag]);
+		PXCharacter->MaxWalkSpeed = PXCharacter->MaxWalkSpeed * (1 + EffectGameplayTags[Tag]);
 		if (UCharacterMovementComponent* MovementComponent = PXCharacter->GetCharacterMovement())
 		{
 			MovementComponent->MaxWalkSpeed = PXCharacter->MaxWalkSpeed;
@@ -172,10 +170,10 @@ void UAbilityComponent::LoadTalents()
 	}
 
 	// 基础跳跃高度
-	TalentTag = TAG("CommonSet.BasicJumpHeightPlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("CommonSet.BasicJumpHeightPlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->JumpZVelocity = PXCharacter->JumpZVelocity * (1 + EffectGameplayTags[TalentTag]);
+		PXCharacter->JumpZVelocity = PXCharacter->JumpZVelocity * (1 + EffectGameplayTags[Tag]);
 		if (UCharacterMovementComponent* MovementComponent = PXCharacter->GetCharacterMovement())
 		{
 			MovementComponent->JumpZVelocity = PXCharacter->JumpZVelocity;
@@ -183,57 +181,57 @@ void UAbilityComponent::LoadTalents()
 	}
 
 	// 基础冲刺距离
-	TalentTag = TAG("CommonSet.DashDistancePlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("CommonSet.DashDistancePlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->BasicDashSpeed = PXCharacter->BasicDashSpeed * (1 + EffectGameplayTags[TalentTag]);
+		PXCharacter->BasicDashSpeed = PXCharacter->BasicDashSpeed * (1 + EffectGameplayTags[Tag]);
 	}
 
 
 	// 视野
-	TalentTag = TAG("CommonSet.SightPlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("CommonSet.SightPlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
 	{
 		if (PXCharacter->BuffComponent->Implements<UBuff_Interface>())
 		{
 			IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
-				TAG("Ability.EagleEye"), EffectGameplayTags[TalentTag], 0, 999);
+				TAG("Ability.EagleEye"), EffectGameplayTags[Tag], 0, 999);
 		}
 	}
 	
 
 	// 最大生命值
-	TalentTag = TAG("CommonSet.MaxHPPlus");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("CommonSet.MaxHPPlus");
+	if (EffectGameplayTags.Contains(Tag))
 	{
 		if (PXCharacter->HealthComponent)
 		{
-			PXCharacter->HealthComponent->ModifyMaxHP(EffectGameplayTags[TalentTag], EStatChange::Increase, true);
+			PXCharacter->HealthComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
 		}
 	}
 
 	// 最大体力值
-	TalentTag = TAG("CommonSet.MaxEPPlus");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("CommonSet.MaxEPPlus");
+	if (EffectGameplayTags.Contains(Tag))
 	{
 		if (UEnergyComponent* EnergyComponent = PXCharacter->EnergyComponent)
 		{
-			EnergyComponent->SetMaxEP(EffectGameplayTags[TalentTag] + EnergyComponent->GetMaxEP());
+			EnergyComponent->SetMaxEP(EffectGameplayTags[Tag] + EnergyComponent->GetMaxEP());
 		}
 	}
 
 
 
 	// 体型 / 蚁人
-	TalentTag = TAG("CommonSet.BodySizePlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("CommonSet.BodySizePlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->SetScale(1 + EffectGameplayTags[TalentTag]);
+		PXCharacter->SetScale(1 + EffectGameplayTags[Tag]);
 	}
 	
 	// 热身
-	TalentTag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
-	if (EffectGameplayTags.Contains(TalentTag))
+	Tag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
 	{
 		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
 			this, &ThisClass::MoveWarmingUP, 0.2);
@@ -253,8 +251,8 @@ void UAbilityComponent::MoveWarmingUP()
 	WarmUP_MoveDistance += FVector::Distance(PXCharacter->GetActorLocation(), OwnerPreLocation);
 	OwnerPreLocation = PXCharacter->GetActorLocation();
 
-	FGameplayTag MoveDistancePerLevelTag = TAG("TalentSet.Warmup.MoveDistancePerLevel");
-	FGameplayTag AttackDamagePlusPercentTag = TAG("TalentSet.Warmup.AttackDamagePlusPercent");
+	FGameplayTag MoveDistancePerLevelTag = TAG("Ability.Warmup.Set.MoveDistancePerLevel");
+	FGameplayTag AttackDamagePlusPercentTag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
 
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
@@ -288,15 +286,14 @@ void UAbilityComponent::MakeMiracleWalker()
 	FGameplayTag MiracleWalkerTag = TAG("Ability.MiracleWalker");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
 
-	FGameplayTag DamagePlusTag = TAG("TalentSet.MiracleWalker.DamagePlus");
-	FGameplayTag IntervalTag = TAG("TalentSet.MiracleWalker.Interval");
-
+	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
+	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.Set.Interval");
 
 	if (!EffectGameplayTags.Contains(DamagePlusTag) || !EffectGameplayTags.Contains(IntervalTag)) return;
 
 	FName TimerName = FName(GetReadableName() + "_MakeMiracleWalker");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-		[WeakThis = TWeakObjectPtr<ThisClass>(this), DamagePlusTag, MiracleWalkerTag]
+		[WeakThis = TWeakObjectPtr(this), DamagePlusTag, MiracleWalkerTag]
 		{
 			if (!WeakThis.IsValid()) return;
 			if (!WeakThis->PXCharacter) return;
@@ -658,7 +655,7 @@ void UAbilityComponent::LoadAbilities()
 	FGameplayTagContainer Tags;
 
 	// 空中移动的控制
-	Tag = TAG("AbilitySet.AirMoveEffectAddPercent");
+	Tag = TAG("CommonSet.AirMoveEffectPlusPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTags[Tag]);
@@ -666,21 +663,21 @@ void UAbilityComponent::LoadAbilities()
 
 
 	// 跳跃上升时间
-	Tag = TAG("AbilitySet.JumpMaxHoldTimePlus");
+	Tag = TAG("CommonSet.JumpMaxHoldTimePlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTags[Tag];
 	}
 	
 	// 附加跳跃次数
-	Tag = TAG("AbilitySet.MaxJumpCountPlus");
+	Tag = TAG("CommonSet.MaxJumpCountPlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		PXCharacter->CurMaxJumpCount = PXCharacter->CurMaxJumpCount + EffectGameplayTags[Tag];
 	}
 	
 	// EP恢复加快
-	Tag = TAG("AbilitySet.EPRecoverLevel");
+	Tag = TAG("CommonSet.EPRecoverLevel");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		TArray<FActiveGameplayEffectHandle> Handles = CachedASC->GetActiveEffectsWithAllTags(
@@ -692,7 +689,7 @@ void UAbilityComponent::LoadAbilities()
 	}
 	
 	// 霸体
-	Tag = TAG("AbilitySet.InRock");
+	Tag = TAG("Ability.InRock.Set.Percent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		HealthComponent->InRockPercent = EffectGameplayTags[Tag];
@@ -818,7 +815,7 @@ int UAbilityComponent::GetAttackDamagePlus()
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 
 	int LocalPlus = 0;
-	FGameplayTag Tag = TAG("TalentSet.Wushu.AttackDamagePlusOnCurHPPercent");
+	FGameplayTag Tag = TAG("Ability.Wushu.Set.AttackDamagePlusOnCurHPPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->HealthComponent->GetCurrentHP()) ;

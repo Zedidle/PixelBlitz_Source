@@ -800,7 +800,7 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 	{
 		float Result;
 		if (Maker->Implements<UFight_Interface>() && Execute_FindEffectGameplayTag(Maker,
-			FGameplayTag::RequestGameplayTag("AbilitySet.ToBossDamagePlusPercent"),
+			TAG("Ability.GiantSlayer.Set.ToBossDamagePlusPercent"),
 			Result))
 		{
 			OutDamage *= 1 + Result;
@@ -953,7 +953,7 @@ APawn* ABaseEnemy::GetPawn_Implementation()
 
 float ABaseEnemy::GetAttackInterval_Implementation()
 {
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AttackAccPercent");
+	FGameplayTag Tag = TAG("CommonSet.AttackAccPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		return BasicAttackInterval / (1 + EffectGameplayTags[Tag]);

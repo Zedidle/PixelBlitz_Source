@@ -662,7 +662,7 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 
 int ABasePXCharacter::GetAttackDamage_Implementation()
 {
-	FGameplayTag AttackDamagePlusTag = FGameplayTag::RequestGameplayTag("AbilitySet.SwordPlay.AttackDamagePlus");
+	FGameplayTag AttackDamagePlusTag = TAG("Ability.SwordPlay.Set.AttackDamagePlus");
 	int AttackValue = BasicAttackValue;
 	if (Weapon)
 	{
@@ -827,7 +827,7 @@ FVector ABasePXCharacter::CalSkillVelocity(float DashSpeed)
 	Result.Y = Result.Y * DashInitSpeedPercent + MovementVelocity.Y * DashNewDirSpeedPercent;
 	Result.Z += MovementVelocity.Z * 0.1;
 	
-	Result *= GetEffectGameplayTag(TAG("AbilitySet.DashDistancePlusPercent")) + 1;
+	Result *= GetEffectGameplayTag(TAG("CommonSet.DashDistancePlusPercent")) + 1;
 	return Result;
 }
 
@@ -1386,7 +1386,7 @@ int ABasePXCharacter::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 	if (!GetCharacterMovement()->IsMovingOnGround())
 	{
 		float AirFightPlus = 0;
-		if (Execute_FindEffectGameplayTag(this, FGameplayTag::RequestGameplayTag("AbilitySet.InAir.DamagePlus"), AirFightPlus))
+		if (Execute_FindEffectGameplayTag(this, TAG("Ability.AirFight.Set.DamagePlus"), AirFightPlus))
 		{
 			Result += AirFightPlus;
 		}
@@ -1529,7 +1529,7 @@ APawn* ABasePXCharacter::GetPawn_Implementation()
 
 float ABasePXCharacter::GetAttackInterval_Implementation()
 {
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("AbilitySet.AttackAccPercent");
+	FGameplayTag Tag = TAG("CommonSet.AttackAccPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		return BasicAttackInterval / (1 + EffectGameplayTags[Tag]);
@@ -1737,7 +1737,7 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
 
-	FGameplayTag Tag = TAG("AbilitySet.Brake");
+	FGameplayTag Tag = TAG("Ability.Brake.Set.Value");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向

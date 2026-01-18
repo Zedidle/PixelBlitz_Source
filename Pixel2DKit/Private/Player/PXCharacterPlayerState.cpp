@@ -43,7 +43,7 @@ void APXCharacterPlayerState::RecoverPlayerStateOnEnemyDie()
 	UAbilitySystemComponent* ASC = PXCharacter->GetAbilitySystemComponent();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC);
 
-	ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(FGameplayTag::RequestGameplayTag("Ability.GOWRecover")));
+	ASC->TryActivateAbilitiesByTag(FGameplayTagContainer(TAG("Ability.GOWRecover")));
 }
 
 void APXCharacterPlayerState::OnEnemyDie_Implementation(ABaseEnemy* Enemy)

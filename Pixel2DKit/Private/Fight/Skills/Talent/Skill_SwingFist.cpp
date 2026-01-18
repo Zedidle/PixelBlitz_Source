@@ -28,15 +28,15 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	FGameplayTag DecreaseTag = TAG("TalentSet.SwingPunch.AttackDamage_DecreasePercent");
-	FGameplayTag IncreaseTag = TAG("TalentSet.SwingPunch.AttackDamage_IncreasePercent");
+	FGameplayTag DecreaseTag = TAG("Ability.SwingPunch.Set.AttackDamage_DecreasePercent");
+	FGameplayTag IncreaseTag = TAG("Ability.SwingPunch.Set.AttackDamage_IncreasePercent");
 
 	if (!EffectGameplayTags.Contains(DecreaseTag) || !EffectGameplayTags.Contains(IncreaseTag)) return;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 
 	SwingFistPower = !SwingFistPower;
 	
-	FGameplayTag SwingFistTag = TAG("Talent.SwingFist");
+	FGameplayTag SwingFistTag = TAG("Ability.SwingFist");
 	IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
 
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");

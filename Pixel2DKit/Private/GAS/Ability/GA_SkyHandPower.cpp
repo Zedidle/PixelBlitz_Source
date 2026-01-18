@@ -70,7 +70,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	}
 
 	float MultiPercent;
-	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("AbilitySet.SkyHandPower.DamageOnAttackDamagePercent"), MultiPercent);
+	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.SkyHandPower.Set.DamageOnAttackDamagePercent"), MultiPercent);
 	
 	int Damage = MultiPercent * IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
 	FVector PreEnemyLocation = Enemy->GetActorLocation();

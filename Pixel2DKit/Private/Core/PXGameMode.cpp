@@ -217,7 +217,7 @@ void APXGameMode::PrepareGame()
 	
 	if (MainSaveGame->CurLevel == 1)
 	{
-		float Potential_SkillPoints = PXCharacter->GetEffectGameplayTag(TAG("TalentSet.Potential"));
+		float Potential_SkillPoints = PXCharacter->GetEffectGameplayTag(TAG("Ability.Potential.Set.Value"));
 		MainSaveGame->RemSkillPoints += static_cast<int>(Potential_SkillPoints);
 	}
 	MainSaveGame->RemSkillPoints += GameDataAsset->BasePerLevelSkillPointsGet;
