@@ -49,5 +49,14 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "PXASC")
 	void RemoveAbilityCD(const FGameplayTag& AbilityTag);
+
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	void SetPXAttributeValueByName(const FString& AttributeName, float Value);
+
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	void ModifyPXAttributeValueByName(const FString& AttributeName, float ModifyValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "PXASC")
+	float GetPXAttributeValueByName(const FString& AttributeName);
 	
 };

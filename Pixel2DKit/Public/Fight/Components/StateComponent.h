@@ -93,7 +93,7 @@ public:
 	virtual void ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current);
 
 	UFUNCTION(BlueprintCallable, Category="StateComponent")
-	virtual void SetHP(const int32 value, const bool broadcast = true);
+	virtual void SetHP(const int32 value);
 	
 protected:
 	// Called when the game starts

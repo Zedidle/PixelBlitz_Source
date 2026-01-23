@@ -49,7 +49,7 @@ void UCommonFuncLib::SpawnFloatingCombatText(EFloatingTextType TextType, FText T
 				Widget->Init(Text, FloatingTextColor::DamageColor * ColorMulti, Icon, WorldLocation);
 			}
 
-			if (TextType == EFloatingTextType::Health)
+			if (TextType == EFloatingTextType::Heal)
 			{
 				Widget->Init(FText::FromString("+" + Text.ToString()), FloatingTextColor::HealthColor * ColorMulti, Icon, WorldLocation);
 			}

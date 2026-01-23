@@ -6,15 +6,12 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "PXCharacterAttributeSet.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class PIXEL2DKIT_API UPXCharacterAttributeSet : public UPXAttributeSet
 {
 	GENERATED_BODY()
 public:
-	
-	
+
 
 };

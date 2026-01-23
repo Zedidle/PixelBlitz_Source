@@ -54,7 +54,7 @@ void UBasePlayerStatusWidget::UpdateHP()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TextBlock_HP)
 
 	float HP = PXAttributeSet->GetHP();
-	float MaxHP = PXAttributeSet->GetMaxHP();
+	float MaxHP = PXAttributeSet->GetCurMaxHP();
 	ProgressBar_HP->SetPercent(HP / MaxHP);
 
 	TextBlock_HP->SetText(FText::FromString(FString::Printf( TEXT("%d / %d"), FMath::RoundToInt(HP), FMath::RoundToInt(MaxHP))));
@@ -67,7 +67,7 @@ void UBasePlayerStatusWidget::UpdateEP()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TextBlock_EP)
 
 	float EP = PXAttributeSet->GetEP();
-	float MaxEP = PXAttributeSet->GetMaxEP();
+	float MaxEP = PXAttributeSet->GetCurMaxEP();
 	ProgressBar_EP->SetPercent(EP / MaxEP);
 	
 	TextBlock_EP->SetText(FText::FromString(FString::Printf( TEXT("%d / %d"), FMath::RoundToInt(EP), FMath::RoundToInt(MaxEP))));
@@ -76,11 +76,11 @@ void UBasePlayerStatusWidget::UpdateEP()
 void UBasePlayerStatusWidget::OnAttributeChanged(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
 
-	if (Attribute == UPXAttributeSet::GetHPAttribute() || Attribute == UPXAttributeSet::GetMaxHPAttribute())
+	if (Attribute == UPXAttributeSet::GetHPAttribute() || Attribute == UPXAttributeSet::GetCurMaxHPAttribute())
 	{
 		UpdateHP();
 	}
-	if (Attribute == UPXAttributeSet::GetEPAttribute() || Attribute == UPXAttributeSet::GetMaxEPAttribute())
+	if (Attribute == UPXAttributeSet::GetEPAttribute() || Attribute == UPXAttributeSet::GetCurMaxEPAttribute())
 	{
 		UpdateEP();
 	}

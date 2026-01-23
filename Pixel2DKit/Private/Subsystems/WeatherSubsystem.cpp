@@ -47,7 +47,7 @@ void UWeatherSubsystem::MakeWeatherEffect()
 	
 	if (FoundActors.IsEmpty()) return;
 
-	FBuffValueEffect DayTimeEffect;
+	FBuffEffect DayTimeEffect;
 	FText DayTimeName = DayTimeEffectSight->DayTime2Name.FindRef(GS->DayTimeType);
 	// 时分影响
 	if (GS->DayTimeType == EDayTimeType::Dawn)
@@ -76,8 +76,8 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (DayTimeNameString != DayTimeName.ToString())
 		{
 			DayTimeNameString = DayTimeName.ToString();
-			IBuff_Interface::Execute_RemoveBuff(BuffComp, DayTimeTag, true);
-			IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, DayTimeTag, DayTimeNameString, FLinearColor::White, false);
+			// IBuff_Interface::Execute_RemoveBuff(BuffComp, DayTimeTag, true);
+			// IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, DayTimeTag, DayTimeNameString, FLinearColor::White, false);
 			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, DayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
 		}
 
@@ -85,8 +85,8 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (!GS->WeatherName.IsEmpty() && WeatherNameString != GS->WeatherName.ToString())
 		{
 			WeatherNameString = GS->WeatherName.ToString();
-			IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
-			IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, WeatherTag, WeatherNameString, FLinearColor::White, false);
+			// IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
+			// IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, WeatherTag, WeatherNameString, FLinearColor::White, false);
 			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
 			IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, WeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
 		}

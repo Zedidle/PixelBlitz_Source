@@ -66,7 +66,7 @@ bool ASkill_Revive::OnDying(int& _RemReviveTimes)
 		{
 			if (Owner->Implements<UFight_Interface>())
 			{
-				IBuff_Interface::Execute_RemoveBuff(Owner, TAG("Ability.Revive"), true);
+				// IBuff_Interface::Execute_RemoveBuff(Owner, TAG("Ability.Revive"), true);
 			}
 		}
 		

@@ -85,6 +85,13 @@ public:
 			Data.Add(Tag, Value);
 		}
 	}
+
+	TArray<FGameplayTag> GetAllKeys() const
+	{
+		TArray<FGameplayTag> Keys;
+		Data.GenerateKeyArray(Keys);
+		return Keys;
+	}
 };
 
 
@@ -268,24 +275,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass = nullptr);
-	
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float MaxWalkSpeed = 200.f;
 
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float MaxAcceleration = 400.f;
-
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float BasicAirControl = 1.0f;
-	
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float JumpZVelocity = 250.0f;
-	
-	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	float GravityScale = 1.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-	float BasicDashSpeed = 400.0f;
 	
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendPitch = -20.0f;
@@ -300,6 +290,8 @@ public:
 	// 玩家视角水平转移
 	UPROPERTY(BlueprintReadOnly, Category = View)
 	float CurBlendYaw = 0.0f;
+
+	// 实际上就是Sight
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
 	float BasicSpringArmLength = 280.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
@@ -316,15 +308,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
 	int CurJumpCount = 0;
 	UPROPERTY(BlueprintReadWrite, Category = Movement)
-	int32 CurMaxJumpCount = 2;
-	UPROPERTY(BlueprintReadonly, Category = Movement)
-	int32 BasicMaxJumpCount = 2;
-	UPROPERTY(BlueprintReadonly, Category = Movement)
-	float BasicJumpMaxHoldTime = 0.3f;
-
-	
-	UPROPERTY(BlueprintReadonly, Category = Movement)
-	float BasicAttackInterval = 1.0f;
+	int32 MaxJumpCount = 2;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bDead;
@@ -376,13 +360,6 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bMoving;
-
-	UPROPERTY(BlueprintReadWrite)
-	float BasicRepelValue;
-	
-	UPROPERTY(BlueprintReadWrite)
-	int	BasicAttackValue = 10;
-
 	
 	
 	UFUNCTION(BlueprintCallable, Category = View)
@@ -509,15 +486,11 @@ public:
 	void OnKillEnemy();
 	
 #pragma region IBuff_Interface
-	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999) override;
-	virtual void BuffUpdate_Speed_Implementation() override;
-	virtual void BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime = 9999) override;
 	virtual void BuffUpdate_Attack_Implementation() override;
 	virtual void BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999) override;
-	virtual void BuffUpdate_Sight_Implementation() override;
 	virtual int32 Buff_CalInitDamage_Implementation(int32 InDamage) override;
-	virtual void AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent) override;
-	virtual void RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf = true) override;
+
+	// 直接通过AttributeSet处理
 	virtual float GetShortSightResistancePercent_Implementation() override;
 	virtual float GetSlowDownResistancePercent_Implementation() override;
 #pragma endregion
@@ -560,6 +533,14 @@ public:
 	
 #pragma endregion
 
+
+	UFUNCTION()
+	void OnPXAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetBasicDashSpeed();
+	
+	
 };
 
 inline bool ABasePXCharacter::CanAttack_Implementation()

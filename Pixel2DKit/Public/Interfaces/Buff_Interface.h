@@ -40,16 +40,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffEffect")
 	int32 Buff_CalInitDamage(int32 InDamage);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
-	void AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
-	void RemoveBuffOnWidget(FGameplayTag Tag, bool OnlySelf);
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffText")
-	void RemoveBuff(FGameplayTag Tag, bool OnlySelf = true);
-
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Buff_Interface | BuffResistance")
 	float GetShortSightResistancePercent();

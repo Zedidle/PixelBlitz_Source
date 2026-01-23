@@ -11,6 +11,25 @@
 #include "NiagaraComponent.h"
 #include "BuffComponent.generated.h"
 
+// 针对PXAttributeSet设定的
+USTRUCT(BlueprintType)
+struct FAttributeEffectMap
+{
+	GENERATED_BODY()
+
+	TMap<FGameplayTag, FBuffEffect> Tag2BuffEffect;
+
+	void AddBuffEffect(const FGameplayTag& Tag, const FBuffEffect& Effect)
+	{
+		Tag2BuffEffect.Add(Tag, Effect);
+	}
+
+	void RemoveBuffEffect(const FGameplayTag& Tag)
+	{
+		Tag2BuffEffect.Remove(Tag);
+	}
+};
+
 
 class UDataTableSettings;
 
@@ -21,13 +40,14 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent, public IBuff_Inter
 
 	UPROPERTY()
 	ACharacter* Owner;
+
+	TMap<FString, FAttributeEffectMap> AttributeEffects;
+	TMap<FGameplayTag, TArray<FString>> Tag2AttributeNames;
 	
-	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Speed;
-	TMap<FGameplayTag, float> Tag2BuffEndTime_Speed;
-	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Attack;
-	TMap<FGameplayTag, float> Tag2BuffEndTime_Attack;
-	TMap<FGameplayTag, FBuffValueEffect> Tag2BuffEffect_Sight;
-	TMap<FGameplayTag, float> Tag2BuffEndTime_Sight;
+	// 扩展BuffComponent为支持所有 UPXAttributeSet 的属性
+	TMap<FGameplayTag, FBuffEffect> Tag2BuffEffect_Speed;
+	TMap<FGameplayTag, FBuffEffect> Tag2BuffEffect_Attack;
+	TMap<FGameplayTag, FBuffEffect> Tag2BuffEffect_Sight;
 
 	UPROPERTY()
 	TMap<FGameplayTag, UNiagaraComponent*> Tag2Niagara;
@@ -77,7 +97,6 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool BuffExist(FGameplayTag Tag) const;
@@ -104,25 +123,31 @@ public:
 	
 #pragma region IBuff_Interface
 	virtual void BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
-	virtual void BuffUpdate_Speed_Implementation() override;
 	virtual void BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime) override;
-	virtual void BuffUpdate_Attack_Implementation() override;
 	virtual void BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime) override;
-	virtual void BuffUpdate_Sight_Implementation() override;
-	virtual int32 Buff_CalInitDamage_Implementation(int32 InDamage) override;
-	// 仅仅用作在界面的显示，后续可能需要改名为 AddBuffOnWidget
-	virtual void AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent) override;
-	virtual void RemoveBuffOnWidget_Implementation(FGameplayTag Tag, bool OnlySelf) override;
-	virtual void RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf) override;
-	virtual float GetShortSightResistancePercent_Implementation() override;
-	virtual float GetSlowDownResistancePercent_Implementation() override;
+	virtual void RemoveBuff_Implementation(const FGameplayTag& Tag, bool OnlySelf=true);
 #pragma endregion
 
+	virtual void AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
+	virtual void RemoveBuffOnWidget(FGameplayTag Tag, bool OnlySelf);
+
+	
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
 	void AddBuffByTag(FGameplayTag Tag, bool bNeedPermanent = false);
 
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
 	void ExpireBuff(FGameplayTag Tag);
+
+
+	UFUNCTION(BlueprintCallable)
+	void AddAttributeEffect(const FString& AttributeName, const FGameplayTag& Tag, const FBuffEffect& Effect);
+	
+	UFUNCTION(BlueprintCallable)
+	void RemoveAttributeEffect(const FString& AttributeName, const FGameplayTag& Tag);
+
+	UFUNCTION(BlueprintCallable)
+	void RemoveAttributeEffectsByTag(const FGameplayTag& Tag);
+
 	
 };
 

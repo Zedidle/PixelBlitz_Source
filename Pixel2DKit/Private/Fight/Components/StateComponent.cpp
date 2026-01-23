@@ -14,6 +14,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
 #include "Core/PXGameState.h"
+#include "GAS/PXASComponent.h"
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
@@ -120,58 +121,54 @@ void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, con
 {
 	AActor* Owner = GetOwner();
 	if (!IsValid(Owner)) return;
-	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
-	if (!IsValid(TargetASC)) return;
-	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	UPXASComponent* ASC = Cast<UPXASComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner));
+	if (!IsValid(ASC)) return;
+	const UPXAttributeSet* PixelAS = ASC->GetSet<UPXAttributeSet>();
 	if (!IsValid(PixelAS)) return;
 
 	value = FMath::Max(value, 0);
 	
 	int CurrentHealth = PixelAS->GetHP();
-	int MaxHealth = PixelAS->GetMaxHP();
+	int MaxHealth = PixelAS->GetCurMaxHP();
 	
 	if (ChangeType == EStatChange::Increase)
 	{
-		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), MaxHealth + value);
+		ASC->SetPXAttributeValueByName("MaxHP", MaxHealth + value);
 		if (current)
 		{
-			SetHP(CurrentHealth + value, false);
+			SetHP(CurrentHealth + value);
 		}
 
-	}else if (ChangeType == EStatChange::Decrease)
+	}
+	else if (ChangeType == EStatChange::Decrease)
 	{
-		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), FMath::Max(0, MaxHealth - value));
+		ASC->SetPXAttributeValueByName("MaxHP", FMath::Max(0, MaxHealth - value));
 		if (current)
 		{
-			SetHP(FMath::Max(0, CurrentHealth - value), false);
+			SetHP(FMath::Max(0, CurrentHealth - value));
 		}
 	}
 	else if (ChangeType == EStatChange::Reset)
 	{
-		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxHPAttribute(), value);
+		ASC->SetPXAttributeValueByName("MaxHP", value);
 		if (current || value < CurrentHealth)
 		{
-			SetHP(value, false);
+			SetHP(value);
 		}
 	}
 }
 
-void UStateComponent::SetHP(const int32 value, const bool broadcast)
+void UStateComponent::SetHP(const int32 value)
 {
 	AActor* TargetActor = GetOwner();
 	if (!IsValid(TargetActor)) return;
 
-	if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
+	if (UPXASComponent* ASC = Cast<UPXASComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor)))
 	{
-		if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
-		{
-			int CurrentHealth = FMath::Clamp(value, 0, PixelAS->GetMaxHP());
-			TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
-		}
+		int CurrentHealth = FMath::Clamp(value, 0, GetMaxHP());
+		ASC->SetPXAttributeValueByName("HP", CurrentHealth);
 	}
 }
-
-
 
 void UStateComponent::IncreaseHP(int32 value, AActor* Instigator)
 {
@@ -185,7 +182,7 @@ void UStateComponent::IncreaseHP(int32 value, AActor* Instigator)
 	value = FMath::Max(value, 0);
 	
 	int preHealth = PixelAS->GetHP();
-	int MaxHealth = PixelAS->GetMaxHP();
+	int MaxHealth = PixelAS->GetCurMaxHP();
 	int CurrentHealth = FMath::Min(value + preHealth, MaxHealth);
 
 	if (CurrentHealth - preHealth > 0)
@@ -264,7 +261,7 @@ int UStateComponent::GetMaxHP()
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				return PixelAS->GetMaxHP();
+				return PixelAS->GetCurMaxHP();
 			}
 		}
 	}
@@ -477,7 +474,7 @@ void UStateComponent::IncreaseEP(int32 Amount)
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				float NewValue = FMath::Min(PixelAS->GetEP() + Amount, PixelAS->GetMaxEP());
+				float NewValue = FMath::Min(PixelAS->GetEP() + Amount, PixelAS->GetCurMaxEP());
 				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
 			}
 		}
@@ -518,7 +515,7 @@ int32 UStateComponent::GetMaxEP()
 		{
 			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
 			{
-				return PixelAS->GetMaxEP();
+				return PixelAS->GetCurMaxEP();
 			}
 		}
 	}
@@ -533,7 +530,7 @@ void UStateComponent::SetMaxEP(int32 NewValue)
 	if (!IsValid(PixelAS)) return;
 
 	NewValue = FMath::Max(NewValue, 0);
-	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetMaxEPAttribute(), NewValue);
+	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetCurMaxEPAttribute(), NewValue);
 	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
 }
 

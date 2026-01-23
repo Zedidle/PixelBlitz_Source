@@ -28,29 +28,29 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	FGameplayTag DecreaseTag = TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
-	FGameplayTag IncreaseTag = TAG("Ability.SwingFist.Set.AttackDamageMinusPercent");
+	FGameplayTag PlusTag = TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
+	FGameplayTag MinusTag = TAG("Ability.SwingFist.Set.AttackDamageMinusPercent");
 
-	if (!EffectGameplayTags.Contains(DecreaseTag) || !EffectGameplayTags.Contains(IncreaseTag)) return;
+	if (!EffectGameplayTags.Contains(PlusTag) || !EffectGameplayTags.Contains(MinusTag)) return;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 
 	SwingFistPower = !SwingFistPower;
 	
 	FGameplayTag SwingFistTag = TAG("Ability.SwingFist");
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
+	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
 
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
 	if (SwingFistPower)
 	{
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[IncreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
-			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
+		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[MinusTag], 0, 999);
+		// IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
+		// 	FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[DecreaseTag], 0, 999);
-		IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
-			FLinearColor(1.0, 0.296138, 0.0, 1), false);
+		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[PlusTag], 0, 999);
+		// IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
+		// 	FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
 }
 

@@ -72,25 +72,29 @@ void ABasePXCharacter::LoadData()
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 
+	UPXASComponent* PXASComponent = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXASComponent);
+
 	const FCharacterAttribute& Attribute = DataAsset->CharacterAttribute;
 	const FCharacterAttribute& InheritAttribute = MainSaveGame->CharacterInheritAttribute;
 
-	BasicDashSpeed = Attribute.BasicDashSpeed + InheritAttribute.BasicDashSpeed;
+	PXASComponent->SetPXAttributeValueByName("BasicDashSpeed", Attribute.BasicDashSpeed + InheritAttribute.BasicDashSpeed);
+	PXASComponent->SetPXAttributeValueByName("BasicAirControl", Attribute.BasicAirControl + InheritAttribute.BasicAirControl);
+	PXASComponent->SetPXAttributeValueByName("BasicSpeed", Attribute.BasicSpeed + InheritAttribute.BasicSpeed);
+	PXASComponent->SetPXAttributeValueByName("MaxAcceleration", Attribute.MaxAcceleration + InheritAttribute.MaxAcceleration);
+	PXASComponent->SetPXAttributeValueByName("JumpZVelocity", Attribute.JumpZVelocity + InheritAttribute.JumpZVelocity);
+	PXASComponent->SetPXAttributeValueByName("GravityScale", Attribute.GravityScale + InheritAttribute.GravityScale);
+	PXASComponent->SetPXAttributeValueByName("BasicJumpMaxHoldTime", Attribute.BasicJumpMaxHoldTime + InheritAttribute.BasicJumpMaxHoldTime);
+	PXASComponent->SetPXAttributeValueByName("BasicSight", Attribute.BasicSight + InheritAttribute.BasicSight);
+	PXASComponent->SetPXAttributeValueByName("BasicAttackValue", Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue);
+	PXASComponent->SetPXAttributeValueByName("BasicAttackInterval", Attribute.BasicAttackInterval + InheritAttribute.BasicAttackInterval);
+	PXASComponent->SetPXAttributeValueByName("BasicRepelValue", Attribute.BasicRepelValue + InheritAttribute.BasicRepelValue);
+	PXASComponent->SetPXAttributeValueByName("BasicMaxJumpCount", Attribute.BasicMaxJumpCount + InheritAttribute.BasicMaxJumpCount);
 	
-	BasicMaxJumpCount = Attribute.BasicMaxJumpCount + InheritAttribute.BasicMaxJumpCount;
-	CurMaxJumpCount = BasicMaxJumpCount;
+	// MaxJumpCount = BasicMaxJumpCount; // 
 	
-	BasicSpringArmLength = Attribute.SpringArmLengthSight + InheritAttribute.SpringArmLengthSight;
-	CurSpringArmLength = BasicSpringArmLength;
-
-	BasicJumpMaxHoldTime = Attribute.BasicJumpMaxHoldTime + InheritAttribute.BasicJumpMaxHoldTime;
-	JumpMaxHoldTime = BasicJumpMaxHoldTime;
-
-	BasicAirControl = Attribute.BasicAirControl + InheritAttribute.BasicAirControl;
-	
-	BasicRepelValue = Attribute.BasicRepelValue + InheritAttribute.BasicRepelValue;
-	BasicAttackValue = Attribute.BasicAttackValue + InheritAttribute.BasicAttackValue;
-	BasicAttackInterval = Attribute.BasicAttackInterval + InheritAttribute.BasicAttackInterval;
+	// CurSpringArmLength = BasicSpringArmLength; // 当视野改变时，触发改变
+	// JumpMaxHoldTime = BasicJumpMaxHoldTime; // 应该是广播回来修改
 
 	if (StateComponent)
 	{
@@ -99,18 +103,13 @@ void ABasePXCharacter::LoadData()
 		StateComponent->RepelResistancePercent = Attribute.RepelResistPercent + InheritAttribute.RepelResistPercent;
 	}
 	
-	MaxWalkSpeed = Attribute.MaxWalkSpeed + InheritAttribute.MaxWalkSpeed;
-	MaxAcceleration = Attribute.MaxAcceleration + InheritAttribute.MaxAcceleration;
-	JumpZVelocity = Attribute.JumpZVelocity + InheritAttribute.JumpZVelocity;
-	GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
-	
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
-		GetCharacterMovement()->MaxAcceleration = MaxAcceleration;
-		GetCharacterMovement()->JumpZVelocity = JumpZVelocity;
-		GetCharacterMovement()->GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
-		GetCharacterMovement()->AirControl = BasicAirControl;
+		// GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+		// GetCharacterMovement()->MaxAcceleration = MaxAcceleration;
+		// GetCharacterMovement()->JumpZVelocity = JumpZVelocity;
+		// GetCharacterMovement()->GravityScale = Attribute.GravityScale + InheritAttribute.GravityScale;
+		// GetCharacterMovement()->AirControl = BasicAirControl;
 	}
 
 #pragma region GAS
@@ -401,7 +400,7 @@ void ABasePXCharacter::LoadAbility_Implementation()
 	UDataTableSubsystem* DataTableManager = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableManager)
 
-	// 暂且什么都不用做
+	// 暂且什么都不用做 
 	
 }
 
@@ -480,12 +479,19 @@ void ABasePXCharacter::BeginPlay()
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
 	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
-
-	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
 	
 	if (AbilityComponent)
 	{
 		AbilityComponent->InitAbilities();
+	}
+	
+	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	if (CachedASC)
+	{
+		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())
+		{
+			PXAttributeSet->OnPXAttributeChange.AddDynamic(this, &ThisClass::OnPXAttributeChanged);
+		}
 	}
 }
 
@@ -502,10 +508,17 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 		StateComponent->OnHPChanged.RemoveAll(this);
 	}
 
-
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoading);
 	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoaded);
+
+	if (CachedASC)
+	{
+		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())
+		{
+			PXAttributeSet->OnPXAttributeChange.RemoveDynamic(this, &ThisClass::OnPXAttributeChanged);
+		}
+	}
 }
 
 bool ABasePXCharacter::SelfCanJump_Implementation()
@@ -518,7 +531,7 @@ bool ABasePXCharacter::SelfCanJump_Implementation()
 	{
 		return false;
 	}
-	if (CurJumpCount >= CurMaxJumpCount)
+	if (CurJumpCount >= MaxJumpCount)
 	{
 		return false;
 	}
@@ -661,8 +674,10 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 
 int ABasePXCharacter::GetAttackDamage_Implementation()
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, 1)
+	
 	FGameplayTag AttackDamagePlusTag = TAG("Ability.SwordPlay.Set.AttackDamagePlus");
-	int AttackValue = BasicAttackValue;
+	int AttackValue = CachedASC->GetPXAttributeValueByName("BasicAttackValue");
 	if (Weapon)
 	{
 		AttackValue += Weapon->GetWeaponDamage();
@@ -679,14 +694,12 @@ int ABasePXCharacter::GetAttackDamage_Implementation()
 
 FVector ABasePXCharacter::GetAttackRepel_Implementation()
 {
-	float Value;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, FVector::ZeroVector)
+
+	float RepelValue = CachedASC->GetPXAttributeValueByName("BasicAttackValue");
 	if (Weapon)
 	{
-		Value = Weapon->GetRepelPower() + BasicRepelValue;
-	}
-	else
-	{
-		Value = BasicRepelValue;
+		RepelValue += Weapon->GetRepelPower();
 	}
 
 	FVector V = GetVelocity();
@@ -698,9 +711,9 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 	
 	FVector SpriteForwardVector = GetSpriteForwardVector();
 	FVector Result = {
-		SpriteForwardVector.X * Value,
-		SpriteForwardVector.Y * Value,
-		Value
+		SpriteForwardVector.X * RepelValue,
+		SpriteForwardVector.Y * RepelValue,
+		RepelValue
 	};
 
 	Result += RepelByVelocity * VelocityRepelFactor;
@@ -805,10 +818,11 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 
 	FName TimerName = FName(GetName() + "_OutOfControl");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,[WeakThis = TWeakObjectPtr(this)]{
-		if (WeakThis.IsValid())
-		{
-			Execute_BuffUpdate_Speed(WeakThis.Get());
-		}
+		if (!WeakThis.IsValid()) return;
+		if (!WeakThis->CachedASC) return;
+		WeakThis->CachedASC->GetPXAttributeValueByName("CurSpeed");
+		
+		Execute_BuffUpdate_Speed(WeakThis.Get());
 	}, SustainTime);
 }
 
@@ -981,9 +995,6 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				OutOfControl(UCommonFuncLib::DealDeltaTime(ChangedHPPercent / 20));
 				SetHurt(true);
 			}
-
-
-			
 		}
 	}
 	else
@@ -1526,13 +1537,12 @@ APawn* ABasePXCharacter::GetPawn_Implementation()
 
 float ABasePXCharacter::GetAttackInterval_Implementation()
 {
-	FGameplayTag Tag = TAG("CommonSet.AttackAccPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		return BasicAttackInterval / (1 + EffectGameplayTags[Tag]);
-	}
+	UPXASComponent* ASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(ASC, 1.0f);
 
-	return BasicAttackInterval;
+	float Interval = ASC->GetPXAttributeValueByName("BasicAttackInterval");
+	float AccPercent = ASC->GetPXAttributeValueByName("AttackAccPercent");
+	return Interval / (1 + AccPercent);
 }
 
 void ABasePXCharacter::OnAttackRelease_Implementation()
@@ -1555,37 +1565,6 @@ void ABasePXCharacter::OnKillEnemy_Implementation()
 	}
 }
 
-void ABasePXCharacter::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
-{
-	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
-	{
-		Execute_BuffEffect_Speed(BuffComponent, Tag, Percent, Value, SustainTime);
-	}
-}
-
-void ABasePXCharacter::BuffUpdate_Speed_Implementation()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent);
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MovementComponent);
-
-	MovementComponent->MaxWalkSpeed = MaxWalkSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
-	MovementComponent->MaxAcceleration = MaxAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
-
-	if (MovementComponent->MaxWalkSpeed < MaxWalkSpeed)
-	{
-		CustomTimeDilation = MovementComponent->MaxWalkSpeed / MaxWalkSpeed;
-	}
-}
-
-void ABasePXCharacter::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
-{
-	IBuff_Interface::BuffEffect_Attack_Implementation(Tag, Percent, Value, SustainTime);
-	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
-	{
-		Execute_BuffEffect_Attack(BuffComponent, Tag, Percent, Value, SustainTime);
-	}
-}
 
 void ABasePXCharacter::BuffUpdate_Attack_Implementation()
 {
@@ -1599,18 +1578,6 @@ void ABasePXCharacter::BuffEffect_Sight_Implementation(FGameplayTag Tag, float P
 	{
 		Execute_BuffEffect_Sight(BuffComponent, Tag, Percent, Value, SustainTime);
 	}
-}
-
-void ABasePXCharacter::BuffUpdate_Sight_Implementation()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent)
-	CurSpringArmLength = BasicSpringArmLength * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight;
-
-	if (PlayerStatusWidget)
-	{
-		PlayerStatusWidget->UpdateDark(CurSpringArmLength / BasicSpringArmLength);
-	}
-
 }
 
 int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
@@ -1631,23 +1598,6 @@ int32 ABasePXCharacter::Buff_CalInitDamage_Implementation(int32 InDamage)
 	return LocalDamage;
 }
 
-void ABasePXCharacter::AddBuffOnWidget_Implementation(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor,
-	bool Permanent)
-{
-	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
-	{
-		Execute_AddBuffOnWidget(BuffComponent, Tag, BuffName, TextColor, Permanent);
-	}
-}
-
-void ABasePXCharacter::RemoveBuff_Implementation(FGameplayTag Tag, bool OnlySelf)
-{
-	IBuff_Interface::RemoveBuff_Implementation(Tag, OnlySelf);
-	if (BuffComponent && BuffComponent->Implements<UBuff_Interface>())
-	{
-		Execute_RemoveBuff(BuffComponent, Tag, OnlySelf);
-	}
-}
 
 float ABasePXCharacter::GetShortSightResistancePercent_Implementation()
 {
@@ -1662,7 +1612,7 @@ float ABasePXCharacter::GetSlowDownResistancePercent_Implementation()
 {
 	float Result = 0.0f;
 	
-	FGameplayTag Tag = FGameplayTag::RequestGameplayTag("CommonSet.SpeedDownResistance");
+	FGameplayTag Tag = TAG("CommonSet.SpeedDownResistance");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		Result += EffectGameplayTags[Tag];
@@ -1679,7 +1629,7 @@ void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousF
 	                                        TimeDelta);
 	SetFalling(true);
 	SetMoving(false);
-	GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	// GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 }
 
 
@@ -1724,7 +1674,6 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 		EnhancedInput->BindActionByTagName("InputAction.Jump", ETriggerEvent::Completed,this, &ABasePXCharacter::JumpRelease);
 		EnhancedInput->BindActionByTagName("InputAction.Interact", ETriggerEvent::Started,this, &ABasePXCharacter::Interact);
 		EnhancedInput->BindActionByTagName("InputAction.Skill", ETriggerEvent::Started,this, &ABasePXCharacter::TryUseSkill);
-
 	}
 }
 
@@ -1865,6 +1814,44 @@ void ABasePXCharacter::RemoveInteractableItem(ABaseInteractableItem* Item)
 	{
 		InteractableItems.Remove(Item);
 	}
+}
+
+void ABasePXCharacter::OnPXAttributeChanged(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Attribute Name: %s, OldValue: %f, NewValue: %f"), *Attribute.GetName(), OldValue, NewValue));
+	
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+
+	// 如何权衡 StateComponent 中 HPChanged广播的关系 ？
+	if (Attribute == UPXAttributeSet::GetHPAttribute())
+	{
+		
+	}
+
+	if (Attribute == UPXAttributeSet::GetBasicSightReductionResistAttribute())
+	{
+		
+	}
+
+	if (Attribute == UPXAttributeSet::GetCurSightAttribute())
+	{
+		CurSpringArmLength = NewValue;
+		float BasicSight = CachedASC->GetPXAttributeValueByName("BasicSight");
+		
+		if (PlayerStatusWidget)
+		{
+			PlayerStatusWidget->UpdateDark(NewValue / BasicSight);
+		}
+	}
+}
+
+float ABasePXCharacter::GetBasicDashSpeed()
+{
+	if (CachedASC)
+	{
+		CachedASC->GetPXAttributeValueByName("BasicDashSpeed");
+	}
+	return 0;
 }
 
 void ABasePXCharacter::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)

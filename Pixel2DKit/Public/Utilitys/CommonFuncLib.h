@@ -13,7 +13,7 @@ UENUM(BlueprintType)
 enum class EFloatingTextType : uint8
 {
 	Damage,
-	Health,
+	Heal,
 	Energy,
 	Gold,
 	Item,

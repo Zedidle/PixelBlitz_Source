@@ -1,6 +1,3 @@
-// Copyright 2020 Dan Kestranek.
-
-
 #include "GAS/AsyncTask/AsyncTaskCooldownChanged.h"
 
 UAsyncTaskCooldownChanged * UAsyncTaskCooldownChanged::ListenForCooldownChange(UAbilitySystemComponent * AbilitySystemComponent, FGameplayTagContainer InCooldownTags, bool InUseServerCooldown)

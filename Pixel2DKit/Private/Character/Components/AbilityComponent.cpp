@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/Components/AbilityComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Character/BasePXCharacter.h"
@@ -157,69 +154,9 @@ void UAbilityComponent::LoadTalents()
 	
 	if (TalentLoaded) return;
 	TalentLoaded = true;
-
-	// 基础移动速度
-	FGameplayTag Tag = TAG("CommonSet.SpeedPlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->MaxWalkSpeed = PXCharacter->MaxWalkSpeed * (1 + EffectGameplayTags[Tag]);
-		if (UCharacterMovementComponent* MovementComponent = PXCharacter->GetCharacterMovement())
-		{
-			MovementComponent->MaxWalkSpeed = PXCharacter->MaxWalkSpeed;
-		}
-	}
-
-	// 基础跳跃高度
-	Tag = TAG("CommonSet.BasicJumpHeightPlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->JumpZVelocity = PXCharacter->JumpZVelocity * (1 + EffectGameplayTags[Tag]);
-		if (UCharacterMovementComponent* MovementComponent = PXCharacter->GetCharacterMovement())
-		{
-			MovementComponent->JumpZVelocity = PXCharacter->JumpZVelocity;
-		}
-	}
-
-	// 基础冲刺距离
-	Tag = TAG("CommonSet.DashDistancePlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->BasicDashSpeed = PXCharacter->BasicDashSpeed * (1 + EffectGameplayTags[Tag]);
-	}
-
-
-	// 视野
-	Tag = TAG("CommonSet.SightPlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		IBuff_Interface::Execute_BuffEffect_Sight(PXCharacter->BuffComponent,
-			TAG("Ability.EagleEye"), EffectGameplayTags[Tag], 0, 999);
-	}
-	
-
-	// 最大生命值
-	Tag = TAG("CommonSet.MaxHPPlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->StateComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
-	}
-
-	// 最大体力值
-	Tag = TAG("CommonSet.MaxEPPlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->StateComponent->SetMaxEP(EffectGameplayTags[Tag] + PXCharacter->StateComponent->GetMaxEP());
-	}
-
-	// 体型 / 蚁人
-	Tag = TAG("CommonSet.BodySizePlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->SetScale(1 + EffectGameplayTags[Tag]);
-	}
 	
 	// 热身
-	Tag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
+	FGameplayTag Tag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
 		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
@@ -262,19 +199,22 @@ void UAbilityComponent::MoveWarmingUP()
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
 	
 	IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, WarmUP_Tag, PlusPowerPercent, 0, 999);
-	IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
-		FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
+	// IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
+	// 	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
 }
 
 void UAbilityComponent::MakeMiracleWalker()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	FGameplayTag MiracleWalkerTag = TAG("Ability.MiracleWalker");
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
-
+	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
+	//
+	// RemoveAttributeEffectsByTag
+	
 	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
 	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.Set.Interval");
 
@@ -349,7 +289,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 
 	if (!First && PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{
-		IBuff_Interface::Execute_RemoveBuff(PXCharacter, ImmortalPowerTag, true);
+		// IBuff_Interface::Execute_RemoveBuff(PXCharacter, ImmortalPowerTag, true);
 		PXCharacter->StateComponent->ModifyMaxHP(1, EStatChange::Increase, true);
 	}
 }
@@ -641,13 +581,47 @@ void UAbilityComponent::LoadAbilities()
 # pragma region 通用技能加载部分，专属技能在 PXCharacter 子类中的LoadAbility自定义
 
 	FGameplayTag Tag;
-	FGameplayTagContainer Tags;
 
+	const auto& EffectTags = EffectGameplayTags.GetAllKeys();
+	for (auto& T : EffectTags)
+	{
+		FString _, AttributeName;
+		T.ToString().Split("CommonSet.", &_, &AttributeName);
+
+		if (AttributeName.IsEmpty()) continue;
+
+		CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetAttributeByName(AttributeName), EffectGameplayTags[T]);
+	}
+
+	// EagleEye 的Buff的处理应该是 BasicSight 
+	// BuffComponent->AddAttributeEffect("BasicSight", TAG("Ability.EagleEye"), FBuffEffect(NewValue, 0, 999));
+
+	// 最大生命值
+	Tag = TAG("CommonSet.MaxHPPlus");
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		PXCharacter->StateComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
+	}
+
+	// 最大体力值
+	Tag = TAG("CommonSet.MaxEPPlus");
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		PXCharacter->StateComponent->SetMaxEP(EffectGameplayTags[Tag] + PXCharacter->StateComponent->GetMaxEP());
+	}
+
+	// 体型 / 蚁人
+	Tag = TAG("CommonSet.BodySizePlusPercent");
+	if (EffectGameplayTags.Contains(Tag))
+	{
+		PXCharacter->SetScale(1 + EffectGameplayTags[Tag]);
+	}
+	
 	// 空中移动的控制
 	Tag = TAG("CommonSet.AirMoveEffectPlusPercent");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTags[Tag]);
+		// PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTags[Tag]);
 	}
 
 
@@ -655,14 +629,14 @@ void UAbilityComponent::LoadAbilities()
 	Tag = TAG("CommonSet.JumpMaxHoldTimePlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTags[Tag];
+		// PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTags[Tag];
 	}
 	
 	// 附加跳跃次数
 	Tag = TAG("CommonSet.MaxJumpCountPlus");
 	if (EffectGameplayTags.Contains(Tag))
 	{
-		PXCharacter->CurMaxJumpCount = PXCharacter->CurMaxJumpCount + EffectGameplayTags[Tag];
+		PXCharacter->MaxJumpCount = PXCharacter->MaxJumpCount + EffectGameplayTags[Tag];
 	}
 	
 	// EP恢复加快
@@ -860,7 +834,7 @@ void UAbilityComponent::OnBuffCalDamage()
 	// 清除热身运动
 	if (WarmUP_Power > 0)
 	{
-		IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.Warmup"), true);
+		// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.Warmup"), true);
 		WarmUP_Power = 0 ;
 		WarmUP_MoveDistance = 0;
 		OwnerPreLocation = PXCharacter->GetActorLocation();
@@ -869,8 +843,8 @@ void UAbilityComponent::OnBuffCalDamage()
 	MakeMiracleWalker();
 	MakeImmortalPower(false);
 
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.StaticPower"), true);
-	IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.EvadeStrike"), true);
+	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.StaticPower"), true);
+	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.EvadeStrike"), true);
 }
 
 void UAbilityComponent::OnDying(int& RemReviveTimes)

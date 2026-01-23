@@ -302,11 +302,12 @@ struct FAbility: public FTableRowBase
 #pragma region FBuffValueEffect
 
 USTRUCT(BlueprintType)
-struct FBuffValueEffect
+struct FBuffEffect
 {
 	GENERATED_BODY()
-	FBuffValueEffect(){}
-	FBuffValueEffect(float Percent, float Value): EffectedPercent(Percent), EffectedValue(Value){}
+	FBuffEffect(){}
+	FBuffEffect(float Percent, float Value): EffectedPercent(Percent), EffectedValue(Value){}
+	FBuffEffect(float Percent, float Value, float EndTime): EffectedPercent(Percent), EffectedValue(Value), EffectedEndTime(EndTime){}
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
 	float EffectedPercent = 0.0f;
@@ -314,6 +315,9 @@ struct FBuffValueEffect
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
 	float EffectedValue = 0.0f;
 
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	float EffectedEndTime = 0.0f;
+	
 };
 
 #pragma endregion 
@@ -328,7 +332,7 @@ struct FCharacterAttribute
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float SpringArmLengthSight = 0.0f;
+	float BasicSight = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	int MaxHP = 0;
@@ -343,7 +347,7 @@ struct FCharacterAttribute
 	int BasicRepelValue = 0;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float MaxWalkSpeed = 0.0f;
+	float BasicSpeed = 0.0f;
 
 	// 技能的快速移动速度
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
