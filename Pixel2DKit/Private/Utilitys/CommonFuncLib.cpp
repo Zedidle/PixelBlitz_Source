@@ -145,3 +145,9 @@ bool UCommonFuncLib::CalRandMap_Vector2D(const TMap<FVector2D, int32>& M, FVecto
 {
 	return CalRandomMap(M, Result);
 }
+
+float UCommonFuncLib::CalEndTime(float Duration)
+{
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	return World->GetTimeSeconds() + Duration;
+}

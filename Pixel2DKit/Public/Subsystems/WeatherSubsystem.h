@@ -16,17 +16,19 @@ class PIXEL2DKIT_API UDayTimeEffectSight : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
+
+	// 后续扩展 TArray<FAttributeEffect> ?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBuffEffect DawnEffect = {0.05f,10.0f};
+	FAttributeEffect DawnEffect = {EPXAttribute::CurSpeed, 0.05f, 10.0f};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBuffEffect LightEffect = {0.05, 20.0f};
+	FAttributeEffect LightEffect = {EPXAttribute::CurSpeed, 0.05, 20.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBuffEffect DuskEffect = {-0.05, -10.0f};
+	FAttributeEffect DuskEffect = {EPXAttribute::CurSpeed, -0.05, -10.0f};
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FBuffEffect NightEffect = {-0.05, -20.0f};
+	FAttributeEffect NightEffect = {EPXAttribute::CurSpeed, -0.05, -20.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EDayTimeType, FText> DayTime2Name;	

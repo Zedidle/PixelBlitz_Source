@@ -18,12 +18,12 @@ struct FAttributeEffectMap
 {
 	GENERATED_BODY()
 
-	TMap<FGameplayTag, FBuffEffect> Tag2BuffEffect;
+	TMap<FGameplayTag, FAttributeEffect> Tag2BuffEffect;
 
 	float Percent;
 	float Value;
 	
-	void AddBuffEffect(const FGameplayTag& Tag, const FBuffEffect& Effect)
+	void AddBuffEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 	{
 		Tag2BuffEffect.Add(Tag, Effect);
 		Percent += Effect.EffectedPercent;
@@ -32,7 +32,7 @@ struct FAttributeEffectMap
 
 	void RemoveBuffEffect(const FGameplayTag& Tag)
 	{
-		if (FBuffEffect* Effect = Tag2BuffEffect.Find(Tag))
+		if (FAttributeEffect* Effect = Tag2BuffEffect.Find(Tag))
 		{
 			Percent -= Effect->EffectedPercent;
 			Value -= Effect->EffectedValue;
@@ -109,10 +109,11 @@ public:
 	UFUNCTION()
 	void OnGameplayEffectRemoved(const FActiveGameplayEffect& GameplayEffect);
 	
-
+	UFUNCTION(BlueprintCallable)
 	void RemoveBuff(const FGameplayTag& Tag, bool OnlySelf=true);
 	void RemoveBuff(TMap<FGameplayTag, TArray<EPXAttribute>>& RemoveEffects);
-	
+
+	UFUNCTION(BlueprintCallable)
 	void AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);
 	void RemoveBuffOnWidget(FGameplayTag Tag, bool OnlySelf);
 
@@ -125,7 +126,10 @@ public:
 
 
 	UFUNCTION(BlueprintCallable)
-	void AddAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag, const FBuffEffect& Effect);
+	void AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect);
+
+	UFUNCTION(BlueprintCallable)
+	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects);
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag);

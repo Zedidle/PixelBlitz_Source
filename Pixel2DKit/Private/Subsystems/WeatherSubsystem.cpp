@@ -47,7 +47,7 @@ void UWeatherSubsystem::MakeWeatherEffect()
 	
 	if (FoundActors.IsEmpty()) return;
 
-	FBuffEffect DayTimeEffect;
+	FAttributeEffect DayTimeEffect;
 	FText DayTimeName = DayTimeEffectSight->DayTime2Name.FindRef(GS->DayTimeType);
 	// 时分影响
 	if (GS->DayTimeType == EDayTimeType::Dawn)
@@ -76,7 +76,8 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (DayTimeNameString != DayTimeName.ToString())
 		{
 			DayTimeNameString = DayTimeName.ToString();
-			BuffComp->AddAttributeEffect(EPXAttribute::CurSight, DayTimeTag, FBuffEffect( DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999));
+			BuffComp->AddAttributeEffect(DayTimeTag,
+				FAttributeEffect( EPXAttribute::CurSight, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue));
 			BuffComp->RemoveBuff(DayTimeTag, true);
 			BuffComp->AddBuffOnWidget(DayTimeTag, DayTimeNameString, FLinearColor::White, false);
 		}
@@ -85,8 +86,10 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (!GS->WeatherName.IsEmpty() && WeatherNameString != GS->WeatherName.ToString())
 		{
 			WeatherNameString = GS->WeatherName.ToString();
-			BuffComp->AddAttributeEffect(EPXAttribute::CurSight, WeatherTag, FBuffEffect(GS->WeatherEffect.SightDistancePercent, 0, 9999));
-			BuffComp->AddAttributeEffect(EPXAttribute::CurSpeed, WeatherTag, FBuffEffect(GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999));
+			BuffComp->AddAttributeEffect(WeatherTag,
+				FAttributeEffect(EPXAttribute::CurSight, GS->WeatherEffect.SightDistancePercent));
+			BuffComp->AddAttributeEffect(WeatherTag,
+				FAttributeEffect(EPXAttribute::CurSight, GS->WeatherEffect.MoveSpeedEffectPercent));
 			BuffComp->RemoveBuff(WeatherTag, true);
 			BuffComp->AddBuffOnWidget(WeatherTag, WeatherNameString, FLinearColor::White, false);
 		}

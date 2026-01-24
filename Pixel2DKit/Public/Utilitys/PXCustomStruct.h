@@ -1,11 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
+#include "GAS/AttributeSet/PXAttributeSet.h"
 #include "PXCustomStruct.generated.h"
 
 class USoundCue;
@@ -233,7 +232,35 @@ struct FDrop : public FTableRowBase
 };
 #pragma endregion
 
+#pragma region FBuffValueEffect
 
+USTRUCT(BlueprintType)
+struct FAttributeEffect
+{
+	GENERATED_BODY()
+	FAttributeEffect(){}
+	FAttributeEffect(EPXAttribute Attribute, float Percent): EffectedAttribute(Attribute),
+			EffectedPercent(Percent), EffectedValue(1.0f), EffectedEndTime(9999){}
+	FAttributeEffect(EPXAttribute Attribute, float Percent, float Value): EffectedAttribute(Attribute),
+				EffectedPercent(Percent), EffectedValue(Value), EffectedEndTime(9999){}
+	FAttributeEffect(EPXAttribute Attribute, float Percent, float Value, float EndTime): EffectedAttribute(Attribute),
+					EffectedPercent(Percent), EffectedValue(Value), EffectedEndTime(EndTime){}
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	EPXAttribute EffectedAttribute;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	float EffectedPercent = 0.0f;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	float EffectedValue = 1.0f;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
+	float EffectedEndTime = 9999;
+	
+};
+
+#pragma endregion 
 
 #pragma region FAbility
 USTRUCT(BlueprintType)
@@ -280,7 +307,6 @@ struct FAbility: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TArray<FGameplayTag> RequiredAbilities;
 	
-	
 	// 技能的特殊附加值，以GameplayTag为前缀
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	TMap<FGameplayTag, float> Effect_GameplayTag;
@@ -292,6 +318,9 @@ struct FAbility: public FTableRowBase
 	// 技能触发时机，如果有 AbilityClass 的话，需要配置
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	EAbilityTiming Timing = EAbilityTiming::None;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	TArray<FAttributeEffect> AttributeEffectOnActivated;
 };
 
 
@@ -299,28 +328,7 @@ struct FAbility: public FTableRowBase
 
 
 
-#pragma region FBuffValueEffect
 
-USTRUCT(BlueprintType)
-struct FBuffEffect
-{
-	GENERATED_BODY()
-	FBuffEffect(){}
-	FBuffEffect(float Percent, float Value): EffectedPercent(Percent), EffectedValue(Value){}
-	FBuffEffect(float Percent, float Value, float EndTime): EffectedPercent(Percent), EffectedValue(Value), EffectedEndTime(EndTime){}
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedPercent = 0.0f;
-	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedValue = 0.0f;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedEndTime = 0.0f;
-	
-};
-
-#pragma endregion 
 
 
 #pragma region Character Data
@@ -501,6 +509,9 @@ struct FTalent: public FTableRowBase
 	// 技能触发时机，同时触发 SkillActor 和 Ability
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
 	EAbilityTiming Timing = EAbilityTiming::None;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	TArray<FAttributeEffect> AttributeEffectOnActivated;
 };
 #pragma endregion
 

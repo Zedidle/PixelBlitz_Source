@@ -42,8 +42,8 @@ bool ASkill_EvadeStrike::OnSkillFinish()
 	if (EffectGameplayTags.Contains(Tag_DamagePlusAfterSkill))
 	{
 		FGameplayTag Tag = TAG("Ability.DodgeStrike");
-		PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, Tag,
-			FBuffEffect(0.0f,EffectGameplayTags[Tag_DamagePlusAfterSkill], 9999));
+		PXCharacter->BuffComponent->AddAttributeEffect(Tag,
+			FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,EffectGameplayTags[Tag_DamagePlusAfterSkill]));
 		PXCharacter->BuffComponent->AddBuffByTag(Tag);
 	}
 

@@ -43,13 +43,15 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
 	if (SwingFistPower)
 	{
-		PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, SwingFistTag, FBuffEffect(EffectGameplayTags[MinusTag], 1, 9999));
+		PXCharacter->BuffComponent->AddAttributeEffect(SwingFistTag,
+			FAttributeEffect(EPXAttribute::CurAttackValue, EffectGameplayTags[MinusTag]));
 		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
-		PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, SwingFistTag, FBuffEffect(EffectGameplayTags[PlusTag], 0, 9999));
+		PXCharacter->BuffComponent->AddAttributeEffect(SwingFistTag,
+			FAttributeEffect(EPXAttribute::CurAttackValue, EffectGameplayTags[PlusTag], 0));
 		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}

@@ -197,8 +197,8 @@ void UAbilityComponent::MoveWarmingUP()
 	FGameplayTag WarmUP_Tag = TAG("Ability.Warmup");
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
 
-	PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, WarmUP_Tag,
-		FBuffEffect(PlusPowerPercent, 1, 9999));
+	PXCharacter->BuffComponent->AddAttributeEffect(WarmUP_Tag,
+		FAttributeEffect(EPXAttribute::CurAttackValue, PlusPowerPercent));
 
 	PXCharacter->BuffComponent->AddBuffOnWidget(WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
 	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
@@ -231,8 +231,8 @@ void UAbilityComponent::MakeMiracleWalker()
 			{
 				if (WeakThis->PXCharacter->BuffComponent)
 				{
-					WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( EPXAttribute::CurAttackValue, MiracleWalkerTag, FBuffEffect(0.0,
-						EffectGameplayTags[DamagePlusTag], 9999)
+					WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( MiracleWalkerTag,
+						FAttributeEffect(EPXAttribute::CurAttackValue, 0.0, EffectGameplayTags[DamagePlusTag])
 					);
 					WeakThis->PXCharacter->BuffComponent->AddBuffByTag(MiracleWalkerTag);
 				}
@@ -271,8 +271,9 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
 			if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
 		
-			WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( EPXAttribute::CurAttackValue, ImmortalPowerTag, FBuffEffect(0.0,
-			FMath::RoundToInt(WeakThis->PXCharacter->StateComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]), 9999)
+			WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( ImmortalPowerTag,
+				FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,
+					FMath::RoundToInt(WeakThis->PXCharacter->StateComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]))
 			);
 
 			if (WeakThis->PXCharacter->BuffComponent)
@@ -281,7 +282,6 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 			}
 
 			// 不灭中，恢复生命值的部分
-			
 			// UGameInstance* GameInstance = WeakThis->PXCharacter->GetGameInstance();
 			// CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 			// UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());

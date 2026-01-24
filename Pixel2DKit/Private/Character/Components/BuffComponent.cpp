@@ -452,7 +452,7 @@ void UBuffComponent::AddBuffByTag(FGameplayTag Tag, bool bNeedPermanent)
 
 	if (bNeedPermanent && !Data->Permanent) return;
 	
-	// Execute_AddBuffOnWidget(this, Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
+	AddBuffOnWidget(Tag, Data->BuffName.ToString(), Data->Color, Data->Permanent);
 }
 
 void UBuffComponent::ExpireBuff(FGameplayTag Tag)
@@ -465,8 +465,10 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 	}
 }
 
-void UBuffComponent::AddAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag, const FBuffEffect& Effect)
+void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 {
+	EPXAttribute AttributeName = Effect.EffectedAttribute;
+	
 	FAttributeEffectMap* AttributeEffectMap = AttributeEffects.Find(AttributeName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
 	
@@ -483,13 +485,21 @@ void UBuffComponent::AddAttributeEffect(EPXAttribute AttributeName, const FGamep
 	AttributeEffectMap->Tag2BuffEffect.Add(Tag, Effect);
 }
 
+void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects)
+{
+	for (auto& Effect : Effects)
+	{
+		AddAttributeEffect(Tag, Effect);
+	}
+}
+
 void UBuffComponent::RemoveAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag)
 {
 	FAttributeEffectMap* AttributeEffectMap = AttributeEffects.Find(AttributeName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 
-	const FBuffEffect& Effect = AttributeEffectMap->Tag2BuffEffect[Tag];
+	const FAttributeEffect& Effect = AttributeEffectMap->Tag2BuffEffect[Tag];
 	
 	// 后续要转入 FGameplayAttributeData 的 BaseValue 和 CurrentValue 的处理
 	float PreValue = CachedASC->GetAttributeValue(AttributeName);

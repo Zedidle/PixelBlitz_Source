@@ -64,7 +64,9 @@ public:
 
 	template<typename T>
 	static bool CalAverageByArray(const TArray<T>& Array, T& Result);
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Common | Time")
+	static float CalEndTime(float Duration);
 };
 
 template <typename T>
