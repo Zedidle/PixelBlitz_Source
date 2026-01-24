@@ -116,5 +116,5 @@ public:
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     int GetAttackDamage();
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    float GetAttackInterval();
+    float GetAttackCD();
 };

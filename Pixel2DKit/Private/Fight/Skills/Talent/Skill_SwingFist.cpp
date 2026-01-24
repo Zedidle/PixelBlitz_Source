@@ -5,6 +5,7 @@
 
 #include "Pixel2DKit.h"
 #include "Character/BasePXCharacter.h"
+#include "Character/Components/BuffComponent.h"
 
 #define LOCTEXT_NAMESPACE "PX"
 
@@ -26,13 +27,13 @@ void ASkill_SwingFist::MakeSwingFistPower()
 {
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(GetOwner());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
 	FGameplayTag PlusTag = TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
 	FGameplayTag MinusTag = TAG("Ability.SwingFist.Set.AttackDamageMinusPercent");
 
 	if (!EffectGameplayTags.Contains(PlusTag) || !EffectGameplayTags.Contains(MinusTag)) return;
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 
 	SwingFistPower = !SwingFistPower;
 	
@@ -42,15 +43,15 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
 	if (SwingFistPower)
 	{
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[MinusTag], 0, 999);
-		// IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
-		// 	FLinearColor(0.093059, 0.027321, 0.0, 1), false);
+		PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, SwingFistTag, FBuffEffect(EffectGameplayTags[MinusTag], 1, 9999));
+		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
+			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, SwingFistTag, EffectGameplayTags[PlusTag], 0, 999);
-		// IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
-		// 	FLinearColor(1.0, 0.296138, 0.0, 1), false);
+		PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, SwingFistTag, FBuffEffect(EffectGameplayTags[PlusTag], 0, 9999));
+		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
+			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
 }
 

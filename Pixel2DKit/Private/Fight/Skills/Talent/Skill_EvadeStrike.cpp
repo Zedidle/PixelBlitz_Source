@@ -33,22 +33,18 @@ bool ASkill_EvadeStrike::OnSkillFinish()
 	if (!Super::OnSkillFinish()) return false;
 
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Owner);
-	if (!PXCharacter || !PXCharacter->Implements<UBuff_Interface>()) return false;
-
+	if (!PXCharacter) return false;
+	if (!PXCharacter->BuffComponent) return false;
+	
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	// 闪避突袭
 	FGameplayTag Tag_DamagePlusAfterSkill = TAG("CommonSet.DamagePlusAfterDash");
 	if (EffectGameplayTags.Contains(Tag_DamagePlusAfterSkill))
 	{
 		FGameplayTag Tag = TAG("Ability.DodgeStrike");
-		IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, Tag, 0.0f,
-			EffectGameplayTags[Tag_DamagePlusAfterSkill], 999.0f
-		);
-
-		if (PXCharacter->BuffComponent)
-		{
-			PXCharacter->BuffComponent->AddBuffByTag(Tag);
-		}
+		PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, Tag,
+			FBuffEffect(0.0f,EffectGameplayTags[Tag_DamagePlusAfterSkill], 9999));
+		PXCharacter->BuffComponent->AddBuffByTag(Tag);
 	}
 
 	return true;

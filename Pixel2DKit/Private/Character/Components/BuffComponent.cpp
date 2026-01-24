@@ -68,38 +68,30 @@ void UBuffComponent::CheckBuffExpire()
 {
 	float CurTime = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 
-	TArray<FGameplayTag> RemovedTags;
-	
-	for (auto& ele : Tag2BuffEffect_Attack)
+	TMap<FGameplayTag, TArray<EPXAttribute>> RemovedTagsEffect;
+
+	for (auto& ele : AttributeEffects)
 	{
-		if (CurTime > ele.Value.EffectedEndTime)
+		FAttributeEffectMap& EffectMap = ele.Value;
+
+		for (auto& BuffEffect : EffectMap.Tag2BuffEffect)
 		{
-			RemovedTags.Add(ele.Key);
+			if (CurTime > BuffEffect.Value.EffectedEndTime)
+			{
+				TArray<EPXAttribute>& Attributes = RemovedTagsEffect.FindOrAdd(BuffEffect.Key);
+				Attributes.Add(ele.Key);
+			}
 		}
 	}
 
-	for (auto& ele : Tag2BuffEffect_Speed)
-	{
-		if (CurTime > ele.Value.EffectedEndTime)
-		{
-			RemovedTags.Add(ele.Key);
-		}
-	}
+	RemoveBuff(RemovedTagsEffect);
 
-	for (auto& ele : Tag2BuffEffect_Sight)
+	if (BuffStateWidget)
 	{
-		if (CurTime > ele.Value.EffectedEndTime)
+		for (auto& ele : RemovedTagsEffect)
 		{
-			RemovedTags.Add(ele.Key);
-		}
-	}
-
-	for (auto& ele : RemovedTags)
-	{
-		RemoveBuff_EffectAll(ele);
-		if (BuffStateWidget)
-		{
-			BuffStateWidget->BuffExpire(ele);
+			if (Tag2AttributeNames.Contains(ele.Key)) continue;
+			BuffStateWidget->BuffExpire(ele.Key);
 		}
 	}
 }
@@ -129,10 +121,9 @@ void UBuffComponent::BeginPlay()
 
 	if (IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Owner))
 	{
-		UAbilitySystemComponent* AbilitySystemComponent = ASI->GetAbilitySystemComponent();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilitySystemComponent);
-		AbilitySystemComponent->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
-		AbilitySystemComponent->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
+		CachedASC = Cast<UPXASComponent>(ASI->GetAbilitySystemComponent());
+		CachedASC->OnGameplayEffectAppliedDelegateToTarget.AddUObject(this, &UBuffComponent::OnGameplayEffectApplied);
+		CachedASC->OnAnyGameplayEffectRemovedDelegate().AddUObject(this, &UBuffComponent::OnGameplayEffectRemoved);
 	}
 
 	TimerName_CheckBuffEnd = FName("BuffComponent" + FGuid::NewGuid().ToString());
@@ -160,60 +151,57 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 bool UBuffComponent::BuffExist(FGameplayTag Tag) const
 {
-	return Tag2BuffEffect_Sight.Contains(Tag)
-		|| Tag2BuffEffect_Speed.Contains(Tag)
-		|| Tag2BuffEffect_Attack.Contains(Tag);
+	return Tag2AttributeNames.Contains(Tag);
 }
 
-void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
-{
-	if (!Tag2BuffEffect_Attack.Contains(Tag)) return;
-
-	FBuffEffect Effect = Tag2BuffEffect_Attack[Tag];
-	EffectedPercent_Attack -= Effect.EffectedPercent;
-	EffectedValue_Attack -= Effect.EffectedValue;
-
-	Tag2BuffEffect_Attack.Remove(Tag);
-
-	if (Owner && Owner->Implements<UBuff_Interface>())
-	{
-		Execute_BuffUpdate_Attack(Owner);
-	}
-	
-}
-
-void UBuffComponent::RemoveBuff_Sight(FGameplayTag Tag)
-{
-	if (!Tag2BuffEffect_Sight.Contains(Tag)) return;
-	
-	FBuffEffect Effect = Tag2BuffEffect_Sight[Tag];
-	EffectedPercent_Sight -= Effect.EffectedPercent;
-	EffectedValue_Sight -= Effect.EffectedValue;
-
-	Tag2BuffEffect_Sight.Remove(Tag);
-
-	if (Owner && Owner->Implements<UBuff_Interface>())
-	{
-		Execute_BuffUpdate_Sight(Owner);
-	}
-}
-
-void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
-{
-	if (!Tag2BuffEffect_Speed.Contains(Tag)) return;
-	
-	FBuffEffect Effect = Tag2BuffEffect_Speed[Tag];
-	EffectedPercent_Speed -= Effect.EffectedPercent;
-	EffectedValue_Speed -= Effect.EffectedValue;
-
-	Tag2BuffEffect_Speed.Remove(Tag);
-
-	if (Owner && Owner->Implements<UBuff_Interface>())
-	{
-		Execute_BuffUpdate_Speed(Owner);
-	}
-	
-}
+// void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
+// {
+// 	if (!Tag2BuffEffect_Attack.Contains(Tag)) return;
+//
+// 	FBuffEffect Effect = Tag2BuffEffect_Attack[Tag];
+// 	EffectedPercent_Attack -= Effect.EffectedPercent;
+// 	EffectedValue_Attack -= Effect.EffectedValue;
+//
+// 	Tag2BuffEffect_Attack.Remove(Tag);
+//
+// 	if (Owner && Owner->Implements<UBuff_Interface>())
+// 	{
+// 		Execute_BuffUpdate_Attack(Owner);
+// 	}
+// 	
+// }
+//
+// void UBuffComponent::RemoveBuff_Sight(FGameplayTag Tag)
+// {
+// 	if (!Tag2BuffEffect_Sight.Contains(Tag)) return;
+// 	
+// 	FBuffEffect Effect = Tag2BuffEffect_Sight[Tag];
+// 	EffectedPercent_Sight -= Effect.EffectedPercent;
+// 	EffectedValue_Sight -= Effect.EffectedValue;
+//
+// 	Tag2BuffEffect_Sight.Remove(Tag);
+//
+// 	if (Owner && Owner->Implements<UBuff_Interface>())
+// 	{
+// 		Execute_BuffUpdate_Sight(Owner);
+// 	}
+// }
+//
+// void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
+// {
+// 	if (!Tag2BuffEffect_Speed.Contains(Tag)) return;
+// 	
+// 	FBuffEffect Effect = Tag2BuffEffect_Speed[Tag];
+// 	EffectedPercent_Speed -= Effect.EffectedPercent;
+// 	EffectedValue_Speed -= Effect.EffectedValue;
+//
+// 	Tag2BuffEffect_Speed.Remove(Tag);
+//
+// 	if (Owner && Owner->Implements<UBuff_Interface>())
+// 	{
+// 		Execute_BuffUpdate_Speed(Owner);
+// 	}
+// }
 
 void UBuffComponent::SetBuffStateWidgetVisibility(ESlateVisibility InVisibility)
 {
@@ -277,143 +265,123 @@ void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Gamepl
 	}
 }
 
-void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
+// void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
+// {
+// 	if (!Tag.IsValid()) return;
+// 	
+// 	RemoveBuff_Speed(Tag);
+// 	
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+// 	if (!Owner->Implements<UBuff_Interface>()) return;
+// 	
+// 	float SlowDownResistancePercent = Execute_GetSlowDownResistancePercent(Owner);
+// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+//
+// 	if (Percent < 0)
+// 	{
+// 		Percent = (1 - SlowDownResistancePercent) * Percent;
+// 	}
+//
+// 	if (Value < 0)
+// 	{
+// 		Value = (1 - SlowDownResistancePercent) * Value;
+// 	}
+//
+// 	EffectedPercent_Speed += Percent;
+// 	EffectedValue_Speed += Value;
+// 	Tag2BuffEffect_Speed.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
+// 	
+// 	Execute_BuffUpdate_Speed(Owner);
+// }
+
+
+// void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
+// {
+// 	if (!Tag.IsValid()) return;
+// 	
+// 	RemoveBuff_Attack(Tag);
+// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+//
+// 	EffectedPercent_Attack += Percent;
+// 	EffectedValue_Attack += Value;
+// 	
+// 	Tag2BuffEffect_Attack.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
+//
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+// 	if (Owner->Implements<UBuff_Interface>())
+// 	{
+// 		Execute_BuffUpdate_Attack(Owner);
+// 	}
+// }
+
+
+// void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
+// {
+// 	if (!Tag.IsValid()) return;
+// 	
+// 	RemoveBuff_Sight(Tag);
+// 	
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+// 	if (!Owner->Implements<UBuff_Interface>()) return;
+//
+// 	float ShortSightResistancePercent = Execute_GetShortSightResistancePercent(Owner);
+// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
+//
+// 	if (Percent < 0)
+// 	{
+// 		Percent = (1 - ShortSightResistancePercent) * Percent;
+// 	}
+//
+// 	if (Value < 0)
+// 	{
+// 		Value = (1 - ShortSightResistancePercent) * Value;
+// 	}
+//
+// 	EffectedPercent_Sight += Percent;
+// 	EffectedValue_Sight += Value;
+// 	Tag2BuffEffect_Sight.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
+// 	
+// 	Execute_BuffUpdate_Sight(Owner);
+//
+// }
+
+void UBuffComponent::RemoveBuff(const FGameplayTag& Tag, bool OnlySelf)
 {
 	if (!Tag.IsValid()) return;
-	
-	RemoveBuff_Speed(Tag);
-	
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-	if (!Owner->Implements<UBuff_Interface>()) return;
-	
-	float SlowDownResistancePercent = Execute_GetSlowDownResistancePercent(Owner);
-	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
 
-	if (Percent < 0)
+	RemoveBuffOnWidget(Tag, OnlySelf);
+	
+	if (OnlySelf)
 	{
-		Percent = (1 - SlowDownResistancePercent) * Percent;
-	}
-
-	if (Value < 0)
-	{
-		Value = (1 - SlowDownResistancePercent) * Value;
-	}
-
-	EffectedPercent_Speed += Percent;
-	EffectedValue_Speed += Value;
-	Tag2BuffEffect_Speed.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
-	
-	Execute_BuffUpdate_Speed(Owner);
-
-	FVector Location = Owner->GetActorLocation();
-	if (Percent < 0 || Value < 0)
-	{
-		UCommonFuncLib::SpawnFloatingText( LOCTEXT("BUFF_SLOWDOWN", "减速"),
-				Location + FVector(20, 0, 20),
-				FLinearColor::Gray);
+		RemoveAttributeEffectsByTag(Tag);
 	}
 	else
 	{
-		UCommonFuncLib::SpawnFloatingText( LOCTEXT("BUFF_SPEEDUP", "加速"),
-				Location + FVector(-30, 0, 20),
-				FLinearColor::White);
+		FGameplayTagContainer TagContainer = UGameplayTagsManager::Get().RequestGameplayTagChildren(Tag);
+		TArray<FGameplayTag> Tags;
+		TagContainer.GetGameplayTagArray(Tags);
+	
+		for (auto& T : Tags)
+		{
+			RemoveAttributeEffectsByTag(T);
+		}
 	}
-
 
 	if (Tag2Niagara.Contains(Tag))
 	{
 		Tag2Niagara[Tag]->DestroyComponent();
 		Tag2Niagara.Remove(Tag);
 	}
-	
- 	if (Percent > 0 && Value > 0)
+}
+
+void UBuffComponent::RemoveBuff(TMap<FGameplayTag, TArray<EPXAttribute>>& RemoveEffects)
+{
+	for (auto& Effect : RemoveEffects)
 	{
-		const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-
-		const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
-
-		if (ResourceDataAsset && ResourceDataAsset->NS_SpeedUP.LoadSynchronous())
+		for (auto& AttributeName : Effect.Value)
 		{
-			UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-				ResourceDataAsset->NS_SpeedUP.LoadSynchronous(),
-				Owner->GetRootComponent(),
-				FName(""),
-				FVector::ZeroVector,
-				FRotator::ZeroRotator,
-				EAttachLocation::Type::KeepRelativeOffset,
-				false,
-				true,
-				ENCPoolMethod::None,
-				true
-			);
-			Tag2Niagara.Add(Tag, NiagaraComponent);
+			RemoveAttributeEffect(AttributeName, Effect.Key);
 		}
-	}
-}
-
-
-void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
-{
-	if (!Tag.IsValid()) return;
-	
-	RemoveBuff_Attack(Tag);
-	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
-
-	EffectedPercent_Attack += Percent;
-	EffectedValue_Attack += Value;
-	
-	Tag2BuffEffect_Attack.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
-
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-	if (Owner->Implements<UBuff_Interface>())
-	{
-		Execute_BuffUpdate_Attack(Owner);
-	}
-}
-void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
-{
-	if (!Tag.IsValid()) return;
-	
-	RemoveBuff_Sight(Tag);
-	
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-	if (!Owner->Implements<UBuff_Interface>()) return;
-
-	float ShortSightResistancePercent = Execute_GetShortSightResistancePercent(Owner);
-	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
-
-	if (Percent < 0)
-	{
-		Percent = (1 - ShortSightResistancePercent) * Percent;
-	}
-
-	if (Value < 0)
-	{
-		Value = (1 - ShortSightResistancePercent) * Value;
-	}
-
-	EffectedPercent_Sight += Percent;
-	EffectedValue_Sight += Value;
-	Tag2BuffEffect_Sight.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
-	
-	Execute_BuffUpdate_Sight(Owner);
-
-	FVector Location = Owner->GetActorLocation();
-	if (Percent < 0 || Value < 0)
-	{
-		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Myopia", "短视"),
-			Location + FVector(10.0, 0, 20),
-			FLinearColor::White,
-			FVector2D(0.9, 0.9)
-			);
-	}
-	else
-	{
-		UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Hyperopia", "远视"),
-			Location + FVector(-50, 0, 20),
-			FLinearColor::Gray);
 	}
 }
 
@@ -468,32 +436,6 @@ void UBuffComponent::RemoveBuffOnWidget(FGameplayTag Tag, bool OnlySelf)
 	}
 }
 
-void UBuffComponent::RemoveBuff_Implementation(const FGameplayTag& Tag, bool OnlySelf)
-{
-	if (!Tag.IsValid()) return;
-
-	RemoveBuffOnWidget(Tag, OnlySelf);
-	// RemoveAttributeEffectsByTag(Tag);
-	
-	if (OnlySelf)
-	{
-		RemoveAttributeEffectsByTag(Tag);
-		// RemoveBuff_EffectAll(Tag);
-	}
-	else
-	{
-		FGameplayTagContainer TagContainer = UGameplayTagsManager::Get().RequestGameplayTagChildren(Tag);
-		TArray<FGameplayTag> Tags;
-		TagContainer.GetGameplayTagArray(Tags);
-	
-		for (auto& T : Tags)
-		{
-			RemoveAttributeEffectsByTag(T);
-			// RemoveBuff_EffectAll(T);
-		}
-	}
-}
-
 void UBuffComponent::AddBuffByTag(FGameplayTag Tag, bool bNeedPermanent)
 {
 	if (!Tag.IsValid()) return;
@@ -523,48 +465,45 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 	}
 }
 
-void UBuffComponent::AddAttributeEffect(const FString& AttributeName, const FGameplayTag& Tag, const FBuffEffect& Effect)
+void UBuffComponent::AddAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag, const FBuffEffect& Effect)
 {
 	FAttributeEffectMap* AttributeEffectMap = AttributeEffects.Find(AttributeName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
 	
-	UPXASComponent* ASC = Cast<UPXASComponent>( UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
-
-	const UPXAttributeSet* AttributeSet = ASC->GetSet<UPXAttributeSet>();
+	const UPXAttributeSet* AttributeSet = CachedASC->GetSet<UPXAttributeSet>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeSet)
 
 	auto& AttributeNames= Tag2AttributeNames.FindOrAdd(Tag);
 	AttributeNames.Add(AttributeName);
 	
-	float PreValue = ASC->GetPXAttributeValueByName(AttributeName);
+	float PreValue = CachedASC->GetAttributeValue(AttributeName);
 	float CurValue = PreValue *  (1 + Effect.EffectedPercent) + Effect.EffectedValue;
 	
-	ASC->SetPXAttributeValueByName(AttributeName, CurValue);
+	CachedASC->SetAttributeValue(AttributeName, CurValue);
 	AttributeEffectMap->Tag2BuffEffect.Add(Tag, Effect);
 }
 
-void UBuffComponent::RemoveAttributeEffect(const FString& AttributeName, const FGameplayTag& Tag)
+void UBuffComponent::RemoveAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag)
 {
 	FAttributeEffectMap* AttributeEffectMap = AttributeEffects.Find(AttributeName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
-
-	UPXASComponent* ASC = Cast<UPXASComponent>( UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ASC)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 
 	const FBuffEffect& Effect = AttributeEffectMap->Tag2BuffEffect[Tag];
-	const UPXAttributeSet* AttributeSet = ASC->GetSet<UPXAttributeSet>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeSet)
 	
-	// 可能要转入 FGameplayAttributeData 的 BaseValue 和 CurrentValue 的处理
-	float PreValue = ASC->GetPXAttributeValueByName(AttributeName);
+	// 后续要转入 FGameplayAttributeData 的 BaseValue 和 CurrentValue 的处理
+	float PreValue = CachedASC->GetAttributeValue(AttributeName);
 	float CurValue = (PreValue - Effect.EffectedValue) / (1 + Effect.EffectedPercent);
 	
-	ASC->SetPXAttributeValueByName(AttributeName, CurValue);
+	CachedASC->SetAttributeValue(AttributeName, CurValue);
 	AttributeEffectMap->Tag2BuffEffect.Remove(Tag);
-	if (auto T = Tag2AttributeNames.Find(Tag))
+	if (auto Attributes = Tag2AttributeNames.Find(Tag))
 	{
-		T->Remove(AttributeName);
+		Attributes->Remove(AttributeName);
+		if (Attributes->IsEmpty())
+		{
+			Tag2AttributeNames.Remove(Tag);
+		}
 	}
 }
 

@@ -288,21 +288,21 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	InitAbilitiesToGive.Append(DataAsset->InitAbilitiesToGive);
 	InitEffects.Append(DataAsset->InitEffects);
-	if (AbilitySystem)
+	if (CachedASC)
 	{
 		for (auto Ability : InitAbilitiesToGive)
 		{
-			AbilitySystem->K2_GiveAbility(Ability);
+			CachedASC->K2_GiveAbility(Ability);
 		}
 
-		FGameplayEffectContextHandle EffectContext = AbilitySystem->MakeEffectContext();
+		FGameplayEffectContextHandle EffectContext = CachedASC->MakeEffectContext();
 		EffectContext.AddSourceObject(this);
 		
 		for (auto Effect : InitEffects)
 		{
 			if (!Effect) continue;
 			
-			FGameplayEffectSpecHandle SpecHandle = AbilitySystem->MakeOutgoingSpec(
+			FGameplayEffectSpecHandle SpecHandle = CachedASC->MakeOutgoingSpec(
 				Effect, 
 				1.0f, 
 				EffectContext
@@ -311,7 +311,7 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 			if (SpecHandle.IsValid())
 			{
 				// 应用效果到自身
-				AbilitySystem->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+				CachedASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 			}
 		}	
 	}
@@ -343,8 +343,8 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 
-	AbilitySystem = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
-	AbilitySystem->SetIsReplicated(true);
+	CachedASC = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
+	CachedASC->SetIsReplicated(true);
 	
 	AttributeSet = CreateDefaultSubobject<UPXEnemyAttributeSet>(TEXT("AttributeSetBase"));
 
@@ -663,39 +663,39 @@ FVector ABaseEnemy::GetHorizontalDirectionToPlayer()
 
 UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
 {
-	return AbilitySystem;
+	return CachedASC;
 }
 
-void ABaseEnemy::BuffUpdate_Attack_Implementation()
-{
-	if (BuffComponent)
-	{
-		CurAttackDamage = EnemyData.AttackDamage * (1 + BuffComponent->EffectedPercent_Attack) + BuffComponent->EffectedValue_Attack;
-	}
-}
+// void ABaseEnemy::BuffUpdate_Attack_Implementation()
+// {
+// 	if (BuffComponent)
+// 	{
+// 		CurAttackDamage = EnemyData.AttackDamage * (1 + BuffComponent->EffectedPercent_Attack) + BuffComponent->EffectedValue_Attack;
+// 	}
+// }
 
-void ABaseEnemy::BuffUpdate_Speed_Implementation()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent);
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MovementComponent);
+// void ABaseEnemy::BuffUpdate_Speed_Implementation()
+// {
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent);
+// 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MovementComponent);
+//
+// 	MovementComponent->MaxWalkSpeed = EnemyData.MoveSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
+// 	MovementComponent->MaxAcceleration = EnemyData.MoveAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
+//
+// 	if (MovementComponent->MaxWalkSpeed < EnemyData.MoveSpeed)
+// 	{
+// 		CustomTimeDilation = MovementComponent->MaxWalkSpeed / EnemyData.MoveSpeed;
+// 	}
+// }
 
-	MovementComponent->MaxWalkSpeed = EnemyData.MoveSpeed * (BuffComponent->EffectedPercent_Speed + 1.0f) + BuffComponent->EffectedValue_Speed;
-	MovementComponent->MaxAcceleration = EnemyData.MoveAcceleration * (BuffComponent->EffectedPercent_Speed + 1.0f);
-
-	if (MovementComponent->MaxWalkSpeed < EnemyData.MoveSpeed)
-	{
-		CustomTimeDilation = MovementComponent->MaxWalkSpeed / EnemyData.MoveSpeed;
-	}
-}
-
-void ABaseEnemy::BuffUpdate_Sight_Implementation()
-{
-	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
-	{
-		EnemyAIController->UpdateSightRadius(EnemyData.SightRadius * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight);
-	}
-}
+// void ABaseEnemy::BuffUpdate_Sight_Implementation()
+// {
+// 	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
+// 	{
+// 		EnemyAIController->UpdateSightRadius(EnemyData.SightRadius * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight);
+// 	}
+// }
 
 bool ABaseEnemy::GetIsAttacking()
 {
@@ -953,7 +953,7 @@ APawn* ABaseEnemy::GetPawn_Implementation()
 	return this;
 }
 
-float ABaseEnemy::GetAttackInterval_Implementation()
+float ABaseEnemy::GetAttackCD_Implementation()
 {
 	FGameplayTag Tag = TAG("CommonSet.AttackAccPercent");
 	if (EffectGameplayTags.Contains(Tag))

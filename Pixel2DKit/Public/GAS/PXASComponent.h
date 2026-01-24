@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "AttributeSet/PXAttributeSet.h"
 #include "PXASComponent.generated.h"
 
 /**
@@ -50,13 +51,67 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PXASC")
 	void RemoveAbilityCD(const FGameplayTag& AbilityTag);
 
-	UFUNCTION(BlueprintCallable, Category = "PXASC")
-	void SetPXAttributeValueByName(const FString& AttributeName, float Value);
 
-	UFUNCTION(BlueprintCallable, Category = "PXASC")
-	void ModifyPXAttributeValueByName(const FString& AttributeName, float ModifyValue);
+	template<typename T = UPXAttributeSet>
+	void SetAttributeValue(EPXAttribute AttributeName, float Value)
+	{
+		if (const T* AttributeSet = GetSet<T>())
+		{
+			T* MutableSet = const_cast<T*>(AttributeSet);
+			FGameplayAttribute Attribute = AttributeSet->GetAttribute(AttributeName);
+			if (FGameplayAttributeData* Data = Attribute.GetGameplayAttributeData(MutableSet))
+			{
+				Data->SetBaseValue(Value);
+			}
+		}
+	}
+	template<typename T = UPXAttributeSet>
+	void SetAttributeValueByName(const FString& AttributeName, float Value)
+	{
+		if (AttributeNameToEnumMap.Contains(AttributeName))
+		{
+			SetAttributeValue<T>(AttributeNameToEnumMap[AttributeName], Value);
+		}
+	}
 	
-	UFUNCTION(BlueprintCallable, Category = "PXASC")
-	float GetPXAttributeValueByName(const FString& AttributeName);
 	
+	template<typename T = UPXAttributeSet>
+	void ModifyAttributeValue(EPXAttribute AttributeName, float ModifyValue)
+	{
+		if (const T* AttributeSet = GetSet<T>())
+		{
+			const FGameplayAttribute& Attribute = AttributeSet->GetAttribute(AttributeName);
+			float CurValue = Attribute.GetNumericValue(AttributeSet);
+			SetNumericAttributeBase(Attribute, CurValue + ModifyValue);
+		}
+	}
+	template<typename T = UPXAttributeSet>
+	void ModifyAttributeValue(const FString& AttributeName, float Value)
+	{
+		if (AttributeNameToEnumMap.Contains(AttributeName))
+		{
+			ModifyAttributeValue<T>(AttributeNameToEnumMap[AttributeName], Value);
+		}
+	}
+	
+	
+	template<typename T = UPXAttributeSet> // 设置默认模板参数
+	float GetAttributeValue(EPXAttribute AttributeName)
+	{
+		if (const T* AttributeSet = GetSet<T>()) // 使用模板参数T
+		{
+			const FGameplayAttribute& Attribute = AttributeSet->GetAttribute(AttributeName);
+			return Attribute.GetNumericValue(AttributeSet);
+		}
+		return 0;
+	}
+	template<typename T = UPXAttributeSet>
+	float GetAttributeValue(const FString& AttributeName, float Value)
+	{
+		if (AttributeNameToEnumMap.Contains(AttributeName))
+		{
+			return GetAttributeValue<T>(AttributeNameToEnumMap[AttributeName], Value);
+		}
+		return 0;
+	}
 };

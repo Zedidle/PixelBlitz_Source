@@ -115,7 +115,7 @@ class ABasePXCharacter;
 
 
 UCLASS(Abstract)
-class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IBuff_Interface, public IAbilitySystemInterface
+class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -307,7 +307,7 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UPXEnemyASComponent* AbilitySystem = nullptr;
+	UPXEnemyASComponent* CachedASC = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPXEnemyAttributeSet* AttributeSet = nullptr;
@@ -317,15 +317,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
-	
-#pragma endregion
-
-
-
-#pragma region Buff_Interface
-	virtual void BuffUpdate_Attack_Implementation() override;
-	virtual void BuffUpdate_Speed_Implementation() override;
-	virtual void BuffUpdate_Sight_Implementation() override;
 	
 #pragma endregion
 
@@ -354,7 +345,7 @@ public:
 	virtual void OnAttackEffectEnd_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
-	virtual float GetAttackInterval_Implementation() override;
+	virtual float GetAttackCD_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;
 	virtual FVector GetAttackRepel_Implementation() override;
 	virtual void OnAnimVulnerableBegin_Implementation() override;

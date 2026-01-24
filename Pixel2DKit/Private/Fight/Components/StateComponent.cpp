@@ -121,19 +121,17 @@ void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, con
 {
 	AActor* Owner = GetOwner();
 	if (!IsValid(Owner)) return;
-	UPXASComponent* ASC = Cast<UPXASComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner));
-	if (!IsValid(ASC)) return;
-	const UPXAttributeSet* PixelAS = ASC->GetSet<UPXAttributeSet>();
-	if (!IsValid(PixelAS)) return;
+
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 
 	value = FMath::Max(value, 0);
 	
-	int CurrentHealth = PixelAS->GetHP();
-	int MaxHealth = PixelAS->GetCurMaxHP();
+	int CurrentHealth = CachedASC->GetAttributeValue(EPXAttribute::HP);
+	int MaxHealth = CachedASC->GetAttributeValue(EPXAttribute::CurMaxHP);
 	
 	if (ChangeType == EStatChange::Increase)
 	{
-		ASC->SetPXAttributeValueByName("MaxHP", MaxHealth + value);
+		CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, MaxHealth + value);
 		if (current)
 		{
 			SetHP(CurrentHealth + value);
@@ -142,7 +140,7 @@ void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, con
 	}
 	else if (ChangeType == EStatChange::Decrease)
 	{
-		ASC->SetPXAttributeValueByName("MaxHP", FMath::Max(0, MaxHealth - value));
+		CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, FMath::Max(0, MaxHealth - value));
 		if (current)
 		{
 			SetHP(FMath::Max(0, CurrentHealth - value));
@@ -150,7 +148,7 @@ void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, con
 	}
 	else if (ChangeType == EStatChange::Reset)
 	{
-		ASC->SetPXAttributeValueByName("MaxHP", value);
+		CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, value);
 		if (current || value < CurrentHealth)
 		{
 			SetHP(value);
@@ -160,34 +158,27 @@ void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, con
 
 void UStateComponent::SetHP(const int32 value)
 {
-	AActor* TargetActor = GetOwner();
-	if (!IsValid(TargetActor)) return;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 
-	if (UPXASComponent* ASC = Cast<UPXASComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor)))
-	{
-		int CurrentHealth = FMath::Clamp(value, 0, GetMaxHP());
-		ASC->SetPXAttributeValueByName("HP", CurrentHealth);
-	}
+	int CurrentHealth = FMath::Clamp(value, 0, GetMaxHP());
+	CachedASC->SetAttributeValue(EPXAttribute::HP, CurrentHealth);
 }
 
 void UStateComponent::IncreaseHP(int32 value, AActor* Instigator)
 {
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner)) return;
-	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
-	if (!IsValid(TargetASC)) return;
-	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	const UPXAttributeSet* PixelAS = CachedASC->GetSet<UPXAttributeSet>();
 	if (!IsValid(PixelAS)) return;
 
 	value = FMath::Max(value, 0);
 	
-	int preHealth = PixelAS->GetHP();
+	int preHealth = CachedASC->GetAttributeValue(EPXAttribute::HP);
 	int MaxHealth = PixelAS->GetCurMaxHP();
 	int CurrentHealth = FMath::Min(value + preHealth, MaxHealth);
 
 	if (CurrentHealth - preHealth > 0)
 	{
-		TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
+		CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
 	}
 }
 
@@ -198,6 +189,8 @@ void UStateComponent::BeginPlay()
 	Super::BeginPlay();
 
 	bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
+
+	CachedASC = Cast<UPXASComponent>(GetOwner());
 	
 	OnHPChanged.AddDynamic(this, &UStateComponent::Event_OnHPChanged);
 }
@@ -216,7 +209,6 @@ void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
 }
 
 
@@ -239,34 +231,13 @@ void UStateComponent::Event_OnHPChanged(int OldValue, int NewValue)
 
 int UStateComponent::GetCurrentHP()
 {
-	if (const AActor* TargetActor = GetOwner())
-	{
-		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
-		{
-			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
-			{
-				return PixelAS->GetHP();
-			}
-		}
-	}
-	
-	return 0;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, 0);
+	return CachedASC->GetAttributeValue(EPXAttribute::HP);
 }
 
 int UStateComponent::GetMaxHP()
 {
-	if (const AActor* TargetActor = GetOwner())
-	{
-		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
-		{
-			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
-			{
-				return PixelAS->GetCurMaxHP();
-			}
-		}
-	}
-
-	return 100;
+	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurMaxHP) : 100;
 }
 
 float UStateComponent::GetHPPercent()
@@ -278,13 +249,9 @@ void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector Knockb
 {
 	if (Damage <= 0) return;
 	AActor* Owner = GetOwner();
-	if (!Owner->Implements<UFight_Interface>()) return;
-
-	if (!IsValid(Owner)) return;
-	UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner);
-	if (!IsValid(TargetASC)) return;
-	const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>();
-	if (!IsValid(PixelAS)) return;
+	if (!Owner || !Owner->Implements<UFight_Interface>()) return;
+	
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
 
 	if (bInvulnerable && !bForce)
 	{
@@ -303,7 +270,7 @@ void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector Knockb
 	int calDamage = CalAcceptDamage(OutDamage, Maker);
 	calDamage = IFight_Interface::Execute_OnDefendingHit(Owner, calDamage);
 
-	int preHealth = PixelAS->GetHP();
+	int preHealth = CachedASC->GetAttributeValue(EPXAttribute::HP);
 	int CurrentHealth = FMath::Max(preHealth - calDamage, 0);
 	int ChangedValue = FMath::Abs(preHealth - CurrentHealth);
 	if (ChangedValue <= 0) return;
@@ -338,8 +305,8 @@ void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector Knockb
 			}
 		}
 	}
-	
-	TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
+	CachedASC->SetAttributeValue(EPXAttribute::HP, CurrentHealth);
+	// CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
 }
 
 void UStateComponent::KnockBack(FVector Repel, AActor* Maker)
@@ -468,17 +435,9 @@ bool UStateComponent::DecreaseEP(int32 Amount)
 
 void UStateComponent::IncreaseEP(int32 Amount)
 {
-	if (const AActor* TargetActor = GetOwner())
-	{
-		if (UAbilitySystemComponent* TargetASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(TargetActor))
-		{
-			if (const UPXAttributeSet* PixelAS = TargetASC->GetSet<UPXAttributeSet>())
-			{
-				float NewValue = FMath::Min(PixelAS->GetEP() + Amount, PixelAS->GetCurMaxEP());
-				TargetASC->SetNumericAttributeBase(UPXAttributeSet::GetEPAttribute(), NewValue);
-			}
-		}
-	}
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	float NewValue = FMath::Min(CachedASC->GetAttributeValue(EPXAttribute::EP) + Amount, CachedASC->GetAttributeValue(EPXAttribute::CurMaxEP));
+	CachedASC->SetAttributeValue(EPXAttribute::EP, NewValue);
 }
 
 void UStateComponent::SetEP(int32 NewValue)

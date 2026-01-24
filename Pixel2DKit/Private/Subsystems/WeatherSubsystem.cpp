@@ -76,19 +76,19 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (DayTimeNameString != DayTimeName.ToString())
 		{
 			DayTimeNameString = DayTimeName.ToString();
-			// IBuff_Interface::Execute_RemoveBuff(BuffComp, DayTimeTag, true);
-			// IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, DayTimeTag, DayTimeNameString, FLinearColor::White, false);
-			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, DayTimeTag, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999);
+			BuffComp->AddAttributeEffect(EPXAttribute::CurSight, DayTimeTag, FBuffEffect( DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue, 9999));
+			BuffComp->RemoveBuff(DayTimeTag, true);
+			BuffComp->AddBuffOnWidget(DayTimeTag, DayTimeNameString, FLinearColor::White, false);
 		}
 
 		// 天气影响
 		if (!GS->WeatherName.IsEmpty() && WeatherNameString != GS->WeatherName.ToString())
 		{
 			WeatherNameString = GS->WeatherName.ToString();
-			// IBuff_Interface::Execute_RemoveBuff(BuffComp, WeatherTag, true);
-			// IBuff_Interface::Execute_AddBuffOnWidget(BuffComp, WeatherTag, WeatherNameString, FLinearColor::White, false);
-			IBuff_Interface::Execute_BuffEffect_Sight(BuffComp, WeatherTag, GS->WeatherEffect.SightDistancePercent, 0, 9999);
-			IBuff_Interface::Execute_BuffEffect_Speed(BuffComp, WeatherTag, GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999);
+			BuffComp->AddAttributeEffect(EPXAttribute::CurSight, WeatherTag, FBuffEffect(GS->WeatherEffect.SightDistancePercent, 0, 9999));
+			BuffComp->AddAttributeEffect(EPXAttribute::CurSpeed, WeatherTag, FBuffEffect(GS->WeatherEffect.MoveSpeedEffectPercent, 0, 9999));
+			BuffComp->RemoveBuff(WeatherTag, true);
+			BuffComp->AddBuffOnWidget(WeatherTag, WeatherNameString, FLinearColor::White, false);
 		}
 		
 		// 针对玩家的血量影响

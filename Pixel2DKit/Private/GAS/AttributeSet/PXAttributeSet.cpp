@@ -152,20 +152,19 @@ bool UPXAttributeSet::SetAttrBaseValueByName(FName AttrName, float Value)
 	return true;	
 }
 
-FGameplayAttribute UPXAttributeSet::GetAttributeByName(const FString& AttributeName)
+FGameplayAttribute UPXAttributeSet::GetAttribute(EPXAttribute AttributeName)
 {
-	FName NameKey = FName(*AttributeName);
-	TMap<FName, FGameplayAttribute>& AttributeMap = GetAttributeMap();
+	TMap<EPXAttribute, FGameplayAttribute>& AttributeMap = GetAttributeMap();
     
-	if (AttributeMap.Contains(NameKey))
+	if (AttributeMap.Contains(AttributeName))
 	{
-		return AttributeMap[NameKey];
+		return AttributeMap[AttributeName];
 	}
     
 	return FGameplayAttribute();
 }
 
-TMap<FName, FGameplayAttribute>& UPXAttributeSet::GetAttributeMap()
+TMap<EPXAttribute, FGameplayAttribute>& UPXAttributeSet::GetAttributeMap()
 {
 	InitializeAttributeMap();
 	return GetAttributeMapInstance();
@@ -200,79 +199,80 @@ FGameplayAttributeData* UPXAttributeSet::GetGameplayAttributeData(FName AttrName
 
 void UPXAttributeSet::InitializeAttributeMap()
 {
-	TMap<FName, FGameplayAttribute>& AttributeMap = GetAttributeMapInstance();
+	TMap<EPXAttribute, FGameplayAttribute>& AttributeMap = GetAttributeMapInstance();
 	
 	if (AttributeMap.IsEmpty())
 	{
 		// 生命值
-		AttributeMap.Add("HP", GetHPAttribute());
-		AttributeMap.Add("BasicMaxHP", GetBasicMaxHPAttribute());
-		AttributeMap.Add("CurMaxHP", GetCurMaxHPAttribute());
+		AttributeMap.Add(EPXAttribute::HP, GetHPAttribute());
+		AttributeMap.Add(EPXAttribute::BasicMaxHP, GetBasicMaxHPAttribute());
+		AttributeMap.Add(EPXAttribute::CurMaxHP, GetCurMaxHPAttribute());
 		// 每五秒恢复生命值
-		AttributeMap.Add("BasicHPRecoverValue", GetBasicHPRecoverValueAttribute());
-		AttributeMap.Add("CurHPRecoverValue", GetCurHPRecoverValueAttribute());
+		AttributeMap.Add(EPXAttribute::BasicHPRecoverValue, GetBasicHPRecoverValueAttribute());
+		AttributeMap.Add(EPXAttribute::CurHPRecoverValue, GetCurHPRecoverValueAttribute());
 
 		// 能量值
-		AttributeMap.Add("EP", GetEPAttribute());
-		AttributeMap.Add("BasicMaxEP", GetBasicMaxEPAttribute());
-		AttributeMap.Add("CurMaxEP", GetCurMaxEPAttribute());
+		AttributeMap.Add(EPXAttribute::EP, GetEPAttribute());
+		AttributeMap.Add(EPXAttribute::BasicMaxEP, GetBasicMaxEPAttribute());
+		AttributeMap.Add(EPXAttribute::CurMaxEP, GetCurMaxEPAttribute());
 		// 能量每五秒能量值
-		AttributeMap.Add("BasicEPRecoverValue", GetBasicEPRecoverValueAttribute());
-		AttributeMap.Add("CurEPRecoverValue", GetCurEPRecoverValueAttribute());
+		AttributeMap.Add(EPXAttribute::BasicEPRecoverValue, GetBasicEPRecoverValueAttribute());
+		AttributeMap.Add(EPXAttribute::CurEPRecoverValue, GetCurEPRecoverValueAttribute());
 
 		// 速度
-		AttributeMap.Add("BasicSpeed", GetBasicSpeedAttribute());
-		AttributeMap.Add("CurSpeed", GetCurSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::BasicSpeed, GetBasicSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::CurSpeed, GetCurSpeedAttribute());
 		// 加速度
-		AttributeMap.Add("BasicAcceleration", GetBasicAccelerationAttribute());
-		AttributeMap.Add("CurAcceleration", GetCurAccelerationAttribute());
+		AttributeMap.Add(EPXAttribute::BasicAcceleration, GetBasicAccelerationAttribute());
+		AttributeMap.Add(EPXAttribute::CurAcceleration, GetCurAccelerationAttribute());
 		// Dash速度
-		AttributeMap.Add("BasicDashSpeed", GetBasicDashSpeedAttribute());
-		AttributeMap.Add("CurDashSpeed", GetCurDashSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::BasicDashSpeed, GetBasicDashSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::CurDashSpeed, GetCurDashSpeedAttribute());
 		
 		// 视野
-		AttributeMap.Add("BasicSight", GetBasicSightAttribute());
-		AttributeMap.Add("CurSight", GetCurSightAttribute());
+		AttributeMap.Add(EPXAttribute::BasicSight, GetBasicSightAttribute());
+		AttributeMap.Add(EPXAttribute::CurSight, GetCurSightAttribute());
 		// 视野削减抵抗值
-		AttributeMap.Add("BasicSightReductionResist", GetBasicSightReductionResistAttribute());
-		AttributeMap.Add("CurSightReductionResist", GetCurSightReductionResistAttribute());
+		AttributeMap.Add(EPXAttribute::BasicSightReductionResist, GetBasicSightReductionResistAttribute());
+		AttributeMap.Add(EPXAttribute::CurSightReductionResist, GetCurSightReductionResistAttribute());
 		
 		
 		// 跳跃
 		// 跳跃次数
-		AttributeMap.Add("BasicMaxJumpCount", GetBasicMaxJumpCountAttribute());
-		AttributeMap.Add("CurMaxJumpCount", GetCurMaxJumpCountAttribute());
+		AttributeMap.Add(EPXAttribute::BasicMaxJumpCount, GetBasicMaxJumpCountAttribute());
+		AttributeMap.Add(EPXAttribute::CurMaxJumpCount, GetCurMaxJumpCountAttribute());
 		// 起跳速度
-		AttributeMap.Add("BasicJumpSpeed", GetBasicJumpSpeedAttribute());
-		AttributeMap.Add("CurJumpSpeed", GetCurJumpSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::BasicJumpSpeed, GetBasicJumpSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::CurJumpSpeed, GetCurJumpSpeedAttribute());
 		// 跳跃上升可控时间
-		AttributeMap.Add("BasicJumpMaxHoldTime", GetBasicJumpMaxHoldTimeAttribute());
-		AttributeMap.Add("CurJumpMaxHoldTime(", GetCurJumpMaxHoldTimeAttribute());
-		AttributeMap.Add("BasicAirControl", GetBasicAirControlAttribute());
-		AttributeMap.Add("CurAirControl", GetCurAirControlAttribute());
+		AttributeMap.Add(EPXAttribute::BasicJumpMaxHoldTime, GetBasicJumpMaxHoldTimeAttribute());
+		AttributeMap.Add(EPXAttribute::CurJumpMaxHoldTime, GetCurJumpMaxHoldTimeAttribute());
+		// 空中控制效能
+		AttributeMap.Add(EPXAttribute::BasicAirControl, GetBasicAirControlAttribute());
+		AttributeMap.Add(EPXAttribute::CurAirControl, GetCurAirControlAttribute());
 		
 		
 		// 攻击
-		AttributeMap.Add("BasicAttackValue", GetBasicAttackValueAttribute());
-		AttributeMap.Add("CurAttackValue", GetCurAttackValueAttribute());
+		AttributeMap.Add(EPXAttribute::BasicAttackValue, GetBasicAttackValueAttribute());
+		AttributeMap.Add(EPXAttribute::CurAttackValue, GetCurAttackValueAttribute());
 		// 攻击速度
-		AttributeMap.Add("BasicAttackSpeed", GetBasicAttackSpeedAttribute());
-		AttributeMap.Add("CurAttackSpeed", GetCurAttackSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::BasicAttackCD, GetBasicAttackCDAttribute());
+		AttributeMap.Add(EPXAttribute::CurAttackCD, GetCurAttackCDAttribute());
 
 		// 击退力
-		AttributeMap.Add("BasicRepelValue", GetBasicRepelValueAttribute());
-		AttributeMap.Add("CurRepelValue", GetCurRepelValueAttribute());
+		AttributeMap.Add(EPXAttribute::BasicRepelValue, GetBasicRepelValueAttribute());
+		AttributeMap.Add(EPXAttribute::CurRepelValue, GetCurRepelValueAttribute());
 		// 击退抵抗值
-		AttributeMap.Add("BasicRepelResist", GetBasicRepelResistAttribute());
-		AttributeMap.Add("CurRepelResist", GetCurRepelResistAttribute());
+		AttributeMap.Add(EPXAttribute::BasicRepelResist, GetBasicRepelResistAttribute());
+		AttributeMap.Add(EPXAttribute::CurRepelResist, GetCurRepelResistAttribute());
 
 		// 重力
-		AttributeMap.Add("BasicGravityScale", GetBasicGravityScaleAttribute());
-		AttributeMap.Add("CurGravityScale", GetCurGravityScaleAttribute());
+		AttributeMap.Add(EPXAttribute::BasicGravityScale, GetBasicGravityScaleAttribute());
+		AttributeMap.Add(EPXAttribute::CurGravityScale, GetCurGravityScaleAttribute());
 
 		// 体型
-		AttributeMap.Add("BasicBodySizeScale", GetBasicBodySizeScaleAttribute());
-		AttributeMap.Add("CurBodySizeScale", GetCurBodySizeScaleAttribute());
+		AttributeMap.Add(EPXAttribute::BasicBodySizeScale, GetBasicBodySizeScaleAttribute());
+		AttributeMap.Add(EPXAttribute::CurBodySizeScale, GetCurBodySizeScaleAttribute());
 	}
 }
 
@@ -389,14 +389,14 @@ void UPXAttributeSet::OnRep_CurAttackValue(const FGameplayAttributeData& OldValu
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurAttackValue, OldValue);
 }
 
-void UPXAttributeSet::OnRep_BasicAttackSpeed(const FGameplayAttributeData& OldValue)
+void UPXAttributeSet::OnRep_BasicAttackCD(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicAttackSpeed, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicAttackCD, OldValue);
 }
 
-void UPXAttributeSet::OnRep_CurAttackSpeed(const FGameplayAttributeData& OldValue)
+void UPXAttributeSet::OnRep_CurAttackCD(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurAttackSpeed, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurAttackCD, OldValue);
 }
 
 void UPXAttributeSet::OnRep_BasicSpeed(const FGameplayAttributeData& OldValue)
@@ -412,6 +412,16 @@ void UPXAttributeSet::OnRep_CurSpeed(const FGameplayAttributeData& OldValue)
 void UPXAttributeSet::OnRep_CurAcceleration(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurAcceleration, OldValue);
+}
+
+void UPXAttributeSet::OnRep_BasicSpeedDownReist(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicSpeedDownReist, OldValue);
+}
+
+void UPXAttributeSet::OnRep_CurSpeedDownReist(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurSpeedDownReist, OldValue);
 }
 
 void UPXAttributeSet::OnRep_BasicMaxJumpCount(const FGameplayAttributeData& OldValue)
@@ -476,7 +486,6 @@ void UPXAttributeSet::OnRep_CurAirControl(const FGameplayAttributeData& OldValue
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurAirControl, OldValue);
 }
 
-
 void UPXAttributeSet::OnRep_BasicDashSpeed(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicDashSpeed, OldValue);
@@ -484,4 +493,24 @@ void UPXAttributeSet::OnRep_BasicDashSpeed(const FGameplayAttributeData& OldValu
 void UPXAttributeSet::OnRep_CurDashSpeed(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurDashSpeed, OldValue);
+}
+
+void UPXAttributeSet::OnRep_BasicDashCD(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicDashCD, OldValue);
+}
+
+void UPXAttributeSet::OnRep_CurDashCD(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurDashCD, OldValue);
+}
+
+void UPXAttributeSet::OnRep_BasicDamagePlusAfterDash(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicDamagePlusAfterDash, OldValue);
+}
+
+void UPXAttributeSet::OnRep_CurDamagePlusAfterDash(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurDamagePlusAfterDash, OldValue);
 }

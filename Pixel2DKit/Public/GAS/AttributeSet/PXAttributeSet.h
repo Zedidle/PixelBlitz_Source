@@ -16,6 +16,112 @@ GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnPXAttributeChangeDelegate, const FGameplayAttribute&, Attribute, float,  OldValue, float, NewValue);
 
 
+UENUM(BlueprintType)
+enum class EPXAttribute : uint8
+{
+	HP,
+	EP,
+	
+	BasicMaxHP,
+	BasicHPRecoverValue,
+	BasicMaxEP,
+	BasicEPRecoverValue,
+	BasicSpeed,
+	BasicAcceleration,
+	BasicSpeedDownResist,
+	BasicDashSpeed,
+	BasicDashCD,
+	BasicDamagePlusAfterDash,
+	BasicSight,
+	BasicSightReductionResist,
+	BasicMaxJumpCount,
+	BasicJumpSpeed,
+	BasicJumpMaxHoldTime,
+	BasicAirControl,
+	BasicAttackValue,
+	BasicAttackCD,
+	BasicRepelValue,
+	BasicRepelResist,
+	BasicGravityScale,
+	BasicBodySizeScale,
+
+	CurMaxEP,
+	CurMaxHP,
+	CurHPRecoverValue,
+	CurEPRecoverValue,
+	CurSpeed,
+	CurAcceleration,
+	CurSpeedDownResist,
+	CurDashSpeed,
+	CurDashCD,
+	CurDamagePlusAfterDash,
+	CurSight,
+	CurSightReductionResist,
+	CurMaxJumpCount,
+	CurJumpSpeed,
+	CurJumpMaxHoldTime,
+	CurAirControl,
+	CurAttackValue,
+	CurAttackCD,
+	CurRepelValue,
+	CurRepelResist,
+	CurGravityScale,
+	CurBodySizeScale
+};
+
+static const TMap<FString, EPXAttribute> AttributeNameToEnumMap = {
+    {"HP", EPXAttribute::HP},
+    {"BasicMaxHP", EPXAttribute::BasicMaxHP},
+    {"CurMaxHP", EPXAttribute::CurMaxHP},
+    {"BasicHPRecoverValue", EPXAttribute::BasicHPRecoverValue},
+    {"CurHPRecoverValue", EPXAttribute::CurHPRecoverValue},
+	
+    {"EP", EPXAttribute::EP},
+    {"BasicMaxEP", EPXAttribute::BasicMaxEP},
+    {"CurMaxEP", EPXAttribute::CurMaxEP},
+    {"BasicEPRecoverValue", EPXAttribute::BasicEPRecoverValue},
+    {"CurEPRecoverValue", EPXAttribute::CurEPRecoverValue},
+	
+    {"BasicSpeed", EPXAttribute::BasicSpeed},
+    {"CurSpeed", EPXAttribute::CurSpeed},
+    {"BasicAcceleration", EPXAttribute::BasicAcceleration},
+    {"CurAcceleration", EPXAttribute::CurAcceleration},
+	{"BasicSpeedDownResist", EPXAttribute::BasicSpeedDownResist},
+	{"CurSpeedDownResist", EPXAttribute::CurSpeedDownResist},
+			
+    {"BasicDashSpeed", EPXAttribute::BasicDashSpeed},
+    {"CurDashSpeed", EPXAttribute::CurDashSpeed},
+    {"BasicDashCD", EPXAttribute::BasicDashCD},
+	{"CurDashCD", EPXAttribute::CurDashCD},
+    {"BasicDamagePlusAfterDash", EPXAttribute::BasicDamagePlusAfterDash},
+    {"CurDamagePlusAfterDash", EPXAttribute::CurDamagePlusAfterDash},
+	
+    {"BasicSight", EPXAttribute::BasicSight},
+    {"CurSight", EPXAttribute::CurSight},
+    {"BasicSightReductionResist", EPXAttribute::BasicSightReductionResist},
+    {"CurSightReductionResist", EPXAttribute::CurSightReductionResist},
+    {"BasicMaxJumpCount", EPXAttribute::BasicMaxJumpCount},
+    {"CurMaxJumpCount", EPXAttribute::CurMaxJumpCount},
+    {"BasicJumpSpeed", EPXAttribute::BasicJumpSpeed},
+    {"CurJumpSpeed", EPXAttribute::CurJumpSpeed},
+    {"BasicJumpMaxHoldTime", EPXAttribute::BasicJumpMaxHoldTime},
+    {"CurJumpMaxHoldTime", EPXAttribute::CurJumpMaxHoldTime},
+    {"BasicAirControl", EPXAttribute::BasicAirControl},
+    {"CurAirControl", EPXAttribute::CurAirControl},
+    {"BasicAttackValue", EPXAttribute::BasicAttackValue},
+    {"CurAttackValue", EPXAttribute::CurAttackValue},
+    {"BasicAttackCD", EPXAttribute::BasicAttackCD},
+    {"CurAttackCD", EPXAttribute::CurAttackCD},
+    {"BasicRepelValue", EPXAttribute::BasicRepelValue},
+    {"CurRepelValue", EPXAttribute::CurRepelValue},
+    {"BasicRepelResist", EPXAttribute::BasicRepelResist},
+    {"CurRepelResist", EPXAttribute::CurRepelResist},
+    {"BasicGravityScale", EPXAttribute::BasicGravityScale},
+    {"CurGravityScale", EPXAttribute::CurGravityScale},
+    {"BasicBodySizeScale", EPXAttribute::BasicBodySizeScale},
+    {"CurBodySizeScale", EPXAttribute::CurBodySizeScale}
+};
+
 UCLASS()
 class PIXEL2DKIT_API UPXAttributeSet : public UAttributeSet
 {
@@ -42,15 +148,15 @@ public:
 	bool SetAttrBaseValueByName(FName AttrName, float Value);
 
 	// 静态成员初始化
-	static TMap<FName, FGameplayAttribute>& GetAttributeMapInstance()
+	static TMap<EPXAttribute, FGameplayAttribute>& GetAttributeMapInstance()
 	{
-		static TMap<FName, FGameplayAttribute> AttributeMap;
+		static TMap<EPXAttribute, FGameplayAttribute> AttributeMap;
 		return AttributeMap;
 	}
-	static TMap<FName, FGameplayAttribute>& GetAttributeMap();
+	static TMap<EPXAttribute, FGameplayAttribute>& GetAttributeMap();
 
 	UFUNCTION(BlueprintCallable, Category = "AttributeSet")
-	static FGameplayAttribute GetAttributeByName(const FString& AttributeName);
+	static FGameplayAttribute GetAttribute(EPXAttribute AttributeName);
 	
 	
 private:
@@ -157,6 +263,19 @@ public:
 	UFUNCTION()
 	virtual void OnRep_CurAcceleration(const FGameplayAttributeData& OldValue);
 
+	// 减速抵抗
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicSpeedDownReist)
+	FGameplayAttributeData BasicSpeedDownReist;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicSpeedDownReist);
+	UFUNCTION()
+	virtual void OnRep_BasicSpeedDownReist(const FGameplayAttributeData& OldValue);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurSpeedDownReist)
+	FGameplayAttributeData CurSpeedDownReist;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, CurSpeedDownReist);
+	UFUNCTION()
+	virtual void OnRep_CurSpeedDownReist(const FGameplayAttributeData& OldValue);
+	
 	// Dash速度
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicDashSpeed)
 	FGameplayAttributeData BasicDashSpeed;
@@ -170,6 +289,30 @@ public:
 	UFUNCTION()
 	virtual void OnRep_CurDashSpeed(const FGameplayAttributeData& OldValue);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicDashCD)
+	FGameplayAttributeData BasicDashCD;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicDashCD);
+	UFUNCTION()
+	virtual void OnRep_BasicDashCD(const FGameplayAttributeData& OldValue);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurDashCD)
+	FGameplayAttributeData CurDashCD;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, CurDashCD);
+	UFUNCTION()
+	virtual void OnRep_CurDashCD(const FGameplayAttributeData& OldValue);
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicDamagePlusAfterDash)
+	FGameplayAttributeData BasicDamagePlusAfterDash;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicDamagePlusAfterDash);
+	UFUNCTION()
+	virtual void OnRep_BasicDamagePlusAfterDash(const FGameplayAttributeData& OldValue);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurDamagePlusAfterDash)
+	FGameplayAttributeData CurDamagePlusAfterDash;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, CurDamagePlusAfterDash);
+	UFUNCTION()
+	virtual void OnRep_CurDamagePlusAfterDash(const FGameplayAttributeData& OldValue);
+	
 	
 	// 基础视野
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicSight)
@@ -267,18 +410,18 @@ public:
 	UFUNCTION()
 	virtual void OnRep_CurAttackValue(const FGameplayAttributeData& OldValue);
 	
-	// 基础攻击速度(次/s)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicAttackSpeed)
-	FGameplayAttributeData BasicAttackSpeed;
-	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicAttackSpeed);
+	// 攻击CD (s)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicAttackCD)
+	FGameplayAttributeData BasicAttackCD;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicAttackCD);
 	UFUNCTION()
-	virtual void OnRep_BasicAttackSpeed(const FGameplayAttributeData& OldValue);
+	virtual void OnRep_BasicAttackCD(const FGameplayAttributeData& OldValue);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurAttackSpeed)
-	FGameplayAttributeData CurAttackSpeed;
-	ATTRIBUTE_ACCESSORS(UPXAttributeSet, CurAttackSpeed);
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_CurAttackCD)
+	FGameplayAttributeData CurAttackCD;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, CurAttackCD);
 	UFUNCTION()
-	virtual void OnRep_CurAttackSpeed(const FGameplayAttributeData& OldValue);
+	virtual void OnRep_CurAttackCD(const FGameplayAttributeData& OldValue);
 
 	
 	// 击退力

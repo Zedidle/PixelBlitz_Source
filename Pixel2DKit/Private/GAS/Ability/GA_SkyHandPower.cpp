@@ -27,8 +27,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	}
 	
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Pawn);
-	if (!PXCharacter || !PXCharacter->Implements<UBuff_Interface>() ||
-		!PXCharacter->Implements<UFight_Interface>() ||
+	if (!PXCharacter || !PXCharacter->Implements<UFight_Interface>() ||
 		!IFight_Interface::Execute_IsAlive(PXCharacter))
 	{
 		K2_EndAbility();
@@ -72,7 +71,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	float MultiPercent;
 	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.SkyHandPower.Set.AttackDamagePercent"), MultiPercent);
 	
-	int Damage = MultiPercent * IBuff_Interface::Execute_Buff_CalInitDamage(PXCharacter, IFight_Interface::Execute_GetAttackDamage(PXCharacter));
+	int Damage = MultiPercent * PXCharacter->CalInitDamage(IFight_Interface::Execute_GetAttackDamage(PXCharacter));
 	FVector PreEnemyLocation = Enemy->GetActorLocation();
 	
 	float SwitchedEnemyHeightOffset = Enemy->GetDefaultHalfHeight();

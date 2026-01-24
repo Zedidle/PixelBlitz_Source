@@ -11,7 +11,6 @@
 #include "Fight/Components/StateComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Interfaces/Buff_Interface.h"
 #include "Item/Weapon/BaseWeapon.h"
 #include "UI/Player/BasePlayerStatusWidget.h"
 #include "BasePXCharacter.generated.h"
@@ -97,8 +96,8 @@ public:
 
 
 UCLASS(BlueprintType, Blueprintable)
-class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IBuff_Interface,
-										public IAbilitySystemInterface, public IInteract_Interface
+class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_Interface, public IInteract_Interface,
+										public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -470,7 +469,7 @@ public:
 	virtual void OnDashEffectEnd_Implementation() override;
 	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
-	virtual float GetAttackInterval_Implementation() override;
+	virtual float GetAttackCD_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;
 	virtual FVector GetAttackRepel_Implementation() override;
 	virtual void OnDie_Implementation() override;
@@ -485,17 +484,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnKillEnemy();
 	
-#pragma region IBuff_Interface
-	virtual void BuffUpdate_Attack_Implementation() override;
-	virtual void BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime = 9999) override;
-	virtual int32 Buff_CalInitDamage_Implementation(int32 InDamage) override;
-
-	// 直接通过AttributeSet处理
-	virtual float GetShortSightResistancePercent_Implementation() override;
-	virtual float GetSlowDownResistancePercent_Implementation() override;
-#pragma endregion
-	
-	
+	int32 CalInitDamage(int32 InDamage);
 
 #pragma region Input
 	
@@ -535,7 +524,7 @@ public:
 
 
 	UFUNCTION()
-	void OnPXAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
+	void OnAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetBasicDashSpeed();

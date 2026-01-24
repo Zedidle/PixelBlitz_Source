@@ -155,50 +155,33 @@ void UPXASComponent::RemoveAbilityCD(const FGameplayTag& AbilityTag)
     
 	// 可选：移除可能残留的“松散标签”，确保状态完全一致
 	RemoveLooseGameplayTag(AbilityTag);
-
-	
 }
 
-void UPXASComponent::SetPXAttributeValueByName(const FString& AttributeName, float Value)
-{
-	if (const UPXAttributeSet* AttributeSet = GetSet<UPXAttributeSet>())
-	{
-		FGameplayAttribute Attribute = AttributeSet->GetAttributeByName(AttributeName);
-		if (const FGameplayAttributeData* Data = Attribute.GetGameplayAttributeData(AttributeSet))
-		{
-			// 现在你可以安全地修改 AttackData 了
-			// AttackData->SetBaseValue(100.0f);
-			// 或者使用你的自定义公式计算后，将结果设置给 CurrentValue
-			Data->GetCurrentValue();
-			Data->GetBaseValue();
-		}
-
-		SetNumericAttributeBase(AttributeSet->GetAttributeByName(AttributeName), Value);
-
-		// if (const FGameplayAttributeData* HealthData = Attribute.GetGameplayAttributeData(AttributeSet))
-		// {
-		// 	HealthData->SetCurrentValue(100.0f); // 修改当前值
-		// }
-	}
-}
-
-void UPXASComponent::ModifyPXAttributeValueByName(const FString& AttributeName, float ModifyValue)
-{
-	if (const UPXAttributeSet* AttributeSet = GetSet<UPXAttributeSet>())
-	{
-		const FGameplayAttribute& Attribute = AttributeSet->GetAttributeByName(AttributeName);
-		float CurValue = Attribute.GetNumericValue(AttributeSet);
-		SetNumericAttributeBase(Attribute, CurValue + ModifyValue);
-	}
-}
-
-float UPXASComponent::GetPXAttributeValueByName(const FString& AttributeName)
-{
-	if (const UPXAttributeSet* AttributeSet = GetSet<UPXAttributeSet>())
-	{
-		const FGameplayAttribute& Attribute = AttributeSet->GetAttributeByName(AttributeName);
-		return Attribute.GetNumericValue(AttributeSet);
-	}
-
-	return 0;
-}
+// void UPXASComponent::SetPXAttributeValue(EPXAttribute AttributeName, float Value)
+// {
+// 	if (const UPXAttributeSet* AttributeSet = GetSet<UPXAttributeSet>())
+// 	{
+// 		UPXAttributeSet* MutableSet = const_cast<UPXAttributeSet*>(AttributeSet);
+// 		FGameplayAttribute Attribute = AttributeSet->GetAttribute(AttributeName);
+// 		if (FGameplayAttributeData* Data = Attribute.GetGameplayAttributeData(MutableSet))
+// 		{
+// 			Data->SetBaseValue(Value);
+//
+// 			// Data->SetCurrentValue(Value);
+// 			
+// 			// 现在你可以安全地修改 AttackData 了
+// 			// Data->SetBaseValue(100.0f);
+//
+// 			// 或者使用你的自定义公式计算后，将结果设置给 CurrentValue
+// 			// Data->GetCurrentValue();
+// 			// Data->GetBaseValue();
+// 		}
+//
+// 		// SetNumericAttributeBase(AttributeSet->GetAttributeByName(AttributeName), Value);
+//
+// 		// if (const FGameplayAttributeData* HealthData = Attribute.GetGameplayAttributeData(AttributeSet))
+// 		// {
+// 		// 	HealthData->SetCurrentValue(100.0f); // 修改当前值
+// 		// }
+// 	}
+// }

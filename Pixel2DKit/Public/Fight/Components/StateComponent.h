@@ -8,6 +8,8 @@
 #include "StateComponent.generated.h"
 
 
+class UPXASComponent;
+
 UENUM(BlueprintType)
 enum class EStatChange : uint8
 {
@@ -39,6 +41,9 @@ class UStateComponent : public UActorComponent
 	GENERATED_BODY()
 
 	bool bOwnerIsPlayer;
+
+	UPROPERTY()
+	UPXASComponent* CachedASC;
 	
 public:
 

@@ -332,41 +332,46 @@ struct FCharacterAttribute
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int BasicMaxHP = 0;
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int BasicHPRecoverValue = 0;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int BasicMaxEP = 0;
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	int BasicEPRecoverValue = 0;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float BasicSpeed = 0.0f;
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float BasicAcceleration = 0.0f;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float BasicDashSpeed = 0.0f;
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
+	float BasicDashCD = 0.0f;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float BasicSight = 0.0f;
-	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int MaxHP = 0;
-	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	int MaxEP = 0;
-	
+
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	int BasicAttackValue = 0;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	int BasicRepelValue = 0;
+	
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float BasicSpeed = 0.0f;
-
-	// 技能的快速移动速度
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float BasicDashSpeed = 0.0f;
+	float BasicJumpSpeed = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float MaxAcceleration = 0.0f;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float JumpZVelocity = 0.0f;
-	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float GravityScale = 0.0f;
+	float BasicGravityScale = 0.0f;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
 	float BasicAirControl = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="CharacterAttribute")
-	float RepelResistPercent = 0.0f;
+	float BasicRepelResist = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
 	int32 BasicMaxJumpCount = 0;
@@ -375,7 +380,7 @@ struct FCharacterAttribute
 	float BasicJumpMaxHoldTime = 0.0f;
 	
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category="CharacterAttribute")
-	float BasicAttackInterval = 0.0f;
+	float BasicAttackCD = 0.0f;
 };
 
 USTRUCT(BlueprintType)

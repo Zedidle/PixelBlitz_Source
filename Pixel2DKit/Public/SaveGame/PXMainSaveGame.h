@@ -76,8 +76,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurCharacterName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FCharacterAttribute CharacterInheritAttribute;
+	// 不在需要继承，而是直接设置在StateComponent
+	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	// FCharacterAttribute CharacterInheritAttribute;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurLevelName;

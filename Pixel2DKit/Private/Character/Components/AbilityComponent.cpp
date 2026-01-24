@@ -173,7 +173,9 @@ void UAbilityComponent::MoveWarmingUP()
 {
 	if (WarmUP_Power >= 4) return;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
+	
 	WarmUP_MoveDistance += FVector::Distance(PXCharacter->GetActorLocation(), OwnerPreLocation);
 	OwnerPreLocation = PXCharacter->GetActorLocation();
 
@@ -191,16 +193,15 @@ void UAbilityComponent::MoveWarmingUP()
 	WarmUP_MoveDistance -= EffectGameplayTags[MoveDistancePerLevelTag];
 	WarmUP_Power ++;
 
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
-	
 	float PlusPowerPercent = WarmUP_Power * EffectGameplayTags[AttackDamagePlusPercentTag];
 	FGameplayTag WarmUP_Tag = TAG("Ability.Warmup");
-	
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
-	
-	IBuff_Interface::Execute_BuffEffect_Attack(PXCharacter, WarmUP_Tag, PlusPowerPercent, 0, 999);
-	// IBuff_Interface::Execute_AddBuffOnWidget(PXCharacter, WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
-	// 	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
+
+	PXCharacter->BuffComponent->AddAttributeEffect(EPXAttribute::CurAttackValue, WarmUP_Tag,
+		FBuffEffect(PlusPowerPercent, 1, 9999));
+
+	PXCharacter->BuffComponent->AddBuffOnWidget(WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
+	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
 }
 
 void UAbilityComponent::MakeMiracleWalker()
@@ -208,11 +209,9 @@ void UAbilityComponent::MakeMiracleWalker()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	FGameplayTag MiracleWalkerTag = TAG("Ability.MiracleWalker");
 	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
-	//
 	// RemoveAttributeEffectsByTag
 	
 	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
@@ -230,11 +229,11 @@ void UAbilityComponent::MakeMiracleWalker()
 			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
 			if (EffectGameplayTags.Contains(DamagePlusTag))
 			{
-				IBuff_Interface::Execute_BuffEffect_Attack(WeakThis->PXCharacter, MiracleWalkerTag, 0.0,
-					EffectGameplayTags[DamagePlusTag], 999
-				);
 				if (WeakThis->PXCharacter->BuffComponent)
 				{
+					WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( EPXAttribute::CurAttackValue, MiracleWalkerTag, FBuffEffect(0.0,
+						EffectGameplayTags[DamagePlusTag], 9999)
+					);
 					WeakThis->PXCharacter->BuffComponent->AddBuffByTag(MiracleWalkerTag);
 				}
 			}
@@ -246,7 +245,6 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->StateComponent)
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
 	FGameplayTag IntervalTag = TAG("Ability.Immortal.Set.Interval");
@@ -268,22 +266,26 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 			if (!WeakThis.IsValid()) return;
 			if (!WeakThis->PXCharacter) return;
 			if (!WeakThis->PXCharacter->StateComponent) return;
+			if (!WeakThis->PXCharacter->BuffComponent) return;
 		
 			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
 			if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
-												
-			IBuff_Interface::Execute_BuffEffect_Attack(WeakThis->PXCharacter, ImmortalPowerTag, 0.0f,
-				FMath::RoundToInt(WeakThis->PXCharacter->StateComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]),
-				999.f
+		
+			WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( EPXAttribute::CurAttackValue, ImmortalPowerTag, FBuffEffect(0.0,
+			FMath::RoundToInt(WeakThis->PXCharacter->StateComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]), 9999)
 			);
+
 			if (WeakThis->PXCharacter->BuffComponent)
 			{
 				WeakThis->PXCharacter->BuffComponent->AddBuffByTag(ImmortalPowerTag);
 			}
-			UGameInstance* GameInstance = WeakThis->PXCharacter->GetGameInstance();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-			UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());
-			MainSaveGame->CharacterInheritAttribute.MaxHP ++;
+
+			// 不灭中，恢复生命值的部分
+			
+			// UGameInstance* GameInstance = WeakThis->PXCharacter->GetGameInstance();
+			// CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
+			// UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());
+			// MainSaveGame->CharacterInheritAttribute.BasicMaxHP ++;
 		}, EffectGameplayTags[IntervalTag]);
 	}
 
@@ -582,26 +584,27 @@ void UAbilityComponent::LoadAbilities()
 
 	FGameplayTag Tag;
 
+	
 	const auto& EffectTags = EffectGameplayTags.GetAllKeys();
 	for (auto& T : EffectTags)
 	{
 		FString _, AttributeName;
-		T.ToString().Split("CommonSet.", &_, &AttributeName);
-
+		T.ToString().Split("BasicAttributeSet.", &_, &AttributeName);
+	
 		if (AttributeName.IsEmpty()) continue;
-
-		CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetAttributeByName(AttributeName), EffectGameplayTags[T]);
+	
+		CachedASC->ModifyAttributeValue(AttributeName, EffectGameplayTags[T]);
 	}
 
 	// EagleEye 的Buff的处理应该是 BasicSight 
 	// BuffComponent->AddAttributeEffect("BasicSight", TAG("Ability.EagleEye"), FBuffEffect(NewValue, 0, 999));
 
 	// 最大生命值
-	Tag = TAG("CommonSet.MaxHPPlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->StateComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
-	}
+	// Tag = TAG("CommonSet.MaxHPPlus");
+	// if (EffectGameplayTags.Contains(Tag))
+	// {
+	// 	PXCharacter->StateComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
+	// }
 
 	// 最大体力值
 	Tag = TAG("CommonSet.MaxEPPlus");
@@ -829,7 +832,6 @@ void UAbilityComponent::OnKillEnemy()
 void UAbilityComponent::OnBuffCalDamage()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	if (!PXCharacter->Implements<UBuff_Interface>()) return;
 	
 	// 清除热身运动
 	if (WarmUP_Power > 0)
