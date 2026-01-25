@@ -2,7 +2,11 @@
 
 
 #include "Fight/Skills/BaseSkill.h"
+
+#include "Pixel2DKit.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Interfaces/Fight_Interface.h"
+#include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/SkillManager.h"
 #include "Subsystems/TimerSubsystemFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
@@ -98,9 +102,23 @@ void ABaseSkill::SetActivateTiming(EAbilityTiming Timing)
 	ActivateTiming = Timing;
 }
 
+void ABaseSkill::ApplyAttributeEffects()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+
+	if (UAbilityComponent* AbilityComponent = Owner->GetComponentByClass<UAbilityComponent>())
+	{
+		for (auto& Tag : AbilityTags.GetGameplayTagArray())
+		{
+			AbilityComponent->ApplyAttributeEffects(Tag);
+		}
+	}
+}
+
 bool ABaseSkill::OnAttackStart()
 {
 	if (ActivateTiming != EAbilityTiming::AttackStart) return false;
+	ApplyAttributeEffects();
 	BP_OnAttackStart();
 	return true;
 }
@@ -108,6 +126,7 @@ bool ABaseSkill::OnAttackStart()
 bool ABaseSkill::OnAttackEffect()
 {
 	if (ActivateTiming != EAbilityTiming::AttackEffect) return false;
+	ApplyAttributeEffects();
 	BP_OnAttackEffect();
 	return true;
 }
@@ -115,6 +134,7 @@ bool ABaseSkill::OnAttackEffect()
 bool ABaseSkill::OnAttackHit(AActor* Receiver)
 {
 	if (ActivateTiming != EAbilityTiming::AttackHit) return false;
+	ApplyAttributeEffects();
 	BP_OnAttackHit(Receiver);
 	return true;
 }
@@ -122,6 +142,7 @@ bool ABaseSkill::OnAttackHit(AActor* Receiver)
 bool ABaseSkill::OnAttackFinish()
 {
 	if (ActivateTiming != EAbilityTiming::AttackFinish) return false;
+	ApplyAttributeEffects();
 	BP_OnAttackFinish();
 	return true;
 }
@@ -129,6 +150,7 @@ bool ABaseSkill::OnAttackFinish()
 bool ABaseSkill::OnAttackDash()
 {
 	if (ActivateTiming != EAbilityTiming::AttackSkill) return false;
+	ApplyAttributeEffects();
 	BP_OnAttackDash();
 	return true;
 }
@@ -136,6 +158,7 @@ bool ABaseSkill::OnAttackDash()
 bool ABaseSkill::OnSkillStart()
 {
 	if (ActivateTiming != EAbilityTiming::SkillStart) return false;
+	ApplyAttributeEffects();
 	BP_OnSkillStart();
 	return true;
 }
@@ -143,6 +166,7 @@ bool ABaseSkill::OnSkillStart()
 bool ABaseSkill::OnSkillHit()
 {
 	if (ActivateTiming != EAbilityTiming::SkillHit) return false;
+	ApplyAttributeEffects();
 	BP_OnSkillHit();
 	return true;
 }
@@ -150,6 +174,7 @@ bool ABaseSkill::OnSkillHit()
 bool ABaseSkill::OnSkillFinish()
 {
 	if (ActivateTiming != EAbilityTiming::SkillFinish) return false;
+	ApplyAttributeEffects();
 	BP_OnSkillFinish();
 	return true;
 }
@@ -157,6 +182,7 @@ bool ABaseSkill::OnSkillFinish()
 bool ABaseSkill::OnKillEnemy()
 {
 	if (ActivateTiming != EAbilityTiming::KillEnemy) return false;
+	ApplyAttributeEffects();
 	BP_OnKillEnemy();
 	return true;
 }
@@ -164,12 +190,14 @@ bool ABaseSkill::OnKillEnemy()
 bool ABaseSkill::OnBeAttacked(AActor* Maker, int InDamage, int& OutDamage, bool& Stop)
 {
 	if (ActivateTiming != EAbilityTiming::BeAttacked) return false;
+	ApplyAttributeEffects();
 	return BP_OnBeAttacked(Maker, InDamage, OutDamage, Stop);
 }
 
 bool ABaseSkill::OnHitWeakPoint(AActor* Receiver)
 {
 	if (ActivateTiming != EAbilityTiming::AttackWeakPoint) return false;
+	ApplyAttributeEffects();
 	BP_OnHitWeakPoint(Receiver);
 	return true;
 }
@@ -177,6 +205,7 @@ bool ABaseSkill::OnHitWeakPoint(AActor* Receiver)
 bool ABaseSkill::OnBeAttackedInvulnerable()
 {
 	if (ActivateTiming != EAbilityTiming::BeAttackedInvulnerable) return false;
+	ApplyAttributeEffects();
 	BP_OnBeAttackedInvulnerable();
 	return true;
 }
@@ -184,6 +213,7 @@ bool ABaseSkill::OnBeAttackedInvulnerable()
 bool ABaseSkill::OnBeDamaged()
 {
 	if (ActivateTiming != EAbilityTiming::BeDamaged) return false;
+	ApplyAttributeEffects();
 	BP_OnBeDamaged();
 	return true;
 }
@@ -191,6 +221,7 @@ bool ABaseSkill::OnBeDamaged()
 bool ABaseSkill::OnJumpStart()
 {
 	if (ActivateTiming != EAbilityTiming::JumpStart) return false;
+	ApplyAttributeEffects();
 	BP_OnJumpStart();
 	return true;
 }
@@ -198,6 +229,7 @@ bool ABaseSkill::OnJumpStart()
 bool ABaseSkill::OnLanding()
 {
 	if (ActivateTiming != EAbilityTiming::Landing) return false;
+	ApplyAttributeEffects();
 	BP_OnLanding();
 	return true;
 }
@@ -205,6 +237,7 @@ bool ABaseSkill::OnLanding()
 bool ABaseSkill::OnDefenseStart()
 {
 	if (ActivateTiming != EAbilityTiming::DefenseStart) return false;
+	ApplyAttributeEffects();
 	BP_OnDefenseStart();
 	return true;
 }
@@ -212,6 +245,7 @@ bool ABaseSkill::OnDefenseStart()
 bool ABaseSkill::OnDefenseSuccess()
 {
 	if (ActivateTiming != EAbilityTiming::DefenseSuccess) return false;
+	ApplyAttributeEffects();
 	BP_OnDefenseSuccess();
 	return true;
 }
@@ -219,6 +253,7 @@ bool ABaseSkill::OnDefenseSuccess()
 bool ABaseSkill::OnDefenseFinish()
 {
 	if (ActivateTiming != EAbilityTiming::DefenseFinish) return false;
+	ApplyAttributeEffects();
 	BP_OnDefenseFinish();
 	return true;
 }
@@ -226,6 +261,7 @@ bool ABaseSkill::OnDefenseFinish()
 bool ABaseSkill::OnDying(int& RemReviveTimes)
 {
 	if (ActivateTiming != EAbilityTiming::Dying) return false;
+	ApplyAttributeEffects();
 	BP_OnDying(RemReviveTimes);
 	return true;
 }
@@ -233,12 +269,7 @@ bool ABaseSkill::OnDying(int& RemReviveTimes)
 bool ABaseSkill::OnPickGold()
 {
 	if (ActivateTiming != EAbilityTiming::PickGold) return false;
+	ApplyAttributeEffects();
 	BP_OnPickGold();
 	return true;
 }
-
-// bool ABaseSkill::ActivateByTiming(EAbilityTiming Timing)
-// {
-// 	if (ActivateTiming != Timing) return false;
-// 	BP_ActivateByTiming();
-// }

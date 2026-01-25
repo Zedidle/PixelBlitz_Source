@@ -104,6 +104,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Skill | Niagara")
 	void SetActivateTiming(EAbilityTiming Timing);
 
+	UFUNCTION()
+	void ApplyAttributeEffects();
+	
+
+	
+	
 	// 由于触发的参数不同，无法笼统使用一个Activate方法
 	// UFUNCTION(BlueprintImplementableEvent, DisplayName="ActivateByTiming")
 	// void BP_ActivateByTiming();

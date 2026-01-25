@@ -106,9 +106,6 @@ public:
     void OnPickGold();
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    bool FindEffectGameplayTag(const FGameplayTag    Tag, float& Result);
-    
-    UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     APawn* GetPawn();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")

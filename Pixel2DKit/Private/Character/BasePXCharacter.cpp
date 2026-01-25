@@ -411,20 +411,6 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	}
 }
 
-bool ABasePXCharacter::HasEffectGameplayTag(const FGameplayTag Tag) const
-{
-	return EffectGameplayTags.Contains(Tag);
-}
-
-float ABasePXCharacter::GetEffectGameplayTag(const FGameplayTag Tag) const
-{
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		return EffectGameplayTags[Tag];
-	}
-	return 0.0f;
-}
-
 void ABasePXCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -678,6 +664,7 @@ int ABasePXCharacter::GetAttackDamage_Implementation()
 FVector ABasePXCharacter::GetAttackRepel_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, FVector::ZeroVector)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AbilityComponent, FVector::ZeroVector)
 
 	float RepelValue = CachedASC->GetAttributeValue(EPXAttribute::CurRepelValue);
 	if (Weapon)
@@ -700,7 +687,13 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 	};
 
 	Result += RepelByVelocity * VelocityRepelFactor;
-	Result *= 1 + EffectGameplayTags[TAG("Ability.Force.Set.PlusPercent")];
+
+	// 后续完全可以改成 AttributeEffects 的形式
+	float FoundR;
+	if (AbilityComponent->FindExtendData(TAG("Ability.Force.Set.PlusPercent"), FoundR))
+	{
+		Result *= 1 + FoundR;
+	}
 	return Result;
 }
 
@@ -810,19 +803,20 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	}, SustainTime);
 }
 
-FVector ABasePXCharacter::CalSkillVelocity(float DashSpeed)
+FVector ABasePXCharacter::CalDashSpeed(float DashSpeed)
 {
 	if (DashSpeed <= 0) return FVector(0);
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MovementComponent, FVector(0));
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MovementComponent, FVector::ZeroVector);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AbilityComponent, FVector::ZeroVector);
 	
 	FVector Result = DashSpeed * GetDashDirection();
 	FVector MovementVelocity = GetCharacterMovement()->Velocity;
 	Result.X = Result.X * DashInitSpeedPercent + MovementVelocity.X * DashNewDirSpeedPercent;
 	Result.Y = Result.Y * DashInitSpeedPercent + MovementVelocity.Y * DashNewDirSpeedPercent;
 	Result.Z += MovementVelocity.Z * 0.1;
-	
-	Result *= GetEffectGameplayTag(TAG("CommonSet.DashDistancePlusPercent")) + 1;
+
+	// 属性引导优化
 	return Result;
 }
 
@@ -1373,12 +1367,14 @@ void ABasePXCharacter::OnBeAttacked_Implementation(AActor* Maker, int InDamage, 
 
 int ABasePXCharacter::DamagePlus_Implementation(int InDamage, AActor* Receiver)
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AbilityComponent, InDamage)
+	
 	int Result = 0;
 	
 	if (!GetCharacterMovement()->IsMovingOnGround())
 	{
-		float AirFightPlus = 0;
-		if (Execute_FindEffectGameplayTag(this, TAG("Ability.AirFight.Set.DamagePlus"), AirFightPlus))
+		float AirFightPlus;
+		if (AbilityComponent->FindExtendData(TAG("Ability.AirFight.Set.DamagePlus"), AirFightPlus))
 		{
 			Result += AirFightPlus;
 		}
@@ -1501,18 +1497,6 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 		Execute_OnDashEffectEnd(AbilityComponent);
 	}
 }
-
-bool ABasePXCharacter::FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result)
-{
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		Result = EffectGameplayTags[Tag];
-		return true;
-	}
-	Result = 0;
-	return false;
-}
-
 
 APawn* ABasePXCharacter::GetPawn_Implementation()
 {
@@ -1637,19 +1621,20 @@ void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
 {
 	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
+
 	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
 	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
 
-	FGameplayTag Tag = TAG("Ability.Brake.Set.Value");
-	if (EffectGameplayTags.Contains(Tag))
+	float FoundR;
+	if (AbilityComponent->FindExtendData(TAG("Ability.Brake.Set.Value"), FoundR))
 	{
 		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
 		{
 			float speed = GetCharacterMovement()->Velocity.Length();
-			GetCharacterMovement()->Velocity = EffectGameplayTags[Tag] * speed * dir;
+			GetCharacterMovement()->Velocity = FoundR * speed * dir;
 		}
 	}
-
 }
 
 

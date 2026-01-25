@@ -13,6 +13,7 @@
 #include "Animation/BasePXAnimInstance.h"
 #include "Core/PXGameState.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Enemy/EnemyAIController.h"
@@ -797,15 +798,15 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Maker)
 	
 	OutDamage = InDamage;
-	if (Execute_GetOwnCamp(this).HasTag(
-				FGameplayTag::RequestGameplayTag("Enemy.BOSS")))
+	if (Execute_GetOwnCamp(this).HasTag(TAG("Enemy.BOSS")))
 	{
-		float Result;
-		if (Maker->Implements<UFight_Interface>() && Execute_FindEffectGameplayTag(Maker,
-			TAG("Ability.GiantSlayer.Set.ToBossDamagePlusPercent"),
-			Result))
+		if (UAbilityComponent* AbilityComponent = Maker->GetComponentByClass<UAbilityComponent>())
 		{
-			OutDamage *= 1 + Result;
+			float FoundR;
+			if (AbilityComponent->FindExtendData(TAG("Ability.GiantSlayer.Set.ToBossDamagePlusPercent"),FoundR))
+			{
+				OutDamage *= 1 + FoundR;
+			}
 		}
 	}
 
@@ -933,18 +934,6 @@ void ABaseEnemy::OnAttackEffectEnd_Implementation()
 
 			WeakThis->SetInAttackState(false);
 		}, BasicAttackInterval);
-}
-
-
-bool ABaseEnemy::FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result)
-{
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		Result = EffectGameplayTags[Tag];
-		return true;
-	}
-	Result = 0;
-	return false;
 }
 
 

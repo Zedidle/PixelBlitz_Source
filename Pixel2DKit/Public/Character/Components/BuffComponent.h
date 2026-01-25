@@ -8,13 +8,14 @@
 #include "Utilitys/PXCustomStruct.h"
 #include "GameplayEffect.h"
 #include "NiagaraComponent.h"
+#include "Character/BasePXCharacter.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "BuffComponent.generated.h"
 
 class UPXASComponent;
 // 针对PXAttributeSet设定的
 USTRUCT(BlueprintType)
-struct FAttributeEffectMap
+struct FAttributeEffectData
 {
 	GENERATED_BODY()
 
@@ -55,7 +56,7 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent
 	// Buff所影响的属性列表，这里没有的Key，AttributeEffects 则没影响
 	TMap<FGameplayTag, TArray<EPXAttribute>> Tag2AttributeNames;
 	// 属性中被不同Buff的影响值
-	TMap<EPXAttribute, FAttributeEffectMap> AttributeEffects;
+	TMap<EPXAttribute, FAttributeEffectData> AttributeEffects;
 	
 
 	UPROPERTY()
@@ -137,5 +138,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveAttributeEffectsByTag(const FGameplayTag& Tag);
 
-
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	FString GetAttributeNameByEnum(EPXAttribute AttributeName) const;
+	
 };

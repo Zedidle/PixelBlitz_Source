@@ -5,6 +5,7 @@
 #include "NavigationSystem.h"
 #include "PXGameplayTags.h"
 #include "Character/BasePXCharacter.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Core/PXGameInstance.h"
 #include "Controller/PXPlayerController.h"
 #include "Components/CapsuleComponent.h"
@@ -217,8 +218,12 @@ void APXGameMode::PrepareGame()
 	
 	if (MainSaveGame->CurLevel == 1)
 	{
-		float Potential_SkillPoints = PXCharacter->GetEffectGameplayTag(TAG("Ability.Potential.Set.Value"));
-		MainSaveGame->RemSkillPoints += static_cast<int>(Potential_SkillPoints);
+		if (PXCharacter->AbilityComponent)
+		{
+			float Potential_SkillPoints;
+			PXCharacter->AbilityComponent->FindExtendData(TAG("Ability.Potential.Set.Value"), Potential_SkillPoints);
+			MainSaveGame->RemSkillPoints += static_cast<int>(Potential_SkillPoints);
+		}
 	}
 	MainSaveGame->RemSkillPoints += GameDataAsset->BasePerLevelSkillPointsGet;
 	MainSaveGame->RemRefreshPoints += GameDataAsset->BasePerLevelSkillRefreshPointsGet;

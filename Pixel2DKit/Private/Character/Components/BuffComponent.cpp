@@ -72,7 +72,7 @@ void UBuffComponent::CheckBuffExpire()
 
 	for (auto& ele : AttributeEffects)
 	{
-		FAttributeEffectMap& EffectMap = ele.Value;
+		FAttributeEffectData& EffectMap = ele.Value;
 
 		for (auto& BuffEffect : EffectMap.Tag2BuffEffect)
 		{
@@ -226,17 +226,13 @@ void UBuffComponent::OnGameplayEffectApplied(UAbilitySystemComponent* AbilitySys
 	for (const FGameplayTag& Tag : Tags)
 	{
 		FString TagString = Tag.ToString();
-		if (TagString.Contains("Buff"))
-		{
-			// Execute_RemoveBuff(this, Tag, true);
-		}
-		else if (TagString.Contains(".CD"))
+		if (TagString.Contains(".CD"))
 		{
 			FString AbilityBuffTag, _;
 			TagString.Split(".CD", &AbilityBuffTag, &_);
 			if (!AbilityBuffTag.IsEmpty())
 			{
-				// Execute_RemoveBuff(this, TAG(*AbilityBuffTag), true);
+				RemoveBuff(TAG(*AbilityBuffTag), true);
 			}
 		}
 	}
@@ -467,22 +463,49 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 
 void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 {
-	EPXAttribute AttributeName = Effect.EffectedAttribute;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	
-	FAttributeEffectMap* AttributeEffectMap = AttributeEffects.Find(AttributeName);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
+	EPXAttribute AttributeEnum = Effect.EffectedAttribute;
+	FString AttributeName = GetAttributeNameByEnum(AttributeEnum);
+	if (AttributeName.IsEmpty()) return;
 	
-	const UPXAttributeSet* AttributeSet = CachedASC->GetSet<UPXAttributeSet>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeSet)
+	if (AttributeName.StartsWith("Basic") || AttributeName.StartsWith("Cur"))
+	{
+		FString _, InitAttributeName;
+		FString BasicAttributeName, CurAttributeName;
+		if (AttributeName.Split("Basic", &_, &InitAttributeName) || AttributeName.Split("Basic", &_, &InitAttributeName))
+		{
+			BasicAttributeName = "Basic" + InitAttributeName;
+			CurAttributeName = "Cur" + InitAttributeName;
+		}
+		
+		FAttributeEffectData* AttributeEffectData = AttributeEffects.Find(AttributeEnum);
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectData)
 
-	auto& AttributeNames= Tag2AttributeNames.FindOrAdd(Tag);
-	AttributeNames.Add(AttributeName);
+		auto& AttributeNames= Tag2AttributeNames.FindOrAdd(Tag);
+		AttributeNames.Add(AttributeEnum);
+		AttributeEffectData->AddBuffEffect(Tag, Effect);
+
+		EPXAttribute BasicAttributeEnum = AttributeNameToEnumMap.FindRef(BasicAttributeName);
+		EPXAttribute CurAttributeEnum = AttributeNameToEnumMap.FindRef(CurAttributeName);
+		FAttributeEffectData BasicAttributeEffectData = AttributeEffects.FindRef(BasicAttributeEnum);
+		FAttributeEffectData CurAttributeEffectData = AttributeEffects.FindRef(CurAttributeEnum);
 	
-	float PreValue = CachedASC->GetAttributeValue(AttributeName);
-	float CurValue = PreValue *  (1 + Effect.EffectedPercent) + Effect.EffectedValue;
-	
-	CachedASC->SetAttributeValue(AttributeName, CurValue);
-	AttributeEffectMap->Tag2BuffEffect.Add(Tag, Effect);
+		float BasicAttributeValue = CachedASC->GetAttributeValue(BasicAttributeName);
+		float BasicEffectedPercent = BasicAttributeEffectData.Percent;
+		float BasicEffectedValue = BasicAttributeEffectData.Value;
+		float CurEffectedPercent = CurAttributeEffectData.Percent;
+		float CurEffectedValue = CurAttributeEffectData.Value;
+		
+		float CurAttributeValue = (BasicAttributeValue *  (1 + BasicEffectedPercent) + BasicEffectedValue) * (1 + CurEffectedPercent) + CurEffectedValue;
+		CachedASC->SetAttributeValue(CurAttributeEnum, CurAttributeValue);		
+	}
+	else
+	{
+		float PreValue = CachedASC->GetAttributeValue(AttributeEnum);
+		float CurValue = PreValue * Effect.EffectedPercent + Effect.EffectedValue;
+		CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurValue);
+	}
 }
 
 void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects)
@@ -495,7 +518,7 @@ void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<F
 
 void UBuffComponent::RemoveAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag)
 {
-	FAttributeEffectMap* AttributeEffectMap = AttributeEffects.Find(AttributeName);
+	FAttributeEffectData* AttributeEffectMap = AttributeEffects.Find(AttributeName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 
@@ -524,6 +547,15 @@ void UBuffComponent::RemoveAttributeEffectsByTag(const FGameplayTag& Tag)
 	{
 		RemoveAttributeEffect(Name, Tag);
 	}
+}
+
+FString UBuffComponent::GetAttributeNameByEnum(EPXAttribute AttributeName) const
+{
+	for (auto& V : AttributeNameToEnumMap)
+	{
+		if (V.Value == AttributeName) return V.Key;
+	}
+	return FString();
 }
 
 #undef LOCTEXT_NAMESPACE

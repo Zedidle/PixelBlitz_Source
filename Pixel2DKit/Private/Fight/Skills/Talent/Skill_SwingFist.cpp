@@ -5,6 +5,7 @@
 
 #include "Pixel2DKit.h"
 #include "Character/BasePXCharacter.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
 
 #define LOCTEXT_NAMESPACE "PX"
@@ -28,12 +29,13 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(GetOwner());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->AbilityComponent)
+	FEffectGameplayTags& AbilityExtendData = PXCharacter->AbilityComponent->AbilityExtendData;
 	
 	FGameplayTag PlusTag = TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
 	FGameplayTag MinusTag = TAG("Ability.SwingFist.Set.AttackDamageMinusPercent");
 
-	if (!EffectGameplayTags.Contains(PlusTag) || !EffectGameplayTags.Contains(MinusTag)) return;
+	if (!AbilityExtendData.Contains(PlusTag) || !AbilityExtendData.Contains(MinusTag)) return;
 
 	SwingFistPower = !SwingFistPower;
 	
@@ -44,14 +46,14 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	if (SwingFistPower)
 	{
 		PXCharacter->BuffComponent->AddAttributeEffect(SwingFistTag,
-			FAttributeEffect(EPXAttribute::CurAttackValue, EffectGameplayTags[MinusTag]));
+			FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[MinusTag]));
 		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
 		PXCharacter->BuffComponent->AddAttributeEffect(SwingFistTag,
-			FAttributeEffect(EPXAttribute::CurAttackValue, EffectGameplayTags[PlusTag], 0));
+			FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[PlusTag], 0));
 		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}

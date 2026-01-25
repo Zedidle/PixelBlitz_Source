@@ -5,6 +5,7 @@
 
 #include "Pixel2DKit.h"
 #include "Character/BasePXCharacter.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
 
 
@@ -35,15 +36,14 @@ bool ASkill_EvadeStrike::OnSkillFinish()
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Owner);
 	if (!PXCharacter) return false;
 	if (!PXCharacter->BuffComponent) return false;
+	if (!PXCharacter->AbilityComponent) return false;
 	
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	// 闪避突袭
-	FGameplayTag Tag_DamagePlusAfterSkill = TAG("CommonSet.DamagePlusAfterDash");
-	if (EffectGameplayTags.Contains(Tag_DamagePlusAfterSkill))
+	float FoundR;
+	if (PXCharacter->AbilityComponent->FindExtendData(TAG("CommonSet.DamagePlusAfterDash"), FoundR))
 	{
 		FGameplayTag Tag = TAG("Ability.DodgeStrike");
 		PXCharacter->BuffComponent->AddAttributeEffect(Tag,
-			FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,EffectGameplayTags[Tag_DamagePlusAfterSkill]));
+			FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,FoundR));
 		PXCharacter->BuffComponent->AddBuffByTag(Tag);
 	}
 

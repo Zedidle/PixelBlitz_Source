@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Character/BasePXCharacter.h"
 #include "Components/ActorComponent.h"
 #include "GAS/PXASComponent.h"
 #include "Interfaces/Fight_Interface.h"
@@ -28,6 +29,7 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent, public IFight_I
 	// 传说品阶技能刷出的概率
 	float LegendRadio = 0.1;
 
+	// 后续看如何扩展为怪物，角色通用
 	UPROPERTY()
 	ABasePXCharacter* PXCharacter;
 
@@ -78,7 +80,12 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UArrowLineWidget> ArrowLineWidgetClass;
 
+	UPROPERTY()
+	FEffectGameplayTags AbilityExtendData;
 
+	UPROPERTY()
+	TMap<FGameplayTag, FAttributeEffectArray> AbilityAttributeEffects;
+	
 	UPROPERTY(BlueprintReadOnly)
 	AActor* HurtMaker;
 	UPROPERTY(BlueprintReadOnly)
@@ -210,7 +217,16 @@ public:
 
 	FGameplayAbilitySpec* GetAbilitySpec(FName TagName);
 
+	UFUNCTION(BlueprintCallable)
+	bool FindExtendData(FGameplayTag Tag, float& Result);
 
+	UFUNCTION(BlueprintCallable)
+	bool FindAttributeEffects(FGameplayTag Tag, FAttributeEffectArray& Result);
+
+	UFUNCTION(BlueprintCallable)
+	void ApplyAttributeEffects(FGameplayTag Tag);
+	
+	
 #pragma region IFight_Interface
 	virtual bool GetIsAttacking() override;
 	virtual bool GetIsDefending() override;

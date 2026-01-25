@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Core/PXGameState.h"
 #include "GAS/PXGameplayEffect.h"
 #include "GAS/AttributeSet/PXAttributeSet.h"
@@ -122,6 +123,50 @@ APawn* UPXGameplayAbility::GetPawn() const
 		return IFight_Interface::Execute_GetPawn(Actor);
 	}
 	return nullptr;
+}
+
+void UPXGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
+	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+	const FGameplayEventData* TriggerEventData)
+{
+	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
+	{			
+		constexpr bool bReplicateEndAbility = true;
+		constexpr bool bWasCancelled = true;
+		EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+		return;
+	}
+
+	if (TriggerEventData && bHasBlueprintActivateFromEvent)
+	{
+		// A Blueprinted ActivateAbility function must call CommitAbility somewhere in its execution chain.
+		K2_ActivateAbilityFromEvent(*TriggerEventData);
+	}
+	else if (bHasBlueprintActivate)
+	{
+		// A Blueprinted ActivateAbility function must call CommitAbility somewhere in its execution chain.
+		K2_ActivateAbility();
+	}
+	
+	APawn* Pawn = GetPawn();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Pawn)
+	
+	if (UAbilityComponent* AbilityComponent = Pawn->GetComponentByClass<UAbilityComponent>())
+	{
+		const FGameplayTagContainer& Tags = GetAssetTags();
+		const TArray<FGameplayTag>& TagArray = Tags.GetGameplayTagArray();
+		for (const FGameplayTag& Tag : TagArray)
+		{
+			AbilityComponent->ApplyAttributeEffects(Tag);
+		}
+	}
+	
+	// 4. 【第四步】确保结束瞬时技能
+	// 因为你的技能逻辑是瞬时完成的，所以必须调用 EndAbility
+	// 参数根据技能是正常结束(false)还是被取消(true)来设置
+	constexpr bool bReplicateEndAbility = true;
+	constexpr bool bWasCancelled = false; // 假设是正常结束
+	EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 #undef LOCTEXT_NAMESPACE

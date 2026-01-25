@@ -5,6 +5,8 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
+#include "Character/Components/AbilityComponent.h"
+#include "Character/Components/BuffComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
@@ -24,11 +26,14 @@ ASkill_Revive::ASkill_Revive()
 void ASkill_Revive::BeginPlay()
 {
 	Super::BeginPlay();
-	if (Owner && Owner->Implements<UFight_Interface>())
+	if (Owner)
 	{
-		float Result = 0;
-		IFight_Interface::Execute_FindEffectGameplayTag(Owner, TAG("Ability.Revive.Set.Times"), Result);
-		RemReviveTimes = Result;
+		if (UAbilityComponent* AbilityComponent = Owner->GetComponentByClass<UAbilityComponent>())
+		{
+			float Result;
+			AbilityComponent->FindExtendData(TAG("Ability.Revive.Set.Times"), Result);
+			RemReviveTimes = Result;
+		}
 	}
 }
 
@@ -63,9 +68,9 @@ bool ASkill_Revive::OnDying(int& _RemReviveTimes)
 
 		if (_RemReviveTimes == 0)
 		{
-			if (Owner->Implements<UFight_Interface>())
+			if (UBuffComponent* BuffComponent = Owner->GetComponentByClass<UBuffComponent>())
 			{
-				// IBuff_Interface::Execute_RemoveBuff(Owner, TAG("Ability.Revive"), true);
+				BuffComponent->RemoveBuff(TAG("Ability.Revive"), true);
 			}
 		}
 		

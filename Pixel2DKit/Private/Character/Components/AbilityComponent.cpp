@@ -150,14 +150,12 @@ void UAbilityComponent::LoadTalents()
 	UWorld* World = GetWorld();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
 	
-	const FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	
 	if (TalentLoaded) return;
 	TalentLoaded = true;
 	
 	// 热身
 	FGameplayTag Tag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
+	if (AbilityExtendData.Contains(Tag))
 	{
 		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
 			this, &ThisClass::MoveWarmingUP, 0.2);
@@ -181,19 +179,18 @@ void UAbilityComponent::MoveWarmingUP()
 
 	FGameplayTag MoveDistancePerLevelTag = TAG("Ability.Warmup.Set.MoveDistancePerLevel");
 	FGameplayTag AttackDamagePlusPercentTag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
-
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
-	if (!EffectGameplayTags.Contains(MoveDistancePerLevelTag) ||
-		!EffectGameplayTags.Contains(AttackDamagePlusPercentTag)
+	
+	if (!AbilityExtendData.Contains(MoveDistancePerLevelTag) ||
+		!AbilityExtendData.Contains(AttackDamagePlusPercentTag)
 	) return;
 
-	if (WarmUP_MoveDistance < EffectGameplayTags[MoveDistancePerLevelTag]) return;
+	if (WarmUP_MoveDistance < AbilityExtendData[MoveDistancePerLevelTag]) return;
 
-	WarmUP_MoveDistance -= EffectGameplayTags[MoveDistancePerLevelTag];
+	WarmUP_MoveDistance -= AbilityExtendData[MoveDistancePerLevelTag];
 	WarmUP_Power ++;
 
-	float PlusPowerPercent = WarmUP_Power * EffectGameplayTags[AttackDamagePlusPercentTag];
+	float PlusPowerPercent = WarmUP_Power * AbilityExtendData[AttackDamagePlusPercentTag];
 	FGameplayTag WarmUP_Tag = TAG("Ability.Warmup");
 	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
 
@@ -208,7 +205,6 @@ void UAbilityComponent::MakeMiracleWalker()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 	
 	FGameplayTag MiracleWalkerTag = TAG("Ability.MiracleWalker");
 	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
@@ -217,7 +213,7 @@ void UAbilityComponent::MakeMiracleWalker()
 	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
 	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.Set.Interval");
 
-	if (!EffectGameplayTags.Contains(DamagePlusTag) || !EffectGameplayTags.Contains(IntervalTag)) return;
+	if (!AbilityExtendData.Contains(DamagePlusTag) || !AbilityExtendData.Contains(IntervalTag)) return;
 
 	FName TimerName = FName(GetReadableName() + "_MakeMiracleWalker");
 	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
@@ -226,7 +222,7 @@ void UAbilityComponent::MakeMiracleWalker()
 			if (!WeakThis.IsValid()) return;
 			if (!WeakThis->PXCharacter) return;
 
-			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
+			FEffectGameplayTags& EffectGameplayTags = WeakThis->AbilityExtendData;
 			if (EffectGameplayTags.Contains(DamagePlusTag))
 			{
 				if (WeakThis->PXCharacter->BuffComponent)
@@ -237,7 +233,7 @@ void UAbilityComponent::MakeMiracleWalker()
 					WeakThis->PXCharacter->BuffComponent->AddBuffByTag(MiracleWalkerTag);
 				}
 			}
-		}, EffectGameplayTags[IntervalTag]);
+		}, AbilityExtendData[IntervalTag]);
 }
 
 void UAbilityComponent::MakeImmortalPower(bool First)
@@ -250,11 +246,9 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 	FGameplayTag IntervalTag = TAG("Ability.Immortal.Set.Interval");
 	FGameplayTag MaxHPPlusAfterAttackTag = TAG("Ability.Immortal.Set.MaxHPPlusAfterAttack");
 	
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	
-	if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag) || 
-		!EffectGameplayTags.Contains(IntervalTag) ||
-		!EffectGameplayTags.Contains(MaxHPPlusAfterAttackTag)
+	if (!AbilityExtendData.Contains(AttackDamagePlusOnMaxHPPercentTag) || 
+		!AbilityExtendData.Contains(IntervalTag) ||
+		!AbilityExtendData.Contains(MaxHPPlusAfterAttackTag)
 	) return;
 	FGameplayTag ImmortalPowerTag = TAG("Ability.Immortal");
 
@@ -268,7 +262,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 			if (!WeakThis->PXCharacter->StateComponent) return;
 			if (!WeakThis->PXCharacter->BuffComponent) return;
 		
-			FEffectGameplayTags& EffectGameplayTags = WeakThis->PXCharacter->EffectGameplayTags;
+			FEffectGameplayTags& EffectGameplayTags = WeakThis->AbilityExtendData;
 			if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
 		
 			WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( ImmortalPowerTag,
@@ -286,7 +280,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 			// CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 			// UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());
 			// MainSaveGame->CharacterInheritAttribute.BasicMaxHP ++;
-		}, EffectGameplayTags[IntervalTag]);
+		}, AbilityExtendData[IntervalTag]);
 	}
 
 	if (!First && PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
@@ -298,6 +292,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 
 void UAbilityComponent::InitTalents()
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld());
@@ -309,19 +304,23 @@ void UAbilityComponent::InitTalents()
 	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 	
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-
 	for (const FGameplayTag& TalentTag: BasicBuildSaveGame->ChosenTalents)
 	{
 		// 获取对应的Talent结构
 		const FTalent& TalentData = DataTableSubsystem->GetTalentDataByTag(TalentTag);
 		if (!TalentData.TalentTag.IsValid()) continue;
 
-		for (auto& D: TalentData.Effect_GameplayTag)
+		for (auto& D: TalentData.ExtendData)
 		{
-			EffectGameplayTags.AddData(D.Key, D.Value);
+			AbilityExtendData.AddData(D.Key, D.Value);
 		}
 
+		FAttributeEffectArray& AttributeEffects = AbilityAttributeEffects.FindOrAdd(TalentData.TalentTag);
+		for (auto& D: TalentData.AttributeEffectOnActivated)
+		{
+			AttributeEffects.AddEffect(D);
+		}
+		
 		for (auto& AbilityClass: TalentData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
@@ -336,6 +335,7 @@ void UAbilityComponent::InitTalents()
 			if (ABaseSkill* Skill = SpawnSkill(TalentData.SkillClass))
 			{
 				Skill->SetActivateTiming(TalentData.Timing);
+				Skill->AbilityTags.AddTag(TalentData.TalentTag);
 				SkillsHolding.Add(Skill);
 			}
 			if (PXCharacter->BuffComponent)
@@ -343,11 +343,16 @@ void UAbilityComponent::InitTalents()
 				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag, true);
 			}
 		}
+
 		
 		if (TalentData.Timing != EAbilityTiming::None)
 		{
 			FGameplayTagArray& TagArray = AbilitiesTiming.FindOrAdd(TalentData.Timing);
 			TagArray.Tags.Add(TalentData.TalentTag);
+		}
+		else
+		{
+			PXCharacter->BuffComponent->AddAttributeEffects(TalentData.TalentTag, TalentData.AttributeEffectOnActivated);
 		}
 	}
 }
@@ -358,13 +363,13 @@ void UAbilityComponent::InitAbilities()
 	
 	// 天赋需要在此之前加载完成
 	float GoldenBlessRadioPlus;
-	if (Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.GoldenBless.Set.RatePlus"), GoldenBlessRadioPlus))
+	if (FindExtendData(TAG("Ability.GoldenBless.Set.RatePlus"), GoldenBlessRadioPlus))
 	{
 		GoldenRadio += GoldenBlessRadioPlus;
 	}
 
 	float LegendBlessRadioPlus;
-	if (Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.LegendBless.Set.RatePlus"), LegendBlessRadioPlus))
+	if (FindExtendData(TAG("Ability.LegendBless.Set.RatePlus"), LegendBlessRadioPlus))
 	{
 		GoldenRadio += LegendBlessRadioPlus;
 		LegendRadio += LegendBlessRadioPlus;
@@ -385,7 +390,7 @@ ABaseSkill* UAbilityComponent::SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, co
 	{
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
 		Skill->AttachToActor(PXCharacter, AttachmentRules);
-
+		
 		if (ABaseDefenseSkill* DefenseSkill = Cast<ABaseDefenseSkill>(Skill))
 		{
 			RegisterDefenseSkill(DefenseSkill);
@@ -522,9 +527,9 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 
 void UAbilityComponent::LoadAbilities()
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
 	
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
@@ -535,8 +540,6 @@ void UAbilityComponent::LoadAbilities()
 	UPXMainSaveGame* MainSave = GameInstance->GetSubsystem<UPXSaveGameSubsystem>()->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
 	
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
-	
 	for (auto Tag : MainSave->TakeEffectAbilities)
 	{
 		FString Parent;
@@ -545,8 +548,8 @@ void UAbilityComponent::LoadAbilities()
 
 		FGameplayTag AbilityTag = TAG(*Parent);
 		
-		if (EffectGameplayTags.Contains(AbilityTag)) continue;
-		EffectGameplayTags.SetData(AbilityTag, 1);
+		if (AbilityExtendData.Contains(AbilityTag)) continue;
+		AbilityExtendData.SetData(AbilityTag, 1);
 		
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
 		if (!AbilityData.AbilityTag.IsValid()) continue;
@@ -560,32 +563,39 @@ void UAbilityComponent::LoadAbilities()
 			}
 		}
 		
-		for (auto& D : AbilityData.Effect_GameplayTag)
+		for (auto& D : AbilityData.ExtendData)
 		{
-			EffectGameplayTags.SetData(D.Key, D.Value);
+			AbilityExtendData.SetData(D.Key, D.Value);
 		}
 
+		FAttributeEffectArray& AttributeEffects = AbilityAttributeEffects.FindOrAdd(AbilityData.AbilityTag);
+		for (auto& D: AbilityData.AttributeEffectsOnActivated)
+		{
+			AttributeEffects.AddEffect(D);
+		}
+		
 		PXCharacter->BuffComponent->AddBuffByTag(TAG(*Parent));
-
+		
 		if (AbilityData.Timing != EAbilityTiming::None)
 		{
 			FGameplayTagArray& TagArray = AbilitiesTiming.FindOrAdd(AbilityData.Timing);
 			TagArray.Tags.Add(TAG(*Parent));
 		}
+		else
+		{
+			PXCharacter->BuffComponent->AddAttributeEffects(AbilityData.AbilityTag, AbilityData.AttributeEffectsOnActivated);
+		}
 	}
 
-	UStateComponent* HealthComponent = PXCharacter->GetComponentByClass<UStateComponent>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(HealthComponent)
+	UStateComponent* StateComponent = PXCharacter->GetComponentByClass<UStateComponent>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(StateComponent)
 	UBuffComponent* BuffComponent = PXCharacter->GetComponentByClass<UBuffComponent>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BuffComponent)
 
 
 # pragma region 通用技能加载部分，专属技能在 PXCharacter 子类中的LoadAbility自定义
 
-	FGameplayTag Tag;
-
-	
-	const auto& EffectTags = EffectGameplayTags.GetAllKeys();
+	const auto& EffectTags = AbilityExtendData.GetAllKeys();
 	for (auto& T : EffectTags)
 	{
 		FString _, AttributeName;
@@ -593,72 +603,7 @@ void UAbilityComponent::LoadAbilities()
 	
 		if (AttributeName.IsEmpty()) continue;
 	
-		CachedASC->ModifyAttributeValue(AttributeName, EffectGameplayTags[T]);
-	}
-
-	// EagleEye 的Buff的处理应该是 BasicSight 
-	// BuffComponent->AddAttributeEffect("BasicSight", TAG("Ability.EagleEye"), FBuffEffect(NewValue, 0, 999));
-
-	// 最大生命值
-	// Tag = TAG("CommonSet.MaxHPPlus");
-	// if (EffectGameplayTags.Contains(Tag))
-	// {
-	// 	PXCharacter->StateComponent->ModifyMaxHP(EffectGameplayTags[Tag], EStatChange::Increase, true);
-	// }
-
-	// 最大体力值
-	Tag = TAG("CommonSet.MaxEPPlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->StateComponent->SetMaxEP(EffectGameplayTags[Tag] + PXCharacter->StateComponent->GetMaxEP());
-	}
-
-	// 体型 / 蚁人
-	Tag = TAG("CommonSet.BodySizePlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->SetScale(1 + EffectGameplayTags[Tag]);
-	}
-	
-	// 空中移动的控制
-	Tag = TAG("CommonSet.AirMoveEffectPlusPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		// PXCharacter->GetCharacterMovement()->AirControl = PXCharacter->BasicAirControl * (1 + EffectGameplayTags[Tag]);
-	}
-
-
-	// 跳跃上升时间
-	Tag = TAG("CommonSet.JumpMaxHoldTimePlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		// PXCharacter->JumpMaxHoldTime = PXCharacter->BasicJumpMaxHoldTime + EffectGameplayTags[Tag];
-	}
-	
-	// 附加跳跃次数
-	Tag = TAG("CommonSet.MaxJumpCountPlus");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		PXCharacter->MaxJumpCount = PXCharacter->MaxJumpCount + EffectGameplayTags[Tag];
-	}
-	
-	// EP恢复加快
-	Tag = TAG("CommonSet.EPRecoverLevel");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		TArray<FActiveGameplayEffectHandle> Handles = CachedASC->GetActiveEffectsWithAllTags(
-						FGameplayTagContainer(TAG("Ability.RecoverEP")));
-		for (auto& Handle : Handles)
-		{
-			CachedASC->SetActiveGameplayEffectLevel(Handle, EffectGameplayTags[Tag]);
-		}
-	}
-	
-	// 霸体
-	Tag = TAG("Ability.InRock.Set.Percent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		HealthComponent->InRockPercent = EffectGameplayTags[Tag];
+		CachedASC->ModifyAttributeValue(AttributeName, AbilityExtendData[T]);
 	}
 	
 	
@@ -778,13 +723,12 @@ int UAbilityComponent::GetAttackDamagePlus()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, 0)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter->StateComponent, 0)
-	FEffectGameplayTags& EffectGameplayTags = PXCharacter->EffectGameplayTags;
 
 	int LocalPlus = 0;
-	FGameplayTag Tag = TAG("Ability.Wushu.Set.AttackDamagePlusOnCurHPPercent");
-	if (EffectGameplayTags.Contains(Tag))
+	float FoundR;
+	if (FindExtendData(TAG("Ability.Wushu.Set.AttackDamagePlusOnCurHPPercent"), FoundR))
 	{
-		LocalPlus += FMath::RoundToInt(EffectGameplayTags[Tag] * PXCharacter->StateComponent->GetCurrentHP()) ;
+		LocalPlus += FMath::RoundToInt(FoundR * PXCharacter->StateComponent->GetCurrentHP()) ;
 	}
 
 	// …… 其它技能
@@ -984,6 +928,40 @@ FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FG
 	}
 	
 	return OutAbilityHandles[0];
+}
+
+bool UAbilityComponent::FindExtendData(FGameplayTag Tag, float& Result)
+{
+	if (AbilityExtendData.Contains(Tag))
+	{
+		Result = AbilityExtendData[Tag];
+		return true;
+	}
+	Result = 0;
+	return false;
+}
+
+bool UAbilityComponent::FindAttributeEffects(FGameplayTag Tag, FAttributeEffectArray& Result)
+{
+	if (AbilityAttributeEffects.Contains(Tag))
+	{
+		Result = AbilityAttributeEffects[Tag];
+		return true;
+	}
+	Result = FAttributeEffectArray();
+	return false;
+}
+
+void UAbilityComponent::ApplyAttributeEffects(FGameplayTag Tag)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent);
+	
+	FAttributeEffectArray Effects;
+	if (FindAttributeEffects(Tag, Effects))
+	{
+		PXCharacter->BuffComponent->AddAttributeEffects(Tag, Effects.Data);
+	}
 }
 
 bool UAbilityComponent::GetIsAttacking()

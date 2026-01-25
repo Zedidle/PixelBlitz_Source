@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonFuncLib.h"
 #include "GameplayTagContainer.h"
 #include "Abilities/GameplayAbility.h"
 #include "Engine/DataAsset.h"
@@ -240,12 +241,26 @@ struct FAttributeEffect
 	GENERATED_BODY()
 	FAttributeEffect(){}
 	FAttributeEffect(EPXAttribute Attribute, float Percent): EffectedAttribute(Attribute),
-			EffectedPercent(Percent), EffectedValue(1.0f), EffectedEndTime(9999){}
+			EffectedPercent(Percent), EffectedValue(1.0f), EffectedDuration(9999)
+	{
+		EffectedEndTime = UCommonFuncLib::CalEndTime(EffectedDuration);
+	}
 	FAttributeEffect(EPXAttribute Attribute, float Percent, float Value): EffectedAttribute(Attribute),
-				EffectedPercent(Percent), EffectedValue(Value), EffectedEndTime(9999){}
-	FAttributeEffect(EPXAttribute Attribute, float Percent, float Value, float EndTime): EffectedAttribute(Attribute),
-					EffectedPercent(Percent), EffectedValue(Value), EffectedEndTime(EndTime){}
+				EffectedPercent(Percent), EffectedValue(Value), EffectedDuration(9999)
+	{
+		EffectedEndTime = UCommonFuncLib::CalEndTime(EffectedDuration);
+	}
+	FAttributeEffect(EPXAttribute Attribute, float Percent, float Value, float Duration): EffectedAttribute(Attribute),
+					EffectedPercent(Percent), EffectedValue(Value), EffectedDuration(Duration)
+	{
+		EffectedEndTime = UCommonFuncLib::CalEndTime(EffectedDuration);
+	}
 
+	void CalculateEndTime()
+	{
+		EffectedEndTime = UCommonFuncLib::CalEndTime(EffectedDuration);
+	}
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
 	EPXAttribute EffectedAttribute;
 	
@@ -256,8 +271,55 @@ struct FAttributeEffect
 	float EffectedValue = 1.0f;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedEndTime = 9999;
+	float EffectedDuration = 9999;
 	
+	float EffectedEndTime = 1;
+	
+	FAttributeEffect& operator+=(const FAttributeEffect& Other)
+	{
+		// 检查属性是否匹配（重要：通常只合并相同属性的效果）
+		if (this->EffectedAttribute == Other.EffectedAttribute)
+		{
+			this->EffectedPercent += Other.EffectedPercent;
+			this->EffectedValue += Other.EffectedValue;
+            
+			// 持续时间处理：取最大值或相加，根据你的游戏逻辑决定
+			this->EffectedDuration = FMath::Max(this->EffectedDuration, Other.EffectedDuration);
+            
+			// 结束时间重新计算
+			this->EffectedEndTime = UCommonFuncLib::CalEndTime(this->EffectedDuration);
+		}
+		else
+		{
+			// 如果属性不匹配，可以选择抛出错误或采取其他处理方式
+			UE_LOG(LogTemp, Warning, TEXT("尝试合并不同属性的FAttributeEffect"));
+		}
+        
+		return *this;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FAttributeEffectArray
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Buff")
+	TArray<FAttributeEffect> Data;
+	
+	FAttributeEffectArray() {}
+    
+	// 可以添加一些便捷方法
+	void AddEffect(const FAttributeEffect& Effect)
+	{
+		Data.Add(Effect);
+	}
+    
+	void RemoveEffectByAttribute(EPXAttribute Attribute)
+	{
+		Data.RemoveAll([Attribute](const FAttributeEffect& Effect) -> bool {
+			return Effect.EffectedAttribute == Attribute;
+		});
+	}
 };
 
 #pragma endregion 
@@ -269,58 +331,58 @@ struct FAbility: public FTableRowBase
 	GENERATED_BODY()
 
 	// 是否已经禁用
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	bool Enable = true;
 
 	// 是否默认未解锁
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	bool DefaultLock = false;
 	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FGameplayTag AbilityTag;
 
 	// 技能归属
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	EAbilityBelongTo AbilityBelongTo = EAbilityBelongTo::Common;
 	
 	// 技能名称本地化
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FText AbilityName;
 
 	// 技能描述本地化
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FText AbilityDesc;
 	
 	// 费用，暂时都是1
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	int32 Price = 1;
 
 	// 技能品阶
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	EAbilityQuality AbilityQuality = EAbilityQuality::Level1;
 
 	// 唯一的技能的前一级，学习后会替换
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FGameplayTag PreLevelAbility;
 	
 	// 前置所需学习的技能 与 前置选择的天赋 GameplayTag
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<FGameplayTag> RequiredAbilities;
 	
 	// 技能的特殊附加值，以GameplayTag为前缀
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	TMap<FGameplayTag, float> Effect_GameplayTag;
-
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	TMap<FGameplayTag, float> ExtendData;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	TArray<FAttributeEffect> AttributeEffectsOnActivated;
+	
 	// 实际所执行的技能
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 
 	// 技能触发时机，如果有 AbilityClass 的话，需要配置
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	EAbilityTiming Timing = EAbilityTiming::None;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	TArray<FAttributeEffect> AttributeEffectOnActivated;
 };
 
 
@@ -469,49 +531,48 @@ struct FTalent: public FTableRowBase
 	GENERATED_BODY()
 
 	// 是否默认未解锁
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	bool DefaultLock = false;
 
 	// 天赋Tag，用于显示BUFF与触发
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FGameplayTag TalentTag;
 
 	// 选择时所需天赋点
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	int Price = 3;
 
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	ETalentType TalentType = ETalentType::None;
 
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FText TalentName;
 	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FText TalentDesc;
 
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TSoftObjectPtr<UTexture2D> Icon;
-
-	// 相关属性，运行时记录在角色中统一处理
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Talent")
-	TMap<FGameplayTag, float> Effect_GameplayTag;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	TMap<FGameplayTag, float> ExtendData;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	TArray<FAttributeEffect> AttributeEffectOnActivated;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 
-	// 如果 CommonInit 为 true，则会初始化生成SkillClass和显示BuffTagOnWidget
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	// 是否初始化生成SkillClass和显示BuffTagOnWidget
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	bool CommonInit = true;
 	
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TSubclassOf<ABaseSkill> SkillClass;
 
 	// 技能触发时机，同时触发 SkillActor 和 Ability
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	EAbilityTiming Timing = EAbilityTiming::None;
-
-	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Ability")
-	TArray<FAttributeEffect> AttributeEffectOnActivated;
 };
 #pragma endregion
 

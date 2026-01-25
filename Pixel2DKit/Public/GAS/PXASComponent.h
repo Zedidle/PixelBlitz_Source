@@ -106,11 +106,11 @@ public:
 		return 0;
 	}
 	template<typename T = UPXAttributeSet>
-	float GetAttributeValue(const FString& AttributeName, float Value)
+	float GetAttributeValue(const FString& AttributeName)
 	{
 		if (AttributeNameToEnumMap.Contains(AttributeName))
 		{
-			return GetAttributeValue<T>(AttributeNameToEnumMap[AttributeName], Value);
+			return GetAttributeValue<T>(AttributeNameToEnumMap[AttributeName]);
 		}
 		return 0;
 	}

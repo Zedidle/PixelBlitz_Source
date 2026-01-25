@@ -228,17 +228,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UCameraComponent* Camera;
 	
-#pragma region EffectGameplayTags
-	UPROPERTY()
-	FEffectGameplayTags EffectGameplayTags;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	bool HasEffectGameplayTag(const FGameplayTag Tag) const;
-
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetEffectGameplayTag(const FGameplayTag Tag) const;
-#pragma endregion
-
 	float PreSpringArmZ = 0.0f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
@@ -406,7 +395,7 @@ public:
 	void OutOfControl(float SustainTime);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FVector CalSkillVelocity(float DashSpeed);
+	FVector CalDashSpeed(float DashSpeed);
 	
 #pragma region Animation
 	UFUNCTION(BlueprintCallable, Category = Movement)
@@ -467,7 +456,6 @@ public:
 	virtual void OnPickGold_Implementation() override;
 	virtual void OnDashEffectBegin_Implementation() override;
 	virtual void OnDashEffectEnd_Implementation() override;
-	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackCD_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;

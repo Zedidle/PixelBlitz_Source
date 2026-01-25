@@ -19,14 +19,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	APawn* Pawn = GetPawn();
-	if (!Pawn)
-	{
-		K2_EndAbility();
-		return;
-	}
-	
-	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Pawn);
+	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(GetPawn());
 	if (!PXCharacter || !PXCharacter->Implements<UFight_Interface>() ||
 		!IFight_Interface::Execute_IsAlive(PXCharacter))
 	{
@@ -69,7 +62,8 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	}
 
 	float MultiPercent;
-	IFight_Interface::Execute_FindEffectGameplayTag(PXCharacter, TAG("Ability.SkyHandPower.Set.AttackDamagePercent"), MultiPercent);
+	PlayerAbilityComponent->FindExtendData(TAG("Ability.SkyHandPower.Set.AttackDamagePercent"), MultiPercent);
+
 	
 	int Damage = MultiPercent * PXCharacter->CalInitDamage(IFight_Interface::Execute_GetAttackDamage(PXCharacter));
 	FVector PreEnemyLocation = Enemy->GetActorLocation();

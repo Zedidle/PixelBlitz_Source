@@ -312,6 +312,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UPXEnemyAttributeSet* AttributeSet = nullptr;
 
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	// UAbilityComponent* AbilityComponent = nullptr;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
 	
@@ -343,7 +346,6 @@ public:
 	virtual void OnDefendEffectEnd_Implementation() override;
 	virtual void OnAttackEffectBegin_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
-	virtual bool FindEffectGameplayTag_Implementation(const FGameplayTag Tag, float& Result) override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackCD_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;
