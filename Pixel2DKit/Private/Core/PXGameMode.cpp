@@ -23,7 +23,7 @@
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/PXAudioSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "UI/UIManager.h"
 #include "Utilitys/PXGameplayStatics.h"
 
@@ -228,7 +228,7 @@ void APXGameMode::PrepareGame()
 	MainSaveGame->RemSkillPoints += GameDataAsset->BasePerLevelSkillPointsGet;
 	MainSaveGame->RemRefreshPoints += GameDataAsset->BasePerLevelSkillRefreshPointsGet;
 
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 

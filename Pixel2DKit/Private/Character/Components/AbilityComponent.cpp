@@ -14,7 +14,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/PXCustomStruct.h"
 
 
@@ -88,7 +88,7 @@ void UAbilityComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), "Ability.WarmUP");
+	UTimerManagerFuncLib::CancelDelay(GetWorld(), "Ability.WarmUP");
 	
 	PXCharacter->OnPlayerAttackStart.RemoveDynamic(this, &ThisClass::OnAttackStart);
 }
@@ -157,7 +157,7 @@ void UAbilityComponent::LoadTalents()
 	FGameplayTag Tag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
 	if (AbilityExtendData.Contains(Tag))
 	{
-		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
+		UTimerManagerFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
 			this, &ThisClass::MoveWarmingUP, 0.2);
 	}
 	
@@ -216,7 +216,7 @@ void UAbilityComponent::MakeMiracleWalker()
 	if (!AbilityExtendData.Contains(DamagePlusTag) || !AbilityExtendData.Contains(IntervalTag)) return;
 
 	FName TimerName = FName(GetReadableName() + "_MakeMiracleWalker");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 		[WeakThis = TWeakObjectPtr(this), DamagePlusTag, MiracleWalkerTag]
 		{
 			if (!WeakThis.IsValid()) return;
@@ -254,7 +254,7 @@ void UAbilityComponent::MakeImmortalPower(bool First)
 
 	if (First || PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
 	{
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+		UTimerManagerFuncLib::SetDelay(GetWorld(),
 	[WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
 		{
 			if (!WeakThis.IsValid()) return;

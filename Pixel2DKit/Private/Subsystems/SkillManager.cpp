@@ -6,7 +6,7 @@
 #include "Engine/World.h"
 #include "Fight/Skills/BaseRemoteShotSkill.h"
 #include "Fight/Skills/BaseTraceProjectileSkill.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 
 void USkillManager::Initialize(FSubsystemCollectionBase& Collection)
@@ -17,7 +17,7 @@ void USkillManager::Initialize(FSubsystemCollectionBase& Collection)
 
 void USkillManager::Deinitialize()
 {
-    UTimerSubsystemFuncLib::CancelDelay(GetWorld(),"USkillManager_SameSkillFarFromEach");
+    UTimerManagerFuncLib::CancelDelay(GetWorld(),"USkillManager_SameSkillFarFromEach");
     
     // 清理所有技能实例
     for (auto& Pair : SkillPoolMap)
@@ -52,9 +52,9 @@ void USkillManager::PreallocateSkillPool(TSubclassOf<ABaseSkill> SkillClass, int
 
     if (SkillPoolMap.IsEmpty())
     {
-        if (!UTimerSubsystemFuncLib::HasTimer(GetWorld(), "USkillManager_SameSkillFarFromEach"))
+        if (!UTimerManagerFuncLib::HasTimer(GetWorld(), "USkillManager_SameSkillFarFromEach"))
         {
-            UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), "USkillManager_SameSkillFarFromEach", this, &ThisClass::Tick_SameSkillFarFromEach, 0.1);
+            UTimerManagerFuncLib::SetDelayLoopSafe(GetWorld(), "USkillManager_SameSkillFarFromEach", this, &ThisClass::Tick_SameSkillFarFromEach, 0.1);
         }
     }
     

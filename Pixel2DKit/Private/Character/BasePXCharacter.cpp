@@ -46,7 +46,7 @@
 #include "Sound/SoundCue.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "UI/UIManager.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
@@ -352,7 +352,7 @@ void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset, float S
 
 	if (SustainTime > 0)
 	{
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), 
+		UTimerManagerFuncLib::SetDelay(GetWorld(), 
 	[WeakThis = TWeakObjectPtr(this), OffsetName]
 		{
 			if (!WeakThis.IsValid()) return;
@@ -467,7 +467,7 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	UTimerSubsystemFuncLib::CancelDelay(this, "ABasePXCharacter::SetScale");
+	UTimerManagerFuncLib::CancelDelay(this, "ABasePXCharacter::SetScale");
 	
 	OnPlayerAttackStart.RemoveAll(this);
 	OnPlayerDie.RemoveAll(this);
@@ -776,7 +776,7 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	AddCameraOffset(FName("BulletTime"), TempOffset, SustainTime);
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
 	}, SustainTime);
@@ -793,7 +793,7 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
 	FName TimerName = FName(GetName() + "_OutOfControl");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,[WeakThis = TWeakObjectPtr(this)]{
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,[WeakThis = TWeakObjectPtr(this)]{
 		if (!WeakThis.IsValid()) return;
 		if (!WeakThis->CachedASC) return;
 		if (!WeakThis->GetCharacterMovement()) return;
@@ -839,7 +839,7 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 	if (!bHurt) return;
 	if (duration > 0)
 	{
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (WeakThis.IsValid())
 			{
@@ -856,7 +856,7 @@ void ABasePXCharacter::SetJumping(bool V, float time)
 	
 	if (!bJumping) return;
 
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (WeakThis.IsValid())
 		{
@@ -879,7 +879,7 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 	if (!bLanding) return;
 
 	PreFrameFalling = false;
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetLanding(false, 0);
@@ -998,7 +998,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 			{
 				StateComponent->InvulnerableForDuration(2.5);
 			}
-			UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+			UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 			{
 				if (!WeakThis.IsValid()) return;
 					WeakThis->Revive();
@@ -1028,7 +1028,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 				{
 					StateComponent->DestroyComponent();
 				}
-				UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+				UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 				{
 					if (WeakThis.IsValid())
 					{
@@ -1049,7 +1049,7 @@ void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue
 						GS->PassDayTime(DataAsset->RevivePassDayTime, false, false, DataAsset->ReviveDelayTime);
 					}
 	
-					UTimerSubsystemFuncLib::SetDelay(GetWorld(),
+					UTimerManagerFuncLib::SetDelay(GetWorld(),
 					[WeakThis = TWeakObjectPtr(this), RespawnPoint]
 					{
 						if (WeakThis.IsValid() && IsValid(RespawnPoint))
@@ -1236,7 +1236,7 @@ void ABasePXCharacter::ToStartPoint_Implementation()
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling, 0);
 
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (WeakThis.IsValid())
 			{
@@ -1301,7 +1301,7 @@ AActor* ABasePXCharacter::GetTarget_Implementation()
 void ABasePXCharacter::OnAttackHit_Implementation(AActor* Receiver)
 {
 	AttackHitComboNum++;
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(this, "Player_AttackHitCombo",
+	UTimerManagerFuncLib::SetRetriggerableDelay(this, "Player_AttackHitCombo",
 		[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (WeakThis.IsValid())
@@ -1329,7 +1329,7 @@ void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 	bRepulsion = true;
 	OutOfControl(Power/1000);
 
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 
@@ -1561,7 +1561,7 @@ void ABasePXCharacter::SetScale(const float targetValue)
 {
 	ScaleLerpValue = 0;
 
-	UTimerSubsystemFuncLib::SetDelayLoop(this, "ABasePXCharacter::SetScale", [WeakThis = TWeakObjectPtr(this), targetValue]
+	UTimerManagerFuncLib::SetDelayLoop(this, "ABasePXCharacter::SetScale", [WeakThis = TWeakObjectPtr(this), targetValue]
 	{
 		if (!WeakThis.IsValid()) return;
 
@@ -1571,7 +1571,7 @@ void ABasePXCharacter::SetScale(const float targetValue)
 		{
 			WeakThis->ScaleCurValue = targetValue;
 			WeakThis->SetActorScale3D(WeakThis->InitScale * WeakThis->ScaleCurValue);
-			UTimerSubsystemFuncLib::CancelDelay(WeakThis.Get(), "ABasePXCharacter::SetScale");
+			UTimerManagerFuncLib::CancelDelay(WeakThis.Get(), "ABasePXCharacter::SetScale");
 		}
 	}, 0.02f);
 }
@@ -1699,13 +1699,13 @@ void ABasePXCharacter::TryToJump()
 		return;
 	}
 	
-	UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(),"TryToJump",[WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelayLoop(GetWorld(),"TryToJump",[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		if (WeakThis->SelfCanJump())
 		{
 			WeakThis->JumpStart();
-			UTimerSubsystemFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
+			UTimerManagerFuncLib::CancelDelay(WeakThis->GetWorld(),"TryToJump");
 		}
 	}, 0.01f, 0.15f);
 }

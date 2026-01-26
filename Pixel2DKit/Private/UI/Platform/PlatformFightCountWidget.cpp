@@ -3,7 +3,7 @@
 
 #include "UI/Platform/PlatformFightCountWidget.h"
 #include "Animation/WidgetAnimation.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 
 void UPlatformFightCountWidget::NativeConstruct()
 {
@@ -16,7 +16,7 @@ void UPlatformFightCountWidget::Show()
 {
 	if (CurNum > 0)
 	{
-		UTimerSubsystemFuncLib::CancelDelay(GetWorld(), "UPlatformFightCountWidget::Fade");
+		UTimerManagerFuncLib::CancelDelay(GetWorld(), "UPlatformFightCountWidget::Fade");
 		if (AnimShowIn)
 		{
 			PlayAnimation(AnimShowIn);
@@ -26,7 +26,7 @@ void UPlatformFightCountWidget::Show()
 
 void UPlatformFightCountWidget::Fade(float Delay)
 {
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "UPlatformFightCountWidget::Fade",
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), "UPlatformFightCountWidget::Fade",
 		[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;

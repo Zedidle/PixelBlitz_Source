@@ -4,7 +4,7 @@
 #include "Platform/BasePlatform.h"
 
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 
 void ABasePlatform::RecordStartLocation()
 {
@@ -109,7 +109,7 @@ void ABasePlatform::OnPlayerLand_Implementation()
 	
 	SetMobility(EComponentMobility::Movable);
 
-	UTimerSubsystemFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetMobility(EComponentMobility::Static);

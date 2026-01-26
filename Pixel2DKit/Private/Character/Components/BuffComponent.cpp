@@ -20,7 +20,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/DataTableSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "UI/Buff/BuffStateWidget.h"
 #include "Utilitys/DebugFuncLab.h"
@@ -127,13 +127,13 @@ void UBuffComponent::BeginPlay()
 	}
 
 	TimerName_CheckBuffEnd = FName("BuffComponent" + FGuid::NewGuid().ToString());
-	UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckBuffEnd, this, &UBuffComponent::CheckBuffExpire, 0.1, -1);
+	UTimerManagerFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckBuffEnd, this, &UBuffComponent::CheckBuffExpire, 0.1, -1);
 }
 
 void UBuffComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckBuffEnd);
+	UTimerManagerFuncLib::CancelDelay(GetWorld(), TimerName_CheckBuffEnd);
 	if (BuffStateWidget)
 	{
 		BuffStateWidget->RemoveFromParent();

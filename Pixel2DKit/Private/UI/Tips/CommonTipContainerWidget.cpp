@@ -6,7 +6,7 @@
 #include "UI/UIEventCenter.h"
 #include "Components/ScrollBox.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 
 
 void UCommonTipContainerWidget::NativeConstruct()
@@ -73,7 +73,7 @@ void UCommonTipContainerWidget::OnCommonTipRemoveAll(float NewEndTime)
 
 	CurEndTime = NewEndTime;
 
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "UCommonTipContainerWidget::OnCommonTipRemoveAll",
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), "UCommonTipContainerWidget::OnCommonTipRemoveAll",
 	[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;

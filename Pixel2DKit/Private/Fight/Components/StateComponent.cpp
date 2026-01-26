@@ -20,7 +20,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXForceFeedbackEffectDataAsset.h"
 #include "Settings/Config/PXResourceDataAsset.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 
@@ -49,7 +49,7 @@ void UStateComponent::OnHurtInvulnerable()
 	SetInvulnerable(false);
 	FName TimerName = FName( GetReadableName()+ "_OnHurtInvulnerable");
 	
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
@@ -60,7 +60,7 @@ void UStateComponent::OnHurtInvulnerable()
 void UStateComponent::InvulnerableForDuration(float duration)
 {
 	SetInvulnerable(true);
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetInvulnerable(false);
@@ -76,7 +76,7 @@ void UStateComponent::FlashForDuration(float Duration, float FlashRate, FLinearC
 	if (FlashTimes % 2 == 1) FlashTimes++;
 	
 	FName TimerName = FName("UHealthComponent::FlashForDuration" + FGuid::NewGuid().ToString());
-	UTimerSubsystemFuncLib::SetDelayLoop(World, TimerName,
+	UTimerManagerFuncLib::SetDelayLoop(World, TimerName,
 		[WeakThis = TWeakObjectPtr(this), FlashColor]
 		{
 			if (!WeakThis.IsValid()) return;
@@ -182,7 +182,11 @@ void UStateComponent::BeginPlay()
 
 	bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
 
-	CachedASC = Cast<UPXASComponent>(GetOwner());
+	
+	if (IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(GetOwner()))
+	{
+		CachedASC = Cast<UPXASComponent>(ASI->GetAbilitySystemComponent());
+	}
 	
 	OnHPChanged.AddDynamic(this, &UStateComponent::Event_OnHPChanged);
 }

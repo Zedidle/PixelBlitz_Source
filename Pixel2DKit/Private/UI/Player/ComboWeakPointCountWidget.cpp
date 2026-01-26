@@ -2,8 +2,7 @@
 
 
 #include "UI/Player/ComboWeakPointCountWidget.h"
-
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 
 void UComboWeakPointCountWidget::NativeConstruct()
 {
@@ -12,7 +11,7 @@ void UComboWeakPointCountWidget::NativeConstruct()
 
 void UComboWeakPointCountWidget::Fade(float Delay)
 {
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), "UComboWeakPointCountWidget::Fade",
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), "UComboWeakPointCountWidget::Fade",
 		[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;

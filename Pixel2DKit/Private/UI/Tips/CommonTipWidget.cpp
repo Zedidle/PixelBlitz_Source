@@ -6,7 +6,7 @@
 #include "Animation/WidgetAnimation.h"
 #include "Components/TextBlock.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 
 
 void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
@@ -21,7 +21,7 @@ void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
 
 	PlayAnimIn();
 	
-	UTimerSubsystemFuncLib::SetDelay(World, [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(World, [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->PlayAnimOut();

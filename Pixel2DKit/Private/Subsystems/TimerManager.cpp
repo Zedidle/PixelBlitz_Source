@@ -1,15 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Subsystems/TimerSubsystem.h"
+#include "Subsystems/TimerManager.h"
 
-void UTimerSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+void UTimerManager::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	ActiveTimers.Empty();
 }
 
-void UTimerSubsystem::Deinitialize()
+void UTimerManager::Deinitialize()
 {
 	// 清理所有计时器
 	UWorld* World = GetWorld();
@@ -26,7 +26,16 @@ void UTimerSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UTimerSubsystem::SetDelay(TFunction<void()>&& Callback, float DelayDuration)
+UTimerManager* UTimerManager::GetInstance(UWorld* World)
+{
+	if (World)
+	{
+		return World->GetSubsystem<UTimerManager>();
+	}
+	return nullptr;	
+}
+
+void UTimerManager::SetDelay(TFunction<void()>&& Callback, float DelayDuration)
 {
 	if (DelayDuration <= 0.0f) return;
 	
@@ -44,7 +53,7 @@ void UTimerSubsystem::SetDelay(TFunction<void()>&& Callback, float DelayDuration
 	World->GetTimerManager().SetTimer(Handle, Delegate, DelayDuration, false);
 }
 
-void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime, int LoopTimes)
+void UTimerManager::SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime, int LoopTimes)
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
@@ -86,7 +95,7 @@ void UTimerSubsystem::SetDelayLoop(const FName& TimerName, TFunction<void()>&& C
 }
 
 
-void UTimerSubsystem::SetRetriggerableDelay(const FName& TimerName, TFunction<void()>&& Callback, float DelayDuration)
+void UTimerManager::SetRetriggerableDelay(const FName& TimerName, TFunction<void()>&& Callback, float DelayDuration)
 {
 	if (DelayDuration <= 0.0f) return;
 	
@@ -115,7 +124,7 @@ void UTimerSubsystem::SetRetriggerableDelay(const FName& TimerName, TFunction<vo
 }
 
 
-void UTimerSubsystem::CancelDelay(FName TimerName)
+void UTimerManager::CancelDelay(FName TimerName)
 {
 	check(IsInGameThread());
 	
@@ -130,12 +139,12 @@ void UTimerSubsystem::CancelDelay(FName TimerName)
 	}
 }
 
-bool UTimerSubsystem::HasTimer(FName TimerName)
+bool UTimerManager::HasTimer(FName TimerName)
 {
 	return ActiveTimers.Contains(TimerName);
 }
 
-bool UTimerSubsystem::IsDelayActive(FName TimerName) const
+bool UTimerManager::IsDelayActive(FName TimerName) const
 {
 	if (const FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{
@@ -145,7 +154,7 @@ bool UTimerSubsystem::IsDelayActive(FName TimerName) const
 	return false;
 }
 
-float UTimerSubsystem::GetRemainingTime(FName TimerName) const
+float UTimerManager::GetRemainingTime(FName TimerName) const
 {
 	if (const FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{
@@ -159,7 +168,7 @@ float UTimerSubsystem::GetRemainingTime(FName TimerName) const
 }
 
 
-void UTimerSubsystem::PauseDelay(FName TimerName)
+void UTimerManager::PauseDelay(FName TimerName)
 {
 	if (FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{
@@ -171,7 +180,7 @@ void UTimerSubsystem::PauseDelay(FName TimerName)
 	}
 }
 
-void UTimerSubsystem::UnPauseDelay(FName TimerName)
+void UTimerManager::UnPauseDelay(FName TimerName)
 {
 	if (FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{
@@ -182,7 +191,7 @@ void UTimerSubsystem::UnPauseDelay(FName TimerName)
 	}
 }
 
-bool UTimerSubsystem::IsDelayPaused(FName TimerName) const
+bool UTimerManager::IsDelayPaused(FName TimerName) const
 {
 	if (const FTimerHandle* Handle = ActiveTimers.Find(TimerName))
 	{

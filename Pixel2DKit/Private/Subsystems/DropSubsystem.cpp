@@ -8,7 +8,7 @@
 #include "Item/BaseInteractableItem.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/DataTableSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "Utilitys/SoundFuncLib.h"
@@ -45,7 +45,7 @@ void UDropSubsystem::SpawnItems(const FName& DropID, const FVector& SpawnLocatio
 
 	FString UniqueTimerName = FString::Printf(TEXT("UDropSubsystem_SpawnItems_%s"), *FGuid::NewGuid().ToString());
 	
-	UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), FName(*UniqueTimerName),
+	UTimerManagerFuncLib::SetDelayLoop(GetWorld(), FName(*UniqueTimerName),
 		[WeakThis=TWeakObjectPtr(this), DropData, SpawnLocation]
 		{
 			if (!WeakThis.IsValid()) return;

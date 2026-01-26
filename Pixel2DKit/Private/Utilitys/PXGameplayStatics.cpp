@@ -5,6 +5,7 @@
 
 #include "CommonInputSubsystem.h"
 #include "CommonUIExtensions.h"
+#include "Pixel2DKit.h"
 #include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
 #include "Controller/PXPlayerController.h"
@@ -13,6 +14,8 @@
 #include "Player/PXLocalPlayer.h"
 #include "Settings/PXSettingsShared.h"
 #include "Utilitys/DebugFuncLab.h"
+
+class APXPlayerController;
 
 UPXGameInstance* UPXGameplayStatics::GetGameInstance(const UObject* WorldContextObject)
 {

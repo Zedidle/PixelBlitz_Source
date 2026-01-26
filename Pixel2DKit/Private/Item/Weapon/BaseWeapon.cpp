@@ -5,6 +5,7 @@
 #include "Core/PXGameInstance.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Subsystems/DataTableSubsystem.h"
+#include "Character/BasePXCharacter.h"
 
 class UDataTableSubsystem;
 

@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TimerSubsystem.h"
-#include "TimerSubsystemFuncLib.generated.h"
+#include "TimerManager.h"
+#include "TimerManagerFuncLib.generated.h"
 
 
 
 UCLASS(Abstract, MinimalAPI)
-class UTimerSubsystemFuncLib : public UObject
+class UTimerManagerFuncLib : public UObject
 {
 	GENERATED_BODY()
 
@@ -17,13 +17,13 @@ public:
     /* 获取计时器子系统
      */
     UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
-    static UTimerSubsystem* GetTimerSubsystem(UObject* WorldContext);
+    static UTimerManager* GetTimerSubsystem(UObject* WorldContext);
 
 
     template<typename Callable>
     static void SetDelay(UObject* WorldContext,Callable&& Callback,float Delay)
     {
-        if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+        if (UTimerManager* Subsystem = GetTimerSubsystem(WorldContext))
         {
             Subsystem->SetDelay(MoveTemp(Callback),Delay);
         }
@@ -32,7 +32,7 @@ public:
     template<typename Callable>
     static void SetDelayLoop(UObject* WorldContext, const FName& TimerName, Callable&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1)
     {
-        if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+        if (UTimerManager* Subsystem = GetTimerSubsystem(WorldContext))
         {
             Subsystem->SetDelayLoop(TimerName, MoveTemp(Callback), InRate, SustainTime, LoopTimes);
         }
@@ -81,7 +81,7 @@ public:
     template<typename Callable>
     static void SetRetriggerableDelay(UObject* WorldContext, const FName& TimerName, Callable&& Callback,float Delay)
     {
-        if (UTimerSubsystem* Subsystem = GetTimerSubsystem(WorldContext))
+        if (UTimerManager* Subsystem = GetTimerSubsystem(WorldContext))
         {
             Subsystem->SetRetriggerableDelay(
                 TimerName,

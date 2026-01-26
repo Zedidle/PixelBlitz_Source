@@ -7,7 +7,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Settings/Config/PXWidgetsDataAsset.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "Utilitys/UserWidgetFuncLib.h"
@@ -69,7 +69,7 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 
 	ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint, GetDamagePlusPercent() * 100);
 	
-	UTimerSubsystemFuncLib::SetDelayLoop(this, "UComboSubsystem::CalDamageByComboWeakPoint",
+	UTimerManagerFuncLib::SetDelayLoop(this, "UComboSubsystem::CalDamageByComboWeakPoint",
 		[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
@@ -88,7 +88,7 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 
 				if (WeakThis->CurComboWeakPoint == 0)
 				{
-					UTimerSubsystemFuncLib::CancelDelay(WeakThis.Get(), "UComboSubsystem::CalDamageByComboWeakPoint");
+					UTimerManagerFuncLib::CancelDelay(WeakThis.Get(), "UComboSubsystem::CalDamageByComboWeakPoint");
 				}
 			}
 		}, ComboWeakPointSustainTime);

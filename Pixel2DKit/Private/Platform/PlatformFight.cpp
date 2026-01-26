@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/PXSettingsShared.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 

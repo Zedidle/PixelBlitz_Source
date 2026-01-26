@@ -13,7 +13,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/Config/EnemyActionMoveDataAsset.h"
 #include "Settings/Config/PXCustomSettings.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 
@@ -67,9 +67,9 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 	
 	if (PXCharacter.IsValid())
 	{
-		if (UTimerSubsystemFuncLib::IsDelayActive(GetWorld(), TimerName_CheckPlayerLocation)) return;
+		if (UTimerManagerFuncLib::IsDelayActive(GetWorld(), TimerName_CheckPlayerLocation)) return;
 		
-		UTimerSubsystemFuncLib::SetDelayLoop(GetWorld(), TimerName_CheckPlayerLocation, [WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelayLoop(GetWorld(), TimerName_CheckPlayerLocation, [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 			WeakThis->UpdatePlayerPaths();
@@ -78,7 +78,7 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 		Character->OnPlayerAttackStart.AddUniqueDynamic(this, &ThisClass::OnPlayerAttackStart);
 		
 		FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetName() + "_CheckPlayerMovement");
-		UTimerSubsystemFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckPlayerMovement, this, &ThisClass::Event_CheckPlayerMovement, 0.1);
+		UTimerManagerFuncLib::SetDelayLoopSafe(GetWorld(), TimerName_CheckPlayerMovement, this, &ThisClass::Event_CheckPlayerMovement, 0.1);
 	}
 	else
 	{
@@ -111,10 +111,10 @@ void UEnemyAIComponent::UpdatePlayerPaths()
 void UEnemyAIComponent::LostPlayer()
 {
 	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetName() + "_SetPixelCharacter");
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerLocation);
+	UTimerManagerFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerLocation);
 	
 	FName TimerName_CheckPlayerMovement = FName(OwningEnemy->GetName() + "_CheckPlayerMovement");
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerMovement);
+	UTimerManagerFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerMovement);
 
 	if (PXCharacter.IsValid())
 	{

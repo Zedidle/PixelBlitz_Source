@@ -8,8 +8,8 @@
 #include "GAS/AttributeSet/PXAttributeSet.h"
 #include "PXCustomStruct.generated.h"
 
-class USoundCue;
 class ABasePXCharacter;
+class USoundCue;
 class ABaseSkill;
 
 UCLASS()

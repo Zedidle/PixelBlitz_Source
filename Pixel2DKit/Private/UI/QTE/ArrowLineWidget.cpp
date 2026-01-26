@@ -7,7 +7,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "UI/QTE/ArrowLineBodyWidget.h"
 #include "UI/QTE/ArrowLineHeadAntiWidget.h"
 #include "UI/QTE/ArrowLineHeadWidget.h"
@@ -19,7 +19,7 @@ void UArrowLineWidget::NativeConstruct()
 
 	if (LifeSpan > 0)
 	{
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (WeakThis.IsValid())
 			{

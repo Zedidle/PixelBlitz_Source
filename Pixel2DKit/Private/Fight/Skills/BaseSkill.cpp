@@ -8,7 +8,7 @@
 #include "Interfaces/Fight_Interface.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/SkillManager.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
 
@@ -70,7 +70,7 @@ void ABaseSkill::SetSkillLifeTimer(bool bActivate)
 	FName TimerName = FName(GetName() + "_Skill.SetActive");
 	if (bActivate)
 	{
-		UTimerSubsystemFuncLib::SetDelayLoop(this, TimerName,[WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelayLoop(this, TimerName,[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 			if (WeakThis->bIdle) return;
@@ -79,7 +79,7 @@ void ABaseSkill::SetSkillLifeTimer(bool bActivate)
 	}
 	else
 	{
-		UTimerSubsystemFuncLib::CancelDelay(this, TimerName);
+		UTimerManagerFuncLib::CancelDelay(this, TimerName);
 	}
 }
 

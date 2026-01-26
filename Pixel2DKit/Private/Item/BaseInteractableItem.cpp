@@ -7,7 +7,7 @@
 #include "Character/BasePXCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/SoundFuncLib.h"
 
 
@@ -28,7 +28,7 @@ void ABaseInteractableItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(),[WeakThis=TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis=TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->SetActorEnableCollision(true);

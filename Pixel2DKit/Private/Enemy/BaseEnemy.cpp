@@ -32,7 +32,7 @@
 #include "Subsystems/DropSubsystem.h"
 #include "Subsystems/EnemyAISubsystem.h"
 #include "Subsystems/PXAnimSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SoundFuncLib.h"
@@ -150,7 +150,7 @@ void ABaseEnemy::SetHurt(bool V, float Duration)
 
 	FName TimerName = FName(GetName() + "_ABaseEnemy::SetHurt");
 
-	// float RemainingTime = UTimerSubsystemFuncLib::GetRemainingTime(GetWorld(), TimerName);
+	// float RemainingTime = UTimerManagerFuncLib::GetRemainingTime(GetWorld(), TimerName);
 	// if (RemainingTime > 0)
 	// {
 	// 	if (RemainingTime > Duration)
@@ -163,7 +163,7 @@ void ABaseEnemy::SetHurt(bool V, float Duration)
 	// 	}
 	// }
 	
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (WeakThis.IsValid())
 		{
@@ -752,7 +752,7 @@ bool ABaseEnemy::InAttackRange_Vertical()
 void ABaseEnemy::DelayLosePlayer_Implementation()
 {
 	FName TimerName = FName(GetName() + "_DelayLosePlayer");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
 	[WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
@@ -816,7 +816,7 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 		OutDamage *= 0.5;
 	}
 
-	UTimerSubsystemFuncLib::SetDelay(this,[WeakThis = TWeakObjectPtr(this), Maker]
+	UTimerManagerFuncLib::SetDelay(this,[WeakThis = TWeakObjectPtr(this), Maker]
 	{
 		if (WeakThis.IsValid())
 		{
@@ -843,7 +843,7 @@ void ABaseEnemy::PowerRepulsion_Implementation(float Power)
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		UTimerSubsystemFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 			if (WeakThis->GetCharacterMovement())
@@ -890,7 +890,7 @@ void ABaseEnemy::OnRemoteAttackEffect_Implementation()
 void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 {
 	FName TimerName = FName(GetName() + "_InAttackState");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
 	[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
@@ -927,7 +927,7 @@ void ABaseEnemy::OnAttackEffectEnd_Implementation()
 {
 	SetInAttackEffect(false); 
 	FName TimerName = FName(GetName() + "_InAttackState");
-	UTimerSubsystemFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
+	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, 
 	[WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;

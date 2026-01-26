@@ -5,13 +5,13 @@
 #include <functional>
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "TimerSubsystem.generated.h"
+#include "TimerManager.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXEL2DKIT_API UTimerSubsystem : public UGameInstanceSubsystem
+class PIXEL2DKIT_API UTimerManager : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -27,7 +27,9 @@ public:
 	// 清理子系统
 	virtual void Deinitialize() override;
 
-
+	UFUNCTION()
+	static UTimerManager* GetInstance(UWorld* World);
+	
 	void SetDelay(TFunction<void()>&& Callback, float DelayDuration);
 
 	void SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1);

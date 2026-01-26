@@ -16,7 +16,7 @@
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/PXAudioSubsystem.h"
-#include "Subsystems/TimerSubsystemFuncLib.h"
+#include "Subsystems/TimerManagerFuncLib.h"
 #include "Subsystems/WeatherSubsystem.h"
 #include "UI/UIManager.h"
 #include "Utilitys/CommonFuncLib.h"
@@ -31,7 +31,7 @@ void APXGameState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	
-	UTimerSubsystemFuncLib::CancelDelay(GetWorld(), "APXGameState.RaceTimer");
+	UTimerManagerFuncLib::CancelDelay(GetWorld(), "APXGameState.RaceTimer");
 }
 
 void APXGameState::EventOnDayTimeTypeChanged_Implementation()
@@ -160,7 +160,7 @@ void APXGameState::PassDayTime(float Time, bool DirectSet, bool AbortWeatherChan
 	if (!_ForceWeatherIndex.IsNone())
 	{
 		ForceWeatherIndex = _ForceWeatherIndex;
-		UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 		{
 			if (!WeakThis.IsValid()) return;
 			WeakThis->ForceWeatherIndex = FName();
@@ -297,7 +297,7 @@ void APXGameState::OnEnemyBossDie_Implementation()
 {
 	StartRaceTimer(false);
 	
-	UTimerSubsystemFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (!WeakThis.IsValid()) return;
 		WeakThis->ToNextLevel();
@@ -311,9 +311,8 @@ void APXGameState::OnEnemyBossDie_Implementation()
 
 void APXGameState::StartRaceTimer_Implementation(bool bStart)
 {
-    UTimerSubsystem* TimerSubsystem = GetGameInstance()->GetSubsystem<UTimerSubsystem>();
+    UTimerManager* TimerSubsystem = UTimerManager::GetInstance(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TimerSubsystem);
-
 
 	FName TimerName = "APXGameState.RaceTimer";
 	

@@ -4,12 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Logging/LogMacros.h"
-PIXEL2DKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogHall, Log, All)
-PIXEL2DKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogGame, Log, All)
-PIXEL2DKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogBuild, Log, All)
-PIXEL2DKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogRGAI, Log, All)
-PIXEL2DKIT_API DECLARE_LOG_CATEGORY_EXTERN(LogRGProtocol, Log, All)
-DECLARE_STATS_GROUP(TEXT("RAGame"), STATGROUP_RAGame, STATCAT_Advanced);
+
 #define CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Pointer) if(nullptr==(Pointer)){return;}
 #define CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Pointer,Val) if(nullptr==(Pointer)){return (Val);}
 //Judge is server
