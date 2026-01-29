@@ -104,7 +104,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Skill | Niagara")
 	void SetActivateTiming(EAbilityTiming Timing);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ApplyAttributeEffects();
 	
 

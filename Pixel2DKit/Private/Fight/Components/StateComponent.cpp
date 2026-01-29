@@ -33,7 +33,7 @@ int UStateComponent::CalAcceptDamage(int InDamage, AActor* Maker)
 	AActor* Owner = GetOwner();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Owner, InDamage)
 	if (!Owner->Implements<UFight_Interface>()) return InDamage;
-	if (GetCurrentHP() <= 0) return 0;
+	if (GetHP() <= 0) return 0;
 	
 	int DamagePlus = 0;
 	if (Maker && Maker->Implements<UFight_Interface>())
@@ -225,10 +225,9 @@ void UStateComponent::Event_OnHPChanged(int OldValue, int NewValue)
 	}
 }
 
-int UStateComponent::GetCurrentHP()
+int UStateComponent::GetHP()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, 0);
-	return CachedASC->GetAttributeValue(EPXAttribute::HP);
+	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::HP) : 0;
 }
 
 int UStateComponent::GetMaxHP()
@@ -238,7 +237,7 @@ int UStateComponent::GetMaxHP()
 
 float UStateComponent::GetHPPercent()
 {
-	return float(GetCurrentHP()) / float(GetMaxHP());
+	return float(GetHP()) / float(GetMaxHP());
 }
 
 void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector KnockbackForce, bool bForce)

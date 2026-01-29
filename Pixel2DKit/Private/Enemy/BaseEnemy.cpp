@@ -247,10 +247,11 @@ float ABaseEnemy::GetVerticalDistanceToPlayer() const
 	return 0;
 }
 
-void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
+void ABaseEnemy::LoadData_Implementation(FName Level)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataAsset)
-
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	
 	UDataTable* DataTable = DataAsset->EnemyLevelDataTable.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
 	
@@ -259,32 +260,38 @@ void ABaseEnemy::LoadEnemyData_Implementation(FName Level)
 
 	EnemyData = DataTableManager->FindRow<FEnemyData>(DataTable, EnemyLevel);
 
-	StateComponent->ModifyMaxHP(EnemyData.HP, EStatChange::Reset, true);
-	SetActorScale3D(FVector(EnemyData.BodyScale));
-
-	LoadLookDeterrence(EnemyData.LookDeterrence);
-
-	CurAttackDamage = EnemyData.AttackDamage;
-	BasicAttackInterval = EnemyData.AttackInterval;
-	WeakPointRefreshPeriod = EnemyData.WeakPointRefreshPeriod;
+	CachedASC->SetAttributeValue(EPXAttribute::HP, EnemyData.BasicMaxHP);
+	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, EnemyData.BasicMaxHP);
+	CachedASC->SetAttributeValue(EPXAttribute::CurMaxHP, EnemyData.BasicMaxHP);
 	
-	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(DataAsset->ActionFieldsCanAttack);
-	EnemyAIComponent->SetActionFieldDistance(EnemyData.ActionFieldDistance);
-	GetCharacterMovement()->MaxAcceleration = EnemyData.MoveAcceleration;
-	GetCharacterMovement()->MaxWalkSpeed = EnemyData.MoveSpeed;
+	CachedASC->SetAttributeValue(EPXAttribute::BasicAttackValue, EnemyData.BasicAttackValue);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAttackValue, EnemyData.BasicAttackValue);
+	
+	CachedASC->SetAttributeValue(EPXAttribute::BasicAttackCD, EnemyData.BasicAttackCD);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAttackCD, EnemyData.BasicAttackCD);
+	
+	CachedASC->SetAttributeValue(EPXAttribute::BasicSpeed, EnemyData.BasicSpeed);
+	CachedASC->SetAttributeValue(EPXAttribute::CurSpeed, EnemyData.BasicSpeed);
+	
+	CachedASC->SetAttributeValue(EPXAttribute::BasicAcceleration, EnemyData.BasicAcceleration);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAcceleration, EnemyData.BasicAcceleration);
+	
+	CachedASC->SetAttributeValue(EPXAttribute::BasicAcceleration, EnemyData.BasicAcceleration);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAcceleration, EnemyData.BasicAcceleration);
 
-	CurAttackRepel = EnemyData.AttackKnockbackForce;
+	CachedASC->SetAttributeValue(EPXAttribute::BasicRepelResist, EnemyData.BasicRepelResist);
+	CachedASC->SetAttributeValue(EPXAttribute::CurRepelResist, EnemyData.BasicRepelResist);
 
-	if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller) )
-	{
-		EnemyAIController->UpdateSightRadius(EnemyData.SightRadius);
-	}
+	CachedASC->SetAttributeValue(EPXAttribute::BasicBodySizeScale, EnemyData.BasicBodySizeScale);
+	CachedASC->SetAttributeValue(EPXAttribute::CurBodySizeScale, EnemyData.BasicBodySizeScale);
+	
+	CurRepelValue = EnemyData.RepelValue;
 	
 	LostEnemyTime = EnemyData.LostEnemyTime;
+	ActionFieldsCanAttack = FGameplayTagContainer::CreateFromArray(DataAsset->ActionFieldsCanAttack);
+	EnemyAIComponent->SetActionFieldDistance(EnemyData.ActionFieldDistance);
+	WeakPointRefreshPeriod = EnemyData.WeakPointRefreshPeriod;
 
-	StateComponent->RepelResistance = EnemyData.RepelResistance;
-
-	
 #pragma region GAS
 
 	InitAbilitiesToGive.Append(DataAsset->InitAbilitiesToGive);
@@ -365,7 +372,7 @@ bool ABaseEnemy::IsActionMoving() const
 void ABaseEnemy::Initialize_Implementation(FName Level)
 {
 	EnemyLevel = Level;
-	LoadEnemyData(EnemyLevel);
+	LoadData(EnemyLevel);
 }
 
 
@@ -377,7 +384,14 @@ void ABaseEnemy::BeginPlay()
 	if (StateComponent)
 	{
 		StateComponent->RegisterComponent();
-		StateComponent->OnHPChanged.AddDynamic(this, &ABaseEnemy::OnHPChanged);
+	}
+	
+	if (CachedASC)
+	{
+		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())
+		{
+			PXAttributeSet->OnPXAttributeChange.AddDynamic(this, &ThisClass::OnAttributeChanged);
+		}
 	}
 }
 
@@ -386,11 +400,6 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 	
 	OnEnemyDie.RemoveAll(this);
-	
-	if (StateComponent)
-	{
-		StateComponent->OnHPChanged.RemoveDynamic(this, &ABaseEnemy::OnHPChanged);
-	}
 }
 
 void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bInterrupt, bool bCabBeInterrupt)
@@ -454,7 +463,7 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 {
 	if (ActionMove.bActionMoving) return;
 	if (!GetCapsuleComponent()) return;
-	if (EnemyData.MoveSpeed <= 0.0f) return;
+	if (EnemyData.BasicSpeed <= 0.0f) return;
 	
 	float VerticalDistanceToPlayer = GetVerticalDistanceToPlayer();
 	
@@ -497,7 +506,7 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
 	if (!IsValid(ActionMoveCurveData.Curve)) return;
 
-	float JumpDuration = FMath::FRandRange(0.15f, 0.25f) + FMath::FRandRange(0.4f, 0.45f) * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.MoveSpeed;
+	float JumpDuration = FMath::FRandRange(0.15f, 0.25f) + FMath::FRandRange(0.4f, 0.45f) * FVector::Dist2D(StartLocation, TargetLocation) / EnemyData.BasicSpeed;
 	
 	ActionMove.bActionMoving = true;
 	ActionMove.CurTime = 0;
@@ -522,11 +531,6 @@ float ABaseEnemy::GetDefaultHalfHeight() const
 		return GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	}
 	return Super::GetDefaultHalfHeight();
-}
-
-
-void ABaseEnemy::LoadLookDeterrence_Implementation(int32 Level)
-{
 }
 
 void ABaseEnemy::OnDie_Implementation()
@@ -697,6 +701,38 @@ UAbilitySystemComponent* ABaseEnemy::GetAbilitySystemComponent() const
 // 		EnemyAIController->UpdateSightRadius(EnemyData.SightRadius * (BuffComponent->EffectedPercent_Sight + 1.0f) + BuffComponent->EffectedValue_Sight);
 // 	}
 // }
+
+void ABaseEnemy::OnAttributeChanged(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Movement)
+	
+	if (Attribute == UPXAttributeSet::GetHPAttribute())
+	{
+		OnHPChanged(OldValue, NewValue);
+	}
+	if (Attribute == UPXAttributeSet::GetCurSightAttribute())
+	{
+		if (AEnemyAIController* EnemyAIController = Cast<AEnemyAIController>(Controller))
+		{
+			EnemyAIController->UpdateSightRadius(NewValue);
+		}
+	}
+	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
+	{
+		Movement->MaxWalkSpeed = NewValue;
+	}
+	if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())
+	{
+		Movement->MaxAcceleration = NewValue;		
+	}
+	if (Attribute == UPXAttributeSet::GetCurBodySizeScaleAttribute())
+	{
+		SetActorScale3D(FVector(NewValue));
+	}
+}
 
 bool ABaseEnemy::GetIsAttacking()
 {
@@ -944,13 +980,7 @@ APawn* ABaseEnemy::GetPawn_Implementation()
 
 float ABaseEnemy::GetAttackCD_Implementation()
 {
-	FGameplayTag Tag = TAG("CommonSet.AttackAccPercent");
-	if (EffectGameplayTags.Contains(Tag))
-	{
-		return BasicAttackInterval / (1 + EffectGameplayTags[Tag]);
-	}
-
-	return BasicAttackInterval;
+	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurAttackCD) : 1.0f;
 }
 
 int ABaseEnemy::GetAttackDamage_Implementation()
@@ -960,7 +990,7 @@ int ABaseEnemy::GetAttackDamage_Implementation()
 
 FVector ABaseEnemy::GetAttackRepel_Implementation()
 {
-	return CurAttackRepel;
+	return CurRepelValue;
 }
 
 void ABaseEnemy::OnAnimVulnerableBegin_Implementation()

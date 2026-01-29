@@ -728,7 +728,7 @@ int UAbilityComponent::GetAttackDamagePlus()
 	float FoundR;
 	if (FindExtendData(TAG("Ability.Wushu.Set.AttackDamagePlusOnCurHPPercent"), FoundR))
 	{
-		LocalPlus += FMath::RoundToInt(FoundR * PXCharacter->StateComponent->GetCurrentHP()) ;
+		LocalPlus += FMath::RoundToInt(FoundR * PXCharacter->StateComponent->GetHP()) ;
 	}
 
 	// …… 其它技能

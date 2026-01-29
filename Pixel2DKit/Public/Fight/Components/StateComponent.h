@@ -72,7 +72,6 @@ public:
 	int CalAcceptDamage(int InDamage, AActor* Maker);
 	void OnHurtInvulnerable();
 	
-	
 	FVector CalRepel(FVector& IncomeRepel, const AActor* Instigator) const;
 	
 	UPROPERTY(BlueprintAssignable, Category = "StateComponent|Health")
@@ -113,7 +112,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateComponent")
-	int GetCurrentHP();
+	int GetHP();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateComponent")
 	int GetMaxHP();
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateComponent")

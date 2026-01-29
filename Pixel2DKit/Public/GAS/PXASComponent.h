@@ -57,13 +57,23 @@ public:
 	{
 		if (const T* AttributeSet = GetSet<T>())
 		{
-			T* MutableSet = const_cast<T*>(AttributeSet);
-			FGameplayAttribute Attribute = AttributeSet->GetAttribute(AttributeName);
-			if (FGameplayAttributeData* Data = Attribute.GetGameplayAttributeData(MutableSet))
-			{
-				Data->SetBaseValue(Value);
-			}
+			// 如果没有实现 GetAttribute 则会报错
+			const FGameplayAttribute& Attribute = AttributeSet->GetAttribute(AttributeName);
+			SetNumericAttributeBase(Attribute, Value);
 		}
+		
+		// if (const T* AttributeSet = GetSet<T>())
+		// {
+		// 	T* MutableSet = const_cast<T*>(AttributeSet);
+		// 	FGameplayAttribute Attribute = AttributeSet->GetAttribute(AttributeName);
+		// 	if (FGameplayAttributeData* Data = Attribute.GetGameplayAttributeData(MutableSet))
+		// 	{
+		// 		// 几种设置值的方式都需要注意一下
+		// 		// SetNumericAttributeBase
+		// 		Data->SetBaseValue(Value);
+		// 		Data->SetCurrentValue(Value);
+		// 	}
+		// }
 	}
 	template<typename T = UPXAttributeSet>
 	void SetAttributeValueByName(const FString& AttributeName, float Value)

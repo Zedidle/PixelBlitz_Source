@@ -27,41 +27,37 @@ struct FEnemyData : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	// Level 可以用来递增 外貌，行动复杂度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	int32 Level = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 HP = 20;
+	int32 BasicMaxHP = 20;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float BodyScale = 1.0f;
+	float BasicBodySizeScale = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 AttackDamage = 10;
+	int32 BasicAttackValue = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float AttackInterval = 1.0f;
+	float BasicAttackCD = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float MoveSpeed = 100.f;
+	float BasicSpeed = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float MoveAcceleration = 100.f;
+	float BasicAcceleration = 100.f;
+
+	// 击退力，想想如何整合通用 为 float
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FVector RepelValue = FVector(200, 100, 50);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 LookDeterrence = 1;
+	float BasicRepelResist = 20.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	int32 AttackComplexity = 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FVector AttackKnockbackForce = FVector(200, 100, 50);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	FVector RepelResistance = FVector(20);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
-	float SightRadius = 300.f;
+	float BasicSight = 300.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	float LostEnemyTime = 10.0f;
@@ -167,17 +163,12 @@ public:
 	void Initialize(FName Level);
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void LoadEnemyData(FName Level);
+	void LoadData(FName Level);
 
 	virtual float GetDefaultHalfHeight() const override;
 
-	
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void LoadLookDeterrence(int32 Level);
-	
 	UPROPERTY(BlueprintAssignable)
 	FOnEnemyDie OnEnemyDie;
-	
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
@@ -203,7 +194,7 @@ public:
 	float MaxHorizontalDistance = 200;
 	
 	int32 CurAttackDamage = 10;
-	FVector CurAttackRepel = FVector(50,50,100);
+	FVector CurRepelValue = FVector(50,50,100);
 	
 	UPROPERTY(BlueprintReadWrite)
 	float BasicAttackInterval = 2.0f;
@@ -323,6 +314,9 @@ public:
 	
 #pragma endregion
 
+	
+	UFUNCTION()
+	void OnAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
 	
 #pragma region Fight_Interface
 	virtual bool GetIsAttacking() override;

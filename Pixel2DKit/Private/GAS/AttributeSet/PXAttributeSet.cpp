@@ -289,6 +289,11 @@ void UPXAttributeSet::OnRep_HP(const FGameplayAttributeData& OldValue)
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, HP, OldValue);
 }
 
+void UPXAttributeSet::OnRep_EP(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, EP, OldValue);
+}
+
 void UPXAttributeSet::OnRep_BasicMaxHP(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, BasicMaxHP, OldValue);
@@ -309,10 +314,6 @@ void UPXAttributeSet::OnRep_CurHPRecoverValue(const FGameplayAttributeData& OldV
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, CurHPRecoverValue, OldValue);
 }
 
-void UPXAttributeSet::OnRep_EP(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UPXAttributeSet, EP, OldValue);
-}
 
 void UPXAttributeSet::OnRep_BasicMaxEP(const FGameplayAttributeData& OldValue)
 {

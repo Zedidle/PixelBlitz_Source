@@ -74,24 +74,41 @@ void ABasePXCharacter::LoadData()
 	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
 
-
 	const FCharacterAttribute& Attribute = DataAsset->CharacterAttribute;
 
+	CachedASC->SetAttributeValue(EPXAttribute::HP, Attribute.BasicMaxHP);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, Attribute.BasicMaxHP);
+	CachedASC->SetAttributeValue(EPXAttribute::CurMaxHP, Attribute.BasicMaxHP);
+	CachedASC->SetAttributeValue(EPXAttribute::EP, Attribute.BasicMaxEP);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxEP, Attribute.BasicMaxEP);
+	CachedASC->SetAttributeValue(EPXAttribute::CurMaxEP, Attribute.BasicMaxEP);
+	
 	CachedASC->SetAttributeValue(EPXAttribute::BasicRepelResist, Attribute.BasicRepelResist);
+	CachedASC->SetAttributeValue(EPXAttribute::CurRepelResist, Attribute.BasicRepelResist);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicDashSpeed, Attribute.BasicDashSpeed);
+	CachedASC->SetAttributeValue(EPXAttribute::CurDashSpeed, Attribute.BasicDashSpeed);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicAirControl, Attribute.BasicAirControl);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAirControl, Attribute.BasicAirControl);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicSpeed, Attribute.BasicSpeed);
+	CachedASC->SetAttributeValue(EPXAttribute::CurSpeed, Attribute.BasicSpeed);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicAcceleration, Attribute.BasicAcceleration);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAcceleration, Attribute.BasicAcceleration);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicJumpSpeed, Attribute.BasicJumpSpeed);
+	CachedASC->SetAttributeValue(EPXAttribute::CurJumpSpeed, Attribute.BasicJumpSpeed);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicGravityScale, Attribute.BasicGravityScale);
+	CachedASC->SetAttributeValue(EPXAttribute::CurGravityScale, Attribute.BasicGravityScale);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicJumpMaxHoldTime, Attribute.BasicJumpMaxHoldTime);
+	CachedASC->SetAttributeValue(EPXAttribute::CurJumpMaxHoldTime, Attribute.BasicJumpMaxHoldTime);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicSight, Attribute.BasicSight);
+	CachedASC->SetAttributeValue(EPXAttribute::CurSight, Attribute.BasicSight);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicAttackValue, Attribute.BasicAttackValue);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAttackValue, Attribute.BasicAttackValue);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicAttackCD, Attribute.BasicAttackCD);
+	CachedASC->SetAttributeValue(EPXAttribute::CurAttackCD, Attribute.BasicAttackCD);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicRepelValue, Attribute.BasicRepelValue);
+	CachedASC->SetAttributeValue(EPXAttribute::CurRepelValue, Attribute.BasicRepelValue);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxJumpCount, Attribute.BasicMaxJumpCount);
+	CachedASC->SetAttributeValue(EPXAttribute::CurMaxJumpCount, Attribute.BasicMaxJumpCount);
 
 
 #pragma region GAS
@@ -436,14 +453,18 @@ void ABasePXCharacter::BeginPlay()
 		GetCharacterMovement()->AirControlBoostMultiplier = 10.0f;
 	}
 
+	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	if (CachedASC)
+	{
+		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())
+		{
+			PXAttributeSet->OnPXAttributeChange.AddDynamic(this, &ThisClass::OnAttributeChanged);
+		}
+	}
+	
 	LoadData();
 	LoadWeapon();
 	
-	if (StateComponent)
-	{
-		StateComponent->OnHPChanged.AddDynamic(this, &ABasePXCharacter::OnHPChanged);
-	}
-
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	ListenerHandle_OnLevelLoading = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoading, this, &ThisClass::OnLevelLoading);
 	ListenerHandle_OnLevelLoaded = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnLevelLoaded, this, &ThisClass::OnLevelLoaded);
@@ -453,14 +474,7 @@ void ABasePXCharacter::BeginPlay()
 		AbilityComponent->InitAbilities();
 	}
 	
-	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
-	if (CachedASC)
-	{
-		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())
-		{
-			PXAttributeSet->OnPXAttributeChange.AddDynamic(this, &ThisClass::OnAttributeChanged);
-		}
-	}
+
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -471,10 +485,6 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	OnPlayerAttackStart.RemoveAll(this);
 	OnPlayerDie.RemoveAll(this);
-	if (StateComponent)
-	{
-		StateComponent->OnHPChanged.RemoveAll(this);
-	}
 
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoading);
@@ -1554,9 +1564,6 @@ void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousF
 	// GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 }
 
-
-
-
 void ABasePXCharacter::SetScale(const float targetValue)
 {
 	ScaleLerpValue = 0;
@@ -1767,6 +1774,10 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Movement)
 
+	if (Attribute == UPXAttributeSet::GetHPAttribute())
+	{
+		OnHPChanged(OldValue, NewValue);
+	}
 	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
 		Movement->MaxWalkSpeed = NewValue;
@@ -1787,13 +1798,24 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	{
 		Movement->AirControl = NewValue;
 	}
-	
+	if (Attribute == UPXAttributeSet::GetCurJumpMaxHoldTimeAttribute())
+	{
+		JumpMaxHoldTime = NewValue;
+	}
+	if (Attribute == UPXAttributeSet::GetCurMaxJumpCountAttribute())
+	{
+		MaxJumpCount = NewValue;
+	}
 	if (Attribute == UPXAttributeSet::GetCurSightAttribute())
 	{
 		FVector Location = GetActorLocation();
 
 		float BasicSight = CachedASC->GetAttributeValue(EPXAttribute::BasicSight);
-
+		CurSpringArmLength = NewValue;
+		if (PlayerStatusWidget)
+		{
+			PlayerStatusWidget->UpdateDark(NewValue / BasicSight);
+		}
 		if (BasicSight > NewValue)
 		{
 			UCommonFuncLib::SpawnFloatingText(LOCTEXT("Buff_Myopia", "短视"),
@@ -1809,25 +1831,6 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 			FLinearColor::Gray);
 		}
 	}
-	
-
-	
-	if (Attribute == UPXAttributeSet::GetCurSightReductionResistAttribute())
-	{
-		
-	}
-	if (Attribute == UPXAttributeSet::GetCurSightAttribute())
-	{
-		CurSpringArmLength = NewValue;
-		float BasicSight = CachedASC->GetAttributeValue(EPXAttribute::CurSight);
-		
-		if (PlayerStatusWidget)
-		{
-			PlayerStatusWidget->UpdateDark(NewValue / BasicSight);
-		}
-	}
-
-
 
 	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
@@ -1869,7 +1872,6 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 				// Tag2Niagara.Add(Tag, NiagaraComponent);
 			}
 		}
-
 
 		// if (Tag2Niagara.Contains(Tag))
 		// {

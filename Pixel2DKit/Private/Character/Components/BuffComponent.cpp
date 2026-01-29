@@ -504,7 +504,8 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 	{
 		float PreValue = CachedASC->GetAttributeValue(AttributeEnum);
 		float CurValue = PreValue * Effect.EffectedPercent + Effect.EffectedValue;
-		CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurValue);
+		
+		CachedASC->SetAttributeValue(AttributeEnum, CurValue);
 	}
 }
 

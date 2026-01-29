@@ -176,6 +176,14 @@ public:
 	UFUNCTION()
 	virtual void OnRep_HP(const FGameplayAttributeData& OldValue);
 	
+	// 当前能量值
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_EP)
+	FGameplayAttributeData EP;
+	ATTRIBUTE_ACCESSORS(UPXAttributeSet, EP);
+	UFUNCTION()
+	virtual void OnRep_EP(const FGameplayAttributeData& OldValue);
+	
+	
 	// 最大生命值
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicMaxHP)
 	FGameplayAttributeData BasicMaxHP;
@@ -202,12 +210,6 @@ public:
 	UFUNCTION()
 	virtual void OnRep_CurHPRecoverValue(const FGameplayAttributeData& OldValue);
 	
-	// 当前能量值
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_EP)
-	FGameplayAttributeData EP;
-	ATTRIBUTE_ACCESSORS(UPXAttributeSet, EP);
-	UFUNCTION()
-	virtual void OnRep_EP(const FGameplayAttributeData& OldValue);
 
 	// 基础最大能量值
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicMaxEP)
