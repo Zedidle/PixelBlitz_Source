@@ -193,11 +193,7 @@ public:
 	// 最大水平跳跃距离，应该取决于自身速度
 	float MaxHorizontalDistance = 200;
 	
-	int32 CurAttackDamage = 10;
 	FVector CurRepelValue = FVector(50,50,100);
-	
-	UPROPERTY(BlueprintReadWrite)
-	float BasicAttackInterval = 2.0f;
 
 	UPROPERTY(BlueprintReadWrite)
 	float WeakPointRefreshPeriod = 6.0f;

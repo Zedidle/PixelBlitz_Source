@@ -125,11 +125,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
 	void ExpireBuff(FGameplayTag Tag);
 
-
 	UFUNCTION(BlueprintCallable)
+	void AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, float Percent = 0.0f, float Value = 1.f, float Duration = 9999.f);
+	
 	void AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect);
-
-	UFUNCTION(BlueprintCallable)
 	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects);
 	
 	UFUNCTION(BlueprintCallable)

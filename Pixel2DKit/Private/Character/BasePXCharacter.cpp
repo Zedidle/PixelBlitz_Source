@@ -1767,8 +1767,6 @@ void ABasePXCharacter::RemoveInteractableItem(ABaseInteractableItem* Item)
 
 void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, float OldValue, float NewValue)
 {
-	UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("Attribute Name: %s, OldValue: %f, NewValue: %f"), *Attribute.GetName(), OldValue, NewValue));
-	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
@@ -1886,13 +1884,9 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	
 }
 
-float ABasePXCharacter::GetBasicDashSpeed()
+float ABasePXCharacter::GetDashSpeed()
 {
-	if (CachedASC)
-	{
-		CachedASC->GetAttributeValue(EPXAttribute::CurDashSpeed);
-	}
-	return 0;
+	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurDashSpeed) : 0.0f;
 }
 
 void ABasePXCharacter::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)

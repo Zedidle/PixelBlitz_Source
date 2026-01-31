@@ -340,7 +340,7 @@ void UAbilityComponent::InitTalents()
 			}
 			if (PXCharacter->BuffComponent)
 			{
-				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag, true);
+				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag);
 			}
 		}
 

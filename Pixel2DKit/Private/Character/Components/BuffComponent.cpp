@@ -461,6 +461,12 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 	}
 }
 
+void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, float Percent, float Value,
+	float Duration)
+{
+	AddAttributeEffect(Tag, FAttributeEffect(Attribute, Percent, Value, Duration));
+}
+
 void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)

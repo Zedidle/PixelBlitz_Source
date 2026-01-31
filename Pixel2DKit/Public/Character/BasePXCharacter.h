@@ -514,7 +514,7 @@ public:
 	void OnAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetBasicDashSpeed();
+	float GetDashSpeed();
 	
 	
 };

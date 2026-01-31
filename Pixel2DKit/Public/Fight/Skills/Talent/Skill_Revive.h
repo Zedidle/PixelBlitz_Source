@@ -11,7 +11,7 @@ class PIXEL2DKIT_API ASkill_Revive : public ABaseSkill
 {
 	GENERATED_BODY()
 
-	int RemReviveTimes = 0;
+	int RemReviveTimes = 1;
 	
 public:
 	// Sets default values for this actor's properties

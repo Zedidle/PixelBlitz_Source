@@ -260,9 +260,9 @@ void ABaseEnemy::LoadData_Implementation(FName Level)
 
 	EnemyData = DataTableManager->FindRow<FEnemyData>(DataTable, EnemyLevel);
 
-	CachedASC->SetAttributeValue(EPXAttribute::HP, EnemyData.BasicMaxHP);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, EnemyData.BasicMaxHP);
 	CachedASC->SetAttributeValue(EPXAttribute::CurMaxHP, EnemyData.BasicMaxHP);
+	CachedASC->SetAttributeValue(EPXAttribute::HP, EnemyData.BasicMaxHP);
 	
 	CachedASC->SetAttributeValue(EPXAttribute::BasicAttackValue, EnemyData.BasicAttackValue);
 	CachedASC->SetAttributeValue(EPXAttribute::CurAttackValue, EnemyData.BasicAttackValue);
@@ -932,7 +932,7 @@ void ABaseEnemy::OnRemoteAttackEnd_Implementation()
 			if (!WeakThis.IsValid()) return;
 
 			WeakThis->SetInAttackState(false);
-		}, BasicAttackInterval);
+		}, Execute_GetAttackCD(this));
 }
 
 void ABaseEnemy::OnDefendEffectBegin_Implementation()
@@ -969,7 +969,7 @@ void ABaseEnemy::OnAttackEffectEnd_Implementation()
 			if (!WeakThis.IsValid()) return;
 
 			WeakThis->SetInAttackState(false);
-		}, BasicAttackInterval);
+		}, Execute_GetAttackCD(this));
 }
 
 
@@ -985,7 +985,7 @@ float ABaseEnemy::GetAttackCD_Implementation()
 
 int ABaseEnemy::GetAttackDamage_Implementation()
 {
-	return CurAttackDamage;
+	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue) : 1.0f;
 }
 
 FVector ABaseEnemy::GetAttackRepel_Implementation()
