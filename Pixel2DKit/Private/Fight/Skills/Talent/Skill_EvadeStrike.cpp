@@ -42,8 +42,9 @@ bool ASkill_EvadeStrike::OnSkillFinish()
 	if (PXCharacter->AbilityComponent->FindExtendData(TAG("CommonSet.DamagePlusAfterDash"), FoundR))
 	{
 		FGameplayTag Tag = TAG("Ability.DodgeStrike");
-		PXCharacter->BuffComponent->AddAttributeEffect(Tag,
-			FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,FoundR));
+		FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,FoundR);
+		
+		PXCharacter->BuffComponent->AddAttributeEffect(Tag, Effect);
 		PXCharacter->BuffComponent->AddBuffByTag(Tag);
 	}
 

@@ -1779,6 +1779,8 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	}
 	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
+			FString::Printf(TEXT("AttributeChanged CurSpeed: %f"),  NewValue));
 		Movement->MaxWalkSpeed = NewValue;
 	}
 	if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())
@@ -1842,47 +1844,13 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 					Location + FVector(20, 0, 20),
 					FLinearColor::Gray);
 		}
-		else
+		else if (NewValue > OldValue)
 		{
 			UCommonFuncLib::SpawnFloatingText( LOCTEXT("BUFF_SPEEDUP", "加速"),
 					Location + FVector(-30, 0, 20),
 					FLinearColor::White);
-			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-
-			const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
-			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
-
-			if (ResourceDataAsset && ResourceDataAsset->NS_SpeedUP.LoadSynchronous())
-			{
-				UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
-					ResourceDataAsset->NS_SpeedUP.LoadSynchronous(),
-					Owner->GetRootComponent(),
-					FName(""),
-					FVector::ZeroVector,
-					FRotator::ZeroRotator,
-					EAttachLocation::Type::KeepRelativeOffset,
-					false,
-					true,
-					ENCPoolMethod::None,
-					true
-				);
-				// 后续看如何补充管理
-				// Tag2Niagara.Add(Tag, NiagaraComponent);
-			}
 		}
-
-		// if (Tag2Niagara.Contains(Tag))
-		// {
-		// 	Tag2Niagara[Tag]->DestroyComponent();
-		// 	Tag2Niagara.Remove(Tag);
-		// }
 	}
-
-
-
-
-	
 }
 
 float ABasePXCharacter::GetDashSpeed()

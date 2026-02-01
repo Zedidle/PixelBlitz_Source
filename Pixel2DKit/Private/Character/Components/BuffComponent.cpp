@@ -9,6 +9,7 @@
 #include "GameplayTagsManager.h"
 #include "NiagaraCommon.h"
 #include "NiagaraComponent.h"
+#include "NiagaraCullProxyComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Blueprint/UserWidget.h"
 #include "Core/PXGameInstance.h"
@@ -261,86 +262,6 @@ void UBuffComponent::OnGameplayEffectRemoved(const FActiveGameplayEffect& Gamepl
 	}
 }
 
-// void UBuffComponent::BuffEffect_Speed_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
-// {
-// 	if (!Tag.IsValid()) return;
-// 	
-// 	RemoveBuff_Speed(Tag);
-// 	
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-// 	if (!Owner->Implements<UBuff_Interface>()) return;
-// 	
-// 	float SlowDownResistancePercent = Execute_GetSlowDownResistancePercent(Owner);
-// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
-//
-// 	if (Percent < 0)
-// 	{
-// 		Percent = (1 - SlowDownResistancePercent) * Percent;
-// 	}
-//
-// 	if (Value < 0)
-// 	{
-// 		Value = (1 - SlowDownResistancePercent) * Value;
-// 	}
-//
-// 	EffectedPercent_Speed += Percent;
-// 	EffectedValue_Speed += Value;
-// 	Tag2BuffEffect_Speed.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
-// 	
-// 	Execute_BuffUpdate_Speed(Owner);
-// }
-
-
-// void UBuffComponent::BuffEffect_Attack_Implementation(FGameplayTag Tag, float Percent, int32 Value, float SustainTime)
-// {
-// 	if (!Tag.IsValid()) return;
-// 	
-// 	RemoveBuff_Attack(Tag);
-// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
-//
-// 	EffectedPercent_Attack += Percent;
-// 	EffectedValue_Attack += Value;
-// 	
-// 	Tag2BuffEffect_Attack.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
-//
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-// 	if (Owner->Implements<UBuff_Interface>())
-// 	{
-// 		Execute_BuffUpdate_Attack(Owner);
-// 	}
-// }
-
-
-// void UBuffComponent::BuffEffect_Sight_Implementation(FGameplayTag Tag, float Percent, float Value, float SustainTime)
-// {
-// 	if (!Tag.IsValid()) return;
-// 	
-// 	RemoveBuff_Sight(Tag);
-// 	
-// 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
-// 	if (!Owner->Implements<UBuff_Interface>()) return;
-//
-// 	float ShortSightResistancePercent = Execute_GetShortSightResistancePercent(Owner);
-// 	float Now = UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld());
-//
-// 	if (Percent < 0)
-// 	{
-// 		Percent = (1 - ShortSightResistancePercent) * Percent;
-// 	}
-//
-// 	if (Value < 0)
-// 	{
-// 		Value = (1 - ShortSightResistancePercent) * Value;
-// 	}
-//
-// 	EffectedPercent_Sight += Percent;
-// 	EffectedValue_Sight += Value;
-// 	Tag2BuffEffect_Sight.Add(Tag, FBuffEffect(Percent, Value, SustainTime + Now));
-// 	
-// 	Execute_BuffUpdate_Sight(Owner);
-//
-// }
-
 void UBuffComponent::RemoveBuff(const FGameplayTag& Tag, bool OnlySelf)
 {
 	if (!Tag.IsValid()) return;
@@ -361,12 +282,6 @@ void UBuffComponent::RemoveBuff(const FGameplayTag& Tag, bool OnlySelf)
 		{
 			RemoveAttributeEffectsByTag(T);
 		}
-	}
-
-	if (Tag2Niagara.Contains(Tag))
-	{
-		Tag2Niagara[Tag]->DestroyComponent();
-		Tag2Niagara.Remove(Tag);
 	}
 }
 
@@ -464,7 +379,8 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, float Percent, float Value,
 	float Duration)
 {
-	AddAttributeEffect(Tag, FAttributeEffect(Attribute, Percent, Value, Duration));
+	FAttributeEffect Effect = FAttributeEffect(Attribute, Percent, Value, Duration);
+	AddAttributeEffect(Tag, Effect);
 }
 
 void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
@@ -488,7 +404,7 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 	else
 	{
 		float PreValue = CachedASC->GetAttributeValue(AttributeEnum);
-		float CurValue = PreValue * Effect.EffectedPercent + Effect.EffectedValue;
+		float CurValue = PreValue * (1 + Effect.EffectedPercent) + Effect.EffectedValue;
 		
 		CachedASC->SetAttributeValue(AttributeEnum, CurValue);
 	}
@@ -555,6 +471,22 @@ void UBuffComponent::UpdateAttribute(const FString& AttributeName)
 		
 	float CurAttributeValue = (BasicAttributeValue *  (1 + BasicEffectedPercent) + BasicEffectedValue) * (1 + CurEffectedPercent) + CurEffectedValue;
 	CachedASC->SetAttributeValue(CurAttributeEnum, CurAttributeValue);
+
+	if (CurAttributeValue < BasicAttributeValue * 1.05 && CurAttributeValue > BasicAttributeValue * 0.95)
+	{
+		RemoveBuffNS(CurAttributeEnum, true);
+		RemoveBuffNS(CurAttributeEnum, false);
+	}
+	else if (CurAttributeValue > BasicAttributeValue * 1.05)
+	{
+		RemoveBuffNS(CurAttributeEnum, false);
+		AddBuffNS(CurAttributeEnum);
+	}
+	else if (CurAttributeValue < BasicAttributeValue * 0.95)
+	{
+		RemoveBuffNS(CurAttributeEnum, true);
+		AddBuffNS(CurAttributeEnum, false);
+	}
 }
 
 void UBuffComponent::UpdateAttribute(EPXAttribute AttributeEnum)
@@ -569,6 +501,52 @@ FString UBuffComponent::GetAttributeNameByEnum(EPXAttribute AttributeName) const
 		if (V.Value == AttributeName) return V.Key;
 	}
 	return FString();
+}
+
+void UBuffComponent::AddBuffNS(EPXAttribute AttributeEnum, bool bPlus)
+{
+	if (bPlus)
+	{
+		if (AttributeEnum == EPXAttribute::CurSpeed)
+		{
+			const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+			const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+
+			if (ResourceDataAsset && ResourceDataAsset->NS_SpeedUP.LoadSynchronous())
+			{
+				UNiagaraComponent* NiagaraComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+					ResourceDataAsset->NS_SpeedUP.LoadSynchronous(),
+					Owner->GetRootComponent(),
+					FName(""),
+					FVector::ZeroVector,
+					FRotator::ZeroRotator,
+					EAttachLocation::Type::KeepRelativeOffset,
+					false,
+					true,
+					ENCPoolMethod::None,
+					true
+				);
+				// 后续看如何补充管理
+				AttributeEnum2Niagara.Add(AttributeEnum, *NiagaraComponent);
+			}
+		}
+	}
+	else
+	{
+		
+	}
+}
+
+void UBuffComponent::RemoveBuffNS(EPXAttribute AttributeEnum, bool bPlus)
+{
+	if (UNiagaraComponent* Niagara = AttributeEnum2Niagara.Find(AttributeEnum))
+	{
+		Niagara->DestroyComponent();
+		AttributeEnum2Niagara.Remove(AttributeEnum);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

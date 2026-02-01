@@ -46,9 +46,8 @@ public:
 
 
 	
-	UPROPERTY( EditAnywhere, Category = "Buff | Niagara")
-	TSoftObjectPtr<UNiagaraSystem> NS_SpeedUP;
 
+	
 	
 	UPROPERTY( EditAnywhere, Category = "GameplayFlow | SoundCue")
 	TSoftObjectPtr<USoundCue> SC_OnDie;
@@ -57,10 +56,16 @@ public:
 	TSubclassOf<APlayerRespawnPoint> PlayerRespawnPointClass;
 
 	
-	UPROPERTY( EditAnywhere, Category = "Buff | Niagara")
+	UPROPERTY( EditAnywhere, Category = "Buff | Sound")
 	TSoftObjectPtr<USoundWave> SW_BeginBGM;
 
 	UPROPERTY( EditAnywhere, Category = "Combo | Sound")
 	TArray<TSoftObjectPtr<USoundBase>> SW_ComboWeakPoints;
-	
+
+
+
+	UPROPERTY( EditAnywhere, Category = "Buff | Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_SpeedUP;
+	UPROPERTY( EditAnywhere, Category = "Buff | Niagara")
+	TSoftObjectPtr<UNiagaraSystem> NS_SpeedDown;
 };

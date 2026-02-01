@@ -68,8 +68,9 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent
 	TMap<EPXAttribute, FAttributeEffectData> AttributeEffects;
 	
 
+	// 配置针对每个属性的增减益状态效果
 	UPROPERTY()
-	TMap<FGameplayTag, UNiagaraComponent*> Tag2Niagara;
+	TMap<EPXAttribute, UNiagaraComponent> AttributeEnum2Niagara;
 	
 public:	
 	// Sets default values for this component's properties
@@ -152,5 +153,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FString GetAttributeNameByEnum(EPXAttribute AttributeName) const;
-	
+
+	void AddBuffNS(EPXAttribute AttributeEnum, bool bPlus = true);
+	void RemoveBuffNS(EPXAttribute AttributeEnum, bool bPlus = true);
 };

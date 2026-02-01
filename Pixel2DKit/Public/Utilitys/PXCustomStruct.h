@@ -239,7 +239,10 @@ USTRUCT(BlueprintType)
 struct FAttributeEffect
 {
 	GENERATED_BODY()
-	FAttributeEffect(){}
+	FAttributeEffect()
+	{
+		
+	}
 	FAttributeEffect(EPXAttribute Attribute, float Percent): EffectedAttribute(Attribute),
 			EffectedPercent(Percent), EffectedValue(1.0f), EffectedDuration(9999)
 	{
@@ -319,6 +322,14 @@ struct FAttributeEffectArray
 		Data.RemoveAll([Attribute](const FAttributeEffect& Effect) -> bool {
 			return Effect.EffectedAttribute == Attribute;
 		});
+	}
+
+	void CalculateEndTime()
+	{
+		for (auto& Effect : Data)
+		{
+			Effect.CalculateEndTime();
+		}
 	}
 };
 
