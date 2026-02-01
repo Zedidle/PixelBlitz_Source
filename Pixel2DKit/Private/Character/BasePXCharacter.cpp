@@ -76,17 +76,20 @@ void ABasePXCharacter::LoadData()
 
 	const FCharacterAttribute& Attribute = DataAsset->CharacterAttribute;
 
-	CachedASC->SetAttributeValue(EPXAttribute::HP, Attribute.BasicMaxHP);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, Attribute.BasicMaxHP);
 	CachedASC->SetAttributeValue(EPXAttribute::CurMaxHP, Attribute.BasicMaxHP);
-	CachedASC->SetAttributeValue(EPXAttribute::EP, Attribute.BasicMaxEP);
+	CachedASC->SetAttributeValue(EPXAttribute::HP, Attribute.BasicMaxHP);
+
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxEP, Attribute.BasicMaxEP);
 	CachedASC->SetAttributeValue(EPXAttribute::CurMaxEP, Attribute.BasicMaxEP);
+	CachedASC->SetAttributeValue(EPXAttribute::EP, Attribute.BasicMaxEP);
 	
 	CachedASC->SetAttributeValue(EPXAttribute::BasicRepelResist, Attribute.BasicRepelResist);
 	CachedASC->SetAttributeValue(EPXAttribute::CurRepelResist, Attribute.BasicRepelResist);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicDashSpeed, Attribute.BasicDashSpeed);
 	CachedASC->SetAttributeValue(EPXAttribute::CurDashSpeed, Attribute.BasicDashSpeed);
+	CachedASC->SetAttributeValue(EPXAttribute::BasicDashCD, Attribute.BasicDashCD);
+	CachedASC->SetAttributeValue(EPXAttribute::CurDashCD, Attribute.BasicDashCD);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicAirControl, Attribute.BasicAirControl);
 	CachedASC->SetAttributeValue(EPXAttribute::CurAirControl, Attribute.BasicAirControl);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicSpeed, Attribute.BasicSpeed);
@@ -473,8 +476,6 @@ void ABasePXCharacter::BeginPlay()
 	{
 		AbilityComponent->InitAbilities();
 	}
-	
-
 }
 
 void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -918,7 +919,7 @@ void ABasePXCharacter::CheckNearDeath_Implementation()
 	}
 }
 
-void ABasePXCharacter::OnHPChanged_Implementation(int32 OldValue, int32 NewValue)
+void ABasePXCharacter::OnHPChanged(int32 OldValue, int32 NewValue)
 {
 	if (bDead) return;
 	if (OldValue == NewValue) return;

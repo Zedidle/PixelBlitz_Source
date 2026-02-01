@@ -157,6 +157,11 @@ void UPXASComponent::RemoveAbilityCD(const FGameplayTag& AbilityTag)
 	RemoveLooseGameplayTag(AbilityTag);
 }
 
+float UPXASComponent::BP_GetAttributeValue(EPXAttribute AttributeName)
+{
+	return GetAttributeValue(AttributeName);
+}
+
 // void UPXASComponent::SetPXAttributeValue(EPXAttribute AttributeName, float Value)
 // {
 // 	if (const UPXAttributeSet* AttributeSet = GetSet<UPXAttributeSet>())

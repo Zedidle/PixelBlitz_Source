@@ -90,7 +90,7 @@ void UBuffComponent::CheckBuffExpire()
 	{
 		for (auto& ele : RemovedTagsEffect)
 		{
-			if (Tag2AttributeNames.Contains(ele.Key)) continue;
+			if (Tag2AttributeEnums.Contains(ele.Key)) continue;
 			BuffStateWidget->BuffExpire(ele.Key);
 		}
 	}
@@ -151,7 +151,7 @@ void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 bool UBuffComponent::BuffExist(FGameplayTag Tag) const
 {
-	return Tag2AttributeNames.Contains(Tag);
+	return Tag2AttributeEnums.Contains(Tag);
 }
 
 // void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
@@ -477,34 +477,13 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 	
 	if (AttributeName.StartsWith("Basic") || AttributeName.StartsWith("Cur"))
 	{
-		FString _, InitAttributeName;
-		FString BasicAttributeName, CurAttributeName;
-		if (AttributeName.Split("Basic", &_, &InitAttributeName) || AttributeName.Split("Basic", &_, &InitAttributeName))
-		{
-			BasicAttributeName = "Basic" + InitAttributeName;
-			CurAttributeName = "Cur" + InitAttributeName;
-		}
-		
-		FAttributeEffectData* AttributeEffectData = AttributeEffects.Find(AttributeEnum);
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectData)
+		FAttributeEffectData& AttributeEffectData = AttributeEffects.FindOrAdd(AttributeEnum);
+		AttributeEffectData.AddBuffEffect(Tag, Effect);
 
-		auto& AttributeNames= Tag2AttributeNames.FindOrAdd(Tag);
-		AttributeNames.Add(AttributeEnum);
-		AttributeEffectData->AddBuffEffect(Tag, Effect);
-
-		EPXAttribute BasicAttributeEnum = AttributeNameToEnumMap.FindRef(BasicAttributeName);
-		EPXAttribute CurAttributeEnum = AttributeNameToEnumMap.FindRef(CurAttributeName);
-		FAttributeEffectData BasicAttributeEffectData = AttributeEffects.FindRef(BasicAttributeEnum);
-		FAttributeEffectData CurAttributeEffectData = AttributeEffects.FindRef(CurAttributeEnum);
-	
-		float BasicAttributeValue = CachedASC->GetAttributeValue(BasicAttributeName);
-		float BasicEffectedPercent = BasicAttributeEffectData.Percent;
-		float BasicEffectedValue = BasicAttributeEffectData.Value;
-		float CurEffectedPercent = CurAttributeEffectData.Percent;
-		float CurEffectedValue = CurAttributeEffectData.Value;
+		TArray<EPXAttribute>& AttributeEnums = Tag2AttributeEnums.FindOrAdd(Tag);
+		AttributeEnums.Add(AttributeEnum);
 		
-		float CurAttributeValue = (BasicAttributeValue *  (1 + BasicEffectedPercent) + BasicEffectedValue) * (1 + CurEffectedPercent) + CurEffectedValue;
-		CachedASC->SetAttributeValue(CurAttributeEnum, CurAttributeValue);		
+		UpdateAttribute(AttributeName);
 	}
 	else
 	{
@@ -523,37 +502,64 @@ void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<F
 	}
 }
 
-void UBuffComponent::RemoveAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag)
+void UBuffComponent::RemoveAttributeEffect(EPXAttribute AttributeEnum, const FGameplayTag& Tag)
 {
-	FAttributeEffectData* AttributeEffectMap = AttributeEffects.Find(AttributeName);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectMap)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-
-	const FAttributeEffect& Effect = AttributeEffectMap->Tag2BuffEffect[Tag];
+	FAttributeEffectData* AttributeEffectData = AttributeEffects.Find(AttributeEnum);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AttributeEffectData)
 	
-	// 后续要转入 FGameplayAttributeData 的 BaseValue 和 CurrentValue 的处理
-	float PreValue = CachedASC->GetAttributeValue(AttributeName);
-	float CurValue = (PreValue - Effect.EffectedValue) / (1 + Effect.EffectedPercent);
-	
-	CachedASC->SetAttributeValue(AttributeName, CurValue);
-	AttributeEffectMap->Tag2BuffEffect.Remove(Tag);
-	if (auto Attributes = Tag2AttributeNames.Find(Tag))
+	AttributeEffectData->RemoveBuffEffect(Tag);
+	if (auto Attributes = Tag2AttributeEnums.Find(Tag))
 	{
-		Attributes->Remove(AttributeName);
+		Attributes->Remove(AttributeEnum);
 		if (Attributes->IsEmpty())
 		{
-			Tag2AttributeNames.Remove(Tag);
+			Tag2AttributeEnums.Remove(Tag);
 		}
 	}
+
+	UpdateAttribute( AttributeEnum );
 }
 
 void UBuffComponent::RemoveAttributeEffectsByTag(const FGameplayTag& Tag)
 {
-	auto Names = Tag2AttributeNames.FindRef(Tag);
-	for (auto& Name : Names)
+	if (TArray<EPXAttribute>* AttributeEnumsPtr = Tag2AttributeEnums.Find(Tag))
 	{
-		RemoveAttributeEffect(Name, Tag);
+		TArray<EPXAttribute>& AttributeEnums = *AttributeEnumsPtr;
+		for (int32 i = AttributeEnums.Num() - 1; i >= 0; --i)
+		{
+			RemoveAttributeEffect(AttributeEnums[i], Tag);
+		}
 	}
+}
+
+void UBuffComponent::UpdateAttribute(const FString& AttributeName)
+{
+	FString _, InitAttributeName;
+	FString BasicAttributeName, CurAttributeName;
+	if (AttributeName.Split("Basic", &_, &InitAttributeName) || AttributeName.Split("Cur", &_, &InitAttributeName))
+	{
+		BasicAttributeName = "Basic" + InitAttributeName;
+		CurAttributeName = "Cur" + InitAttributeName;
+	}
+
+	EPXAttribute BasicAttributeEnum = AttributeNameToEnumMap.FindRef(BasicAttributeName);
+	EPXAttribute CurAttributeEnum = AttributeNameToEnumMap.FindRef(CurAttributeName);
+	FAttributeEffectData BasicAttributeEffectData = AttributeEffects.FindRef(BasicAttributeEnum);
+	FAttributeEffectData CurAttributeEffectData = AttributeEffects.FindRef(CurAttributeEnum);
+	
+	float BasicAttributeValue = CachedASC->GetAttributeValue(BasicAttributeName);
+	float BasicEffectedPercent = BasicAttributeEffectData.Percent;
+	float BasicEffectedValue = BasicAttributeEffectData.Value;
+	float CurEffectedPercent = CurAttributeEffectData.Percent;
+	float CurEffectedValue = CurAttributeEffectData.Value;
+		
+	float CurAttributeValue = (BasicAttributeValue *  (1 + BasicEffectedPercent) + BasicEffectedValue) * (1 + CurEffectedPercent) + CurEffectedValue;
+	CachedASC->SetAttributeValue(CurAttributeEnum, CurAttributeValue);
+}
+
+void UBuffComponent::UpdateAttribute(EPXAttribute AttributeEnum)
+{
+	UpdateAttribute(GetAttributeNameByEnum(AttributeEnum));
 }
 
 FString UBuffComponent::GetAttributeNameByEnum(EPXAttribute AttributeName) const

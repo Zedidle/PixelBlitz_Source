@@ -13,7 +13,7 @@ struct FWeatherEffectData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SightDistancePercent = 0.0f;
+	float SightPercent = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 HPEffectPerSecond = 0;

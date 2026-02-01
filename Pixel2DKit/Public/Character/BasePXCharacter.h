@@ -180,7 +180,6 @@ public:
 	void SetLanding(const bool V, const float time = 0.1f);
 
 
-	UFUNCTION(BlueprintNativeEvent)
 	void OnHPChanged(int32 OldValue, int32 NewValue);
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void CheckNearDeath();

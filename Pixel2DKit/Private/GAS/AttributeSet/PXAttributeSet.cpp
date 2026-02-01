@@ -228,6 +228,8 @@ void UPXAttributeSet::InitializeAttributeMap()
 		// Dash速度
 		AttributeMap.Add(EPXAttribute::BasicDashSpeed, GetBasicDashSpeedAttribute());
 		AttributeMap.Add(EPXAttribute::CurDashSpeed, GetCurDashSpeedAttribute());
+		AttributeMap.Add(EPXAttribute::BasicDashCD, GetBasicDashCDAttribute());
+		AttributeMap.Add(EPXAttribute::CurDashCD, GetCurDashCDAttribute());
 		
 		// 视野
 		AttributeMap.Add(EPXAttribute::BasicSight, GetBasicSightAttribute());

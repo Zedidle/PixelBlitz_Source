@@ -26,7 +26,16 @@ struct FAttributeEffectData
 	
 	void AddBuffEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 	{
-		Tag2BuffEffect.Add(Tag, Effect);
+		if (FAttributeEffect* PreEffect = Tag2BuffEffect.Find(Tag))
+		{
+			Percent -= PreEffect->EffectedPercent;
+			Value -= PreEffect->EffectedValue;
+		}
+		else
+		{
+			Tag2BuffEffect.Add(Tag, Effect);
+		}
+		
 		Percent += Effect.EffectedPercent;
 		Value += Effect.EffectedValue;
 	}
@@ -54,7 +63,7 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent
 	ACharacter* Owner;
 
 	// Buff所影响的属性列表，这里没有的Key，AttributeEffects 则没影响
-	TMap<FGameplayTag, TArray<EPXAttribute>> Tag2AttributeNames;
+	TMap<FGameplayTag, TArray<EPXAttribute>> Tag2AttributeEnums;
 	// 属性中被不同Buff的影响值
 	TMap<EPXAttribute, FAttributeEffectData> AttributeEffects;
 	
@@ -132,11 +141,15 @@ public:
 	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects);
 	
 	UFUNCTION(BlueprintCallable)
-	void RemoveAttributeEffect(EPXAttribute AttributeName, const FGameplayTag& Tag);
+	void RemoveAttributeEffect(EPXAttribute AttributeEnum, const FGameplayTag& Tag);
 
 	UFUNCTION(BlueprintCallable)
 	void RemoveAttributeEffectsByTag(const FGameplayTag& Tag);
 
+	void UpdateAttribute(const FString& AttributeName);
+	void UpdateAttribute(EPXAttribute AttributeEnum);
+
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FString GetAttributeNameByEnum(EPXAttribute AttributeName) const;
 	

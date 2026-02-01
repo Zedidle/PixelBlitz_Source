@@ -76,9 +76,9 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (DayTimeNameString != DayTimeName.ToString())
 		{
 			DayTimeNameString = DayTimeName.ToString();
+			BuffComp->RemoveBuff(DayTimeTag, true);
 			BuffComp->AddAttributeEffect(DayTimeTag,
 				FAttributeEffect( EPXAttribute::CurSight, DayTimeEffect.EffectedPercent, DayTimeEffect.EffectedValue));
-			BuffComp->RemoveBuff(DayTimeTag, true);
 			BuffComp->AddBuffOnWidget(DayTimeTag, DayTimeNameString, FLinearColor::White, false);
 		}
 
@@ -86,11 +86,11 @@ void UWeatherSubsystem::MakeWeatherEffect()
 		if (!GS->WeatherName.IsEmpty() && WeatherNameString != GS->WeatherName.ToString())
 		{
 			WeatherNameString = GS->WeatherName.ToString();
-			BuffComp->AddAttributeEffect(WeatherTag,
-				FAttributeEffect(EPXAttribute::CurSight, GS->WeatherEffect.SightDistancePercent));
-			BuffComp->AddAttributeEffect(WeatherTag,
-				FAttributeEffect(EPXAttribute::CurSight, GS->WeatherEffect.MoveSpeedEffectPercent));
 			BuffComp->RemoveBuff(WeatherTag, true);
+			BuffComp->AddAttributeEffect(WeatherTag,
+				FAttributeEffect(EPXAttribute::CurSight, GS->WeatherEffect.SightPercent));
+			BuffComp->AddAttributeEffect(WeatherTag,
+				FAttributeEffect(EPXAttribute::CurSpeed, GS->WeatherEffect.MoveSpeedEffectPercent));
 			BuffComp->AddBuffOnWidget(WeatherTag, WeatherNameString, FLinearColor::White, false);
 		}
 		

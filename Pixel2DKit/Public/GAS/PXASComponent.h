@@ -103,7 +103,10 @@ public:
 			ModifyAttributeValue<T>(AttributeNameToEnumMap[AttributeName], Value);
 		}
 	}
-	
+
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXASC", DisplayName = "GetAttributeValue")
+	float BP_GetAttributeValue(EPXAttribute AttributeName);
 	
 	template<typename T = UPXAttributeSet> // 设置默认模板参数
 	float GetAttributeValue(EPXAttribute AttributeName)
