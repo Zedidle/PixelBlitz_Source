@@ -31,10 +31,11 @@ struct FAttributeEffectData
 			Percent -= PreEffect->EffectedPercent;
 			Value -= PreEffect->EffectedValue;
 		}
-		else
-		{
-			Tag2BuffEffect.Add(Tag, Effect);
-		}
+		
+		FAttributeEffect& E = const_cast<FAttributeEffect&>(Effect);
+		E.CalculateEndTime();
+		
+		Tag2BuffEffect.Add(Tag, Effect);
 		
 		Percent += Effect.EffectedPercent;
 		Value += Effect.EffectedValue;
@@ -70,7 +71,7 @@ class PIXEL2DKIT_API UBuffComponent : public UActorComponent
 
 	// 配置针对每个属性的增减益状态效果
 	UPROPERTY()
-	TMap<EPXAttribute, UNiagaraComponent> AttributeEnum2Niagara;
+	TMap<EPXAttribute, TObjectPtr<UNiagaraComponent>> AttributeEnum2Niagara;
 	
 public:	
 	// Sets default values for this component's properties

@@ -1779,8 +1779,6 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	}
 	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
-			FString::Printf(TEXT("AttributeChanged CurSpeed: %f"),  NewValue));
 		Movement->MaxWalkSpeed = NewValue;
 	}
 	if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())

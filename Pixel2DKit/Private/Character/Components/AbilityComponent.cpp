@@ -310,6 +310,8 @@ void UAbilityComponent::InitTalents()
 		const FTalent& TalentData = DataTableSubsystem->GetTalentDataByTag(TalentTag);
 		if (!TalentData.TalentTag.IsValid()) continue;
 
+		AbilityExtendData.SetData(TalentData.TalentTag, 1.0f);
+		
 		for (auto& D: TalentData.ExtendData)
 		{
 			AbilityExtendData.AddData(D.Key, D.Value);
@@ -549,11 +551,11 @@ void UAbilityComponent::LoadAbilities()
 		FGameplayTag AbilityTag = TAG(*Parent);
 		
 		if (AbilityExtendData.Contains(AbilityTag)) continue;
-		AbilityExtendData.SetData(AbilityTag, 1);
 		
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
 		if (!AbilityData.AbilityTag.IsValid()) continue;
-
+		
+		AbilityExtendData.SetData(AbilityData.AbilityTag, 1);
 		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
@@ -960,7 +962,7 @@ void UAbilityComponent::ApplyAttributeEffects(FGameplayTag Tag)
 	FAttributeEffectArray Effects;
 	if (FindAttributeEffects(Tag, Effects))
 	{
-		Effects.CalculateEndTime();
+		// Effects.CalculateEndTime();
 		PXCharacter->BuffComponent->AddAttributeEffects(Tag, Effects.Data);
 	}
 }

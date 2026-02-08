@@ -530,7 +530,7 @@ void UBuffComponent::AddBuffNS(EPXAttribute AttributeEnum, bool bPlus)
 					true
 				);
 				// 后续看如何补充管理
-				AttributeEnum2Niagara.Add(AttributeEnum, *NiagaraComponent);
+				AttributeEnum2Niagara.Add(AttributeEnum, NiagaraComponent);
 			}
 		}
 	}
@@ -542,7 +542,8 @@ void UBuffComponent::AddBuffNS(EPXAttribute AttributeEnum, bool bPlus)
 
 void UBuffComponent::RemoveBuffNS(EPXAttribute AttributeEnum, bool bPlus)
 {
-	if (UNiagaraComponent* Niagara = AttributeEnum2Niagara.Find(AttributeEnum))
+	TObjectPtr<UNiagaraComponent> NiagaraPtr = AttributeEnum2Niagara.FindRef(AttributeEnum);
+	if (UNiagaraComponent* Niagara = NiagaraPtr.Get())  // FindRef返回值，不是指针
 	{
 		Niagara->DestroyComponent();
 		AttributeEnum2Niagara.Remove(AttributeEnum);

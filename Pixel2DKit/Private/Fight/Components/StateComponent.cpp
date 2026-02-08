@@ -170,8 +170,7 @@ void UStateComponent::IncreaseHP(int32 value, AActor* Instigator)
 	const UPXAttributeSet* PixelAS = CachedASC->GetSet<UPXAttributeSet>();
 	if (!IsValid(PixelAS)) return;
 
-	// 应该在 AttributeSet 的 Pre事件中控制生命值范围
-	CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), value);
+	CachedASC->ModifyAttributeValue(EPXAttribute::HP, value);
 }
 
 
