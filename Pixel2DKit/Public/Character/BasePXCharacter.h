@@ -393,7 +393,7 @@ public:
 	void OutOfControl(float SustainTime);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	FVector CalDashSpeed(float DashSpeed);
+	FVector GetDashSpeed();
 	
 #pragma region Animation
 	UFUNCTION(BlueprintCallable, Category = Movement)
@@ -513,7 +513,7 @@ public:
 	void OnAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetDashSpeed();
+	float GetDashSpeedValue();
 	
 	
 };

@@ -340,7 +340,10 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	{
 		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds);
 	}
-
+	
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
+	FString::Printf(TEXT("Tick_SpringArmMotivation CurCameraOffset : %s"), *CurCameraOffset.ToString()));
+	
 	FVector NewSpringArmLocation = GetActorLocation() + CurCameraOffset;
 	NewSpringArmLocation.Z = FMath::Lerp(PreSpringArmZ, NewSpringArmLocation.Z, 0.1);
 	
@@ -814,8 +817,9 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 	}, SustainTime);
 }
 
-FVector ABasePXCharacter::CalDashSpeed(float DashSpeed)
+FVector ABasePXCharacter::GetDashSpeed()
 {
+	float DashSpeed = GetDashSpeedValue();
 	if (DashSpeed <= 0) return FVector(0);
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MovementComponent, FVector::ZeroVector);
@@ -1851,7 +1855,7 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	}
 }
 
-float ABasePXCharacter::GetDashSpeed()
+float ABasePXCharacter::GetDashSpeedValue()
 {
 	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurDashSpeed) : 0.0f;
 }
