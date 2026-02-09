@@ -26,13 +26,14 @@ void UTimerManager::Deinitialize()
 	Super::Deinitialize();
 }
 
-UTimerManager* UTimerManager::GetInstance(UWorld* World)
+UTimerManager* UTimerManager::GetInstance(UObject* WorldContextObject)
 {
-	if (World)
-	{
-		return World->GetSubsystem<UTimerManager>();
-	}
-	return nullptr;	
+	if (!WorldContextObject) return nullptr;
+	
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!World) return nullptr;
+	
+	return World->GetSubsystem<UTimerManager>();
 }
 
 void UTimerManager::SetDelay(TFunction<void()>&& Callback, float DelayDuration)

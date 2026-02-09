@@ -12,6 +12,19 @@
 #include "Utilitys/PXGameplayStatics.h"
 
 
+UWeatherSubsystem* UWeatherSubsystem::GetInstance(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!World) return nullptr;
+	
+	UGameInstance* GameInstance = World->GetGameInstance();
+	if (!GameInstance) return nullptr;
+	
+	return GameInstance->GetSubsystem<UWeatherSubsystem>();
+}
+
 void UWeatherSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

@@ -10,6 +10,19 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 
 
+UDataTableSubsystem* UDataTableSubsystem::GetInstance(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!World) return nullptr;
+	
+	UGameInstance* GameInstance = World->GetGameInstance();
+	if (!GameInstance) return nullptr;
+	
+	return GameInstance->GetSubsystem<UDataTableSubsystem>();
+}
+
 void UDataTableSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

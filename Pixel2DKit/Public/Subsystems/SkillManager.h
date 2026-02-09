@@ -119,6 +119,10 @@ class PIXEL2DKIT_API USkillManager : public UGameInstanceSubsystem
 	GENERATED_BODY()
 
 public:
+	
+	static USkillManager* GetInstance(const UObject* WorldContextObject);
+	
+	
 	// 初始化子系统
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;

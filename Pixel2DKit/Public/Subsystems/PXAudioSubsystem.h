@@ -21,6 +21,9 @@ class PIXEL2DKIT_API UPXAudioSubsystem : public UGameInstanceSubsystem
 	
 public:
 
+	static UPXAudioSubsystem* GetInstance(const UObject* WorldContextObject);
+	
+	
 	virtual void Deinitialize() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Begin")

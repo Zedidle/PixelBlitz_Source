@@ -18,6 +18,10 @@ class PIXEL2DKIT_API UComboSubsystem : public UPXWorldSubsystem
 
 	
 public:
+	
+	static UComboSubsystem* GetInstance(const UObject* WorldContextObject);
+	
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	/** Implement this for deinitialization of instances of the system */

@@ -20,6 +20,10 @@ class PIXEL2DKIT_API UEnemyAISubsystem : public UGameInstanceSubsystem
 
 	
 public:
+	
+	static UEnemyAISubsystem* GetInstance(const UObject* WorldContextObject);
+	
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void BeginDestroy() override;

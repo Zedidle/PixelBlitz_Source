@@ -18,7 +18,11 @@ class PIXEL2DKIT_API UPXAnimSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 
-	public:
+public:
+	
+	
+	static UPXAnimSubsystem* GetInstance(const UObject* WorldContextObject);
+	
 	
 	template <typename T>
 	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, T V)

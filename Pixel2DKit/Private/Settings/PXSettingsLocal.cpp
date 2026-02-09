@@ -1031,13 +1031,7 @@ void UPXSettingsLocal::SetOverallVolume(float InVolume)
 	// 	}
 	// }
 
-	UWorld* World = GEngine->GetCurrentPlayWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-
-	UGameInstance* GameInstance = World->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-	
-	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
+	UPXAudioSubsystem* AudioSubsystem = UPXAudioSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
 
 	AudioSubsystem->SetBGMVolume(GetOverallVolume() * GetMusicVolume());
@@ -1072,13 +1066,7 @@ void UPXSettingsLocal::SetMusicVolume(float InVolume)
 	// 	}
 	// }
 
-	UWorld* World = GEngine->GetCurrentPlayWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-
-	UGameInstance* GameInstance = World->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-	
-	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
+	UPXAudioSubsystem* AudioSubsystem = UPXAudioSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
 
 	AudioSubsystem->SetBGMVolume(GetOverallVolume() * GetMusicVolume());

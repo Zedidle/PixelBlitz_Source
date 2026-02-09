@@ -107,10 +107,7 @@ void UAbilityComponent::RefreshAbilitiesCanChoice()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
 
-	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-
-	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	UDataTableSubsystem* DataTableSubsystem = UDataTableSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 	
 	AbilitiesCanChoice.Empty();
@@ -298,10 +295,7 @@ void UAbilityComponent::InitTalents()
 	UPXBasicBuildSaveGame* BasicBuildSaveGame = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(GetWorld());
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
 
-	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-
-	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	UDataTableSubsystem* DataTableSubsystem = UDataTableSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 	
 	for (const FGameplayTag& TalentTag: BasicBuildSaveGame->ChosenTalents)
@@ -434,13 +428,10 @@ FAbility UAbilityComponent::GetAbilityToLearn()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, FAbility())
 
-	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(GameInstance, FAbility())
-	
-	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	UDataTableSubsystem* DataTableSubsystem = UDataTableSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(DataTableSubsystem, FAbility())
 	
-	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
+	UPXSaveGameSubsystem* SaveGameSubsystem = UPXSaveGameSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(SaveGameSubsystem, FAbility())
 	
 	UPXMainSaveGame* MainSave = SaveGameSubsystem->GetMainData();

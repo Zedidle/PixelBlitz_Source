@@ -21,6 +21,16 @@ float UComboSubsystem::GetDamagePlusPercent()
 	return 0;	
 }
 
+UComboSubsystem* UComboSubsystem::GetInstance(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!World) return nullptr;
+	
+	return World->GetSubsystem<UComboSubsystem>();
+}
+
 void UComboSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

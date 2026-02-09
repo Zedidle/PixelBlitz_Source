@@ -21,14 +21,10 @@ class PIXEL2DKIT_API UTimerManager : public UWorldSubsystem
 
 	
 public:
-	// 初始化子系统
+	static UTimerManager* GetInstance(UObject* WorldContextObject);
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-
-	// 清理子系统
 	virtual void Deinitialize() override;
-
-	UFUNCTION()
-	static UTimerManager* GetInstance(UWorld* World);
 	
 	void SetDelay(TFunction<void()>&& Callback, float DelayDuration);
 

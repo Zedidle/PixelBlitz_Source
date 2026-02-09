@@ -40,10 +40,7 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 	UPXTalentsSaveGame* TalentsSaveGame;
 	
 public:
-
-	UFUNCTION()
-	static UPXSaveGameSubsystem* GetSelfInstance(const UObject* WorldContextObject);
-
+	static UPXSaveGameSubsystem* GetInstance(const UObject* WorldContextObject);
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	

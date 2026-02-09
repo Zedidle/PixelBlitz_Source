@@ -51,6 +51,8 @@ class PIXEL2DKIT_API UAchievementSubsystem : public UGameInstanceSubsystem
 	
 	
 public:
+	static UAchievementSubsystem* GetInstance(const UObject* WorldContextObject);
+	
 	/** Implement this for initialization of instances of the system */
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 

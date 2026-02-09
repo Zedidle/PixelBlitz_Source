@@ -152,10 +152,10 @@ void APXGameMode::OnLevelStarted_Implementation()
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 
-	UDataTableSubsystem* DataTableSubsystem = GameInstance->GetSubsystem<UDataTableSubsystem>();
+	UDataTableSubsystem* DataTableSubsystem = UDataTableSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem);
 
-	UPXAudioSubsystem* AudioSubsystem = GameInstance->GetSubsystem<UPXAudioSubsystem>();
+	UPXAudioSubsystem* AudioSubsystem = UPXAudioSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
 
 	if (const FLevelData* Data = DataTableSubsystem->GetLevelDataByName(CurLevelName))
@@ -195,7 +195,7 @@ void APXGameMode::PrepareGame()
 	UPXGameDataAsset* GameDataAsset = Settings->GameDataAsset.LoadSynchronous();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameDataAsset);
 
-	UPXSaveGameSubsystem* SaveGameSubsystem = UPXSaveGameSubsystem::GetSelfInstance(this);
+	UPXSaveGameSubsystem* SaveGameSubsystem = UPXSaveGameSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 	
 	UPXMainSaveGame* MainSaveGame = UPXSaveGameSubSystemFuncLib::GetMainData(GetWorld());

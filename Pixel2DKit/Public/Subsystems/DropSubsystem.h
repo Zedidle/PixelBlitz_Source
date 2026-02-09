@@ -53,13 +53,12 @@ class PIXEL2DKIT_API UDropSubsystem : public UGameInstanceSubsystem
 	TObjectPtr<UDataTable> ItemDataTable;
 	
 public:
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override
-	{
-	}
-
-	virtual void Deinitialize() override;
-
 	
+	static UDropSubsystem* GetInstance(const UObject* WorldContextObject);
+	
+	
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 	virtual void BeginDestroy() override;
 	
 	

@@ -49,7 +49,7 @@ void APXGameState::EventOnDayTimeTypeChanged_Implementation()
 		}
 	}
 
-	if (UWeatherSubsystem* WeatherSubsystem = GetGameInstance()->GetSubsystem<UWeatherSubsystem>())
+	if (UWeatherSubsystem* WeatherSubsystem = UWeatherSubsystem::GetInstance(this))
 	{
 		WeatherSubsystem->MakeWeatherEffect();
 	}
@@ -113,19 +113,13 @@ void APXGameState::DealUI_Implementation()
 
 void APXGameState::DealStatics_Implementation()
 {
-	UWorld* World = GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
-
-	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-	
-	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(World);
+	UPXMainSaveGame* MainSave = UPXSaveGameSubSystemFuncLib::GetMainData(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSave);
 
-	UPXBasicBuildSaveGame* BasicBuildSave = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(World);
+	UPXBasicBuildSaveGame* BasicBuildSave = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSave);
 
-	UPXTalentsSaveGame* TalentSave = UPXSaveGameSubSystemFuncLib::GetTalentsData(World);
+	UPXTalentsSaveGame* TalentSave = UPXSaveGameSubSystemFuncLib::GetTalentsData(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSave);
 	
 	
@@ -134,11 +128,11 @@ void APXGameState::DealStatics_Implementation()
 	TalentSave->TotalPickupGolds += MainSave->JustPickedGolds;
 	MainSave->JustPickedGolds = 0;
 
-	UPXSaveGameSubSystemFuncLib::SaveMainData(World);
-	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(World);
-	UPXSaveGameSubSystemFuncLib::SaveTalentsData(World);
+	UPXSaveGameSubSystemFuncLib::SaveMainData(this);
+	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(this);
+	UPXSaveGameSubSystemFuncLib::SaveTalentsData(this);
 	
-	if (UAchievementSubsystem* AchievementSubsystem = GameInstance->GetSubsystem<UAchievementSubsystem>())
+	if (UAchievementSubsystem* AchievementSubsystem = UAchievementSubsystem::GetInstance(this))
 	{
 		AchievementSubsystem->Achievement_LevelTransition();
 	}
@@ -271,7 +265,7 @@ void APXGameState::OnGameStart()
 		}
 	}
 
-	if (UWeatherSubsystem* WeatherSubsystem = GameInstance->GetSubsystem<UWeatherSubsystem>())
+	if (UWeatherSubsystem* WeatherSubsystem = UWeatherSubsystem::GetInstance(this))
 	{
 		WeatherSubsystem->MakeWeatherEffect();
 	}
@@ -303,7 +297,7 @@ void APXGameState::OnEnemyBossDie_Implementation()
 		WeakThis->ToNextLevel();
 	}, 1.2);
 
-	if (UPXAudioSubsystem* AudioSubsystem = GetGameInstance()->GetSubsystem<UPXAudioSubsystem>())
+	if (UPXAudioSubsystem* AudioSubsystem = UPXAudioSubsystem::GetInstance(this))
 	{
 		AudioSubsystem->CloseBGM();
 	}

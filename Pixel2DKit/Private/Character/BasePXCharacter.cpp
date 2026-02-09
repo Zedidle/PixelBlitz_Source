@@ -607,7 +607,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 #pragma region 舞空术成就
 	if (JumpStartTime > 0 && UKismetSystemLibrary::GetGameTimeInSeconds(GetWorld()) - JumpStartTime > 10.0f)
 	{
-		if (UAchievementSubsystem* AchievementSubsystem = GetGameInstance()->GetSubsystem<UAchievementSubsystem>())
+		if (UAchievementSubsystem* AchievementSubsystem = UAchievementSubsystem::GetInstance(this))
 		{
 			AchievementSubsystem->CompleteAchievement("10");
 		}

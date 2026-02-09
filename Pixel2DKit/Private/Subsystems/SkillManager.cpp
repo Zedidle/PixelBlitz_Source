@@ -9,6 +9,19 @@
 #include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 
+USkillManager* USkillManager::GetInstance(const UObject* WorldContextObject)
+{
+    if (!WorldContextObject) return nullptr;
+	
+    UWorld* World = WorldContextObject->GetWorld();
+    if (!World) return nullptr;
+	
+    UGameInstance* GameInstance = World->GetGameInstance();
+    if (!GameInstance) return nullptr;
+	
+    return GameInstance->GetSubsystem<USkillManager>();
+}
+
 void USkillManager::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);

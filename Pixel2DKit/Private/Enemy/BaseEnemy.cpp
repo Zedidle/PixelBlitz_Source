@@ -410,7 +410,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	if (ActionMove.bActionMoving && !ActionMove.bCabBeInterrupt) return;
 	if (ActionMove.bActionMoving && !bInterrupt) return;
 
-	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
+	UEnemyAISubsystem* EnemyAISubsystem = UEnemyAISubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
 	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
@@ -500,7 +500,7 @@ void ABaseEnemy::TryJumpToOtherPlatform(const FVector& StartLocation, const FVec
 
 	if (CurveName.IsNone()) return;
 	
-	UEnemyAISubsystem* EnemyAISubsystem = GetGameInstance()->GetSubsystem<UEnemyAISubsystem>();
+	UEnemyAISubsystem* EnemyAISubsystem = UEnemyAISubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
 
 	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(CurveName);
@@ -535,9 +535,6 @@ float ABaseEnemy::GetDefaultHalfHeight() const
 
 void ABaseEnemy::OnDie_Implementation()
 {
-	UWorld* World = GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
-
 	if (AEnemyAIController* EnemyAI = GetController<AEnemyAIController>())
 	{
 		EnemyAI->StopAI();
@@ -548,8 +545,10 @@ void ABaseEnemy::OnDie_Implementation()
 		GetCharacterMovement()->StopMovementImmediately();
 	}
 	
-	UDropSubsystem* DropSubsystem = GetGameInstance()->GetSubsystem<UDropSubsystem>();
-	DropSubsystem->SpawnItems(EnemyData.DropID_Rate, GetActorLocation());
+	if (UDropSubsystem* DropSubsystem = UDropSubsystem::GetInstance(this))
+	{
+		DropSubsystem->SpawnItems(EnemyData.DropID_Rate, GetActorLocation());
+	}
 
 	if (GetCapsuleComponent())
 	{
@@ -559,11 +558,11 @@ void ABaseEnemy::OnDie_Implementation()
 	SetInAttackEffect(false);
 	SetInAttackState(false);
 	
-	if (APXCharacterPlayerState* PS = Cast<APXCharacterPlayerState>(UGameplayStatics::GetPlayerState(World, 0)))
+	if (APXCharacterPlayerState* PS = Cast<APXCharacterPlayerState>(UGameplayStatics::GetPlayerState(this, 0)))
 	{
 		PS->OnEnemyDie(this);
 	}
-	if (APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(World)))
+	if (APXGameState* GS = Cast<APXGameState>(UGameplayStatics::GetGameState(this)))
 	{
 		GS->OnEnemyDie(this);
 	}

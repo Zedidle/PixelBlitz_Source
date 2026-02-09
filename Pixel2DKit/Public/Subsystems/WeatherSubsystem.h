@@ -46,6 +46,9 @@ class PIXEL2DKIT_API UWeatherSubsystem : public UGameInstanceSubsystem
 	
 public:
 
+	static UWeatherSubsystem* GetInstance(const UObject* WorldContextObject);
+	
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	FString DayTimeNameString;

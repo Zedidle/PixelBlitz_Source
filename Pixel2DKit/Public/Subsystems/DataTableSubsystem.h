@@ -23,6 +23,11 @@ class PIXEL2DKIT_API UDataTableSubsystem : public UGameInstanceSubsystem
 	FString GetConfigPath(FString InName){ return FString::Printf(TEXT("/Game/Assets/Config/%s.%s"), *InName, *InName); };
 	
 public:
+	
+	static UDataTableSubsystem* GetInstance(const UObject* WorldContextObject);
+	
+	
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 	// 通过目录配置

@@ -14,6 +14,24 @@
 #include "Utilitys/SoundFuncLib.h"
 
 
+UDropSubsystem* UDropSubsystem::GetInstance(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!World) return nullptr;
+	
+	UGameInstance* GameInstance = World->GetGameInstance();
+	if (!GameInstance) return nullptr;
+	
+	return GameInstance->GetSubsystem<UDropSubsystem>();
+}
+
+void UDropSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+}
+
 void UDropSubsystem::Deinitialize()
 {
 	Super::Deinitialize();

@@ -14,16 +14,10 @@ class UTimerManagerFuncLib : public UObject
 	GENERATED_BODY()
 
 public:
-    /* 获取计时器子系统
-     */
-    UFUNCTION(BlueprintCallable, Category = "Timer", meta = (WorldContext = "WorldContext"))
-    static UTimerManager* GetTimerSubsystem(UObject* WorldContext);
-
-
     template<typename Callable>
     static void SetDelay(UObject* WorldContext,Callable&& Callback,float Delay)
     {
-        if (UTimerManager* Subsystem = GetTimerSubsystem(WorldContext))
+        if (UTimerManager* Subsystem = UTimerManager::GetInstance(WorldContext))
         {
             Subsystem->SetDelay(MoveTemp(Callback),Delay);
         }
@@ -32,7 +26,7 @@ public:
     template<typename Callable>
     static void SetDelayLoop(UObject* WorldContext, const FName& TimerName, Callable&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1)
     {
-        if (UTimerManager* Subsystem = GetTimerSubsystem(WorldContext))
+        if (UTimerManager* Subsystem = UTimerManager::GetInstance(WorldContext))
         {
             Subsystem->SetDelayLoop(TimerName, MoveTemp(Callback), InRate, SustainTime, LoopTimes);
         }
@@ -81,7 +75,7 @@ public:
     template<typename Callable>
     static void SetRetriggerableDelay(UObject* WorldContext, const FName& TimerName, Callable&& Callback,float Delay)
     {
-        if (UTimerManager* Subsystem = GetTimerSubsystem(WorldContext))
+        if (UTimerManager* Subsystem = UTimerManager::GetInstance(WorldContext))
         {
             Subsystem->SetRetriggerableDelay(
                 TimerName,

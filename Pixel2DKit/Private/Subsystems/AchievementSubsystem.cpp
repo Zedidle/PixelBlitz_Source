@@ -11,6 +11,20 @@
 #include "UI/Achievement/AchievementCompleteWidget.h"
 #include "Utilitys/PXGameplayStatics.h"
 
+UAchievementSubsystem* UAchievementSubsystem::GetInstance(const UObject* WorldContextObject)
+{
+	if (!WorldContextObject) return nullptr;
+	
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!World) return nullptr;
+	
+	UGameInstance* GameInstance = World->GetGameInstance();
+	if (!GameInstance) return nullptr;
+	
+	return GameInstance->GetSubsystem<UAchievementSubsystem>();
+	
+}
+
 void UAchievementSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

@@ -56,7 +56,8 @@ void ABaseSkill::SetActive(bool v)
 		SetActorHiddenInGame(true);
 		SetSkillLifeTimer(false);
 		bIdle = false;
-		if (USkillManager* SkillManager = GetGameInstance()->GetSubsystem<USkillManager>())
+		
+		if (USkillManager* SkillManager = USkillManager::GetInstance(this))
 		{
 			SkillManager->DeactivateSkill(this);
 		}
