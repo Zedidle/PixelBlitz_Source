@@ -332,17 +332,18 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	
 	// 一般都是计算水平偏移，与Z无关
 	FVector NewTargetCameraOffset;
-	if (UCommonFuncLib::CalAverageByArray(OffsetValues, NewTargetCameraOffset))
+	if (UCommonFuncLib::CalAverageByArray<FVector>(OffsetValues, NewTargetCameraOffset))
 	{
 		CurCameraOffset = FMath::Lerp(CurCameraOffset, NewTargetCameraOffset, SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds);
+// 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White,
+// FString::Printf(TEXT("Tick_SpringArmMotivation NewTargetCameraOffset: %s, CurCameraOffset: %s, alpha: %f"), 
+// 	*NewTargetCameraOffset.ToString(), *CurCameraOffset.ToString(), SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds));
 	}
 	else
 	{
 		CurCameraOffset = FMath::Lerp(CurCameraOffset, FVector(0), SettingsShared->GetCameraOffsetSpeed() * DeltaSeconds);
 	}
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue,
-	FString::Printf(TEXT("Tick_SpringArmMotivation CurCameraOffset : %s"), *CurCameraOffset.ToString()));
 	
 	FVector NewSpringArmLocation = GetActorLocation() + CurCameraOffset;
 	NewSpringArmLocation.Z = FMath::Lerp(PreSpringArmZ, NewSpringArmLocation.Z, 0.1);

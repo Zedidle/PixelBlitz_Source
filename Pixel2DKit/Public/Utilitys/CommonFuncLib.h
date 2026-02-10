@@ -100,12 +100,14 @@ bool UCommonFuncLib::CalAverageByArray(const TArray<T>& Array, T& Result)
 {
 	if (Array.IsEmpty()) return false;
 	
-	T TmpValue;
+	T TmpValue = {};
 	for (const auto& Item : Array)
 	{
 		TmpValue += Item;
 	}
 
+	
 	Result = TmpValue / Array.Num();
+	
 	return true;
 }
