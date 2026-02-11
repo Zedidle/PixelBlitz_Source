@@ -661,19 +661,7 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 
 int ABasePXCharacter::GetAttackDamage_Implementation()
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, 1)
-	return CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue);
-	
-	// 统一设置
-	// FGameplayTag AttackDamagePlusTag = TAG("Ability.SwordPlay.Set.AttackDamagePlus");
-	// int AttackValue = CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue);
-	// if (Weapon)
-	// {
-	// 	AttackValue += Weapon->GetWeaponDamage();
-	// }
-	//
-	// AttackValue = CalInitDamage(AttackValue);
-	// return AttackValue;
+	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue) : 1;
 }
 
 FVector ABasePXCharacter::GetAttackRepel_Implementation()
@@ -1587,25 +1575,6 @@ void ABasePXCharacter::SetScale(const float targetValue)
 			UTimerManagerFuncLib::CancelDelay(WeakThis.Get(), "ABasePXCharacter::SetScale");
 		}
 	}, 0.02f);
-}
-
-int32 ABasePXCharacter::CalInitDamage(int32 InDamage)
-{
-	// int LocalDamage = InDamage;
-	// if (BuffComponent)
-	// {
-	// 	LocalDamage += InDamage * BuffComponent->EffectedPercent_Attack;
-	// 	LocalDamage += BuffComponent->EffectedValue_Attack;
-	// }
-
-	// if (AbilityComponent)
-	// {
-	// 	AbilityComponent->OnBuffCalDamage();
-	// 	LocalDamage += AbilityComponent->GetAttackDamagePlus();
-	// }
-	//
-	// return LocalDamage;
-	return InDamage;
 }
 
 void ABasePXCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)

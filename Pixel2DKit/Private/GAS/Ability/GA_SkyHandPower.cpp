@@ -65,7 +65,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	PlayerAbilityComponent->FindExtendData(TAG("Ability.SkyHandPower.Set.AttackDamagePercent"), MultiPercent);
 
 	
-	int Damage = MultiPercent * PXCharacter->CalInitDamage(IFight_Interface::Execute_GetAttackDamage(PXCharacter));
+	int Damage = MultiPercent * IFight_Interface::Execute_GetAttackDamage(PXCharacter);
 	FVector PreEnemyLocation = Enemy->GetActorLocation();
 	
 	float SwitchedEnemyHeightOffset = Enemy->GetDefaultHalfHeight();

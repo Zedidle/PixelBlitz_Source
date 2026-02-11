@@ -313,7 +313,7 @@ void UBuffComponent::AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, 
 			{
 				if (Widget->BuffName != BuffName)
 				{
-					// Execute_RemoveBuffOnWidget(this, Tag, true);
+					RemoveBuffOnWidget(Tag, Permanent);
 				}
 			}
 			

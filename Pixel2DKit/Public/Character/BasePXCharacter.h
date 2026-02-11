@@ -470,8 +470,6 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void OnKillEnemy();
 	
-	int32 CalInitDamage(int32 InDamage);
-
 #pragma region Input
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
