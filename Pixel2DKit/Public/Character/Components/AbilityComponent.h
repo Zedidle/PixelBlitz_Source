@@ -126,9 +126,6 @@ public:
 	void MoveWarmingUP();
 
 	UFUNCTION()
-	void MakeMiracleWalker();
-
-	UFUNCTION()
 	void MakeImmortalPower(bool First);
 	
 #pragma endregion 

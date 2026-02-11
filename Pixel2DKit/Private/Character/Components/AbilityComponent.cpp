@@ -73,10 +73,7 @@ void UAbilityComponent::BeginPlay()
 
 	MainSave->TakeEffectAbilities.Append(AbilitiesDefaultOwn);
 	
-	if (UPXASComponent* PXASComponent = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent()))
-	{
-		CachedASC = PXASComponent;
-	}
+	CachedASC = Cast<UPXASComponent>(PXCharacter->GetAbilitySystemComponent());
 	
 	// 对 OnPlayerAttack 的绑定，在玩家发起攻击时的事件
 	PXCharacter->OnPlayerAttackStart.AddDynamic(this, &ThisClass::OnAttackStart);
@@ -158,8 +155,6 @@ void UAbilityComponent::LoadTalents()
 			this, &ThisClass::MoveWarmingUP, 0.2);
 	}
 	
-	// 奇迹行者
-	MakeMiracleWalker();
 	// 不灭
 	MakeImmortalPower(true);
 }
@@ -198,40 +193,6 @@ void UAbilityComponent::MoveWarmingUP()
 	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
 }
 
-void UAbilityComponent::MakeMiracleWalker()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-	
-	FGameplayTag MiracleWalkerTag = TAG("Ability.MiracleWalker");
-	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, MiracleWalkerTag, true);
-	// RemoveAttributeEffectsByTag
-	
-	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
-	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.Set.Interval");
-
-	if (!AbilityExtendData.Contains(DamagePlusTag) || !AbilityExtendData.Contains(IntervalTag)) return;
-
-	FName TimerName = FName(GetReadableName() + "_MakeMiracleWalker");
-	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-		[WeakThis = TWeakObjectPtr(this), DamagePlusTag, MiracleWalkerTag]
-		{
-			if (!WeakThis.IsValid()) return;
-			if (!WeakThis->PXCharacter) return;
-
-			FEffectGameplayTags& EffectGameplayTags = WeakThis->AbilityExtendData;
-			if (EffectGameplayTags.Contains(DamagePlusTag))
-			{
-				if (WeakThis->PXCharacter->BuffComponent)
-				{
-					WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( MiracleWalkerTag,
-						FAttributeEffect(EPXAttribute::CurAttackValue, 0.0, EffectGameplayTags[DamagePlusTag])
-					);
-					WeakThis->PXCharacter->BuffComponent->AddBuffByTag(MiracleWalkerTag);
-				}
-			}
-		}, AbilityExtendData[IntervalTag]);
-}
 
 void UAbilityComponent::MakeImmortalPower(bool First)
 {
@@ -779,7 +740,6 @@ void UAbilityComponent::OnBuffCalDamage()
 		OwnerPreLocation = PXCharacter->GetActorLocation();
 	}
 
-	MakeMiracleWalker();
 	MakeImmortalPower(false);
 
 	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.StaticPower"), true);

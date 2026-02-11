@@ -27,7 +27,11 @@ bool ABaseSkill::CanDamageEffect_Implementation(AActor* Actor)
 void ABaseSkill::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
+	if (IAbilitySystemInterface* Interface = Cast<IAbilitySystemInterface>(GetOwner()))
+	{
+		CachedASC = Cast<UPXASComponent>(Interface->GetAbilitySystemComponent());
+	}
 }
 
 

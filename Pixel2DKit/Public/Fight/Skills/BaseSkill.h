@@ -6,8 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
-#include "UObject/FastReferenceCollector.h"
-#include "Utilitys/DebugFuncLab.h"
+#include "GAS/PXASComponent.h"
 #include "Utilitys/PXCustomStruct.h"
 #include "BaseSkill.generated.h"
 
@@ -19,6 +18,7 @@ UCLASS()
 class PIXEL2DKIT_API ABaseSkill : public AActor
 {
 	GENERATED_BODY()
+
 
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
@@ -38,6 +38,11 @@ protected:
 	// 用于判断技能在自行消失生命或伤害结算后将要进入 Waiting状态 倒计时（一般是0.5秒）触发消失特效的阶段
 	UPROPERTY(BlueprintReadWrite)
 	bool bEnding = false;
+	
+	UPROPERTY()
+	TWeakObjectPtr<UPXASComponent> CachedASC;
+	
+
 	
 public:
 
