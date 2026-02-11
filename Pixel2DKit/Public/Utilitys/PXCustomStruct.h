@@ -264,6 +264,14 @@ struct FAttributeEffect
 		EffectedEndTime = UCommonFuncLib::CalEndTime(EffectedDuration);
 	}
 	
+	float GetRemainingTime() const
+	{
+		UWorld* World = GEngine->GetCurrentPlayWorld();
+		if (!World) return -1;
+	
+		return EffectedEndTime - World->GetTimeSeconds();
+	}
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
 	EPXAttribute EffectedAttribute;
 	

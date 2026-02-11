@@ -94,9 +94,6 @@ public:
 	virtual void SetInvulnerable(const bool v);
 
 	UFUNCTION(BlueprintCallable, Category="StateComponent")
-	virtual void ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current);
-
-	UFUNCTION(BlueprintCallable, Category="StateComponent")
 	virtual void SetHP(const int32 value);
 	
 protected:

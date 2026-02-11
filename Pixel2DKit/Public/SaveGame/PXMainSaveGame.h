@@ -15,8 +15,6 @@ class PIXEL2DKIT_API UPXMainSaveGame : public USaveGame
 
 
 public:
-
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurLevelToChoiceAbility;
 
@@ -76,9 +74,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurCharacterName;
 
-	// 不在需要继承，而是直接设置在StateComponent
-	// UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	// FCharacterAttribute CharacterInheritAttribute;
+	// 角色读档某局生成时，叠加局内属性
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FCharacterAttribute CharacterInheritAttribute;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurLevelName;

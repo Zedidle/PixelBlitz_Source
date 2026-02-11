@@ -44,7 +44,7 @@ void ASkill_MiracleWalker::PrepareEffect()
 	BuffComponent->RemoveBuff(MiracleWalkerTag);
 	
 	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
-	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.Set.Interval");
+	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.CD");
 
 	if (!AbilityComponent->AbilityExtendData.Contains(DamagePlusTag) || 
 		!AbilityComponent->AbilityExtendData.Contains(IntervalTag)) return;

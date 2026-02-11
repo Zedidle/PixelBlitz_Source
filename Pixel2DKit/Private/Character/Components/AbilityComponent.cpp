@@ -154,9 +154,6 @@ void UAbilityComponent::LoadTalents()
 		UTimerManagerFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
 			this, &ThisClass::MoveWarmingUP, 0.2);
 	}
-	
-	// 不灭
-	MakeImmortalPower(true);
 }
 
 void UAbilityComponent::MoveWarmingUP()
@@ -193,60 +190,6 @@ void UAbilityComponent::MoveWarmingUP()
 	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
 }
 
-
-void UAbilityComponent::MakeImmortalPower(bool First)
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->StateComponent)
-	
-	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
-	FGameplayTag IntervalTag = TAG("Ability.Immortal.Set.Interval");
-	FGameplayTag MaxHPPlusAfterAttackTag = TAG("Ability.Immortal.Set.MaxHPPlusAfterAttack");
-	
-	if (!AbilityExtendData.Contains(AttackDamagePlusOnMaxHPPercentTag) || 
-		!AbilityExtendData.Contains(IntervalTag) ||
-		!AbilityExtendData.Contains(MaxHPPlusAfterAttackTag)
-	) return;
-	FGameplayTag ImmortalPowerTag = TAG("Ability.Immortal");
-
-	if (First || PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
-	{
-		UTimerManagerFuncLib::SetDelay(GetWorld(),
-	[WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
-		{
-			if (!WeakThis.IsValid()) return;
-			if (!WeakThis->PXCharacter) return;
-			if (!WeakThis->PXCharacter->StateComponent) return;
-			if (!WeakThis->PXCharacter->BuffComponent) return;
-		
-			FEffectGameplayTags& EffectGameplayTags = WeakThis->AbilityExtendData;
-			if (!EffectGameplayTags.Contains(AttackDamagePlusOnMaxHPPercentTag)) return;
-		
-			WeakThis->PXCharacter->BuffComponent->AddAttributeEffect( ImmortalPowerTag,
-				FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,
-					FMath::RoundToInt(WeakThis->PXCharacter->StateComponent->GetMaxHP() * EffectGameplayTags[AttackDamagePlusOnMaxHPPercentTag]))
-			);
-
-			if (WeakThis->PXCharacter->BuffComponent)
-			{
-				WeakThis->PXCharacter->BuffComponent->AddBuffByTag(ImmortalPowerTag);
-			}
-
-			// 不灭中，恢复生命值的部分
-			// UGameInstance* GameInstance = WeakThis->PXCharacter->GetGameInstance();
-			// CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
-			// UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());
-			// MainSaveGame->CharacterInheritAttribute.BasicMaxHP ++;
-		}, AbilityExtendData[IntervalTag]);
-	}
-
-	if (!First && PXCharacter->BuffComponent->BuffExist(ImmortalPowerTag))
-	{
-		// IBuff_Interface::Execute_RemoveBuff(PXCharacter, ImmortalPowerTag, true);
-		PXCharacter->StateComponent->ModifyMaxHP(1, EStatChange::Increase, true);
-	}
-}
 
 void UAbilityComponent::InitTalents()
 {
@@ -739,8 +682,6 @@ void UAbilityComponent::OnBuffCalDamage()
 		WarmUP_MoveDistance = 0;
 		OwnerPreLocation = PXCharacter->GetActorLocation();
 	}
-
-	MakeImmortalPower(false);
 
 	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.StaticPower"), true);
 	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.EvadeStrike"), true);

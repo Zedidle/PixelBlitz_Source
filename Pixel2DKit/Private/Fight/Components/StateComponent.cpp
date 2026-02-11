@@ -117,45 +117,6 @@ void UStateComponent::SetInvulnerable(const bool v)
 	bInvulnerable = v;
 }
 
-void UStateComponent::ModifyMaxHP(int32 value, const EStatChange ChangeType, const bool current)
-{
-	AActor* Owner = GetOwner();
-	if (!IsValid(Owner)) return;
-
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-
-	value = FMath::Max(value, 0);
-	
-	int CurrentHealth = CachedASC->GetAttributeValue(EPXAttribute::HP);
-	int MaxHealth = CachedASC->GetAttributeValue(EPXAttribute::CurMaxHP);
-	
-	if (ChangeType == EStatChange::Increase)
-	{
-		CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, MaxHealth + value);
-		if (current)
-		{
-			SetHP(CurrentHealth + value);
-		}
-
-	}
-	else if (ChangeType == EStatChange::Decrease)
-	{
-		CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, FMath::Max(0, MaxHealth - value));
-		if (current)
-		{
-			SetHP(FMath::Max(0, CurrentHealth - value));
-		}
-	}
-	else if (ChangeType == EStatChange::Reset)
-	{
-		CachedASC->SetAttributeValue(EPXAttribute::BasicMaxHP, value);
-		if (current || value < CurrentHealth)
-		{
-			SetHP(value);
-		}
-	}
-}
-
 void UStateComponent::SetHP(const int32 value)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)

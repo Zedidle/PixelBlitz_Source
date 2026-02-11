@@ -1751,6 +1751,10 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	{
 		OnHPChanged(OldValue, NewValue);
 	}
+	if (Attribute == UPXAttributeSet::GetCurMaxHPAttribute())
+	{
+			
+	}
 	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
 		Movement->MaxWalkSpeed = NewValue;

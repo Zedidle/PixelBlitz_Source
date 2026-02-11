@@ -26,6 +26,27 @@ struct FAttributeEffectData
 	
 	void AddBuffEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 	{
+		FAttributeEffect& E = const_cast<FAttributeEffect&>(Effect);
+		
+		if (FAttributeEffect* PreEffect = Tag2BuffEffect.Find(Tag))
+		{
+			Percent -= PreEffect->EffectedPercent;
+			Value -= PreEffect->EffectedValue;
+			
+			E.EffectedPercent += PreEffect->EffectedPercent;
+			E.EffectedValue += PreEffect->EffectedValue;
+			E.EffectedDuration += PreEffect->GetRemainingTime();
+		}
+		E.CalculateEndTime();
+		
+		Tag2BuffEffect.Add(Tag, Effect);
+		
+		Percent += E.EffectedPercent;
+		Value += E.EffectedValue;
+	}
+	
+	void SetBuffEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
+	{
 		if (FAttributeEffect* PreEffect = Tag2BuffEffect.Find(Tag))
 		{
 			Percent -= PreEffect->EffectedPercent;
@@ -136,6 +157,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Buff | BuffText")
 	void ExpireBuff(FGameplayTag Tag);
 
+	
+	
+	
 	UFUNCTION(BlueprintCallable)
 	void AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, float Percent = 0.0f, float Value = 1.f, float Duration = 9999.f);
 	
