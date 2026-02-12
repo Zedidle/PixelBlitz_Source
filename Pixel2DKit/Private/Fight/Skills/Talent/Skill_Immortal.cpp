@@ -54,6 +54,8 @@ void ASkill_Immortal::BeginPrepare()
 	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
 	FGameplayTag CDTag = TAG("Ability.Immortal.CD");
 	
+	BuffComponent->RemoveBuffOnWidget(ImmortalPowerTag, true);
+	
 	UTimerManagerFuncLib::SetDelay(GetWorld(),
 [WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
 		{
@@ -112,7 +114,7 @@ void ASkill_Immortal::MakeEffect()
 		
 		float HPEffect = AbilityComponent->AbilityExtendData[MaxHPPlusAfterAttackTag];
 		
-		BuffComponent->RemoveBuff(ImmortalPowerTag, true);
+		BuffComponent->RemoveAttributeEffect(EPXAttribute::CurAttackValue, ImmortalPowerTag);
 		BuffComponent->AddAttributeEffect(ImmortalPowerTag, EPXAttribute::BasicMaxHP, 0.0f , HPEffect);
 		StateComponent->IncreaseHP(HPEffect, Owner);
 		

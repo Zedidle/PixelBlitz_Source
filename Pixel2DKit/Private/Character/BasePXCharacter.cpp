@@ -642,6 +642,10 @@ void ABasePXCharacter::LoadWeapon(TSubclassOf<ABaseWeapon> WeaponClass)
 
 		// 附加基础攻击力
 		CachedASC->ModifyAttributeValue(EPXAttribute::BasicAttackValue,Weapon->GetWeaponDamage());
+		if (BuffComponent)
+		{
+			BuffComponent->UpdateAttribute(EPXAttribute::CurAttackValue);
+		}
 	}
 }
 
