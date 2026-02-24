@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Pixel2DKit.h"
 #include "Fight/Skills/Talent/Skill_MiracleWalker.h"
+#include "Pixel2DKit.h"
 #include "Character/Components/AbilityComponent.h"
 #include "Character/Components/BuffComponent.h"
 #include "Subsystems/TimerManagerFuncLib.h"
@@ -69,7 +69,7 @@ void ASkill_MiracleWalker::PrepareEffect()
 				if (BuffComponent)
 				{
 					BuffComponent->AddAttributeEffect( MiracleWalkerTag,
-						FAttributeEffect(EPXAttribute::CurAttackValue, EffectGameplayTags[DamagePlusTag])
+						FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f, EffectGameplayTags[DamagePlusTag])
 					);
 					BuffComponent->AddBuffByTag(MiracleWalkerTag);
 				}
