@@ -23,49 +23,69 @@ enum class EPXAttribute : uint8
 	EP,
 	
 	BasicMaxHP,
-	BasicHPRecoverValue,
-	BasicMaxEP,
-	BasicEPRecoverValue,
-	BasicSpeed,
-	BasicAcceleration,
-	BasicSpeedDownResist,
-	BasicDashSpeed,
-	BasicDashCD,
-	BasicDamagePlusAfterDash,
-	BasicSight,
-	BasicSightReductionResist,
-	BasicMaxJumpCount,
-	BasicJumpSpeed,
-	BasicJumpMaxHoldTime,
-	BasicAirControl,
-	BasicAttackValue,
-	BasicAttackCD,
-	BasicRepelValue,
-	BasicRepelResist,
-	BasicGravityScale,
-	BasicBodySizeScale,
-
-	CurMaxEP,
 	CurMaxHP,
+	
+	BasicHPRecoverValue,
 	CurHPRecoverValue,
+	
+	BasicMaxEP,
+	CurMaxEP,
+	
+	BasicEPRecoverValue,
 	CurEPRecoverValue,
+	
+	BasicSpeed,
 	CurSpeed,
+	
+	BasicAcceleration,
 	CurAcceleration,
+	
+	BasicSpeedDownResist,
 	CurSpeedDownResist,
+	
+	BasicDashSpeed,
 	CurDashSpeed,
+	
+	BasicDashCD,
 	CurDashCD,
+	
+	BasicDamagePlusAfterDash,
 	CurDamagePlusAfterDash,
+	
+	BasicSight,
 	CurSight,
+	
+	BasicSightReductionResist,
 	CurSightReductionResist,
+	
+	BasicMaxJumpCount,
 	CurMaxJumpCount,
+	
+	BasicJumpSpeed,
 	CurJumpSpeed,
+	
+	BasicJumpMaxHoldTime,
 	CurJumpMaxHoldTime,
+	
+	BasicAirControl,
 	CurAirControl,
+	
+	BasicAttackValue,
 	CurAttackValue,
+	
+	BasicAttackCD,
 	CurAttackCD,
+	
+	BasicRepelValue,
 	CurRepelValue,
+	
+	BasicRepelResist,
 	CurRepelResist,
+	
+	BasicGravityScale,
 	CurGravityScale,
+	
+	BasicBodySizeScale,
 	CurBodySizeScale
 };
 
