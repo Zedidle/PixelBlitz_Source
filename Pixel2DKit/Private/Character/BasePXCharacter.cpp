@@ -112,6 +112,8 @@ void ABasePXCharacter::LoadData()
 	CachedASC->SetAttributeValue(EPXAttribute::CurRepelValue, Attribute.BasicRepelValue);
 	CachedASC->SetAttributeValue(EPXAttribute::BasicMaxJumpCount, Attribute.BasicMaxJumpCount);
 	CachedASC->SetAttributeValue(EPXAttribute::CurMaxJumpCount, Attribute.BasicMaxJumpCount);
+	CachedASC->SetAttributeValue(EPXAttribute::BasicBodySizeScale, 1.0f);
+	CachedASC->SetAttributeValue(EPXAttribute::CurBodySizeScale, 1.0f);
 
 
 #pragma region GAS
@@ -1751,39 +1753,43 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	{
 		OnHPChanged(OldValue, NewValue);
 	}
-	if (Attribute == UPXAttributeSet::GetCurMaxHPAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurMaxHPAttribute())
 	{
 			
 	}
-	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
 		Movement->MaxWalkSpeed = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())
 	{
 		Movement->MaxAcceleration = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurJumpSpeedAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurJumpSpeedAttribute())
 	{
 		Movement->JumpZVelocity = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurGravityScaleAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurGravityScaleAttribute())
 	{
 		Movement->GravityScale = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurAirControlAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurAirControlAttribute())
 	{
 		Movement->AirControl = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurJumpMaxHoldTimeAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurJumpMaxHoldTimeAttribute())
 	{
 		JumpMaxHoldTime = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurMaxJumpCountAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurMaxJumpCountAttribute())
 	{
 		MaxJumpCount = NewValue;
 	}
-	if (Attribute == UPXAttributeSet::GetCurSightAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurBodySizeScaleAttribute())
+	{
+		SetActorScale3D(FVector(NewValue));
+	}
+	else if (Attribute == UPXAttributeSet::GetCurSightAttribute())
 	{
 		FVector Location = GetActorLocation();
 
@@ -1809,7 +1815,7 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 		}
 	}
 
-	if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
+	else if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
 		FVector Location = GetActorLocation();
 		

@@ -468,7 +468,7 @@ void UBuffComponent::UpdateAttribute(const FString& AttributeName)
 	float BasicEffectedValue = BasicAttributeEffectData.Value;
 	float CurEffectedPercent = CurAttributeEffectData.Percent;
 	float CurEffectedValue = CurAttributeEffectData.Value;
-		
+
 	float CurAttributeValue = (BasicAttributeValue *  (1 + BasicEffectedPercent) + BasicEffectedValue) * (1 + CurEffectedPercent) + CurEffectedValue;
 	CachedASC->SetAttributeValue(CurAttributeEnum, CurAttributeValue);
 
