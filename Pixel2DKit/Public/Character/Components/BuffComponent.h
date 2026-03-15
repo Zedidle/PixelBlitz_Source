@@ -144,9 +144,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveBuff(const FGameplayTag& Tag, bool OnlySelf=true);
-	void RemoveBuff(TMap<FGameplayTag, TArray<EPXAttribute>>& RemoveEffects);
+	void RemoveBuffEffects(const TMap<FGameplayTag, TArray<EPXAttribute>>& Effects);
 	void RemoveBuff(const FName& TagName);
 
+	
 	
 	UFUNCTION(BlueprintCallable)
 	void AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent);

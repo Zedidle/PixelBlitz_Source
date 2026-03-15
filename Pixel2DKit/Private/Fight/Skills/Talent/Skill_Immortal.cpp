@@ -53,6 +53,8 @@ void ASkill_Immortal::BeginPrepare()
 	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
 	FGameplayTag CDTag = TAG("Ability.Immortal.CD");
 	
+	BuffComponent->RemoveBuffOnWidget(ImmortalPowerTag, true);
+	
 	UTimerManagerFuncLib::SetDelay(GetWorld(),
 [WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag]
 		{

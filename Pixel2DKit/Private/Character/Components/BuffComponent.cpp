@@ -85,7 +85,7 @@ void UBuffComponent::CheckBuffExpire()
 		}
 	}
 
-	RemoveBuff(RemovedTagsEffect);
+	RemoveBuffEffects(RemovedTagsEffect);
 
 	if (BuffStateWidget)
 	{
@@ -285,9 +285,9 @@ void UBuffComponent::RemoveBuff(const FGameplayTag& Tag, bool OnlySelf)
 	}
 }
 
-void UBuffComponent::RemoveBuff(TMap<FGameplayTag, TArray<EPXAttribute>>& RemoveEffects)
+void UBuffComponent::RemoveBuffEffects(const TMap<FGameplayTag, TArray<EPXAttribute>>& Effects)
 {
-	for (auto& Effect : RemoveEffects)
+	for (auto& Effect : Effects)
 	{
 		for (auto& AttributeName : Effect.Value)
 		{
