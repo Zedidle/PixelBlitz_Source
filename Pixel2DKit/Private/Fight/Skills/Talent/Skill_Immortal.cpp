@@ -53,7 +53,7 @@ void ASkill_Immortal::BeginPrepare()
 	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
 	FGameplayTag CDTag = TAG("Ability.Immortal.CD");
 	
-	BuffComponent->RemoveBuffOnWidget(ImmortalPowerTag, true);
+	BuffComponent->RemoveBuffOnWidget(AbilityTag, true);
 	
 	UTimerManagerFuncLib::SetDelay(GetWorld(),
 [WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag]
@@ -96,7 +96,6 @@ void ASkill_Immortal::MakeEffect()
 	if (!CachedASC.IsValid()) return;
 	
 	FGameplayTag MaxHPPlusAfterAttackTag = TAG("Ability.Immortal.Set.MaxHPPlusAfterAttack");
-	
 	if (!AbilityComponent->AbilityExtendData.Contains(MaxHPPlusAfterAttackTag)) return;
 
 	// 判断是否就绪
@@ -107,10 +106,9 @@ void ASkill_Immortal::MakeEffect()
 		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 		
 		UPXMainSaveGame* MainSaveGame= UPXSaveGameSubSystemFuncLib::GetMainData(GameInstance->GetWorld());
-		
-		MainSaveGame->CharacterInheritAttribute.BasicMaxHP ++;
-		
 		float HPEffect = AbilityComponent->AbilityExtendData[MaxHPPlusAfterAttackTag];
+		
+		MainSaveGame->CharacterInheritAttribute.BasicMaxHP += HPEffect;
 		
 		BuffComponent->RemoveBuff(AbilityTag, true);
 		BuffComponent->AddAttributeEffect(AbilityTag, EPXAttribute::BasicMaxHP, 0.0f , HPEffect);
