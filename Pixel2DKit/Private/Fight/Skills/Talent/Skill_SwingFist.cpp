@@ -39,23 +39,22 @@ void ASkill_SwingFist::MakeSwingFistPower()
 
 	SwingFistPower = !SwingFistPower;
 	
-	FGameplayTag SwingFistTag = TAG("Ability.SwingFist");
-	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, SwingFistTag, true);
-
+	PXCharacter->BuffComponent->RemoveBuff(AbilityTag);
+	
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
 	if (SwingFistPower)
 	{
 		FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[MinusTag]);
-		PXCharacter->BuffComponent->AddAttributeEffect(SwingFistTag, Effect);
-		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
+		PXCharacter->BuffComponent->AddAttributeEffect(AbilityTag, Effect);
+		PXCharacter->BuffComponent->AddBuffOnWidget(AbilityTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
 		FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[PlusTag], 0);
 		
-		PXCharacter->BuffComponent->AddAttributeEffect(SwingFistTag, Effect);
-		PXCharacter->BuffComponent->AddBuffOnWidget(SwingFistTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
+		PXCharacter->BuffComponent->AddAttributeEffect(AbilityTag, Effect);
+		PXCharacter->BuffComponent->AddBuffOnWidget(AbilityTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
 }

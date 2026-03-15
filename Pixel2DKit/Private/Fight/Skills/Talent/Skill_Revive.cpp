@@ -67,7 +67,7 @@ bool ASkill_Revive::OnDying(int& _RemReviveTimes)
 		{
 			if (UBuffComponent* BuffComponent = Owner->GetComponentByClass<UBuffComponent>())
 			{
-				BuffComponent->RemoveBuff(TAG("Ability.Revive"), true);
+				BuffComponent->RemoveBuff(AbilityTag);
 			}
 		}
 		

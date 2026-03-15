@@ -296,6 +296,11 @@ void UBuffComponent::RemoveBuff(TMap<FGameplayTag, TArray<EPXAttribute>>& Remove
 	}
 }
 
+void UBuffComponent::RemoveBuff(const FName& TagName)
+{
+	RemoveBuff(TAG(TagName));
+}
+
 void UBuffComponent::AddBuffOnWidget(FGameplayTag Tag, const FString& BuffName, FLinearColor TextColor, bool Permanent)
 {
 	if (!Tag.IsValid()) return;
@@ -397,7 +402,7 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 		AttributeEffectData.AddBuffEffect(Tag, Effect);
 
 		TArray<EPXAttribute>& AttributeEnums = Tag2AttributeEnums.FindOrAdd(Tag);
-		AttributeEnums.Add(AttributeEnum);
+		AttributeEnums.AddUnique(AttributeEnum);
 		
 		UpdateAttribute(AttributeName);
 	}
@@ -443,7 +448,10 @@ void UBuffComponent::RemoveAttributeEffectsByTag(const FGameplayTag& Tag)
 		TArray<EPXAttribute>& AttributeEnums = *AttributeEnumsPtr;
 		for (int32 i = AttributeEnums.Num() - 1; i >= 0; --i)
 		{
-			RemoveAttributeEffect(AttributeEnums[i], Tag);
+			if (AttributeEnums.IsValidIndex(i))
+			{
+				RemoveAttributeEffect(AttributeEnums[i], Tag);
+			}
 		}
 	}
 }
@@ -460,8 +468,8 @@ void UBuffComponent::UpdateAttribute(const FString& AttributeName)
 
 	EPXAttribute BasicAttributeEnum = AttributeNameToEnumMap.FindRef(BasicAttributeName);
 	EPXAttribute CurAttributeEnum = AttributeNameToEnumMap.FindRef(CurAttributeName);
-	FAttributeEffectData BasicAttributeEffectData = AttributeEffects.FindRef(BasicAttributeEnum);
-	FAttributeEffectData CurAttributeEffectData = AttributeEffects.FindRef(CurAttributeEnum);
+	const FAttributeEffectData& BasicAttributeEffectData = AttributeEffects.FindRef(BasicAttributeEnum);
+	const FAttributeEffectData& CurAttributeEffectData = AttributeEffects.FindRef(CurAttributeEnum);
 	
 	float BasicAttributeValue = CachedASC->GetAttributeValue(BasicAttributeName);
 	float BasicEffectedPercent = BasicAttributeEffectData.Percent;

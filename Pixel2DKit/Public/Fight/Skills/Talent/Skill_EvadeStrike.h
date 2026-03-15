@@ -24,4 +24,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual bool OnSkillFinish() override;
+	
+	virtual bool OnAttackFinish() override;
+
+	
 };

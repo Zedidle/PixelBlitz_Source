@@ -15,7 +15,7 @@ void ABaseDefenseSkill::BeginPlay()
 
 	if (DataAsset)
 	{
-		AbilityTags = DataAsset->AbilityTags;
+		AbilityTag = DataAsset->AbilityTag;
 		Priority = DataAsset->Priority;
 		StopPropagation = DataAsset->StopPropagation;
 	}

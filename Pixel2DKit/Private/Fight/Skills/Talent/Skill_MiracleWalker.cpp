@@ -40,8 +40,7 @@ void ASkill_MiracleWalker::PrepareEffect()
 	
 	if (!CachedASC.IsValid()) return;
 	
-	FGameplayTag MiracleWalkerTag = TAG("Ability.MiracleWalker");
-	BuffComponent->RemoveBuff(MiracleWalkerTag);
+	BuffComponent->RemoveBuff(AbilityTag);
 	
 	FGameplayTag DamagePlusTag = TAG("Ability.MiracleWalker.Set.DamagePlus");
 	FGameplayTag IntervalTag = TAG("Ability.MiracleWalker.CD");
@@ -51,7 +50,7 @@ void ASkill_MiracleWalker::PrepareEffect()
 
 	FName TimerName = FName(GetName() + "_MakeMiracleWalker");
 	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName,
-	[WeakThis = TWeakObjectPtr(this), DamagePlusTag, MiracleWalkerTag]
+	[WeakThis = TWeakObjectPtr(this), DamagePlusTag]
 		{
 			if (!WeakThis.IsValid()) return;
 			AActor* Owner = WeakThis->GetOwner();
@@ -68,10 +67,10 @@ void ASkill_MiracleWalker::PrepareEffect()
 			{
 				if (BuffComponent)
 				{
-					BuffComponent->AddAttributeEffect( MiracleWalkerTag,
+					BuffComponent->AddAttributeEffect( WeakThis->AbilityTag,
 						FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f, EffectGameplayTags[DamagePlusTag])
 					);
-					BuffComponent->AddBuffByTag(MiracleWalkerTag);
+					BuffComponent->AddBuffByTag(WeakThis->AbilityTag);
 				}
 			}
 		}, AbilityComponent->AbilityExtendData[IntervalTag]);

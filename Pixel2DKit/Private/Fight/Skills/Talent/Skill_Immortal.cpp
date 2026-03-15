@@ -50,12 +50,11 @@ void ASkill_Immortal::BeginPrepare()
 	
 	if (!CachedASC.IsValid()) return;
 	
-	FGameplayTag ImmortalPowerTag = TAG("Ability.Immortal");
 	FGameplayTag AttackDamagePlusOnMaxHPPercentTag = TAG("Ability.Immortal.Set.AttackDamagePlusOnMaxHPPercent");
 	FGameplayTag CDTag = TAG("Ability.Immortal.CD");
 	
 	UTimerManagerFuncLib::SetDelay(GetWorld(),
-[WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag, ImmortalPowerTag]
+[WeakThis = TWeakObjectPtr(this), AttackDamagePlusOnMaxHPPercentTag]
 		{
 			if (!WeakThis.IsValid()) return;
 			if (!WeakThis->Owner) return;
@@ -69,12 +68,12 @@ void ASkill_Immortal::BeginPrepare()
 			UStateComponent* StateComponent = WeakThis->Owner->GetComponentByClass<UStateComponent>();
 			CHECK_RAW_POINTER_IS_VALID_OR_RETURN(StateComponent);
 				
-			BuffComponent->AddAttributeEffect( ImmortalPowerTag,
+			BuffComponent->AddAttributeEffect( WeakThis->AbilityTag,
 				FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,
 					FMath::RoundToInt(StateComponent->GetMaxHP() * AbilityComponent->AbilityExtendData[AttackDamagePlusOnMaxHPPercentTag])));
 					
 			WeakThis->bReady = true;
-			BuffComponent->AddBuffByTag(ImmortalPowerTag);
+			BuffComponent->AddBuffByTag(WeakThis->AbilityTag);
 		
 		}, AbilityComponent->AbilityExtendData[CDTag]);
 }
@@ -94,7 +93,6 @@ void ASkill_Immortal::MakeEffect()
 	
 	if (!CachedASC.IsValid()) return;
 	
-	FGameplayTag ImmortalPowerTag = TAG("Ability.Immortal");
 	FGameplayTag MaxHPPlusAfterAttackTag = TAG("Ability.Immortal.Set.MaxHPPlusAfterAttack");
 	
 	if (!AbilityComponent->AbilityExtendData.Contains(MaxHPPlusAfterAttackTag)) return;
@@ -112,8 +110,8 @@ void ASkill_Immortal::MakeEffect()
 		
 		float HPEffect = AbilityComponent->AbilityExtendData[MaxHPPlusAfterAttackTag];
 		
-		BuffComponent->RemoveBuff(ImmortalPowerTag, true);
-		BuffComponent->AddAttributeEffect(ImmortalPowerTag, EPXAttribute::BasicMaxHP, 0.0f , HPEffect);
+		BuffComponent->RemoveBuff(AbilityTag, true);
+		BuffComponent->AddAttributeEffect(AbilityTag, EPXAttribute::BasicMaxHP, 0.0f , HPEffect);
 		StateComponent->IncreaseHP(HPEffect, Owner);
 		
 		BeginPrepare();

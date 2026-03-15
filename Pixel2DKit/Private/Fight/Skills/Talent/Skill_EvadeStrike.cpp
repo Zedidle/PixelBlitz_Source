@@ -31,23 +31,31 @@ void ASkill_EvadeStrike::Tick(float DeltaTime)
 
 bool ASkill_EvadeStrike::OnSkillFinish()
 {
-	if (!Super::OnSkillFinish()) return false;
-
 	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Owner);
 	if (!PXCharacter) return false;
 	if (!PXCharacter->BuffComponent) return false;
 	if (!PXCharacter->AbilityComponent) return false;
+	if (!PXCharacter->CachedASC) return false;
+	if (PXCharacter->BuffComponent->BuffExist(AbilityTag)) return false;
 	
-	float FoundR;
-	if (PXCharacter->AbilityComponent->FindExtendData(TAG("CommonSet.DamagePlusAfterDash"), FoundR))
-	{
-		FGameplayTag Tag = TAG("Ability.DodgeStrike");
-		FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f,FoundR);
-		
-		PXCharacter->BuffComponent->AddAttributeEffect(Tag, Effect);
-		PXCharacter->BuffComponent->AddBuffByTag(Tag);
-	}
+	if (!Super::OnSkillFinish()) return false;
+	
+	float CurDamagePlusAfterDashValue = PXCharacter->CachedASC->GetAttributeValue(EPXAttribute::CurDamagePlusAfterDash);
+	FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, 0.0f, CurDamagePlusAfterDashValue);
+	
+	PXCharacter->BuffComponent->AddAttributeEffect(AbilityTag, Effect);
+	PXCharacter->BuffComponent->AddBuffByTag(AbilityTag);
 
+	return true;
+}
+
+bool ASkill_EvadeStrike::OnAttackFinish()
+{
+	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Owner);
+	if (!PXCharacter) return false;
+	if (!PXCharacter->BuffComponent) return false;
+	
+	PXCharacter->BuffComponent->RemoveBuff(AbilityTag);
 	return true;
 }
 

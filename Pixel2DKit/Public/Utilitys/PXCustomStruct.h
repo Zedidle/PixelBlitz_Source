@@ -556,7 +556,11 @@ struct FTalent: public FTableRowBase
 	// 天赋Tag，用于显示BUFF与触发
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	FGameplayTag TalentTag;
-
+	
+	// 是否初始化显示BuffTagOnWidget
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	bool InitBuffOnWidget = true;
+	
 	// 选择时所需天赋点
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	int Price = 3;
@@ -582,10 +586,7 @@ struct FTalent: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 
-	// 是否初始化生成SkillClass和显示BuffTagOnWidget
-	UPROPERTY(BlueprintReadWrite,EditAnywhere)
-	bool CommonInit = true;
-	
+	// 所有技能都是默认起始生成
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TSubclassOf<ABaseSkill> SkillClass;
 

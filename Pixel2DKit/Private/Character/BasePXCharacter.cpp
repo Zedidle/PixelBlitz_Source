@@ -1468,6 +1468,11 @@ void ABasePXCharacter::OnAttackEffectBegin_Implementation()
 void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 {
 	bInAttackEffect = false;
+	
+	if (AbilityComponent)
+	{
+		Execute_OnAttackEffectEnd(AbilityComponent);
+	}
 }
 
 void ABasePXCharacter::OnPickGold_Implementation()

@@ -225,11 +225,17 @@ void UPXAttributeSet::InitializeAttributeMap()
 		// 加速度
 		AttributeMap.Add(EPXAttribute::BasicAcceleration, GetBasicAccelerationAttribute());
 		AttributeMap.Add(EPXAttribute::CurAcceleration, GetCurAccelerationAttribute());
+
 		// Dash速度
 		AttributeMap.Add(EPXAttribute::BasicDashSpeed, GetBasicDashSpeedAttribute());
 		AttributeMap.Add(EPXAttribute::CurDashSpeed, GetCurDashSpeedAttribute());
+		// Dash CD
 		AttributeMap.Add(EPXAttribute::BasicDashCD, GetBasicDashCDAttribute());
 		AttributeMap.Add(EPXAttribute::CurDashCD, GetCurDashCDAttribute());
+		
+		// 使用技能后攻击值附加
+		AttributeMap.Add(EPXAttribute::BasicDamagePlusAfterDash, GetBasicDamagePlusAfterDashAttribute());
+		AttributeMap.Add(EPXAttribute::CurDamagePlusAfterDash, GetCurDamagePlusAfterDashAttribute());
 		
 		// 视野
 		AttributeMap.Add(EPXAttribute::BasicSight, GetBasicSightAttribute());
@@ -257,7 +263,7 @@ void UPXAttributeSet::InitializeAttributeMap()
 		// 攻击
 		AttributeMap.Add(EPXAttribute::BasicAttackValue, GetBasicAttackValueAttribute());
 		AttributeMap.Add(EPXAttribute::CurAttackValue, GetCurAttackValueAttribute());
-		// 攻击速度
+		// 攻击 CD
 		AttributeMap.Add(EPXAttribute::BasicAttackCD, GetBasicAttackCDAttribute());
 		AttributeMap.Add(EPXAttribute::CurAttackCD, GetCurAttackCDAttribute());
 
@@ -275,6 +281,7 @@ void UPXAttributeSet::InitializeAttributeMap()
 		// 体型
 		AttributeMap.Add(EPXAttribute::BasicBodySizeScale, GetBasicBodySizeScaleAttribute());
 		AttributeMap.Add(EPXAttribute::CurBodySizeScale, GetCurBodySizeScaleAttribute());
+
 	}
 }
 

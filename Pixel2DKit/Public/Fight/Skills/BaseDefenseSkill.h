@@ -16,7 +16,7 @@ class PIXEL2DKIT_API UDefenseSkillDataAsset : public UDataAsset
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
-	FGameplayTagContainer AbilityTags;
+	FGameplayTag AbilityTag;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "DefenseSkill")
 	int Priority = 1;

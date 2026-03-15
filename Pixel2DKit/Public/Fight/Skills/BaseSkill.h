@@ -87,9 +87,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsActive() const;
 	
-	// 一般来说，每个技能都会有对应的Tag
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Skill")
-	FGameplayTagContainer AbilityTags;
+	FGameplayTag AbilityTag;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, BlueprintPure, Category="Skill")
 	bool CanDamageEffect(AActor* Actor); 

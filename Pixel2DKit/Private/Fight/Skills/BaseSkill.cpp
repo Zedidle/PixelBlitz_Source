@@ -113,10 +113,7 @@ void ABaseSkill::ApplyAttributeEffects()
 
 	if (UAbilityComponent* AbilityComponent = Owner->GetComponentByClass<UAbilityComponent>())
 	{
-		for (auto& Tag : AbilityTags.GetGameplayTagArray())
-		{
-			AbilityComponent->ApplyAttributeEffects(Tag);
-		}
+		AbilityComponent->ApplyAttributeEffects(AbilityTag);
 	}
 }
 

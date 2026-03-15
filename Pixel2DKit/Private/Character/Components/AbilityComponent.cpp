@@ -215,6 +215,7 @@ void UAbilityComponent::InitTalents()
 			AbilityExtendData.AddData(D.Key, D.Value);
 		}
 
+		// 事先把技能的属性影响记录下来，当触发技能时再激活
 		FAttributeEffectArray& AttributeEffects = AbilityAttributeEffects.FindOrAdd(TalentData.TalentTag);
 		for (auto& D: TalentData.AttributeEffectOnActivated)
 		{
@@ -229,15 +230,16 @@ void UAbilityComponent::InitTalents()
 				CachedASC->GiveAbility(Spec);
 			}
 		}
-		
-		if (TalentData.CommonInit)
+
+		if (ABaseSkill* Skill = SpawnSkill(TalentData.SkillClass))
 		{
-			if (ABaseSkill* Skill = SpawnSkill(TalentData.SkillClass))
-			{
-				Skill->SetActivateTiming(TalentData.Timing);
-				Skill->AbilityTags.AddTag(TalentData.TalentTag);
-				SkillsHolding.Add(Skill);
-			}
+			Skill->SetActivateTiming(TalentData.Timing);
+			Skill->AbilityTag = TalentData.TalentTag;
+			SkillsHolding.Add(Skill);
+		}
+		
+		if (TalentData.InitBuffOnWidget)
+		{
 			if (PXCharacter->BuffComponent)
 			{
 				PXCharacter->BuffComponent->AddBuffByTag(TalentData.TalentTag);
@@ -324,7 +326,7 @@ void UAbilityComponent::RemoveDefenseSkill(const FGameplayTag& Tag)
 {
 	DefenseSkills.RemoveAllSwap([&Tag](const ABaseDefenseSkill* Skill)
 	{
-		return Skill && Skill->AbilityTags.HasTag(Tag);
+		return Skill && Skill->AbilityTag == Tag;
 	}, EAllowShrinking::No);
 }
 
@@ -673,6 +675,7 @@ void UAbilityComponent::OnKillEnemy()
 void UAbilityComponent::OnBuffCalDamage()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	
 	// 清除热身运动
 	if (WarmUP_Power > 0)
@@ -683,8 +686,8 @@ void UAbilityComponent::OnBuffCalDamage()
 		OwnerPreLocation = PXCharacter->GetActorLocation();
 	}
 
-	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.StaticPower"), true);
-	// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.EvadeStrike"), true);
+	PXCharacter->BuffComponent->RemoveBuff("Ability.EvadeStrike");
+	PXCharacter->BuffComponent->RemoveBuff("Ability.StaticPower");
 }
 
 void UAbilityComponent::OnDying(int& RemReviveTimes)
@@ -1003,6 +1006,19 @@ void UAbilityComponent::OnDashEffectEnd_Implementation()
 	}
 	
 	ActivateAbilityByTiming(EAbilityTiming::SkillFinish);
+}
+
+void UAbilityComponent::OnAttackEffectEnd_Implementation()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnAttackFinish();
+		}
+	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::AttackFinish);
 }
 
 
