@@ -1495,7 +1495,7 @@ void ABasePXCharacter::OnDashEffectBegin_Implementation()
 		bAttackStartup = false;
 		bInAttackEffect = false;
 		
-		AbilityComponent->OnAttackDash();
+		AbilityComponent->OnAttackSkillStart();
 	}
 }
 
@@ -1506,6 +1506,7 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 	if (AbilityComponent)
 	{
 		Execute_OnDashEffectEnd(AbilityComponent);
+		AbilityComponent->OnAttackSkillEnd();
 	}
 }
 

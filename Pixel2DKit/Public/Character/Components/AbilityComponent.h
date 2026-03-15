@@ -179,8 +179,11 @@ public:
 	void OnAttackStart(EAttackType Type, FVector Direction);
 	
 	UFUNCTION()
-	void OnAttackDash();// 后续可能会补充参数
-
+	void OnAttackSkillStart();
+	
+	UFUNCTION()
+	void OnAttackSkillEnd();
+	
 	UFUNCTION()
 	void OnKillEnemy(); // 后续可能会补充参数
 

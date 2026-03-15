@@ -108,10 +108,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Skill | Niagara")
 	void SetActivateTiming(EAbilityTiming Timing);
 
+	// 如果技能没有设定 AttributeEffectOnActivated，则可以不通过 Super::XXX 调用改函数
 	UFUNCTION(BlueprintCallable)
 	void ApplyAttributeEffects();
-	
-
 	
 	
 	// 由于触发的参数不同，无法笼统使用一个Activate方法
@@ -140,11 +139,16 @@ public:
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnAttackFinish();
 
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackSkill")
-	bool BP_OnAttackDash();
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackSkillStart")
+	bool BP_OnAttackSkillStart();
 	UFUNCTION(Category="Skill | Timing")
-	virtual bool OnAttackDash();
+	virtual bool OnAttackSkillStart();
 
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackSkillEnd")
+	bool BP_OnAttackSkillEnd();
+	UFUNCTION(Category="Skill | Timing")
+	virtual bool OnAttackSkillEnd();
+	
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnSkillStart")
 	bool BP_OnSkillStart();
 	UFUNCTION(Category="Skill | Timing")

@@ -149,11 +149,19 @@ bool ABaseSkill::OnAttackFinish()
 	return true;
 }
 
-bool ABaseSkill::OnAttackDash()
+bool ABaseSkill::OnAttackSkillStart()
 {
-	if (ActivateTiming != EAbilityTiming::AttackSkill) return false;
+	if (ActivateTiming != EAbilityTiming::AttackSkillStart) return false;
 	ApplyAttributeEffects();
-	BP_OnAttackDash();
+	BP_OnAttackSkillStart();
+	return true;
+}
+
+bool ABaseSkill::OnAttackSkillEnd()
+{
+	if (ActivateTiming != EAbilityTiming::AttackSkillEnd) return false;
+	ApplyAttributeEffects();
+	BP_OnAttackSkillEnd();
 	return true;
 }
 

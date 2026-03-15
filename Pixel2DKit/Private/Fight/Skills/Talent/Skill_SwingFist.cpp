@@ -31,32 +31,30 @@ void ASkill_SwingFist::MakeSwingFistPower()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->AbilityComponent)
 	FEffectGameplayTags& AbilityExtendData = PXCharacter->AbilityComponent->AbilityExtendData;
-	
-	FGameplayTag PlusTag = TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
-	FGameplayTag MinusTag = TAG("Ability.SwingFist.Set.AttackDamageMinusPercent");
 
-	if (!AbilityExtendData.Contains(PlusTag) || !AbilityExtendData.Contains(MinusTag)) return;
-
-	SwingFistPower = !SwingFistPower;
+	FGameplayTag CalTag = SwingFistPower ? TAG("Ability.SwingFist.Set.AttackDamageMinusPercent") : TAG("Ability.SwingFist.Set.AttackDamagePlusPercent");
 	
+	if (!AbilityExtendData.Contains(CalTag)) return;
+
 	PXCharacter->BuffComponent->RemoveBuff(AbilityTag);
 	
 	FText BuffNameFormat = LOCTEXT("Buff_SwingFist", "摇摆拳{0}");
+
+	FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[CalTag]);
+	PXCharacter->BuffComponent->AddAttributeEffect(AbilityTag, Effect);
+	
 	if (SwingFistPower)
 	{
-		FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[MinusTag]);
-		PXCharacter->BuffComponent->AddAttributeEffect(AbilityTag, Effect);
 		PXCharacter->BuffComponent->AddBuffOnWidget(AbilityTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↓"))).ToString(),
 			FLinearColor(0.093059, 0.027321, 0.0, 1), false);
 	}
 	else
 	{
-		FAttributeEffect Effect = FAttributeEffect(EPXAttribute::CurAttackValue, AbilityExtendData[PlusTag], 0);
-		
-		PXCharacter->BuffComponent->AddAttributeEffect(AbilityTag, Effect);
 		PXCharacter->BuffComponent->AddBuffOnWidget(AbilityTag,  FText::Format(BuffNameFormat, FText::FromString(TEXT("↑"))).ToString(),
 			FLinearColor(1.0, 0.296138, 0.0, 1), false);
 	}
+
+	SwingFistPower = !SwingFistPower;
 }
 
 // Called every frame
@@ -65,14 +63,16 @@ void ASkill_SwingFist::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-bool ASkill_SwingFist::OnAttackStart()
+bool ASkill_SwingFist::OnAttackFinish()
 {
-	if (Super::OnAttackStart())
-	{
-		MakeSwingFistPower();
-		return true;
-	}
-	return false;
+	MakeSwingFistPower();
+	return true;
+}
+
+bool ASkill_SwingFist::OnAttackSkillEnd()
+{
+	MakeSwingFistPower();
+	return true;
 }
 
 

@@ -31,6 +31,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual bool OnAttackStart() override;
+	virtual bool OnAttackFinish() override;
+	virtual bool OnAttackSkillEnd() override;
 	
 };

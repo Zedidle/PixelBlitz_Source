@@ -648,16 +648,28 @@ void UAbilityComponent::OnAttackStart(EAttackType Type, FVector Direction)
 }
 
 
-void UAbilityComponent::OnAttackDash()
+void UAbilityComponent::OnAttackSkillStart()
 {
 	for (auto& Skill : SkillsHolding)
 	{
 		if (Skill.IsValid())
 		{
-			Skill->OnAttackDash();
+			Skill->OnAttackSkillStart();
 		}
 	}
-	ActivateAbilityByTiming(EAbilityTiming::AttackSkill);
+	ActivateAbilityByTiming(EAbilityTiming::AttackSkillStart);
+}
+
+void UAbilityComponent::OnAttackSkillEnd()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnAttackSkillEnd();
+		}
+	}
+	ActivateAbilityByTiming(EAbilityTiming::AttackSkillEnd);
 }
 
 void UAbilityComponent::OnKillEnemy()
