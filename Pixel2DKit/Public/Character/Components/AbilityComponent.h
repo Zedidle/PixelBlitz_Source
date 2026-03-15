@@ -49,7 +49,6 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent, public IFight_I
 
 	bool TalentLoaded = false;
 
-	FVector OwnerPreLocation;
 	
 	UPROPERTY()
 	TArray<ABaseDefenseSkill*> DefenseSkills;
@@ -59,16 +58,7 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent, public IFight_I
 
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ABaseSkill>> SkillsHolding;
-	
-#pragma region TalentSet
 
-
-	// 热身
-	int WarmUP_Power = 0;
-	int WarmUP_MoveDistance = 0;
-
-	
-#pragma endregion
 	
 public:	
 	// Sets default values for this component's properties
@@ -119,13 +109,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void LoadTalents();
-
-#pragma region Talents专项处理
-	
-	UFUNCTION()
-	void MoveWarmingUP();
-	
-#pragma endregion 
 	
 	UFUNCTION()
 	void InitTalents();

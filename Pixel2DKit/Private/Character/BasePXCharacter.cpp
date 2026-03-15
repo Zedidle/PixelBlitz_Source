@@ -1494,7 +1494,8 @@ void ABasePXCharacter::OnDashEffectBegin_Implementation()
 		SetAttackAnimToggle(false);
 		bAttackStartup = false;
 		bInAttackEffect = false;
-		
+
+		bInAttackSkill = true;
 		AbilityComponent->OnAttackSkillStart();
 	}
 }
@@ -1506,7 +1507,12 @@ void ABasePXCharacter::OnDashEffectEnd_Implementation()
 	if (AbilityComponent)
 	{
 		Execute_OnDashEffectEnd(AbilityComponent);
-		AbilityComponent->OnAttackSkillEnd();
+
+		if (bInAttackSkill)
+		{
+			AbilityComponent->OnAttackSkillEnd();
+			bInAttackSkill = false;
+		}
 	}
 }
 

@@ -60,7 +60,6 @@ void UAbilityComponent::BeginPlay()
 
 	PXCharacter = Cast<ABasePXCharacter>(Owner);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-	OwnerPreLocation = PXCharacter->GetActorLocation();
 	
 	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
@@ -146,49 +145,8 @@ void UAbilityComponent::LoadTalents()
 	
 	if (TalentLoaded) return;
 	TalentLoaded = true;
-	
-	// 热身
-	FGameplayTag Tag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
-	if (AbilityExtendData.Contains(Tag))
-	{
-		UTimerManagerFuncLib::SetDelayLoopSafe(GetWorld(), "Ability.WarmUP",
-			this, &ThisClass::MoveWarmingUP, 0.2);
-	}
 }
 
-void UAbilityComponent::MoveWarmingUP()
-{
-	if (WarmUP_Power >= 4) return;
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC);
-	
-	WarmUP_MoveDistance += FVector::Distance(PXCharacter->GetActorLocation(), OwnerPreLocation);
-	OwnerPreLocation = PXCharacter->GetActorLocation();
-
-	FGameplayTag MoveDistancePerLevelTag = TAG("Ability.Warmup.Set.MoveDistancePerLevel");
-	FGameplayTag AttackDamagePlusPercentTag = TAG("Ability.Warmup.Set.AttackDamagePlusPercent");
-	
-	
-	if (!AbilityExtendData.Contains(MoveDistancePerLevelTag) ||
-		!AbilityExtendData.Contains(AttackDamagePlusPercentTag)
-	) return;
-
-	if (WarmUP_MoveDistance < AbilityExtendData[MoveDistancePerLevelTag]) return;
-
-	WarmUP_MoveDistance -= AbilityExtendData[MoveDistancePerLevelTag];
-	WarmUP_Power ++;
-
-	float PlusPowerPercent = WarmUP_Power * AbilityExtendData[AttackDamagePlusPercentTag];
-	FGameplayTag WarmUP_Tag = TAG("Ability.Warmup");
-	FText BuffNameFormat = LOCTEXT("Buff_Warmup", "热身{0}");
-
-	PXCharacter->BuffComponent->AddAttributeEffect(WarmUP_Tag,
-		FAttributeEffect(EPXAttribute::CurAttackValue, PlusPowerPercent));
-
-	PXCharacter->BuffComponent->AddBuffOnWidget(WarmUP_Tag, FText::Format(BuffNameFormat, WarmUP_Power).ToString(),
-	FLinearColor( 0.25 * WarmUP_Power, 0.1, 0.1, 1.0), false);
-}
 
 
 void UAbilityComponent::InitTalents()
@@ -689,15 +647,6 @@ void UAbilityComponent::OnBuffCalDamage()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
 	
-	// 清除热身运动
-	if (WarmUP_Power > 0)
-	{
-		// IBuff_Interface::Execute_RemoveBuff(PXCharacter, TAG("Ability.Warmup"), true);
-		WarmUP_Power = 0 ;
-		WarmUP_MoveDistance = 0;
-		OwnerPreLocation = PXCharacter->GetActorLocation();
-	}
-
 	PXCharacter->BuffComponent->RemoveBuff("Ability.EvadeStrike");
 	PXCharacter->BuffComponent->RemoveBuff("Ability.StaticPower");
 }

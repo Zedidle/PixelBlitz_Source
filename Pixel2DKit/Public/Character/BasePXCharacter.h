@@ -327,7 +327,10 @@ public:
 	// 用于管理攻击效果生效，暂不用于动画控制
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackEffect;
-
+	
+	UPROPERTY(BlueprintReadWrite, Category = Animation)
+	bool bInAttackSkill;
+	
 	// 冲刺进入
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDashing;
