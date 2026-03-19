@@ -68,6 +68,9 @@ public:
 	float RepelSameDistance = 50;
 
 	UFUNCTION(BlueprintCallable)
+	void RemoveSelfBuff();
+	
+	UFUNCTION(BlueprintCallable)
 	virtual void RepelFromActor(AActor* Other);
 	
 	UFUNCTION(BlueprintCallable)

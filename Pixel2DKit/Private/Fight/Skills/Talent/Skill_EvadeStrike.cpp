@@ -51,11 +51,7 @@ bool ASkill_EvadeStrike::OnSkillFinish()
 
 bool ASkill_EvadeStrike::OnAttackFinish()
 {
-	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(Owner);
-	if (!PXCharacter) return false;
-	if (!PXCharacter->BuffComponent) return false;
-	
-	PXCharacter->BuffComponent->RemoveBuff(AbilityTag);
+	RemoveSelfBuff();
 	return true;
 }
 

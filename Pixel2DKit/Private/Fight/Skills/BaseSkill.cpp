@@ -5,6 +5,7 @@
 
 #include "Pixel2DKit.h"
 #include "Character/Components/AbilityComponent.h"
+#include "Character/Components/BuffComponent.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Subsystems/AchievementSubsystem.h"
 #include "Subsystems/SkillManager.h"
@@ -34,6 +35,15 @@ void ABaseSkill::BeginPlay()
 	}
 }
 
+
+void ABaseSkill::RemoveSelfBuff()
+{
+	if (!IsValid(Owner)) return;
+	if (UBuffComponent* BuffComponent = Owner->GetComponentByClass<UBuffComponent>())
+	{
+		BuffComponent->RemoveBuff(AbilityTag);
+	}
+}
 
 void ABaseSkill::RepelFromActor(AActor* Other)
 {
