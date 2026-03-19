@@ -667,7 +667,9 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 
 int ABasePXCharacter::GetAttackDamage_Implementation()
 {
-	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue) : 1;
+	int AttackDamagePlus = AbilityComponent ? AbilityComponent->GetAttackDamagePlusRealtime() : 0;
+	
+	return AttackDamagePlus + (CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue) : 1);
 }
 
 FVector ABasePXCharacter::GetAttackRepel_Implementation()

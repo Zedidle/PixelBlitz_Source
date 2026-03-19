@@ -155,8 +155,9 @@ public:
 	UFUNCTION()
 	void OnSkillStart();// 后续可能会补充参数
 
+	// 专门处理实时变化的攻击附加
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	int GetAttackDamagePlus();
+	int GetAttackDamagePlusRealtime();
 
 	UFUNCTION()
 	void OnAttackStart(EAttackType Type, FVector Direction);

@@ -576,7 +576,7 @@ void UAbilityComponent::OnSkillStart()
 	ActivateAbilityByTiming(EAbilityTiming::SkillStart);
 }
 
-int UAbilityComponent::GetAttackDamagePlus()
+int UAbilityComponent::GetAttackDamagePlusRealtime()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, 0)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter->StateComponent, 0)
