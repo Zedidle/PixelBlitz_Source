@@ -155,54 +155,6 @@ bool UBuffComponent::BuffExist(FGameplayTag Tag) const
 	return Tag2AttributeEnums.Contains(Tag);
 }
 
-// void UBuffComponent::RemoveBuff_Attack(FGameplayTag Tag)
-// {
-// 	if (!Tag2BuffEffect_Attack.Contains(Tag)) return;
-//
-// 	FBuffEffect Effect = Tag2BuffEffect_Attack[Tag];
-// 	EffectedPercent_Attack -= Effect.EffectedPercent;
-// 	EffectedValue_Attack -= Effect.EffectedValue;
-//
-// 	Tag2BuffEffect_Attack.Remove(Tag);
-//
-// 	if (Owner && Owner->Implements<UBuff_Interface>())
-// 	{
-// 		Execute_BuffUpdate_Attack(Owner);
-// 	}
-// 	
-// }
-//
-// void UBuffComponent::RemoveBuff_Sight(FGameplayTag Tag)
-// {
-// 	if (!Tag2BuffEffect_Sight.Contains(Tag)) return;
-// 	
-// 	FBuffEffect Effect = Tag2BuffEffect_Sight[Tag];
-// 	EffectedPercent_Sight -= Effect.EffectedPercent;
-// 	EffectedValue_Sight -= Effect.EffectedValue;
-//
-// 	Tag2BuffEffect_Sight.Remove(Tag);
-//
-// 	if (Owner && Owner->Implements<UBuff_Interface>())
-// 	{
-// 		Execute_BuffUpdate_Sight(Owner);
-// 	}
-// }
-//
-// void UBuffComponent::RemoveBuff_Speed(FGameplayTag Tag)
-// {
-// 	if (!Tag2BuffEffect_Speed.Contains(Tag)) return;
-// 	
-// 	FBuffEffect Effect = Tag2BuffEffect_Speed[Tag];
-// 	EffectedPercent_Speed -= Effect.EffectedPercent;
-// 	EffectedValue_Speed -= Effect.EffectedValue;
-//
-// 	Tag2BuffEffect_Speed.Remove(Tag);
-//
-// 	if (Owner && Owner->Implements<UBuff_Interface>())
-// 	{
-// 		Execute_BuffUpdate_Speed(Owner);
-// 	}
-// }
 
 void UBuffComponent::SetBuffStateWidgetVisibility(ESlateVisibility InVisibility)
 {
