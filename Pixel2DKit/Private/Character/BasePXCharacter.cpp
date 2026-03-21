@@ -1619,16 +1619,17 @@ void ABasePXCharacter::AddMovementInput(FVector WorldDirection, float ScaleValue
 	Super::AddMovementInput(WorldDirection, ScaleValue, bForce);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
 
-	FVector velocity = GetCharacterMovement()->Velocity.GetSafeNormal();
-	FVector dir = WorldDirection.GetSafeNormal2D() * ScaleValue;
+	FVector PreDirection = GetCharacterMovement()->Velocity.GetSafeNormal();
+	FVector NewDirection = WorldDirection.GetSafeNormal2D() * ScaleValue;
 
 	float FoundR;
 	if (AbilityComponent->FindExtendData(TAG("Ability.Brake.Set.Value"), FoundR))
 	{
-		if (dir.Dot(velocity) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
+		// 天赋【急停】判断移动是否接近反方向
+		if (NewDirection.Dot(PreDirection) < -0.7 && GetCharacterMovement()->IsMovingOnGround()) // 接近反方向
 		{
-			float speed = GetCharacterMovement()->Velocity.Length();
-			GetCharacterMovement()->Velocity = FoundR * speed * dir;
+			float CurSpeed = GetCharacterMovement()->Velocity.Length();
+			GetCharacterMovement()->Velocity = FoundR * CurSpeed * NewDirection;
 		}
 	}
 }
