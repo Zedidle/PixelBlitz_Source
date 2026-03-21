@@ -225,7 +225,11 @@ void UPXAttributeSet::InitializeAttributeMap()
 		// 加速度
 		AttributeMap.Add(EPXAttribute::BasicAcceleration, GetBasicAccelerationAttribute());
 		AttributeMap.Add(EPXAttribute::CurAcceleration, GetCurAccelerationAttribute());
-
+		// 减速抵抗
+		AttributeMap.Add(EPXAttribute::BasicSpeedDownResist, GetBasicSpeedDownReistAttribute());
+		AttributeMap.Add(EPXAttribute::CurSpeedDownResist, GetCurSpeedDownReistAttribute());
+		
+		
 		// Dash速度
 		AttributeMap.Add(EPXAttribute::BasicDashSpeed, GetBasicDashSpeedAttribute());
 		AttributeMap.Add(EPXAttribute::CurDashSpeed, GetCurDashSpeedAttribute());

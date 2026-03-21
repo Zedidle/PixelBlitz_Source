@@ -168,6 +168,9 @@ public:
 	
 	void AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect);
 	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects);
+
+	// 针对性属性处理
+	FAttributeEffect DealEffectInternal(const FAttributeEffect& Effect);
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveAttributeEffect(EPXAttribute AttributeEnum, const FGameplayTag& Tag);

@@ -343,15 +343,16 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute At
 void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-	
 	EPXAttribute AttributeEnum = Effect.EffectedAttribute;
+	FAttributeEffect DealEffect = DealEffectInternal(Effect);
+	
 	FString AttributeName = GetAttributeNameByEnum(AttributeEnum);
 	if (AttributeName.IsEmpty()) return;
 	
 	if (AttributeName.StartsWith("Basic") || AttributeName.StartsWith("Cur"))
 	{
 		FAttributeEffectData& AttributeEffectData = AttributeEffects.FindOrAdd(AttributeEnum);
-		AttributeEffectData.AddBuffEffect(Tag, Effect);
+		AttributeEffectData.AddBuffEffect(Tag, DealEffect);
 
 		TArray<EPXAttribute>& AttributeEnums = Tag2AttributeEnums.FindOrAdd(Tag);
 		AttributeEnums.AddUnique(AttributeEnum);
@@ -361,7 +362,7 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 	else
 	{
 		float PreValue = CachedASC->GetAttributeValue(AttributeEnum);
-		float CurValue = PreValue * (1 + Effect.EffectedPercent) + Effect.EffectedValue;
+		float CurValue = PreValue * (1 + DealEffect.EffectedPercent) + DealEffect.EffectedValue;
 		
 		CachedASC->SetAttributeValue(AttributeEnum, CurValue);
 	}
@@ -373,6 +374,24 @@ void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<F
 	{
 		AddAttributeEffect(Tag, Effect);
 	}
+}
+
+FAttributeEffect UBuffComponent::DealEffectInternal(const FAttributeEffect& Effect)
+{
+	FAttributeEffect NewEffect = Effect;
+	if (NewEffect.EffectedAttribute == EPXAttribute::CurSpeed)
+	{
+		float CurSpeedDownResist = CachedASC->GetAttributeValue(EPXAttribute::CurSpeedDownResist);
+		if (Effect.EffectedPercent < 0)
+		{
+			NewEffect.EffectedPercent = Effect.EffectedPercent * (1 - CurSpeedDownResist);
+		}
+		if (Effect.EffectedValue < 0)
+		{
+			NewEffect.EffectedValue = Effect.EffectedValue * (1 - CurSpeedDownResist);
+		}
+	}
+	return NewEffect;
 }
 
 void UBuffComponent::RemoveAttributeEffect(EPXAttribute AttributeEnum, const FGameplayTag& Tag)
@@ -410,6 +429,8 @@ void UBuffComponent::RemoveAttributeEffectsByTag(const FGameplayTag& Tag)
 
 void UBuffComponent::UpdateAttribute(const FString& AttributeName)
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
+	
 	FString _, InitAttributeName;
 	FString BasicAttributeName, CurAttributeName;
 	if (AttributeName.Split("Basic", &_, &InitAttributeName) || AttributeName.Split("Cur", &_, &InitAttributeName))
