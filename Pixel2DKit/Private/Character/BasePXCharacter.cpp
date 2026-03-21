@@ -699,12 +699,6 @@ FVector ABasePXCharacter::GetAttackRepel_Implementation()
 
 	Result += RepelByVelocity * VelocityRepelFactor;
 
-	// 后续完全可以改成 AttributeEffects 的形式
-	float FoundR;
-	if (AbilityComponent->FindExtendData(TAG("Ability.Force.Set.PlusPercent"), FoundR))
-	{
-		Result *= 1 + FoundR;
-	}
 	return Result;
 }
 
