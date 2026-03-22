@@ -425,7 +425,7 @@ void UAbilityComponent::LoadAbilities()
 			AbilityExtendData.SetData(D.Key, D.Value);
 		}
 
-		FAttributeEffectArray& AttributeEffects = AbilityAttributeEffects.FindOrAdd(AbilityData.AbilityTag);
+		FAttributeEffectArray& AttributeEffects = AbilityAttributeEffects.FindOrAdd(AbilityTag);
 		for (auto& D: AbilityData.AttributeEffectsOnActivated)
 		{
 			AttributeEffects.AddEffect(D);
@@ -915,6 +915,19 @@ void UAbilityComponent::OnBeAttacked_Implementation(AActor* Maker, int InDamage,
 	}
 	
 	OutDamage = RemDamage; 
+}
+
+void UAbilityComponent::OnBeAttacked_Invulnerable_Implementation()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnBeAttackedInvulnerable();
+		}
+	}
+	
+	ActivateAbilityByTiming(EAbilityTiming::BeAttackedInvulnerable);
 }
 
 void UAbilityComponent::OnAttackEffect_Implementation()

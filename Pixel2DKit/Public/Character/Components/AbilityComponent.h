@@ -214,6 +214,7 @@ public:
 	virtual void OnAttackHit_Implementation(AActor* Receiver) override;
 	virtual void OnSkillHit_Implementation() override;
 	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce) override;
+	virtual void OnBeAttacked_Invulnerable_Implementation() override;
 	virtual void OnAttackEffect_Implementation() override;
 	virtual void OnAttackWeakPoint_Implementation(AActor* Receiver) override;
 	virtual void OnPickGold_Implementation() override;

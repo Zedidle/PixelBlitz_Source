@@ -1354,9 +1354,10 @@ void ABasePXCharacter::OnBeAttacked_Invulnerable_Implementation()
 	{
 		PerfectDodgeTimes++;
 
-		CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-		CachedASC->TryActivateAbilityByTagName("Ability.PerfectDodge");
-
+		if (AbilityComponent)
+		{
+			Execute_OnBeAttacked_Invulnerable(AbilityComponent);
+		}
 		CameraOffset_BulletTime(0.03f);
 	}
 }
