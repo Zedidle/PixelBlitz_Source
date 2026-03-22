@@ -59,16 +59,10 @@ public:
 	float InvulnerableDuration = 0.5; // 无敌帧时间
 
 	bool bFlashing = false; // 是否在受伤闪烁
-	
-	UPROPERTY(BlueprintReadWrite, Category = "StateComponent")
-	float InRockPercent = 0.0f; // 霸体抗性，抵御击退、击飞
 
 	UPROPERTY(BlueprintReadWrite, Category = "StateComponent")
 	FVector RepelResistance = FVector(10, 10, 10); // 各个方向的击退抵抗
 
-	UPROPERTY(BlueprintReadWrite, Category = "StateComponent")
-	float RepelResistancePercent = 0.f; // 最终结算时的击退削减百分比
-	
 	float KnockBackMultiplier = 1.f; // 受力缩放
 	float MinPowerRepelForceValue = 300.f; // 强效击退触发的阈值
 	
