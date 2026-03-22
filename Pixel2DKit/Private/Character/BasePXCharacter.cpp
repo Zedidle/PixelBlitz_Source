@@ -1744,8 +1744,7 @@ void ABasePXCharacter::TryUseSkill()
 	
 	if (AbilityComponent)
 	{
-		float _;
-		if (AbilityComponent->FindExtendData(TAG("Ability.MoonStep"), _))
+		if (AbilityComponent->HasExtendData(TAG("Ability.MoonStep")))
 		{
 			CurJumpCount -- ;
 		}

@@ -13,6 +13,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
+#include "Character/Components/AbilityComponent.h"
 #include "Core/PXGameState.h"
 #include "GAS/PXASComponent.h"
 #include "Settings/PXSettingsShared.h"
@@ -94,7 +95,11 @@ void UStateComponent::FlashForDuration(float Duration, float FlashRate, FLinearC
 FVector UStateComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigator) const
 {
 	if (!IsValid(Instigator)) return IncomeRepel;
-	IncomeRepel = (1.0f - RepelResistancePercent) * IncomeRepel;
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, IncomeRepel)
+	
+	float CurRepelResist = CachedASC->GetAttributeValue(EPXAttribute::CurRepelResist);
+	
+	IncomeRepel = (1.0f - CurRepelResist) * IncomeRepel;
 	IncomeRepel.X = IncomeRepel.X > 0 ? FMath::Max(IncomeRepel.X - RepelResistance.X, 0) : FMath::Min(IncomeRepel.X + RepelResistance.X, 0);
 	IncomeRepel.Y = IncomeRepel.Y > 0 ? FMath::Max(IncomeRepel.Y - RepelResistance.Y, 0) : FMath::Min(IncomeRepel.Y + RepelResistance.Y, 0);
 	IncomeRepel.Z = IncomeRepel.Z > 0 ? FMath::Max(IncomeRepel.Z - RepelResistance.Z, 0) : FMath::Min(IncomeRepel.Z + RepelResistance.Z, 0);
@@ -282,12 +287,17 @@ void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector Knockb
 		}
 	}
 	CachedASC->SetAttributeValue(EPXAttribute::HP, CurrentHealth);
-	// CachedASC->SetNumericAttributeBase(UPXAttributeSet::GetHPAttribute(), CurrentHealth);
 }
 
 void UStateComponent::KnockBack(FVector Repel, AActor* Maker)
 {
-	if (InRockPercent > 0.0f)
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GetOwner());
+	UAbilityComponent* AbilityComponent = GetOwner()->GetComponentByClass<UAbilityComponent>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent);
+
+	if (bInvulnerable) return;
+	
+	if (AbilityComponent->HasExtendData(TAG("Ability.InRock")))
 	{
 		UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_INROCK", "霸体"),
 			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.8, 0.8));
@@ -295,7 +305,7 @@ void UStateComponent::KnockBack(FVector Repel, AActor* Maker)
 
 	if (bInvulnerable) return;
 
-	Repel = (1 - InRockPercent) * CalRepel(Repel, Maker) * KnockBackMultiplier;
+	Repel = CalRepel(Repel, Maker) * KnockBackMultiplier;
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())
 	{
 		MovementComponent->StopMovementImmediately();
