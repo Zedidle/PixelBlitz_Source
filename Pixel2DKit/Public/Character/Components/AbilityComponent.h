@@ -199,9 +199,6 @@ public:
 	FGameplayAbilitySpec* GetAbilitySpec(FName TagName);
 
 	UFUNCTION(BlueprintCallable)
-	bool HasExtendData(FGameplayTag Tag);
-	
-	UFUNCTION(BlueprintCallable)
 	bool FindExtendData(FGameplayTag Tag, float& Result);
 
 	UFUNCTION(BlueprintCallable)

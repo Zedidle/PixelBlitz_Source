@@ -786,11 +786,6 @@ FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FG
 	return OutAbilityHandles[0];
 }
 
-bool UAbilityComponent::HasExtendData(FGameplayTag Tag)
-{
-	return AbilityExtendData.Contains(Tag);
-}
-
 bool UAbilityComponent::FindExtendData(FGameplayTag Tag, float& Result)
 {
 	if (AbilityExtendData.Contains(Tag))
