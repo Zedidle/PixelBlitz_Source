@@ -404,13 +404,11 @@ void UAbilityComponent::LoadAbilities()
 		Tag.ToString().Split(".Level", &Parent, &Level);
 
 		FGameplayTag AbilityTag = TAG(*Parent);
-		
 		if (AbilityExtendData.Contains(AbilityTag)) continue;
 		
 		const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(Tag);
-		if (!AbilityData.AbilityTag.IsValid()) continue;
 		
-		AbilityExtendData.SetData(AbilityData.AbilityTag, 1);
+		AbilityExtendData.SetData(AbilityTag, 1);
 		for (auto& AbilityClass: AbilityData.AbilityClass)
 		{
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
@@ -440,7 +438,7 @@ void UAbilityComponent::LoadAbilities()
 		}
 		else
 		{
-			PXCharacter->BuffComponent->AddAttributeEffects(AbilityData.AbilityTag, AbilityData.AttributeEffectsOnActivated);
+			PXCharacter->BuffComponent->AddAttributeEffects(AbilityTag, AbilityData.AttributeEffectsOnActivated);
 		}
 	}
 

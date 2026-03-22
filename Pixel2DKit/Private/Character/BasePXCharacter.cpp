@@ -1741,6 +1741,15 @@ void ABasePXCharacter::Interact()
 void ABasePXCharacter::TryUseSkill()
 {
 	BP_TryUseSkill();
+	
+	if (AbilityComponent)
+	{
+		float _;
+		if (AbilityComponent->FindExtendData(TAG("Ability.MoonStep"), _))
+		{
+			CurJumpCount -- ;
+		}
+	}
 }
 
 void ABasePXCharacter::AddInteractableItem(ABaseInteractableItem* Item)
