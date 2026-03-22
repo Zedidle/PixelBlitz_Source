@@ -149,6 +149,27 @@ void UStateComponent::BeginPlay()
 	}
 	
 	OnHPChanged.AddDynamic(this, &UStateComponent::Event_OnHPChanged);
+
+	AActor* Owner = GetOwner();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Owner)
+	
+	FName TimerName_HPRecover = FName(Owner->GetName() + "_UStateComponent_HPRecover");
+	UTimerManagerFuncLib::SetDelayLoop(GetWorld(), TimerName_HPRecover, [WeakThis = TWeakObjectPtr(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		if (!WeakThis->CachedASC) return;
+		float RecoverValue = WeakThis->CachedASC->GetAttributeValue(EPXAttribute::CurHPRecoverValue);
+		WeakThis->IncreaseHP(RecoverValue, WeakThis->GetOwner());
+	}, HPRecoverInterval);
+
+	FName TimerName_EPRecover = FName(Owner->GetName() + "_UStateComponent_EPRecover");
+	UTimerManagerFuncLib::SetDelayLoop(GetWorld(), TimerName_EPRecover, [WeakThis = TWeakObjectPtr(this)]
+	{
+		if (!WeakThis.IsValid()) return;
+		if (!WeakThis->CachedASC) return;
+		float RecoverValue = WeakThis->CachedASC->GetAttributeValue(EPXAttribute::CurEPRecoverValue);
+		WeakThis->IncreaseEP(RecoverValue);
+	}, EPRecoverInterval);
 }
 
 void UStateComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

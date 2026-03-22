@@ -44,6 +44,9 @@ class UStateComponent : public UActorComponent
 
 	UPROPERTY()
 	UPXASComponent* CachedASC;
+
+	float HPRecoverInterval = 5;
+	float EPRecoverInterval = 2;
 	
 public:
 

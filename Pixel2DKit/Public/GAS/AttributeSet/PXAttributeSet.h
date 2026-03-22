@@ -217,7 +217,7 @@ public:
 	UFUNCTION()
 	virtual void OnRep_CurMaxHP(const FGameplayAttributeData& OldValue);
 
-	// 生命值（每5秒）恢复值，从自定义恢复曲线中读取
+	// 生命值（每 StateComponent.HPRecoverInterval 秒）恢复值，从自定义恢复曲线中读取
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicHPRecoverValue)
 	FGameplayAttributeData BasicHPRecoverValue;
 	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicHPRecoverValue);
@@ -245,7 +245,7 @@ public:
 	UFUNCTION()
 	virtual void OnRep_CurMaxEP(const FGameplayAttributeData& OldValue);
 	
-	// 能量值（每5秒）恢复值，曲线直接设置的恢复值
+	// 能量值（每 StateComponent.EPRecoverInterval 秒）恢复值，曲线直接设置的恢复值
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, ReplicatedUsing = OnRep_BasicEPRecoverValue)
 	FGameplayAttributeData BasicEPRecoverValue;
 	ATTRIBUTE_ACCESSORS(UPXAttributeSet, BasicEPRecoverValue);
