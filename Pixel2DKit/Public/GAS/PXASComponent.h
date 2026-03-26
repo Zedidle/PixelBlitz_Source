@@ -75,6 +75,7 @@ public:
 		// 	}
 		// }
 	}
+	
 	template<typename T = UPXAttributeSet>
 	void SetAttributeValueByName(const FString& AttributeName, float Value)
 	{
