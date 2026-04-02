@@ -12,6 +12,7 @@
 #include "Utilitys/PXCustomStruct.h"
 #include "Engine/DataTable.h"
 #include "Fight/Components/StateComponent.h"
+#include "Fight/Skills/BaseSummonSkill.h"
 #include "GAS/PXEnemyASComponent.h"
 #include "BaseEnemy.generated.h"
 
@@ -127,6 +128,9 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	void SetLanding(const bool V, const float time = 0.1f);
 
 	FActionMove ActionMove;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	TArray<ABaseSummonSkill*> SummonSkills;
 	
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
@@ -382,6 +386,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight", meta = (ExposeOnSpawn = true))
 	FName EnemyLevel = "1"; 
 	
+	
+	
+	
+	
+	
+	UFUNCTION()
+	void OnDispel();
+	
+	
+	
 protected:
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -389,7 +403,6 @@ protected:
 	void Tick_ActionMove(float DeltaSeconds);
 	void Tick_SnapOnPlatform(float DeltaSeconds);
 	
-
 
 	
 };

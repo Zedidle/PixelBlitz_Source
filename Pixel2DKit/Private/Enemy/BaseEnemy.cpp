@@ -1246,6 +1246,11 @@ void ABaseEnemy::Tick_SnapOnPlatform(float DeltaSeconds)
 	}
 }
 
+void ABaseEnemy::OnDispel()
+{
+	
+}
+
 void ABaseEnemy::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
