@@ -12,7 +12,7 @@
 #include "Foundation/PXActionWidget.h"
 #include "Foundation/PXActivatableWidget.h"
 #include "Pixel2DKit/Pixel2DKit.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "Widgets/CommonActivatableWidgetContainer.h"
 #include "UIManager.generated.h"
 

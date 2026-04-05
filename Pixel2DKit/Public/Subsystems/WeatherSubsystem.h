@@ -6,7 +6,7 @@
 #include "Pixel2DKit.h"
 #include "Core/PXGameState.h"
 #include "Subsystems/GameInstanceSubsystem.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "WeatherSubsystem.generated.h"
 
 

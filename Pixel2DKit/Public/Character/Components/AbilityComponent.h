@@ -10,7 +10,7 @@
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "UI/QTE/ArrowLineWidget.h"
 #include "UI/QTE/KeyPressCountDownWidget.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "AbilityComponent.generated.h"
 
 

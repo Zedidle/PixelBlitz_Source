@@ -7,7 +7,7 @@
 #include "Item/BaseItem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "Utilitys/SoundFuncLib.h"
 #include "BaseWeapon.generated.h"
 

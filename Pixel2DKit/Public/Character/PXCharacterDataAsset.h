@@ -6,7 +6,7 @@
 #include "PXCharacterInputConfig.h"
 #include "Engine/DataAsset.h"
 #include "UI/Player/BasePlayerStatusWidget.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "PXCharacterDataAsset.generated.h"
 
 class ABaseWeapon;

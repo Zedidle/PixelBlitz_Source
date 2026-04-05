@@ -6,7 +6,22 @@
 #include "GameFramework/Actor.h"
 #include "BaseSummoned.generated.h"
 
-UCLASS()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+UCLASS(Abstract)
 class PIXEL2DKIT_API ABaseSummoned : public AActor
 {
 	GENERATED_BODY()

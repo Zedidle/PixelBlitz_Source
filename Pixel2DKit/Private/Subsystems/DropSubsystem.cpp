@@ -10,7 +10,7 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/CommonFuncLib.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "Utilitys/SoundFuncLib.h"
 
 

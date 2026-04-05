@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "SubtitleDisplayOptions.h"
 #include "GameFramework/SaveGame.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "PXSettingsShared.generated.h"
 
 class UObject;

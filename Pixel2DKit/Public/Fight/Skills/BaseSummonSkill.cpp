@@ -1,8 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "BaseSummonSkill.h"
-
 #include "Fight/Summoned/BaseSummoned.h"
 
 
@@ -11,6 +9,10 @@ ABaseSummonSkill::ABaseSummonSkill()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// 读取召唤物表
+	
+	
 }
 
 // Called when the game starts or when spawned
@@ -20,8 +22,10 @@ void ABaseSummonSkill::BeginPlay()
 	
 	if (GetWorld())
 	{
-		GetWorld()->GetTimerManager().SetTimer(SummonTimer, this, &ThisClass::Summon, SpawnInterval, true);
+		GetWorld()->GetTimerManager().SetTimer(SummonTimer, this, &ThisClass::Summon, GetSpawnInterval(), true);
 	}
+
+	ActivateTiming = EAbilityTiming::BeDamaged;
 	
 	// 后续可能SetData? 
 	SetLifeSpan(GetSustainTime());
@@ -106,6 +110,15 @@ void ABaseSummonSkill::End()
 	{
 		Summoned->SummonedEnd();
 	}
+}
+
+float ABaseSummonSkill::GetSpawnInterval()
+{
+	if (SpawnIntervalAtLevel.IsValidIndex(SkillLevel - 1))
+	{
+		return SpawnIntervalAtLevel[SkillLevel - 1];
+	}
+	return 1.0f;
 }
 
 float ABaseSummonSkill::GetSustainTime()

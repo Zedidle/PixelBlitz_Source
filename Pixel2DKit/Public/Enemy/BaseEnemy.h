@@ -9,7 +9,7 @@
 #include "Curves/CurveVector.h"
 #include "Interfaces/Fight_Interface.h"
 #include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "Engine/DataTable.h"
 #include "Fight/Components/StateComponent.h"
 #include "Fight/Skills/BaseSummonSkill.h"
@@ -128,7 +128,8 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	void SetLanding(const bool V, const float time = 0.1f);
 
 	FActionMove ActionMove;
-	
+
+	// 当前激活的召唤术技能
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	TArray<ABaseSummonSkill*> SummonSkills;
 	

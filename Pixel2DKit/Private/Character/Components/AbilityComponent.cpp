@@ -15,7 +15,7 @@
 #include "Settings/Config/PXCustomSettings.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerManagerFuncLib.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 
 
 

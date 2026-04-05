@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "CommonTextBlock.h"
 #include "Blueprint/UserWidget.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "TalentTipWidget.generated.h"
 
 /**

@@ -14,7 +14,7 @@ class PIXEL2DKIT_API ABaseSummonSkill : public ABaseSkill
 	GENERATED_BODY()
 
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true, ExposeOnSpawn = true))
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true, ExposeOnSpawn = true))
 	int SkillLevel = 1;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true, ExposeOnSpawn = true))
@@ -24,8 +24,9 @@ class PIXEL2DKIT_API ABaseSummonSkill : public ABaseSkill
 	TSubclassOf<ABaseSummoned> SummonedClass;
 	
 	FTimerHandle SummonTimer;
-	float SpawnInterval;
-	
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	TArray<float> SpawnIntervalAtLevel;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
 	TArray<float> SustainTimesAtLevel;
@@ -67,6 +68,9 @@ public:
 	void Summon();
 	
 	void End();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetSpawnInterval();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetSustainTime();

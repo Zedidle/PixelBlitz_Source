@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "UI/Buff/BuffStateWidget.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "GameplayEffect.h"
 #include "NiagaraComponent.h"
 #include "Character/BasePXCharacter.h"

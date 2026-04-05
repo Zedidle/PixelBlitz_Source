@@ -7,7 +7,7 @@
 #include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
 #include "GAS/PXASComponent.h"
-#include "Utilitys/PXCustomStruct.h"
+#include "PXCustomStruct.h"
 #include "BaseSkill.generated.h"
 
 
@@ -20,21 +20,22 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 	GENERATED_BODY()
 
 
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	USoundBase* BeginSound = nullptr;
 
+
+	
+	
+protected:
+	virtual void BeginPlay() override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bActive = false;
-	
 	
 	// 技能触发时机，长期挂载才有用
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	EAbilityTiming ActivateTiming = EAbilityTiming::None;
 	
-protected:
-	virtual void BeginPlay() override;
-
 	// 用于判断技能在自行消失生命或伤害结算后将要进入 Waiting状态 倒计时（一般是0.5秒）触发消失特效的阶段
 	UPROPERTY(BlueprintReadWrite)
 	bool bEnding = false;
