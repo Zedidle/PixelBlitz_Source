@@ -12,7 +12,7 @@
 #include "PXCustomStruct.h"
 #include "Engine/DataTable.h"
 #include "Fight/Components/StateComponent.h"
-#include "Fight/Skills/BaseSummonSkill.h"
+#include "Fight/Skills/Common/CommonSummonSkill.h"
 #include "GAS/PXEnemyASComponent.h"
 #include "BaseEnemy.generated.h"
 
@@ -131,11 +131,14 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 
 	// 当前激活的召唤术技能
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
-	TArray<ABaseSummonSkill*> SummonSkills;
+	TArray<ACommonSummonSkill*> SummonSkills;
 	
 public:
 	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	UFUNCTION(BlueprintCallable)
+	void ActivateSummonSkill(FName SummonedID, int SkillLevel = 1);
+	
 	bool IsActionMoving() const;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)

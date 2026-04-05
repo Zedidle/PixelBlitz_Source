@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PXCustomStruct.h"
+#include "Fight/Skills/Common/CommonSummonSkill.h"
 #include "DataTableSubsystem.generated.h"
 
 struct FWeaponData;
@@ -54,9 +55,6 @@ public:
 	TObjectPtr<UDataTable> GetLevelWeatherRateData()  { return GetDataTable("LevelWeatherRate"); }
 	TObjectPtr<UDataTable> GetWeatherData()  { return GetDataTable("Weather"); }
 
-
-
-
 	
 	mutable TMap<FGameplayTag, FAbility> AbilityData;
 	void LoadAbilityData();
@@ -82,12 +80,19 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	FTalent GetTalentDataByTag(const FGameplayTag& TalentTag);
 	
+
+	mutable TMap<FName, FSummoned> SummonedData ;
+	TObjectPtr<UDataTable> GetSummonedData() { return GetDataTable("Summoned"); }
+	void LoadSummonedData() ;
+	const FSummoned* GetSummonedDataByName(const FName& SummonedName) ;
+
 	
 	mutable TMap<FGameplayTag, FWeaponData> WeaponData;
 	void LoadWeaponData() ;
 	const FWeaponData* GetWeaponDataByTag(const FGameplayTag& WeaponTag) ;
 
 	
+	// 获取关卡数据
 	mutable TMap<FName, FLevelData> LevelData;
 	void LoadLevelData();
 	const FLevelData* GetLevelDataByName(const FName& LevelInstanceName) ;

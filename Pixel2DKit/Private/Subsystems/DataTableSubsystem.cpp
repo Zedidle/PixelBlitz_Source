@@ -112,6 +112,30 @@ FTalent UDataTableSubsystem::GetTalentDataByTag(const FGameplayTag& TalentTag)
 	return TalentData.FindRef(TalentTag);
 }
 
+void UDataTableSubsystem::LoadSummonedData()
+{
+	UDataTable* DataTable = GetSummonedData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	TArray<FName> Rownames = DataTable->GetRowNames();
+	for (auto& Row : Rownames)
+	{
+		FSummoned* Data = DataTable->FindRow<FSummoned>(Row, "LoadSummonedData");
+		SummonedData.Add(Data->SummonedID, *Data);
+	}
+}
+
+const FSummoned* UDataTableSubsystem::GetSummonedDataByName(const FName& SummonedName)
+{
+	if (!SummonedData.Contains(SummonedName))
+	{
+		LoadSummonedData();
+	}
+
+	return SummonedData.Find(SummonedName);
+}
+
+
 void UDataTableSubsystem::LoadWeaponData()
 {
 	UDataTable* DataTable = GetDataTable("Weapon");

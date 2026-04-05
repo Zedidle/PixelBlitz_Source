@@ -345,8 +345,6 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 : Super(ObjectInitializer)
 {
-	
-	// StateComponent = CreateDefaultSubobject<UStateComponent>(TEXT("StateComponent"));
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
@@ -362,6 +360,20 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	{
 		GetSprite()->CastShadow = true;
 	}
+}
+
+void ABaseEnemy::ActivateSummonSkill(FName SummonedID, int SkillLevel)
+{
+	UWorld* World = GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
+
+	ACommonSummonSkill* SummonSkill = World->SpawnActor<ACommonSummonSkill>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SummonSkill);
+
+	SummonSkill->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+	SummonSkill->LoadData(SummonedID, SkillLevel);
+	SummonSkill->SetTarget(GetPixelCharacter());
+	SummonSkills.Add(SummonSkill);
 }
 
 bool ABaseEnemy::IsActionMoving() const
