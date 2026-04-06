@@ -333,14 +333,14 @@ void UBuffComponent::ExpireBuff(FGameplayTag Tag)
 	}
 }
 
-void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, float Percent, float Value,
+void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, bool bSetDirectly, float Percent, float Value,
 	float Duration)
 {
 	FAttributeEffect Effect = FAttributeEffect(Attribute, Percent, Value, Duration);
-	AddAttributeEffect(Tag, Effect);
+	AddAttributeEffect(Tag, Effect, bSetDirectly);
 }
 
-void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect)
+void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect, bool bSetDirectly)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	EPXAttribute AttributeEnum = Effect.EffectedAttribute;
@@ -352,7 +352,14 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 	if (AttributeName.StartsWith("Basic") || AttributeName.StartsWith("Cur"))
 	{
 		FAttributeEffectData& AttributeEffectData = AttributeEffects.FindOrAdd(AttributeEnum);
-		AttributeEffectData.AddBuffEffect(Tag, DealEffect);
+		if (bSetDirectly)
+		{
+			AttributeEffectData.SetBuffEffect(Tag, DealEffect);
+		}
+		else
+		{
+			AttributeEffectData.AddBuffEffect(Tag, DealEffect);
+		}
 
 		TArray<EPXAttribute>& AttributeEnums = Tag2AttributeEnums.FindOrAdd(Tag);
 		AttributeEnums.AddUnique(AttributeEnum);
@@ -368,11 +375,11 @@ void UBuffComponent::AddAttributeEffect(const FGameplayTag& Tag, const FAttribut
 	}
 }
 
-void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects)
+void UBuffComponent::AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects, bool bSetDirectly)
 {
 	for (auto& Effect : Effects)
 	{
-		AddAttributeEffect(Tag, Effect);
+		AddAttributeEffect(Tag, Effect, bSetDirectly);
 	}
 }
 

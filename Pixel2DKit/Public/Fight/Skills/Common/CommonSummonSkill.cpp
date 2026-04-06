@@ -2,6 +2,7 @@
 
 #include "CommonSummonSkill.h"
 #include "Fight/Summoned/BaseSummoned.h"
+#include "Kismet/GameplayStatics.h"
 #include "Subsystems/DataTableSubsystem.h"
 
 
@@ -87,24 +88,37 @@ void ACommonSummonSkill::Summon()
 	UWorld* World = GetWorld();
 	if (!World) return;
 
+	if (!Owner) return;
 	if (!SummonedData.SummonedClass) return;
 	
-	FVector Location = GetActorLocation() + FMath::VRand() * SummonedData.SpawnRadius;
+	FVector Location = Owner->GetActorLocation() + FMath::VRand() * SummonedData.SpawnRadius;
 	
 	FTransform Transform;
 	Transform.SetLocation(Location);
 
-	if (ABaseSummoned* Summoned = World->SpawnActor<ABaseSummoned>(SummonedData.SummonedClass, Transform))
+	// 2. 延迟生成Actor（仅创建实例，未执行BeginPlay等生命周期）
+	if (ABaseSummoned* Summoned = World->SpawnActorDeferred<ABaseSummoned>(
+		SummonedData.SummonedClass,  // 要生成的Actor类
+		Transform,                   // 生成变换（位置/旋转/缩放）
+		GetOwner(),                  // 生成参数
+		nullptr,
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+	))
 	{
+		// 3. 【延迟阶段】Actor已创建，但未FinishSpawning，在此完成所有初始化
+		// 注：Spawn时已指定Owner，可省略SetOwner；若有自定义SetOwner逻辑，可保留原代码
+		// Summoned->SetOwner(GetOwner()); 
 		Summoned->SetTarget(Target.Get());
+		Summoned->SetLifeSpan(GetSummonedLifeSpan());
 		ActivatedSummoneds.Add(Summoned);
-		
+
+		// 4. 【必须调用】完成Actor生成，触发PostInitializeComponents、BeginPlay等生命周期
+		UGameplayStatics::FinishSpawningActor(Summoned, Transform);
+
+		// 5. 生成成功后，执行原定时器逻辑（完全保留原业务）
 		if (ActivatedSummoneds.Num() == GetSpawnNum())
 		{
-			if (GetWorld())
-			{
-				GetWorld()->GetTimerManager().ClearTimer(SummonTimer);
-			}
+			World->GetTimerManager().ClearTimer(SummonTimer);
 		}
 	}
 	
@@ -119,8 +133,20 @@ void ACommonSummonSkill::End()
 	
 	for (ABaseSummoned* Summoned : ActivatedSummoneds)
 	{
-		Summoned->SummonedEnd();
+		if (IsValid(Summoned))
+		{
+			Summoned->SummonedEnd();
+		}
 	}
+}
+
+float ACommonSummonSkill::GetSustainTime()
+{
+	if (SummonedData.SustainTimeAtLevel.IsValidIndex(SkillLevel - 1))
+	{
+		return SummonedData.SustainTimeAtLevel[SkillLevel - 1];
+	}
+	return 5.0f;
 }
 
 float ACommonSummonSkill::GetSpawnInterval()
@@ -132,13 +158,13 @@ float ACommonSummonSkill::GetSpawnInterval()
 	return 1.0f;
 }
 
-float ACommonSummonSkill::GetSustainTime()
+float ACommonSummonSkill::GetSummonedLifeSpan()
 {
-	if (SummonedData.SustainTimesAtLevel.IsValidIndex(SkillLevel - 1))
+	if (SummonedData.SummonedLifeSpanAtLevel.IsValidIndex(SkillLevel - 1))
 	{
-		return SummonedData.SustainTimesAtLevel[SkillLevel - 1];
+		return SummonedData.SummonedLifeSpanAtLevel[SkillLevel - 1];
 	}
-	return 2.0f;
+	return 3.0f;
 }
 
 int ACommonSummonSkill::GetSpawnNum()

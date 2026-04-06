@@ -21,28 +21,28 @@ struct FSummoned : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText SummonedName;
 
-	// 召唤术持续时间
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float LifeSpan = 5.0f;
-	
 	// 生成点的波动范围
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SpawnRadius = 100.0f;
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TSubclassOf<ABaseSummoned> SummonedClass;
-
+	
+	// 召唤术持续时间
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<float> SustainTimeAtLevel = {5.0f};
+	
 	// 生成多个时的间隔
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<float> SpawnIntervalAtLevel;
+	TArray<float> SpawnIntervalAtLevel = {1.0f};
 
 	// 召唤物持续时间
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<float> SustainTimesAtLevel;
+	TArray<float> SummonedLifeSpanAtLevel = {3.0f};
 
 	// 召唤物数目
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<int> SpawnNumsAtLevel;
+	TArray<int> SpawnNumsAtLevel = {1};
 
 };
 #pragma endregion
@@ -103,10 +103,13 @@ public:
 	void End();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
+	float GetSustainTime();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	float GetSpawnInterval();
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	float GetSustainTime();
+	float GetSummonedLifeSpan();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	int GetSpawnNum();

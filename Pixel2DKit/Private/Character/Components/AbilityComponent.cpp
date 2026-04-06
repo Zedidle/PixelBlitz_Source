@@ -821,7 +821,7 @@ void UAbilityComponent::ApplyAttributeEffects(FGameplayTag Tag)
 	FAttributeEffectArray Effects;
 	if (FindAttributeEffects(Tag, Effects))
 	{
-		PXCharacter->BuffComponent->AddAttributeEffects(Tag, Effects.Data);
+		PXCharacter->BuffComponent->AddAttributeEffects(Tag, Effects.Data, true);
 	}
 }
 

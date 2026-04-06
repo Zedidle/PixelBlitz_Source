@@ -368,11 +368,12 @@ void ABaseEnemy::ActivateSummonSkill(FName SummonedID, int SkillLevel)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World);
 
 	ACommonSummonSkill* SummonSkill = World->SpawnActor<ACommonSummonSkill>();
+
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SummonSkill);
 
-	SummonSkill->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-	SummonSkill->LoadData(SummonedID, SkillLevel);
+	SummonSkill->SetOwner(this);
 	SummonSkill->SetTarget(GetPixelCharacter());
+	SummonSkill->LoadData(SummonedID, SkillLevel);
 	SummonSkills.Add(SummonSkill);
 }
 

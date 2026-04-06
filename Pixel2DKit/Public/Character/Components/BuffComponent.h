@@ -164,11 +164,11 @@ public:
 	
 	
 	UFUNCTION(BlueprintCallable)
-	void AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, float Percent = 0.0f, float Value = 1.f, float Duration = 9999.f);
-	
-	void AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect);
-	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects);
+	void AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, bool bSetDirectly = false, float Percent = 0.0f, float Value = 1.f, float Duration = 9999.f);
+	void AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect, bool bSetDirectly = false);
+	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects, bool bSetDirectly = false);
 
+	
 	// 针对性属性处理
 	FAttributeEffect DealEffectInternal(const FAttributeEffect& Effect);
 	

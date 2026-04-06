@@ -30,7 +30,7 @@ void ABaseSummoned::Tick_KeepFaceTarget()
 {
 	if (Target.IsValid())
 	{
-		if (bInReady && bNeedKeepFaceTarget)
+		if (bNeedKeepFaceTarget)
 		{
 			FaceTargetEffect();
 		}
