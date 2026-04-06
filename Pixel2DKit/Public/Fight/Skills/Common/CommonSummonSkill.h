@@ -88,7 +88,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	void OnDispel(int DispelLevel);
+	void OnDispel(int DispelLevel, float BasicRate);
 	
 	UFUNCTION(BlueprintCallable)
 	void OnOwnerDie();

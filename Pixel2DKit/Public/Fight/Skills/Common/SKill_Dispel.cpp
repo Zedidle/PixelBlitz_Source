@@ -3,6 +3,7 @@
 
 #include "SKill_Dispel.h"
 
+#include "Character/Components/AbilityComponent.h"
 #include "Enemy/BaseEnemy.h"
 
 
@@ -30,7 +31,16 @@ bool ASKill_Dispel::OnAttackHit(AActor* Receiver)
 {
 	if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(Receiver))
 	{
-		Enemy->OnDispel(SkillLevel);
+		UAbilityComponent* AbilityComponent = Owner->GetComponentByClass<UAbilityComponent>();
+		CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AbilityComponent, false);
+
+		FGameplayTag DispelBasicRate = TAG("Ability.Dispel.Set.BasicRate");
+
+		float BasicRate;
+		if (AbilityComponent->FindExtendData(DispelBasicRate, BasicRate))
+		{
+			Enemy->OnDispel(SkillLevel, BasicRate);
+		}
 	}
 	
 	return true;
