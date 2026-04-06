@@ -1259,9 +1259,13 @@ void ABaseEnemy::Tick_SnapOnPlatform(float DeltaSeconds)
 	}
 }
 
-void ABaseEnemy::OnDispel()
+void ABaseEnemy::OnDispel(int DispelLevel)
 {
-	
+	int SkillIndex = FMath::RandRange(0, SummonSkills.Num()-1);
+	if (SummonSkills.IsValidIndex(SkillIndex))
+	{
+		SummonSkills[SkillIndex]->OnDispel(DispelLevel);
+	}
 }
 
 void ABaseEnemy::Tick(float DeltaSeconds)

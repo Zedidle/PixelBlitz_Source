@@ -417,12 +417,20 @@ void UAbilityComponent::LoadAbilities()
 				CachedASC->GiveAbility(Spec);
 			}
 		}
+
+		if (ABaseSkill* Skill = SpawnSkill(AbilityData.SkillClass))
+		{
+			Skill->SetActivateTiming(AbilityData.Timing);
+			Skill->AbilityTag = AbilityData.AbilityTag;
+			Skill->SetLevel(FCString::Atoi(*Level));
+			SkillsHolding.Add(Skill);
+		}
 		
 		for (auto& D : AbilityData.ExtendData)
 		{
 			AbilityExtendData.SetData(D.Key, D.Value);
 		}
-
+		
 		FAttributeEffectArray& AttributeEffects = AbilityAttributeEffects.FindOrAdd(AbilityTag);
 		for (auto& D: AbilityData.AttributeEffectsOnActivated)
 		{

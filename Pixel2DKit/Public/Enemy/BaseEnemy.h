@@ -396,7 +396,7 @@ public:
 	
 	
 	UFUNCTION()
-	void OnDispel();
+	void OnDispel(int DispelLevel);
 	
 	
 	

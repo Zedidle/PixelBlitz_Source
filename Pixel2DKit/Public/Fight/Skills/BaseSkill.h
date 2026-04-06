@@ -22,13 +22,14 @@ class PIXEL2DKIT_API ABaseSkill : public AActor
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	USoundBase* BeginSound = nullptr;
-
-
 	
 	
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true, ExposeOnSpawn = true))
+	int SkillLevel = 1;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bActive = false;
 	
@@ -73,6 +74,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void RepelFromActor(AActor* Other);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SetLevel(int Level);
 	
 	UFUNCTION(BlueprintCallable)
 	virtual void SetActive(bool v);

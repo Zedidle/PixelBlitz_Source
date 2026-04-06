@@ -55,20 +55,35 @@ void ACommonSummonSkill::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACommonSummonSkill::OnDispel(int localnum)
+void ACommonSummonSkill::OnDispel(int DispelLevel)
 {
 	if (ActivatedSummoneds.IsEmpty()) return;
 
 	int LastIndex = ActivatedSummoneds.Num() - 1;
-	for (int i = LastIndex; i >= LastIndex - localnum; i--)
+
+	if (ActivatedSummoneds.IsValidIndex(LastIndex))
 	{
-		if (ActivatedSummoneds.IsValidIndex(i))
+		// ====================== 数值参数（可自由调整平衡）======================
+		const float MinChance = 0.1f;    // 最小概率（5%，保底）
+		const float MaxChance = 1.0f;    // 最大概率（85%，封顶，避免必中）
+		const float BaseChance = 0.5f;   // 等级相同时的基础概率（15%）
+		const float PerLevelBonus = 0.25f; // 每差1级，概率提升10%
+	
+		// 计算等级差：驱散等级 - 召唤技能等级
+		int32 LevelDiff = DispelLevel - SkillLevel;
+	
+		// 核心驱散概率公式（线性增长+钳制，最合理、最平滑）
+		float DispelChance = BaseChance + LevelDiff * PerLevelBonus;
+	
+		// 强制限制概率在 最小~最大 之间（防止概率异常）
+		DispelChance = FMath::Clamp(DispelChance, MinChance, MaxChance);
+
+		// 随机判断：随机数 < 概率 → 驱散成功
+		float R = FMath::FRand();
+		if (R < DispelChance)
 		{
-			if (IsValid(ActivatedSummoneds[i]))
-			{
-				ActivatedSummoneds[i]->SummonedEnd();
-				ActivatedSummoneds.RemoveAt(i);
-			}
+			ActivatedSummoneds[LastIndex]->SummonedEnd();
+			ActivatedSummoneds.RemoveAt(LastIndex);
 		}
 	}
 }

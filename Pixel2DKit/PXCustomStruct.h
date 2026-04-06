@@ -400,6 +400,9 @@ struct FAbility: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
 
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	TSubclassOf<ABaseSkill> SkillClass;
+	
 	// 技能触发时机，如果有 AbilityClass 的话，需要配置
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	EAbilityTiming Timing = EAbilityTiming::None;
@@ -586,8 +589,7 @@ struct FTalent: public FTableRowBase
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<TSoftClassPtr<UGameplayAbility>> AbilityClass;
-
-	// 所有技能都是默认起始生成
+	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TSubclassOf<ABaseSkill> SkillClass;
 

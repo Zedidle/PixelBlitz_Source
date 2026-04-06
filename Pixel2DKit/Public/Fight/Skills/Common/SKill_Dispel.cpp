@@ -30,7 +30,7 @@ bool ASKill_Dispel::OnAttackHit(AActor* Receiver)
 {
 	if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(Receiver))
 	{
-		Enemy->OnDispel();
+		Enemy->OnDispel(SkillLevel);
 	}
 	
 	return true;

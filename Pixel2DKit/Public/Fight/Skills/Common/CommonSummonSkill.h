@@ -52,9 +52,7 @@ UCLASS()
 class PIXEL2DKIT_API ACommonSummonSkill : public ABaseSkill
 {
 	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true, ExposeOnSpawn = true))
-	int SkillLevel = 1;
+	
 	
 	UPROPERTY(BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	FSummoned SummonedData;
@@ -90,7 +88,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	void OnDispel(int localnum);
+	void OnDispel(int DispelLevel);
 	
 	UFUNCTION(BlueprintCallable)
 	void OnOwnerDie();

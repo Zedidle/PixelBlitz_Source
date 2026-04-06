@@ -49,6 +49,11 @@ void ABaseSkill::RepelFromActor(AActor* Other)
 {
 }
 
+void ABaseSkill::SetLevel(int Level)
+{
+	SkillLevel = Level;
+}
+
 void ABaseSkill::SetActive(bool v)
 {
 	if (v)
