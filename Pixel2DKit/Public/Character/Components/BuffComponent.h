@@ -166,6 +166,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddAttributeEffect(const FGameplayTag& Tag, EPXAttribute Attribute, bool bSetDirectly = false, float Percent = 0.0f, float Value = 1.f, float Duration = 9999.f);
 	void AddAttributeEffect(const FGameplayTag& Tag, const FAttributeEffect& Effect, bool bSetDirectly = false);
+	
+	// bSetDirectly 直接设置还是叠加
 	void AddAttributeEffects(const FGameplayTag& Tag, const TArray<FAttributeEffect>& Effects, bool bSetDirectly = false);
 
 	

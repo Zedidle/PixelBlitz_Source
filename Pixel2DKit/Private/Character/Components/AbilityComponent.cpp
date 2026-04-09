@@ -421,7 +421,7 @@ void UAbilityComponent::LoadAbilities()
 		if (ABaseSkill* Skill = SpawnSkill(AbilityData.SkillClass))
 		{
 			Skill->SetActivateTiming(AbilityData.Timing);
-			Skill->AbilityTag = AbilityData.AbilityTag;
+			Skill->AbilityTag = AbilityTag;
 			Skill->SetLevel(FCString::Atoi(*Level));
 			SkillsHolding.Add(Skill);
 		}

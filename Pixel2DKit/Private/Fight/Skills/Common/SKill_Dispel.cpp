@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "SKill_Dispel.h"
+#include "Fight/Skills/Common/SKill_Dispel.h"
 
 #include "Character/Components/AbilityComponent.h"
 #include "Enemy/BaseEnemy.h"
