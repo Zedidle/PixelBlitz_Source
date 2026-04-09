@@ -404,7 +404,6 @@ void UAbilityComponent::LoadAbilities()
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
 				FGameplayAbilitySpec Spec(LoadedClass);
-				Spec.Level = FCString::Atoi(*Level);
 				CachedASC->GiveAbility(Spec);
 			}
 		}

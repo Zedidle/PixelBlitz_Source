@@ -55,12 +55,6 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	if (!K2_CommitAbility())
-	{
-		K2_EndAbility();
-		return;
-	}
-
 	float MultiPercent;
 	PlayerAbilityComponent->FindExtendData(TAG("Ability.SkyHandPower.Set.AttackDamagePercent"), MultiPercent);
 
