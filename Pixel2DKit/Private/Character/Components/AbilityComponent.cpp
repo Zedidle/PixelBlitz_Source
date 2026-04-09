@@ -361,19 +361,9 @@ void UAbilityComponent::LearnAbility(const FGameplayTag& AbilityTag)
 	MainSave->ChosenAbilities.Add(AbilityTag);
 	
 	const FAbility& AbilityData = DataTableSubsystem->GetAbilityDataByTag(AbilityTag);
-
 	if (!AbilityData.PreLevelAbility.IsValid())
 	{
 		MainSave->TakeEffectAbilities.AddUnique(AbilityTag);
-		// 由于同一技能的不同等级都使用相同的GA，只是数值不同，就只用在学习第一个技能是GiveAbility
-		for (auto& AbilityClass: AbilityData.AbilityClass)
-		{
-			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
-			{
-				FGameplayAbilitySpec Spec(LoadedClass);
-				CachedASC->GiveAbility(Spec);
-			}
-		}
 	}
 	else if (MainSave->TakeEffectAbilities.Contains(AbilityData.PreLevelAbility))
 	{
@@ -414,6 +404,7 @@ void UAbilityComponent::LoadAbilities()
 			if (UClass* LoadedClass = AbilityClass.LoadSynchronous())
 			{
 				FGameplayAbilitySpec Spec(LoadedClass);
+				Spec.Level = FCString::Atoi(*Level);
 				CachedASC->GiveAbility(Spec);
 			}
 		}
