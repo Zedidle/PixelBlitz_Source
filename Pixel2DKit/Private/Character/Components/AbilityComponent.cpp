@@ -16,7 +16,7 @@
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerManagerFuncLib.h"
 #include "PXCustomStruct.h"
-
+#include "PXGameplayTags.h"
 
 
 #define LOCTEXT_NAMESPACE "PX"
@@ -677,9 +677,10 @@ void UAbilityComponent::ActivateAbilityByTiming(EAbilityTiming Timing)
 
 void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 {
-	OnHurtInstigatorDead(nullptr);
+	RemoveQTE();
+	
 	if (!HurtMaker || !HurtMaker->Implements<UFight_Interface>()
-		|| !IFight_Interface::Execute_IsAlive(HurtMaker)) return;
+		|| !Execute_IsAlive(HurtMaker)) return;
 	
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(KeyPressCountdownWidgetClass)
 	KeyPressCountDownWidget = CreateWidget<UKeyPressCountDownWidget>(GetWorld(), KeyPressCountdownWidgetClass);
@@ -696,6 +697,18 @@ void UAbilityComponent::CreateQTE(float _SustainTime, float _Scale)
 		FVector2D(64, 64), FVector::Zero());
 	ArrowLineWidget->SetRenderScale(FVector2D(_Scale));
 	ArrowLineWidget->AddToViewport(100);
+}
+
+void UAbilityComponent::RemoveQTE()
+{
+	if (KeyPressCountDownWidget)
+	{
+		KeyPressCountDownWidget->RemoveFromParent();	
+	}
+	if (ArrowLineWidget)
+	{
+		ArrowLineWidget->RemoveArrowLine();
+	}
 }
 
 void UAbilityComponent::OnInteract(bool& Keep)
@@ -743,16 +756,9 @@ void UAbilityComponent::OnInteract(bool& Keep)
 	}
 }
 
-void UAbilityComponent::OnHurtInstigatorDead(ABaseEnemy* DeadEnemy)
+void UAbilityComponent::OnHurtInstigatorDead(FGameplayTag Channel, const FEnemyMessage& Message)
 {
-	if (KeyPressCountDownWidget)
-	{
-		KeyPressCountDownWidget->RemoveFromParent();	
-	}
-	if (ArrowLineWidget)
-	{
-		ArrowLineWidget->RemoveArrowLine();
-	}
+	RemoveQTE();
 }
 
 
@@ -762,7 +768,9 @@ void UAbilityComponent::ListenHurtInstigatorDead()
 	ABaseEnemy* Enemy = Cast<ABaseEnemy>(HurtMaker);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Enemy)
 
-	Enemy->OnEnemyDie.AddUniqueDynamic(this, &UAbilityComponent::OnHurtInstigatorDead);
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle_OnEnemyDie = MessageSubsystem.RegisterListener(
+		PXGameplayTags::GameplayFlow_OnEnemyDie, this, &ThisClass::OnHurtInstigatorDead);
 }
 
 FGameplayAbilitySpecHandle UAbilityComponent::GetGameplayAbilityWithTag(const FGameplayTag& Tag)

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseSkill.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "BaseTraceProjectileSkill.generated.h"
 
@@ -65,6 +66,8 @@ class PIXEL2DKIT_API ABaseTraceProjectileSkill : public ABaseSkill
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Skill | Projectile", meta = (AllowPrivateAccess = true))
 	TEnumAsByte<ETraceTypeQuery> TraceObstacleChannel = TraceTypeQuery5;
 
+	
+	FGameplayMessageListenerHandle ListenerHandle_OnEnemyDie;
 	
 public:
 	// Sets default values for this actor's properties
@@ -145,7 +148,7 @@ public:
 	void SetNewTarget(AActor* TargetActor, bool Idle = false);
 	
 	UFUNCTION()
-	void OnEnemyDie(ABaseEnemy* Enemy);
+	void OnEnemyDie(FGameplayTag Channel, const FEnemyMessage& Message);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void OnHitTarget(AActor* HitTarget);

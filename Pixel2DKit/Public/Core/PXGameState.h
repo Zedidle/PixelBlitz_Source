@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PXCustomStruct.h"
 #include "Character/BasePXCharacter.h"
 #include "GameFramework/GameState.h"
 #include "PXGameState.generated.h"

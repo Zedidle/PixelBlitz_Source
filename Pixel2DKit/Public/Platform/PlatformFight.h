@@ -30,6 +30,8 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = true))
 	float ViewRotateFactor = 0.15f;
 	
+	FGameplayMessageListenerHandle ListenerHandle_OnEnemyDie;
+	
 public:
 
 	UPROPERTY(BlueprintReadWrite)
@@ -41,6 +43,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	TArray<AEnemySpawner*> EnemySpawners;
 
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 	virtual void Tick(float DeltaTime) override;
 
@@ -48,7 +52,7 @@ public:
 	void RegisterEnemies();
 	
 	UFUNCTION(BlueprintNativeEvent)
-	void OnEnemyDie(ABaseEnemy* enemy);
+	void OnEnemyDie(FGameplayTag Channel, const FEnemyMessage& Message);
 
 	// 战斗结束，触发条件之一：玩家死亡 || 玩家逃出 || 怪物清空
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

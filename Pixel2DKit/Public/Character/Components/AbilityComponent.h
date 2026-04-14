@@ -183,13 +183,21 @@ public:
 	
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
 	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);
+	
+	void RemoveQTE();
 
 	UFUNCTION(BlueprintCallable)
 	void OnInteract(bool& Keep);
 
 	UFUNCTION(BlueprintCallable)
-	void OnHurtInstigatorDead(ABaseEnemy* DeadEnemy);
+	void OnHurtInstigatorDead(FGameplayTag Channel, const FEnemyMessage& Message);
 
+#pragma region Massage
+	
+	FGameplayMessageListenerHandle ListenerHandle_OnEnemyDie;
+	
+#pragma endregion
+	
 	UFUNCTION()
 	void ListenHurtInstigatorDead();
 

@@ -11,6 +11,7 @@
 class ABasePXCharacter;
 class USoundCue;
 class ABaseSkill;
+class ABaseEnemy;
 
 UCLASS()
 class PIXEL2DKIT_API UPXCustomStruct : public UObject
@@ -41,6 +42,15 @@ USTRUCT(BlueprintType)
 struct FDefaultEmptyMessage
 {
 	GENERATED_BODY()
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyMessage
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	ABaseEnemy* Enemy;
 };
 
 

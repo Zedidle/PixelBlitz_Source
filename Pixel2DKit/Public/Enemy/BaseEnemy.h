@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "PaperZDCharacter.h"
-#include "BehaviorTree/BehaviorTree.h"
 #include "Character/BasePXCharacter.h"
 #include "Components/EnemyAIComponent.h"
 #include "Curves/CurveVector.h"
@@ -18,9 +17,6 @@
 
 
 class UAISenseConfig_Sight;
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDie, ABaseEnemy*, Enemy);
-
-
 class UPXEnemyAttributeSet;
 
 USTRUCT(BlueprintType)
@@ -175,9 +171,6 @@ public:
 
 	virtual float GetDefaultHalfHeight() const override;
 
-	UPROPERTY(BlueprintAssignable)
-	FOnEnemyDie OnEnemyDie;
-	
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	AActor* GetPixelCharacter();
 	UFUNCTION(BlueprintCallable, Category="Enemy")

@@ -5,6 +5,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "PaperFlipbookComponent.h"
+#include "PXGameplayTags.h"
 #include "StaticMeshAttributes.h"
 #include "Components/WidgetComponent.h"
 #include "Enemy/Components/EnemyAIComponent.h"
@@ -411,8 +412,6 @@ void ABaseEnemy::BeginPlay()
 void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	
-	OnEnemyDie.RemoveAll(this);
 }
 
 void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bInterrupt, bool bCabBeInterrupt)
@@ -584,7 +583,11 @@ void ABaseEnemy::OnDie_Implementation()
 	{
 		GetSprite()->SetSpriteColor(FLinearColor::Gray);
 	}
-	OnEnemyDie.Broadcast(this);
+	
+	FEnemyMessage Message;
+	Message.Enemy = this;
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnEnemyDie, Message);
 }
 
 

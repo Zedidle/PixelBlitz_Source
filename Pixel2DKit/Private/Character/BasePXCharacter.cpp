@@ -33,6 +33,7 @@
 #include "GeometryCollection/GeometryCollectionParticlesData.h"
 #include "Input/PXInputComponent.h"
 #include "Item/BaseInteractableItem.h"
+#include "Item/Weapon/BaseWeapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXLocalPlayer.h"
@@ -492,11 +493,10 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	
 	OnPlayerAttackStart.RemoveAll(this);
 	OnPlayerDie.RemoveAll(this);
-
-	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
-	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoading);
-	MessageSubsystem.UnregisterListener(ListenerHandle_OnLevelLoaded);
-
+	
+	ListenerHandle_OnLevelLoading.Unregister();
+	ListenerHandle_OnLevelLoaded.Unregister();
+	
 	if (CachedASC)
 	{
 		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())

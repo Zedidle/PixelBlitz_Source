@@ -3,12 +3,28 @@
 
 #include "Platform/PlatformFight.h"
 
+#include "PXGameplayTags.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "Settings/PXSettingsShared.h"
 #include "Subsystems/TimerManagerFuncLib.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
+
+void APlatformFight::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle_OnEnemyDie = MessageSubsystem.RegisterListener(
+		PXGameplayTags::GameplayFlow_OnEnemyDie, this, &ThisClass::OnEnemyDie);
+}
+
+void APlatformFight::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	ListenerHandle_OnEnemyDie.Unregister();
+}
 
 void APlatformFight::Tick(float DeltaTime)
 {
@@ -54,6 +70,25 @@ void APlatformFight::Tick(float DeltaTime)
 	PXCharacter->AddCameraOffset(FName("PlatformFight"), FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint);
 }
 
+void APlatformFight::OnEnemyDie_Implementation(FGameplayTag Channel, const FEnemyMessage& Message)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Message.Enemy)
+	
+	if (!Enemies.Contains(Message.Enemy)) return;
+	
+	Enemies.Remove(Message.Enemy);
+	
+	if (IsValid(PlatformFightCountWidget))
+	{
+		PlatformFightCountWidget->UpdateCount(Enemies.Num());
+	}
+
+	if (Enemies.IsEmpty())
+	{
+		FightEnd();
+	}
+}
+
 void APlatformFight::RegisterEnemies_Implementation()
 {
 	for (auto spawner : EnemySpawners)
@@ -61,30 +96,11 @@ void APlatformFight::RegisterEnemies_Implementation()
 		if (!IsValid(spawner)) continue;
 		if (ABaseEnemy* enemy = spawner->GetSelfEnemy())
 		{
-			enemy->OnEnemyDie.AddDynamic(this, &APlatformFight::OnEnemyDie);
 			Enemies.Add(enemy);
 		}
 	}
 }
 
-void APlatformFight::OnEnemyDie_Implementation(ABaseEnemy* enemy)
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(enemy)
-	Enemies.Remove(enemy);
-	enemy->OnEnemyDie.RemoveAll(this);
-	if (IsValid(PlatformFightCountWidget))
-	{
-		PlatformFightCountWidget->UpdateCount(Enemies.Num());
-	}
-
-	// UDebugFuncLab::ScreenMessage(FString::Printf(TEXT("APlatformFight::OnEnemyDie Num: %d"), Enemies.Num()));
-
-	if (Enemies.IsEmpty())
-	{
-		FightEnd();
-	}
-
-}
 
 void APlatformFight::FightEnd_Implementation()
 {

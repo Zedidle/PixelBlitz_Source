@@ -5,6 +5,7 @@
 
 #include "NiagaraFunctionLibrary.h"
 #include "Pixel2DKit.h"
+#include "PXGameplayTags.h"
 #include "Enemy/BaseEnemy.h"
 #include "Utilitys/SpaceFuncLib.h"
 
@@ -29,6 +30,9 @@ void ABaseTraceProjectileSkill::BeginPlay()
 	{
 		SetNewTarget(Target, bIdle);
 	}
+	
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle_OnEnemyDie = MessageSubsystem.RegisterListener(PXGameplayTags::GameplayFlow_OnEnemyDie, this, &ThisClass::OnEnemyDie);
 }
 
 void ABaseTraceProjectileSkill::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -38,6 +42,7 @@ void ABaseTraceProjectileSkill::EndPlay(const EEndPlayReason::Type EndPlayReason
 	{
 		ProjectileComp->DestroyComponent();
 	}
+	ListenerHandle_OnEnemyDie.Unregister();
 }
 
 // Called every frame
@@ -234,17 +239,14 @@ void ABaseTraceProjectileSkill::SetNewTarget(AActor* TargetActor, bool Idle)
 			ProjectileComp->Velocity = InitSpeed * (Target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
 		}
 	}
-
-	if (ABaseEnemy* Enemy = Cast<ABaseEnemy>(Target))
-	{
-		Enemy->OnEnemyDie.AddUniqueDynamic(this, &ThisClass::OnEnemyDie);
-	}
 }
 
-void ABaseTraceProjectileSkill::OnEnemyDie(ABaseEnemy* Enemy)
+void ABaseTraceProjectileSkill::OnEnemyDie(FGameplayTag Channel, const FEnemyMessage& Message)
 {
-	Enemy->OnEnemyDie.RemoveDynamic(this, &ThisClass::OnEnemyDie);
-	TryFindNextTarget(Enemy);
+	if (Message.Enemy == Target)
+	{
+		TryFindNextTarget(Message.Enemy);
+	}
 }
 
 void ABaseTraceProjectileSkill::OnHitTarget_Implementation(AActor* HitTarget)

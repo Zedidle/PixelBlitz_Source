@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,7 +8,7 @@
 #include "Fight/Components/StateComponent.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Item/Weapon/BaseWeapon.h"
+#include "Interfaces/Interact_Interface.h"
 #include "UI/Player/BasePlayerStatusWidget.h"
 #include "BasePXCharacter.generated.h"
 
@@ -20,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 // 发起攻击的监听事件
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerAttackStart, EAttackType, AttackType, FVector, AttackDirection);
 
-
+class ABaseWeapon;
 
 class UInputAction;
 class UAbilityComponent;
