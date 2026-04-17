@@ -7,12 +7,10 @@
 
 namespace PXGameplayTags
 {
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelLoading, "GameplayFlow.OnLoadingLevel", "关卡开始加载");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelLoaded, "GameplayFlow.OnLoadingLevel", "关卡加载完成");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelStarted, "GameplayFlow.OnStartLevelSuccess", "关卡正式开始，（需要主动触发）");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnEnemyDie, "GameplayFlow.OnEnemyDie", "怪物死亡");
-
-	
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelLoading, "GameplayFlow.OnLoadingLevel", "Level loading has started");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelLoaded, "GameplayFlow.OnLevelLoaded", "Level loading has completed");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnLevelStarted, "GameplayFlow.OnStartLevelSuccess", "Level gameplay has started");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(GameplayFlow_OnEnemyDie, "GameplayFlow.OnEnemyDie", "Enemy died");
 
 	FGameplayTag FindTagByString(const FString& TagString, bool bMatchPartialString)
 	{
@@ -38,4 +36,3 @@ namespace PXGameplayTags
 		return Tag;
 	}
 }
-

@@ -163,7 +163,7 @@ UPXBasicBuildSaveGame* UPXSaveGameSubsystem::GetBasicBuildData()
 {
     if (IsValid(BasicBuildSaveGame)) return BasicBuildSaveGame;
     
-    if (UPXBasicBuildSaveGame* SaveGame = Cast<UPXBasicBuildSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Main, UserIndex)))
+    if (UPXBasicBuildSaveGame* SaveGame = Cast<UPXBasicBuildSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_BasicBuild, UserIndex)))
     {
         BasicBuildSaveGame = SaveGame;
         return BasicBuildSaveGame;
@@ -229,7 +229,7 @@ UPXShopSaveGame* UPXSaveGameSubsystem::GetShopData()
         return ShopSaveGame;
     }
 
-    AchievementsSaveGame = NewObject<UPXAchievementsSaveGame>(this);
+    ShopSaveGame = NewObject<UPXShopSaveGame>(this);
     SaveShopData();
     return ShopSaveGame;
 }

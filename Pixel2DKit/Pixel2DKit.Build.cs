@@ -46,7 +46,8 @@ public class Pixel2DKit : ModuleRules
 			"CommonGame", 
 			"GameplayMessageRuntime",
 			"AudioModulation",
-			"AudioMixer"
+			"AudioMixer",
+			"Foliage"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
