@@ -291,6 +291,44 @@ true, FLinearColor::Red, FLinearColor::Green, 0.1f);
 	return true;
 }
 
+int32 UEnemyAIComponent::CountAlliesOnPath(const FVector& NewTargetLocation) const
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, 0);
+
+	const FVector OwnerLocation = OwningEnemy->GetActorLocation();
+	TArray<AActor*> ActorsToIgnore = {OwningEnemy};
+	TArray<FHitResult> OutHits;
+	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), OwnerLocation, NewTargetLocation, AllyCheckRadius,
+		EnemyTrace, false, ActorsToIgnore, EDrawDebugTrace::None, OutHits,
+		true, FLinearColor::Red, FLinearColor::Green, 0.1f);
+
+	TSet<TWeakObjectPtr<ABaseEnemy>> UniqueAllies;
+	for (const FHitResult& Hit : OutHits)
+	{
+		if (ABaseEnemy* Ally = Cast<ABaseEnemy>(Hit.GetActor()))
+		{
+			UniqueAllies.Add(Ally);
+		}
+	}
+
+	return UniqueAllies.Num();
+}
+
+bool UEnemyAIComponent::HasDirectSightToPlayer() const
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, false);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXCharacter, false);
+
+	FHitResult OutHit;
+	const bool bBlocked = UKismetSystemLibrary::LineTraceSingle(GetWorld(),
+		OwningEnemy->GetActorLocation(), PXCharacter->GetActorLocation(),
+		TraceTypeQuery1, false, {OwningEnemy},
+		EDrawDebugTrace::None, OutHit, true,
+		FLinearColor::Yellow, FLinearColor::Blue, 0.1f);
+
+	return !bBlocked;
+}
+
 
 FVector UEnemyAIComponent::GetNearestActionFieldCanAttackLocation()
 {
@@ -466,6 +504,57 @@ bool UEnemyAIComponent::GetPlayerPathPoint(FVector& Point)
 	return true;
 }
 
+float UEnemyAIComponent::GetCurrentPlayerAttackStartDodgeRate() const
+{
+	float DodgeRate = OnPlayerAttackStart_DodgeRate;
+	if (OwningEnemy && OwningEnemy->IsInHesitationState())
+	{
+		DodgeRate += HesitationDodgeRateBonus;
+	}
+
+	return FMath::Clamp(DodgeRate, 0.0f, 1.0f);
+}
+
+float UEnemyAIComponent::GetHesitationContestSkillBonus() const
+{
+	if (!OwningEnemy || !OwningEnemy->IsInHesitationState())
+	{
+		return 0.0f;
+	}
+
+	return HesitationContestSkillBonus;
+}
+
+bool UEnemyAIComponent::TryEnterHesitationState()
+{
+	return TryEnterHesitationStateByRate(1.0f);
+}
+
+bool UEnemyAIComponent::TryEnterHesitationStateByRate(float EnterRate)
+{
+	if (!OwningEnemy) return false;
+	if (OwningEnemy->IsInHesitationState())
+	{
+		OwningEnemy->SetInHesitationState(true, HesitationDuration);
+		return true;
+	}
+	if (!OwningEnemy->CanEnterHesitationState()) return false;
+	if (FMath::RandRange(0.0f, 1.0f) > FMath::Clamp(EnterRate, 0.0f, 1.0f)) return false;
+
+	OwningEnemy->SetInHesitationState(true, HesitationDuration);
+	return true;
+}
+
+bool UEnemyAIComponent::TryEnterHesitationStateByCrowd(const FVector& NewTargetLocation)
+{
+	if (CountAlliesOnPath(NewTargetLocation) < OnCrowded_HesitationMinAllies)
+	{
+		return false;
+	}
+
+	return TryEnterHesitationStateByRate(OnCrowded_HesitationRate);
+}
+
 void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type, FVector Direction)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
@@ -475,7 +564,7 @@ void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type, FVector Direction)
 	if (Direction.Dot(- OwningEnemy->GetHorizontalDirectionToPlayer()) > DotDegree10)
 	{
 		// 侧闪，需要判断攻击类型: 判断方式为玩家发起攻击时距离自身的位置（后续可能会加入方位等判断？）
-		if (FMath::RandRange(0.0f, 1.0f) <= OnPlayerAttackStart_DodgeRate)
+		if (FMath::RandRange(0.0f, 1.0f) <= GetCurrentPlayerAttackStartDodgeRate())
 		{
 			TArray<float> RandRotateYaws;
 			FName CurveName;
@@ -504,6 +593,11 @@ void UEnemyAIComponent::Event_CheckPlayerMovement()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+
+	if (PXCharacter->bAttackHolding && HasDirectSightToPlayer())
+	{
+		TryEnterHesitationStateByRate(OnPlayerAttackHolding_HesitationRate);
+	}
 
 	FVector PlayerVelocity = PXCharacter->GetVelocity();
 	if (PlayerVelocity.IsZero()) return;

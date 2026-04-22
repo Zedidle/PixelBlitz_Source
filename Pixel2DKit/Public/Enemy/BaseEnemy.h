@@ -227,6 +227,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bInDefendState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bInHesitationState;
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
 	bool bDefendStart;
@@ -263,6 +266,9 @@ public:
 	void SetInDefendState(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetInHesitationState(const bool V, float Duration = 0.0f);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
 	void SetDefendStart(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
@@ -277,6 +283,12 @@ public:
 	float GetHorizontalDistanceToPlayer() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
 	float GetVerticalDistanceToPlayer() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	bool IsInHesitationState() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	bool CanEnterHesitationState() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Enemy | Fight")
 	void TryAttack();

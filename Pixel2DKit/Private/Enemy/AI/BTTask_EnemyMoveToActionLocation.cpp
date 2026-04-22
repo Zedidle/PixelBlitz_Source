@@ -57,6 +57,13 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		FinishAbort();
 		return EBTNodeResult::Failed;
 	}
+
+	if (SelfEnemyPawn->IsInHesitationState())
+	{
+		EnemyAIController->StopMovement();
+		FinishExecute(true);
+		return EBTNodeResult::Failed;
+	}
 	
 	if (!IEnemyAI_Interface::Execute_CanMove(SelfEnemyPawn))
 	{
@@ -153,6 +160,13 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		{
 			TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
 			TargetLocation += FMath::RandRange(0.2f ,0.8f) * (PlayerPawnLocation - TargetLocation);
+
+			if (EnemyAIComponent->TryEnterHesitationStateByCrowd(TargetLocation))
+			{
+				EnemyAIController->StopMovement();
+				FinishExecute(true);
+				return EBTNodeResult::Failed;
+			}
 		}
 	
 		bool bIsCliff = USpaceFuncLib::CheckCliffProcess(SelfEnemyPawnLocation,TargetLocation,

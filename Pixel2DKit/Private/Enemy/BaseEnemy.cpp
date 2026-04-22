@@ -198,8 +198,39 @@ void ABaseEnemy::SetAttackAnimToggle(const bool V)
 
 void ABaseEnemy::SetInDefendState(const bool V)
 {
+	if (V)
+	{
+		SetInHesitationState(false);
+	}
 	bInDefendState = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInDefendState")), V);
+}
+
+void ABaseEnemy::SetInHesitationState(const bool V, float Duration)
+{
+	const FName TimerName = FName(GetName() + "_ABaseEnemy::HesitationState");
+
+	if (!V)
+	{
+		bInHesitationState = false;
+		UTimerManagerFuncLib::CancelDelay(GetWorld(), TimerName);
+		return;
+	}
+
+	bInHesitationState = true;
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+	}
+
+	if (Duration > 0.0f)
+	{
+		UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
+		{
+			if (!WeakThis.IsValid()) return;
+			WeakThis->SetInHesitationState(false);
+		}, Duration);
+	}
 }
 
 void ABaseEnemy::SetDefendStart(const bool V)
@@ -246,6 +277,16 @@ float ABaseEnemy::GetVerticalDistanceToPlayer() const
 		return PXCharacter->GetActorLocation().Z - GetActorLocation().Z;
 	}
 	return 0;
+}
+
+bool ABaseEnemy::IsInHesitationState() const
+{
+	return bInHesitationState;
+}
+
+bool ABaseEnemy::CanEnterHesitationState() const
+{
+	return !bDead && !bHurt && !bInDefendState && !bInAttackState && !bInAttackEffect && !IsActionMoving();
 }
 
 void ABaseEnemy::LoadData_Implementation(FName Level)
@@ -569,6 +610,7 @@ void ABaseEnemy::OnDie_Implementation()
 	
 	SetInAttackEffect(false);
 	SetInAttackState(false);
+	SetInHesitationState(false);
 	
 	if (APXCharacterPlayerState* PS = Cast<APXCharacterPlayerState>(UGameplayStatics::GetPlayerState(this, 0)))
 	{
@@ -835,7 +877,7 @@ bool ABaseEnemy::CanAttack_Implementation()
 	if (!PXCharacter.IsValid()) return false;
 	if (!Execute_IsAlive(PXCharacter.Get())) return false;
 	
-	return !bDead && !bInAttackState && !bHurt;
+	return !bDead && !bInAttackState && !bHurt && !bInHesitationState;
 }
 
 bool ABaseEnemy::Dash_Implementation()
@@ -907,7 +949,7 @@ void ABaseEnemy::PowerRepulsion_Implementation(float Power)
 
 int ABaseEnemy::OnDefendingHit_Implementation(int iniDamage)
 {
-	if (GetIsDefending())
+	if (bInDefendState)
 	{
 		UCommonFuncLib::SpawnFloatingText(
 			LOCTEXT("AbilityPassive_Defend", "防御"),
@@ -1046,6 +1088,7 @@ void ABaseEnemy::TryAttack_Implementation()
 
 	if (ASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
 	{
+		SetInHesitationState(false);
 		SetAttackAnimToggle(true);
 		SetInAttackState(true);
 
