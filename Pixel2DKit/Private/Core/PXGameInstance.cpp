@@ -44,6 +44,25 @@ void UPXGameInstance::StartNewGame()
 
 	PXSG->GetMainData()->RemLevels.Empty();
 	TArray<FLevelData> LevelDataArray = DataTableSubsystem->GetRowMap<FLevelData>(LevelData);
+	LevelDataArray.Sort([](const FLevelData& A, const FLevelData& B)
+	{
+		if (A.LevelOrder != B.LevelOrder)
+		{
+			if (A.LevelOrder == INDEX_NONE)
+			{
+				return false;
+			}
+
+			if (B.LevelOrder == INDEX_NONE)
+			{
+				return true;
+			}
+
+			return A.LevelOrder < B.LevelOrder;
+		}
+
+		return A.LevelInstanceName.ToString() < B.LevelInstanceName.ToString();
+	});
 	for (auto& D : LevelDataArray)
 	{
 		PXSG->GetMainData()->RemLevels.Add(D.LevelInstanceName);
@@ -165,8 +184,15 @@ void UPXGameInstance::GetTotalUseTime(float& usetime, bool& newrecord)
 	{
 		Time += r;
 	}
-	
-	newrecord = AchievementsSaveGame->TotalUseTime > Time;
+
+	if (MainSaveGame->Results.IsEmpty())
+	{
+		newrecord = false;
+		usetime = 0.0f;
+		return;
+	}
+
+	newrecord = AchievementsSaveGame->TotalUseTime < 0.0f || AchievementsSaveGame->TotalUseTime > Time;
 	if (newrecord)
 	{
 		AchievementsSaveGame->TotalUseTime = Time;

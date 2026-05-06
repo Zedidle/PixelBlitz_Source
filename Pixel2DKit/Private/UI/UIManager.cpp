@@ -211,12 +211,18 @@ bool UUIManager::CloseUI(const FName UIType)
 
 void UUIManager::CloseUIByLayer(FGameplayTag InLayer)
 {
-	for(auto It = WidgetLayerMap.CreateIterator(); It; ++It)
+	TArray<FName> UITypesToClose;
+	for (const TPair<FName, FGameplayTag>& Pair : WidgetLayerMap)
 	{
-		if(It->Value == InLayer)
+		if (Pair.Value == InLayer)
 		{
-			CloseUI(It->Key);
+			UITypesToClose.Add(Pair.Key);
 		}
+	}
+
+	for (const FName& UIType : UITypesToClose)
+	{
+		CloseUI(UIType);
 	}
 }
 

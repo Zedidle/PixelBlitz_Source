@@ -213,23 +213,33 @@ void APXGameState::ToNextLevel()
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
 	
-	if (APXGameMode* GM = UPXGameplayStatics::GetGameMode(World))
-	{
-		GM->LoadLevel(GameInstance->GetCurLevelName_Simple(true), GetNewLevelInitLocation());
-	}
+	const FName NextLevelName = GameInstance->GetCurLevelName_Simple(true);
 
 	// 时间记录
-	float PreUsedTime; bool NewRecord;
-	GameInstance->GetTotalUseTime(PreUsedTime, NewRecord);
-	
 	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem);
 
-	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreUsedTime);
+	UPXMainSaveGame* MainSaveGame = SaveGameSubsystem->GetMainData();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(MainSaveGame);
+
+	float PreviousUsedTime = 0.0f;
+	for (float Result : MainSaveGame->Results)
+	{
+		PreviousUsedTime += Result;
+	}
+	SaveGameSubsystem->Main_AddResult(CurRaceTime - PreviousUsedTime);
 	
 	// 由于UI需要Statics来显示，DealUI要先
 	DealUI();
 	DealStatics();
+
+	if (APXGameMode* GM = UPXGameplayStatics::GetGameMode(World))
+	{
+		if (!NextLevelName.IsNone())
+		{
+			GM->LoadLevel(NextLevelName, GetNewLevelInitLocation());
+		}
+	}
 }
 
 FVector APXGameState::GetNewLevelInitLocation()

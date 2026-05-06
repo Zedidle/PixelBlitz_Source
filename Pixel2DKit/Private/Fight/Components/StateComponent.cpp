@@ -243,7 +243,8 @@ void UStateComponent::DecreaseHP(int Damage, AActor* Maker, const FVector Knockb
 	int OutDamage = Damage;
 
 	IFight_Interface::Execute_OnBeAttacked(Owner, Maker, Damage, OutDamage, bForce);
-	KnockBack(KnockbackForce * (OutDamage / Damage), Maker);
+	const float KnockbackScale = Damage > 0 ? FMath::Max(static_cast<float>(OutDamage), 0.0f) / static_cast<float>(Damage) : 0.0f;
+	KnockBack(KnockbackForce * KnockbackScale, Maker);
 	
 	
 	if (OutDamage <= 0) return;

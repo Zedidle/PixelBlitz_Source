@@ -662,6 +662,10 @@ USTRUCT(BlueprintType)
 struct FLevelData : public FTableRowBase
 {
 	GENERATED_BODY()
+
+	// Optional explicit sort key for run order. Falls back to level name when unset.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	int32 LevelOrder = INDEX_NONE;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	TSoftObjectPtr<USoundWave> BGM;

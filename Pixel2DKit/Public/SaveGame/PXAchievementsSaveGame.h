@@ -18,7 +18,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
 	TArray<FName> CompletedAchievements;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	float TotalUseTime;
+	float TotalUseTime = -1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Achievements")
-	int KilledBossNum;
+	int KilledBossNum = 0;
 };

@@ -76,6 +76,12 @@ void APXGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 {
+	if (LevelName.IsNone())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APXGameMode::LoadLevel called with an invalid level name."));
+		return;
+	}
+
 	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
 	{
 		PlayerStart->SetActorLocation(StartLocation + FVector(0,0,200));
@@ -126,6 +132,10 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 
 		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelLoading, EMPTY_MESSAGE);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("APXGameMode::LoadLevel failed to stream level instance '%s'."), *LevelName.ToString());
 	}
 }
 
