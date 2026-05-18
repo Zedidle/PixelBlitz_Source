@@ -118,19 +118,15 @@ void APXGameState::DealStatics_Implementation()
 
 	UPXBasicBuildSaveGame* BasicBuildSave = UPXSaveGameSubSystemFuncLib::GetBasicBuildData(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSave);
-
-	UPXTalentsSaveGame* TalentSave = UPXSaveGameSubSystemFuncLib::GetTalentsData(this);
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(TalentSave);
 	
 	
 	MainSave->RoundGoldNum += MainSave->JustPickedGolds;
 	BasicBuildSave->RemainGoldNum += MainSave->JustPickedGolds;
-	TalentSave->TotalPickupGolds += MainSave->JustPickedGolds;
+	BasicBuildSave->TotalPickupGolds += MainSave->JustPickedGolds;
 	MainSave->JustPickedGolds = 0;
 
 	UPXSaveGameSubSystemFuncLib::SaveMainData(this);
 	UPXSaveGameSubSystemFuncLib::SaveBasicBuildData(this);
-	UPXSaveGameSubSystemFuncLib::SaveTalentsData(this);
 	
 	if (UAchievementSubsystem* AchievementSubsystem = UAchievementSubsystem::GetInstance(this))
 	{

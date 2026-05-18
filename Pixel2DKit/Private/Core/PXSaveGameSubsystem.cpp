@@ -8,7 +8,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Pixel2DKit/Pixel2DKit.h"
 #include "SaveGame/PXShopSaveGame.h"
-#include "SaveGame/PXTalentsSaveGame.h"
 #include "Settings/PXSettingsLocal.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
@@ -68,19 +67,6 @@ void UPXSaveGameSubsystem::InitData_Shop()
     }
 }
 
-void UPXSaveGameSubsystem::InitData_Talents()
-{
-    if (UPXTalentsSaveGame* SaveGame = Cast<UPXTalentsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Talents, UserIndex)))
-    {
-        TalentsSaveGame = SaveGame;
-    }
-    else
-    {
-        TalentsSaveGame = NewObject<UPXTalentsSaveGame>(this);
-        SaveTalentsData();
-    }
-}
-
 UPXSaveGameSubsystem* UPXSaveGameSubsystem::GetInstance(const UObject* WorldContextObject)
 {
     UGameInstance* GameInstance = UGameplayStatics::GetGameInstance(WorldContextObject);
@@ -96,7 +82,6 @@ void UPXSaveGameSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     InitData_BasicBuild();
     InitData_Achievements();
     InitData_Shop();
-    InitData_Talents();
 }
 
 void UPXSaveGameSubsystem::SaveMainData()
@@ -232,28 +217,4 @@ UPXShopSaveGame* UPXSaveGameSubsystem::GetShopData()
     ShopSaveGame = NewObject<UPXShopSaveGame>(this);
     SaveShopData();
     return ShopSaveGame;
-}
-
-void UPXSaveGameSubsystem::SaveTalentsData()
-{
-    bool result = UGameplayStatics::SaveGameToSlot(TalentsSaveGame, SlotName_Talents, UserIndex);
-    if (result)
-    {
-        UE_LOG(LogTemp,Log,TEXT("UPXSaveGameSubsystem::SaveTalentsData Success ^ ^"))
-    }
-}
-
-UPXTalentsSaveGame* UPXSaveGameSubsystem::GetTalentsData()
-{
-    if (IsValid(TalentsSaveGame)) return TalentsSaveGame;
-
-    if (UPXTalentsSaveGame* SaveGame = Cast<UPXTalentsSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Talents, UserIndex)))
-    {
-        TalentsSaveGame = SaveGame;
-        return TalentsSaveGame;
-    }
-
-    TalentsSaveGame = NewObject<UPXTalentsSaveGame>(this);
-    SaveTalentsData();
-    return TalentsSaveGame;
 }

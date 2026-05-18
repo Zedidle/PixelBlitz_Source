@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+#include "PXCustomStruct.h"
 #include "PXBasicBuildSaveGame.generated.h"
 
 struct FGameplayTag;
@@ -33,4 +34,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
 	TArray<FGameplayTag> UnlockedTalents;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	TMap<EWeather, int> KillBOSSNum_InWeatherType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	int TotalPickupGolds = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	int TotalDeathNum = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicBuild")
+	int TotalPerfectDodgeTimes = 0;
 };

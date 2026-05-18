@@ -87,20 +87,3 @@ void UPXSaveGameSubSystemFuncLib::SaveShopData(const UObject* WorldContext)
 		SaveGameSubsystem->SaveShopData();
 	}
 }
-
-UPXTalentsSaveGame* UPXSaveGameSubSystemFuncLib::GetTalentsData(const UObject* WorldContext)
-{
-	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
-	{
-		return SaveGameSubsystem->GetTalentsData();
-	}
-	return nullptr;
-}
-
-void UPXSaveGameSubSystemFuncLib::SaveTalentsData(const UObject* WorldContext)
-{
-	if (UPXSaveGameSubsystem* SaveGameSubsystem = GetSaveGameSubsystem(WorldContext))
-	{
-		SaveGameSubsystem->SaveTalentsData();
-	}
-}

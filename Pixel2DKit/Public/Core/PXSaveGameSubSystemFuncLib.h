@@ -35,9 +35,4 @@ public:
 	static UPXShopSaveGame* GetShopData(const UObject* WorldContext);
 	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
 	static void SaveShopData(const UObject* WorldContext);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static UPXTalentsSaveGame* GetTalentsData(const UObject* WorldContext);
-	UFUNCTION(BlueprintCallable, Category = SaveGame, meta = (WorldContext = "WorldContext"))
-	static void SaveTalentsData(const UObject* WorldContext);
 };

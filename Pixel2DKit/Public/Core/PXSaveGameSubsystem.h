@@ -6,7 +6,6 @@
 #include "SaveGame/PXAchievementsSaveGame.h"
 #include "SaveGame/PXBasicBuildSaveGame.h"
 #include "SaveGame/PXMainSaveGame.h"
-#include "SaveGame/PXTalentsSaveGame.h"
 #include "SaveGame/PXShopSaveGame.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "PXSaveGameSubsystem.generated.h"
@@ -22,7 +21,6 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 	void InitData_BasicBuild();
 	void InitData_Achievements();
 	void InitData_Shop();
-	void InitData_Talents();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Main", meta = (AllowPrivateAccess = "true"))
 	UPXMainSaveGame* MainSaveGame;
@@ -35,9 +33,6 @@ class PIXEL2DKIT_API UPXSaveGameSubsystem : public UGameInstanceSubsystem
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Shop", meta = (AllowPrivateAccess = "true"))
 	UPXShopSaveGame* ShopSaveGame;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SaveGame | Talents", meta = (AllowPrivateAccess = "true"))
-	UPXTalentsSaveGame* TalentsSaveGame;
 	
 public:
 	static UPXSaveGameSubsystem* GetInstance(const UObject* WorldContextObject);
@@ -106,16 +101,4 @@ public:
 #pragma endregion 
 
 
-#pragma region Talents
-	
-	const FString SlotName_Talents = "Talents";
-
-	UFUNCTION(BlueprintCallable, Category = "SaveGame | Talents")
-	void SaveTalentsData();
-	UPXTalentsSaveGame* GetTalentsData();
-
-#pragma endregion 
-
-	
-	
 };
