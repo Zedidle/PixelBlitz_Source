@@ -125,27 +125,6 @@ void UAbilityComponent::RefreshAbilitiesCanChoice()
 	}
 }
 
-void UAbilityComponent::LoadTalents()
-{
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->BuffComponent)
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->StateComponent)
-	UGameInstance* GameInstance = PXCharacter->GetGameInstance();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
-	UPXSaveGameSubsystem* SaveGameSubsystem = GameInstance->GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SaveGameSubsystem)
-	UPXBasicBuildSaveGame* BasicBuildSaveGame = SaveGameSubsystem->GetBasicBuildData();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(BasicBuildSaveGame)
-
-	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
-
-	UWorld* World = GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
-	
-	if (TalentLoaded) return;
-	TalentLoaded = true;
-}
 
 
 

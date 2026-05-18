@@ -107,9 +107,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RefreshAbilitiesCanChoice();
 
-	UFUNCTION(BlueprintCallable)
-	void LoadTalents();
-	
 	UFUNCTION()
 	void InitTalents();
 	
