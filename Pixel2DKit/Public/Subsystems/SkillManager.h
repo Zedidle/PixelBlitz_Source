@@ -113,6 +113,8 @@ struct FSkillPool
 };
 
 
+// Manages transient reusable skill actors, mainly projectile-like world skills.
+// Character-owned passive / attached skills are still spawned by AbilityComponent.
 UCLASS()
 class PIXEL2DKIT_API USkillManager : public UGameInstanceSubsystem
 {

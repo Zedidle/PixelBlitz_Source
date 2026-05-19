@@ -56,6 +56,8 @@ class PIXEL2DKIT_API UAbilityComponent : public UActorComponent, public IFight_I
 	UPROPERTY()
 	TMap<EAbilityTiming, FGameplayTagArray> AbilitiesTiming;
 
+	// Skills attached to and owned by this character for the whole run. These are
+	// event listeners / passive handlers, not pooled transient world skills.
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ABaseSkill>> SkillsHolding;
 
@@ -113,8 +115,10 @@ public:
 	UFUNCTION()
 	void InitAbilities();
 
+	// Spawns a character-owned skill instance and attaches it to the current
+	// character. This is intentionally separate from SkillManager's pooled skill flow.
 	UFUNCTION()
-	ABaseSkill* SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform = FTransform());
+	ABaseSkill* SpawnOwnedSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform = FTransform());
 
 	UFUNCTION()
 	void RegisterDefenseSkill(ABaseDefenseSkill* Skill);

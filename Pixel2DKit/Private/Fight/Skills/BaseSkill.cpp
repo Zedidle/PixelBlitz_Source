@@ -76,6 +76,9 @@ void ABaseSkill::SetActive(bool v)
 		SetSkillLifeTimer(false);
 		bIdle = false;
 		
+		// Only pooled transient skills are expected to be returned by SkillManager.
+		// Character-owned attached skills may call this path too, but SkillManager
+		// will simply ignore classes that were never registered in a pool.
 		if (USkillManager* SkillManager = USkillManager::GetInstance(this))
 		{
 			SkillManager->DeactivateSkill(this);

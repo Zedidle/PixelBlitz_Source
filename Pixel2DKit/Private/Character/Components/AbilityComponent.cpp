@@ -168,7 +168,7 @@ void UAbilityComponent::InitTalents()
 			}
 		}
 
-		if (ABaseSkill* Skill = SpawnSkill(TalentData.SkillClass))
+		if (ABaseSkill* Skill = SpawnOwnedSkill(TalentData.SkillClass))
 		{
 			Skill->SetActivateTiming(TalentData.Timing);
 			Skill->AbilityTag = TalentData.TalentTag;
@@ -215,7 +215,7 @@ void UAbilityComponent::InitAbilities()
 	}
 }
 
-ABaseSkill* UAbilityComponent::SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform)
+ABaseSkill* UAbilityComponent::SpawnOwnedSkill(TSubclassOf<ABaseSkill> SkillClass, const FTransform& SpawnTransform)
 {
 	UWorld* World = GetWorld();
 	if (!World) return nullptr;
@@ -227,6 +227,8 @@ ABaseSkill* UAbilityComponent::SpawnSkill(TSubclassOf<ABaseSkill> SkillClass, co
 	
 	if (ABaseSkill* Skill = World->SpawnActor<ABaseSkill>(SkillClass, SpawnTransform, SpawnParams))
 	{
+		// Character-owned skills stay attached to the character and participate in
+		// AbilityComponent event dispatch through SkillsHolding.
 		FAttachmentTransformRules AttachmentRules(EAttachmentRule::KeepRelative, true);
 		Skill->AttachToActor(PXCharacter, AttachmentRules);
 		
@@ -387,7 +389,7 @@ void UAbilityComponent::LoadAbilities()
 			}
 		}
 
-		if (ABaseSkill* Skill = SpawnSkill(AbilityData.SkillClass))
+		if (ABaseSkill* Skill = SpawnOwnedSkill(AbilityData.SkillClass))
 		{
 			Skill->SetActivateTiming(AbilityData.Timing);
 			Skill->AbilityTag = AbilityTag;
