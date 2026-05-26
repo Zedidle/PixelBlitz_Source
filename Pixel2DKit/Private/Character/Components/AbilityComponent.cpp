@@ -545,7 +545,28 @@ bool UAbilityComponent::ChoiceAbility(const FGameplayTag& Tag, int& RemSkillPoin
 
 void UAbilityComponent::OnLanding()
 {
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnLanding();
+		}
+	}
+	
 	ActivateAbilityByTiming(EAbilityTiming::Landing);
+}
+
+void UAbilityComponent::OnCrossPlatformLanding()
+{
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnCrossPlatformLanding();
+		}
+	}
+
+	ActivateAbilityByTiming(EAbilityTiming::CrossPlatformLanding);
 }
 
 void UAbilityComponent::OnSkillStart()

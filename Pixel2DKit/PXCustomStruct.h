@@ -140,6 +140,7 @@ enum class EAbilityTiming : uint8
 	BeDamaged UMETA(DisplayName = "受到伤害"),
 	JumpStart UMETA(DisplayName = "起跳"),
 	Landing UMETA(DisplayName = "落地"),
+	CrossPlatformLanding UMETA(DisplayName = "跨平台跳跃落地"),
 	DefenseStart  UMETA(DisplayName = "防御开始"),
 	DefenseSuccess  UMETA(DisplayName = "防御成功抵挡伤害"),
 	DefenseFinish  UMETA(DisplayName = "防御结束"),
@@ -293,7 +294,7 @@ struct FAttributeEffect
 	float EffectedValue = 1.0f;
 
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	float EffectedDuration = 9999;
+	float EffectedDuration = 99999.9;
 	
 	float EffectedEndTime = 1;
 	

@@ -19,6 +19,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"
+#include "Components/PrimitiveComponent.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/StateComponent.h"
 #include "Subsystems/PXAnimSubsystem.h"
@@ -37,6 +38,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXLocalPlayer.h"
+#include "Platform/BasePlatform.h"
 #include "Settings/PXSettingsLocal.h"
 #include "Settings/PXSettingsShared.h"
 #include "Settings/Config/PXCameraSourceDataAsset.h"
@@ -528,8 +530,39 @@ void ABasePXCharacter::JumpStart_Implementation()
 	CachedASC->TryActivateAbilityByTagName("Ability.Jump");
 }
 
+ABasePlatform* ABasePXCharacter::ResolvePlatformActor(const FHitResult* Hit) const
+{
+	if (Hit)
+	{
+		if (ABasePlatform* Platform = Cast<ABasePlatform>(Hit->GetActor()))
+		{
+			return Platform;
+		}
+
+		if (const UPrimitiveComponent* HitComponent = Hit->GetComponent())
+		{
+			if (ABasePlatform* Platform = Cast<ABasePlatform>(HitComponent->GetOwner()))
+			{
+				return Platform;
+			}
+		}
+	}
+
+	if (const UPrimitiveComponent* MovementBase = GetMovementBase())
+	{
+		return Cast<ABasePlatform>(MovementBase->GetOwner());
+	}
+
+	return nullptr;
+}
+
 void ABasePXCharacter::Jump()
 {
+	if (CurJumpCount == 0)
+	{
+		JumpTakeoffPlatform = ResolvePlatformActor();
+	}
+
 	Super::Jump();
 	SetJumping(true);
 
@@ -575,9 +608,20 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
+	ABasePlatform* LandingPlatform = ResolvePlatformActor(&Hit);
+
 	if (AbilityComponent)
 	{
 		AbilityComponent->OnLanding();
+		if (JumpTakeoffPlatform.IsValid() && LandingPlatform && JumpTakeoffPlatform.Get() != LandingPlatform)
+		{
+			AbilityComponent->OnCrossPlatformLanding();
+		}
+	}
+
+	if (LandingPlatform)
+	{
+		LandingPlatform->OnPlayerLand();
 	}
 	
 	if (DataAsset && DataAsset->LandedSound)
@@ -615,6 +659,7 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 		}
 	}
 	JumpStartTime = 0;
+	JumpTakeoffPlatform.Reset();
 #pragma endregion
 }
 

@@ -207,6 +207,11 @@ public:
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnLanding();
 
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnCrossPlatformLanding")
+	bool BP_OnCrossPlatformLanding();
+	UFUNCTION(Category="Skill | Timing")
+	virtual bool OnCrossPlatformLanding();
+
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnDefenseStart")
 	bool BP_OnDefenseStart();
 	UFUNCTION(Category="Skill | Timing")

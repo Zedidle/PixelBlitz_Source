@@ -154,6 +154,9 @@ public:
 	void OnLanding();// 后续可能会补充参数
 
 	UFUNCTION()
+	void OnCrossPlatformLanding();
+
+	UFUNCTION()
 	void OnSkillStart();// 后续可能会补充参数
 
 	// 专门处理实时变化的攻击附加

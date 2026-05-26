@@ -262,6 +262,14 @@ bool ABaseSkill::OnLanding()
 	return true;
 }
 
+bool ABaseSkill::OnCrossPlatformLanding()
+{
+	if (ActivateTiming != EAbilityTiming::CrossPlatformLanding) return false;
+	ApplyAttributeEffects();
+	BP_OnCrossPlatformLanding();
+	return true;
+}
+
 bool ABaseSkill::OnDefenseStart()
 {
 	if (ActivateTiming != EAbilityTiming::DefenseStart) return false;

@@ -19,6 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerDie);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerAttackStart, EAttackType, AttackType, FVector, AttackDirection);
 
 class ABaseWeapon;
+class ABasePlatform;
 
 class UInputAction;
 class UAbilityComponent;
@@ -106,6 +107,9 @@ class PIXEL2DKIT_API ABasePXCharacter : public APaperZDCharacter, public IFight_
 	bool PreSpriteLeft = false;
 	FVector CameraOffsetForBulletTime;
 	float JumpStartTime = -1;
+	TWeakObjectPtr<ABasePlatform> JumpTakeoffPlatform;
+
+	ABasePlatform* ResolvePlatformActor(const FHitResult* Hit = nullptr) const;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UBasePlayerStatusWidget* PlayerStatusWidget;
