@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "Animation/BasePXAnimInstance.h"
+#include "AnimSequences/Players/PaperZDAnimPlayer.h"
 #include "PaperFlipbookComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Core/PXGameInstance.h"
@@ -164,6 +165,43 @@ FVector ABasePXCharacter::GetSpriteForwardVector()
 	return FVector::ForwardVector;
 }
 
+bool ABasePXCharacter::IsProjectileNormalAttack() const
+{
+	return DataAsset && DataAsset->NormalAttackType == EAttackType::Projectile;
+}
+
+float ABasePXCharacter::GetAttackHoldMoveSpeedSub() const
+{
+	if (!bAttackHolding || !IsProjectileNormalAttack())
+	{
+		return 0.0f;
+	}
+
+	return FMath::Max(0.0f, AttackHoldMoveSpeedSub);
+}
+
+void ABasePXCharacter::RefreshAttackHoldingMoveSpeed()
+{
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	if (!Movement) return;
+
+	float BaseMoveSpeed = CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurSpeed) : Movement->MaxWalkSpeed;
+	Movement->MaxWalkSpeed = FMath::Max(0.0f, BaseMoveSpeed - GetAttackHoldMoveSpeedSub());
+}
+
+
+
+void ABasePXCharacter::SetAnimPlayerPlaybackReversed(bool bReversed) const
+{
+	if (UPaperZDAnimInstance* LocalAnimInstance = GetAnimInstance())
+	{
+		if (UPaperZDAnimPlayer* AnimPlayer = LocalAnimInstance->GetPlayer())
+		{
+			AnimPlayer->PlaybackMode = bReversed ? EAnimPlayerPlaybackMode::Reversed : EAnimPlayerPlaybackMode::Forward;
+		}
+	}
+}
+
 void ABasePXCharacter::Tick_SaveFallingStartTime(float DeltaSeconds)
 {
 	if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
@@ -181,19 +219,23 @@ void ABasePXCharacter::Tick_SaveFallingStartTime(float DeltaSeconds)
 
 void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 {
-	if (!GetCharacterMovement() || GetCharacterMovement()->Velocity.Size2D() < 1.0f) return;
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent || !GetSprite())
+	{
+		// SetAnimPlayerPlaybackReversed(false);
+		return;
+	}
 
-	if (!GetSprite()) return;
-	FVector Acceleration = GetCharacterMovement()->GetCurrentAcceleration();
+	FVector Acceleration = MovementComponent->GetCurrentAcceleration();
 
 	FVector Velocity;
 	if (Acceleration.IsZero())
 	{
-		Velocity = GetCharacterMovement()->Velocity;
+		Velocity = MovementComponent->Velocity;
 	}
 	else
 	{
-		Velocity = GetCharacterMovement()->GetCurrentAcceleration();
+		Velocity = Acceleration;
 	}
 
 	float Dot_VelocityToCamera = FVector::DotProduct(Velocity.GetSafeNormal2D(MinDot_VelocityToCamera), GetVectorFaceToCamera().GetSafeNormal2D());
@@ -1155,6 +1197,7 @@ void ABasePXCharacter::SetAttackHolding(bool V)
 {
 	bAttackHolding = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackHolding")), V);
+	RefreshAttackHoldingMoveSpeed();
 }
 
 void ABasePXCharacter::SetAttackFire(bool V)
@@ -1684,8 +1727,11 @@ void ABasePXCharacter::Input_Move2D(const FInputActionValue& Value)
 	FVector2D AxisValue = Value.Get<FVector2D>();
 	if (AxisValue.X == 0 && AxisValue.Y == 0) return;
 
-	AddMovementInput(GetRightVectorWithBlendYaw(), AxisValue.X, false);
-	AddMovementInput(GetVectorFaceToCamera(), -AxisValue.Y, false);
+	FVector RightDirection = GetRightVectorWithBlendYaw();
+	FVector ForwardDirection = GetVectorFaceToCamera();
+
+	AddMovementInput(RightDirection, AxisValue.X, false);
+	AddMovementInput(ForwardDirection, -AxisValue.Y, false);
 }
 
 void ABasePXCharacter::TryToAttack()
@@ -1697,6 +1743,7 @@ void ABasePXCharacter::TryToAttack()
 	{
 		bAttackStartup = true;
 		SetAttackAnimToggle(true);
+		SetAttackFire(false);
 
 		if (GetCharacterMovement())
 		{
@@ -1824,7 +1871,7 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 	}
 	else if (Attribute == UPXAttributeSet::GetCurSpeedAttribute())
 	{
-		Movement->MaxWalkSpeed = NewValue;
+		Movement->MaxWalkSpeed = NewValue - GetAttackHoldMoveSpeedSub();
 	}
 	else if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())
 	{

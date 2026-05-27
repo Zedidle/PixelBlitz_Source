@@ -348,7 +348,10 @@ public:
 	// 蓄力攻击释放
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackFire;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack|Holding", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float AttackHoldMoveSpeedSub = 50.0f;
+
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bMoving;
 	
@@ -491,6 +494,11 @@ public:
 	void TryUseSkill();
 	
 #pragma endregion
+
+	bool IsProjectileNormalAttack() const;
+	float GetAttackHoldMoveSpeedSub() const;
+	void RefreshAttackHoldingMoveSpeed();
+	void SetAnimPlayerPlaybackReversed(bool bReversed) const;
 
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ABaseInteractableItem>> InteractableItems;
