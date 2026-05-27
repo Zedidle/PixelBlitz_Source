@@ -218,10 +218,6 @@ void ABaseEnemy::SetInHesitationState(const bool V, float Duration)
 	}
 
 	bInHesitationState = true;
-	if (GetCharacterMovement())
-	{
-		GetCharacterMovement()->StopMovementImmediately();
-	}
 
 	if (Duration > 0.0f)
 	{

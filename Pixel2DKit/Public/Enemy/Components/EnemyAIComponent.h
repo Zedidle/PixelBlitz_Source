@@ -43,6 +43,7 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 
 	float PlayerHigher = 0.0f;
 	EPlayerMovementType CurPlayerMovementType = EPlayerMovementType::None;
+	bool bObservedPlayerAttackHolding = false;
 
 	TArray<FVector> PlayerPaths;
 
@@ -94,6 +95,9 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float HesitationDuration = 0.75f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float HesitationDefaultDirRotateBonus = 35.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float HesitationDodgeRateBonus = 0.2f;

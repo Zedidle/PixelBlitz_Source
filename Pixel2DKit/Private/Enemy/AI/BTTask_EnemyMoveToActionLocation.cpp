@@ -58,13 +58,6 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		return EBTNodeResult::Failed;
 	}
 
-	if (SelfEnemyPawn->IsInHesitationState())
-	{
-		EnemyAIController->StopMovement();
-		FinishExecute(true);
-		return EBTNodeResult::Failed;
-	}
-	
 	if (!IEnemyAI_Interface::Execute_CanMove(SelfEnemyPawn))
 	{
 		FinishExecute(true);
@@ -163,9 +156,7 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 
 			if (EnemyAIComponent->TryEnterHesitationStateByCrowd(TargetLocation))
 			{
-				EnemyAIController->StopMovement();
-				FinishExecute(true);
-				return EBTNodeResult::Failed;
+				TargetLocation = EnemyAIComponent->GetMoveDotDirRandLocation(TargetLocation);
 			}
 		}
 	

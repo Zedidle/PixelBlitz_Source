@@ -62,6 +62,7 @@ void UEnemyAIComponent::SetPXCharacter(ABasePXCharacter* Character)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	PXCharacter = Character;
+	bObservedPlayerAttackHolding = false;
 
 	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetName() + "_SetPixelCharacter");
 	
@@ -110,6 +111,8 @@ void UEnemyAIComponent::UpdatePlayerPaths()
 
 void UEnemyAIComponent::LostPlayer()
 {
+	bObservedPlayerAttackHolding = false;
+
 	FName TimerName_CheckPlayerLocation = FName(OwningEnemy->GetName() + "_SetPixelCharacter");
 	UTimerManagerFuncLib::CancelDelay(GetWorld(), TimerName_CheckPlayerLocation);
 	
@@ -143,8 +146,13 @@ FVector UEnemyAIComponent::GetMoveDotDirRandLocation(FVector NewTargetLocation, 
 	
 	// 移动向量
 	float BlockYawModify = FMath::Min(MaxBlockYawModify, BlockValue * BlockDirModifyValue);
+	float BaseDirRotate = DefaultDirRotate;
+	if (OwningEnemy->IsInHesitationState())
+	{
+		BaseDirRotate += HesitationDefaultDirRotateBonus;
+	}
 	
-	FVector MoveVector = FRotator(0, (PreBlockYawDirection ? 1 : -1) * (DefaultDirRotate + BlockYawModify), 0)
+	FVector MoveVector = FRotator(0, (PreBlockYawDirection ? 1 : -1) * (BaseDirRotate + BlockYawModify), 0)
 							.RotateVector(NewTargetLocation - OwnerLocation);
 
 	
@@ -594,10 +602,12 @@ void UEnemyAIComponent::Event_CheckPlayerMovement()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(OwningEnemy)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
 
-	if (PXCharacter->bAttackHolding && HasDirectSightToPlayer())
+	const bool bPlayerAttackHoldingVisible = PXCharacter->bAttackHolding && HasDirectSightToPlayer();
+	if (bPlayerAttackHoldingVisible && !bObservedPlayerAttackHolding)
 	{
 		TryEnterHesitationStateByRate(OnPlayerAttackHolding_HesitationRate);
 	}
+	bObservedPlayerAttackHolding = bPlayerAttackHoldingVisible;
 
 	FVector PlayerVelocity = PXCharacter->GetVelocity();
 	if (PlayerVelocity.IsZero()) return;
