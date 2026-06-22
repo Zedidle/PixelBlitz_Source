@@ -152,7 +152,9 @@ EBTNodeResult::Type UBTTask_EnemyMoveToActionLocation::ExecuteTask(UBehaviorTree
 		if (!bFoundPathPoint)
 		{
 			TargetLocation = EnemyAIComponent->GetNearestActionFieldCanAttackLocation();
-			TargetLocation += FMath::RandRange(0.2f ,0.8f) * (PlayerPawnLocation - TargetLocation);
+
+			// Keep a little variation around the chosen attack band without always collapsing inward.
+			TargetLocation += FMath::RandRange(-0.2f, 0.2f) * (PlayerPawnLocation - TargetLocation);
 
 			if (EnemyAIComponent->TryEnterHesitationStateByCrowd(TargetLocation))
 			{

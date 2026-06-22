@@ -43,6 +43,7 @@ class PIXEL2DKIT_API UEnemyAIComponent : public UActorComponent
 
 	float PlayerHigher = 0.0f;
 	EPlayerMovementType CurPlayerMovementType = EPlayerMovementType::None;
+	bool bPrevPlayerAttackHolding = false;
 	bool bObservedPlayerAttackHolding = false;
 
 	TArray<FVector> PlayerPaths;

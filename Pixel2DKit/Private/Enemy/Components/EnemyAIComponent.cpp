@@ -315,7 +315,10 @@ int32 UEnemyAIComponent::CountAlliesOnPath(const FVector& NewTargetLocation) con
 	{
 		if (ABaseEnemy* Ally = Cast<ABaseEnemy>(Hit.GetActor()))
 		{
-			UniqueAllies.Add(Ally);
+			if (FVector::Dist2D(Ally->GetActorLocation(), NewTargetLocation) <= AllyCheckRadius)
+			{
+				UniqueAllies.Add(Ally);
+			}
 		}
 	}
 
@@ -555,6 +558,14 @@ bool UEnemyAIComponent::TryEnterHesitationStateByRate(float EnterRate)
 
 bool UEnemyAIComponent::TryEnterHesitationStateByCrowd(const FVector& NewTargetLocation)
 {
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(OwningEnemy, false);
+
+	// Only treat crowding near the intended attack location as hesitation.
+	if (FVector::Dist2D(OwningEnemy->GetActorLocation(), NewTargetLocation) > AllyCheckRadius * 2.0f)
+	{
+		return false;
+	}
+
 	if (CountAlliesOnPath(NewTargetLocation) < OnCrowded_HesitationMinAllies)
 	{
 		return false;

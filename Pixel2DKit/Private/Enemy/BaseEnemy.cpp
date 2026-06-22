@@ -779,7 +779,7 @@ void ABaseEnemy::OnAttributeChanged(const FGameplayAttribute& Attribute, float O
 	}
 	if (Attribute == UPXAttributeSet::GetCurAccelerationAttribute())
 	{
-		Movement->MaxAcceleration = NewValue;		
+		Movement->MaxAcceleration = NewValue;
 	}
 	if (Attribute == UPXAttributeSet::GetCurBodySizeScaleAttribute())
 	{

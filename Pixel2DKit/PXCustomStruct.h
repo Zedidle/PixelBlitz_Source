@@ -50,7 +50,7 @@ struct FEnemyMessage
 	GENERATED_BODY()
 	
 	UPROPERTY()
-	ABaseEnemy* Enemy;
+	ABaseEnemy* Enemy = nullptr;
 };
 
 
@@ -251,10 +251,9 @@ USTRUCT(BlueprintType)
 struct FAttributeEffect
 {
 	GENERATED_BODY()
-	FAttributeEffect()
-	{
-		
-	}
+
+	FAttributeEffect() = default;
+
 	FAttributeEffect(EPXAttribute Attribute, float Percent): EffectedAttribute(Attribute),
 			EffectedPercent(Percent), EffectedValue(1.0f), EffectedDuration(9999)
 	{
@@ -285,7 +284,7 @@ struct FAttributeEffect
 	}
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
-	EPXAttribute EffectedAttribute;
+	EPXAttribute EffectedAttribute = EPXAttribute::HP;
 	
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
 	float EffectedPercent = 0.0f;
@@ -296,7 +295,7 @@ struct FAttributeEffect
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="Buff")
 	float EffectedDuration = 99999.9;
 	
-	float EffectedEndTime = 1;
+	float EffectedEndTime = 1.0f;
 	
 	FAttributeEffect& operator+=(const FAttributeEffect& Other)
 	{
