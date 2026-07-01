@@ -111,7 +111,7 @@ void ASkill_Immortal::MakeEffect()
 		MainSaveGame->CharacterInheritAttribute.BasicMaxHP += HPEffect;
 		
 		BuffComponent->RemoveBuff(AbilityTag, true);
-		BuffComponent->AddAttributeEffect(AbilityTag, EPXAttribute::BasicMaxHP, 0.0f , HPEffect);
+		BuffComponent->AddAttributeEffect(AbilityTag, EPXAttribute::BasicMaxHP, 0.0f , 0, HPEffect);
 		StateComponent->IncreaseHP(HPEffect, Owner);
 		
 		BeginPrepare();
