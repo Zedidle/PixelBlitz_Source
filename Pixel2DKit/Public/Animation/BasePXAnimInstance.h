@@ -58,6 +58,9 @@ public:
 	bool bAttackFire;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
+	int32 AttackComboIndex;
+	
+	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bDashing;
 
 
