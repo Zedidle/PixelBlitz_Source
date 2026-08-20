@@ -602,7 +602,7 @@ void UEnemyAIComponent::OnPlayerAttackStart(EAttackType Type, FVector Direction)
 			{
 				float Yaw = RandRotateYaws[FMath::RandRange(0, RandRotateYaws.Num() - 1)];
 				FVector MoveVector = FRotator(0, Yaw, 0).RotateVector(OwningEnemy->GetHorizontalDirectionToPlayer()) * OnPlayerAttackStart_DodgeDistance;
-				OwningEnemy->SetActionMove(MoveVector, CurveName, 0.3, false);
+				OwningEnemy->AddActionMove(MoveVector, CurveName, 0.3, false);
 			}
 		}
 	}

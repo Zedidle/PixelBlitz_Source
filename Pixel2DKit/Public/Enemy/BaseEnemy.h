@@ -70,6 +70,24 @@ struct FEnemyData : public FTableRowBase
 	float WeakPointRefreshPeriod = 6.0f;
 };
 
+USTRUCT(BlueprintType)
+struct FActionData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FVector MoveVector = FVector::ZeroVector;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FName CurveName = FName();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	float SustainTime = 0.5f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	bool bCabBeInterrupt = true;
+	
+};
 
 USTRUCT(BlueprintType)
 struct FActionMove
@@ -123,6 +141,7 @@ class PIXEL2DKIT_API ABaseEnemy : public APaperZDCharacter, public IFight_Interf
 	
 	void SetLanding(const bool V, const float time = 0.1f);
 
+	TQueue<FActionData> PreActionData;
 	FActionMove ActionMove;
 
 	// 当前激活的召唤术技能
@@ -158,8 +177,11 @@ public:
 
 	
 	UFUNCTION(BlueprintCallable)
-	void SetActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bInterrupt = false, bool bCabBeInterrupt = false);
+	void AddActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bInterrupt = false, bool bCabBeInterrupt = false);
 
+	UFUNCTION()
+	void UpdateActionMove();
+	
 	UFUNCTION(BlueprintCallable)
 	void TryJumpToOtherPlatform(const FVector& StartLocation, const FVector& TargetLocation);
 	

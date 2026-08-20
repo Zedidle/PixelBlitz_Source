@@ -95,7 +95,7 @@ void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 	{
 		if (PlayerActor->GetDistanceTo(this) < 100.0f)
 		{
-			SetActionMove(GetHorizontalDirectionToPlayer() * -20, "Startled", FMath::RandRange(0.3f, 0.4f), true);
+			AddActionMove(GetHorizontalDirectionToPlayer() * -20, "Startled", FMath::RandRange(0.3f, 0.4f), true);
 		}
 	}
 
@@ -133,6 +133,7 @@ void ABaseEnemy::SetDead(bool V)
 		bInAttackEffect = false;
 
 		ActionMove.bActionMoving = false;
+		PreActionData.Empty();
 		// ActionMove图中被击落
 		if (GetCharacterMovement())
 		{
@@ -451,13 +452,22 @@ void ABaseEnemy::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bInterrupt, bool bCabBeInterrupt)
+void ABaseEnemy::AddActionMove(const FVector& MoveVector,  const FName& CurveName, float SustainTime, bool bInterrupt, bool bCabBeInterrupt)
 {
 	if (!GetCapsuleComponent()) return;
 	if (CurveName.IsNone()) return;
 	if (SustainTime <= 0.0f) return;
-	if (ActionMove.bActionMoving && !ActionMove.bCabBeInterrupt) return;
-	if (ActionMove.bActionMoving && !bInterrupt) return;
+	if (ActionMove.bActionMoving && !ActionMove.bCabBeInterrupt || 
+		ActionMove.bActionMoving && !bInterrupt )
+	{
+		FActionData Data;
+		Data.MoveVector = MoveVector;
+		Data.CurveName = CurveName;
+		Data.SustainTime = SustainTime;
+		Data.bCabBeInterrupt = bCabBeInterrupt;
+		PreActionData.Enqueue(Data);
+		return;	
+	} 
 
 	UEnemyAISubsystem* EnemyAISubsystem = UEnemyAISubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
@@ -493,6 +503,7 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation);
 	}
 
+	
 	ActionMove.bActionMoving = true;
 	ActionMove.CurTime = 0;
 	ActionMove.SustainTime = SustainTime;
@@ -500,6 +511,62 @@ void ABaseEnemy::SetActionMove(const FVector& MoveVector,  const FName& CurveNam
 	ActionMove.TargetLocation = TargetLocation;
 	ActionMove.CurveVector = ActionMoveCurveData.Curve;
 	ActionMove.bCabBeInterrupt = bCabBeInterrupt;
+	
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->SetActive(false, false);
+		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	}
+}
+
+void ABaseEnemy::UpdateActionMove()
+{
+	if (PreActionData.IsEmpty()) return;
+	FActionData Data;
+	PreActionData.Dequeue(Data);
+	
+	UEnemyAISubsystem* EnemyAISubsystem = UEnemyAISubsystem::GetInstance(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(EnemyAISubsystem)
+
+	const FCurveFloatData& ActionMoveCurveData = EnemyAISubsystem->GetActionMoveCurveData(Data.CurveName);
+	if (!IsValid(ActionMoveCurveData.Curve)) return;
+
+	FVector StartLocation = GetActorLocation();
+	if (ActionMoveCurveData.CheckBehindDistance > 0)
+	{
+		FHitResult OutHit;
+		FVector CheckBehindLocation = StartLocation - ActionMoveCurveData.CheckBehindDistance * Data.MoveVector.GetSafeNormal2D();
+		bool bBlock = UKismetSystemLibrary::LineTraceSingle(GetWorld(), StartLocation,CheckBehindLocation,
+		TraceTypeQuery1, false, {this},
+				EDrawDebugTrace::None, OutHit, true,
+				FLinearColor::Red, FLinearColor::Green, 1.0f);
+
+		if (bBlock) return;
+	}
+
+	// 向下检查的悬崖高度
+	float Height = GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 50;
+	// 间距单位
+	float Radius = GetCapsuleComponent()->GetScaledCapsuleRadius();
+	FVector Direction = Data.MoveVector.GetSafeNormal2D();
+	FVector TargetLocation = USpaceFuncLib::GetHorizontalFarestPosition(StartLocation, Direction, Data.MoveVector.Size2D(), Height, Radius);
+
+	// 该方向没有可行的点位
+	if (StartLocation == TargetLocation) return;
+	
+	if (EnemyAIComponent)
+	{
+		EnemyAIComponent->MoveCheckAllies(TargetLocation, TargetLocation);
+	}
+
+	
+	ActionMove.bActionMoving = true;
+	ActionMove.CurTime = 0;
+	ActionMove.SustainTime = Data.SustainTime;
+	ActionMove.StartLocation = StartLocation;
+	ActionMove.TargetLocation = TargetLocation;
+	ActionMove.CurveVector = ActionMoveCurveData.Curve;
+	ActionMove.bCabBeInterrupt = Data.bCabBeInterrupt;
 	
 	if (GetCharacterMovement())
 	{
@@ -1271,6 +1338,8 @@ void ABaseEnemy::Tick_ActionMove(float DeltaSeconds)
 			GetCharacterMovement()->SetActive(true, false);
 			GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 		}
+		
+		UpdateActionMove();
 	}
 }
 
