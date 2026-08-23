@@ -316,11 +316,6 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Movement)
 	bool bLanding;
-	
-
-	// 仅用于控制攻击动画的进入
-	UPROPERTY(BlueprintReadOnly, Category = Animation)
-	bool bAttackAnimToggle; 
 
 	// 处于攻击前摇
 	UPROPERTY(BlueprintReadWrite, Category = Animation)

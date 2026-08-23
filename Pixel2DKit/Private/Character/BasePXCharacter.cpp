@@ -1189,7 +1189,6 @@ void ABasePXCharacter::SetDashing(bool V)
 
 void ABasePXCharacter::SetAttackAnimToggle(bool V)
 {
-	bAttackAnimToggle = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackAnimToggle")), V);
 }
 
