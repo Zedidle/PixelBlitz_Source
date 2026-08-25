@@ -434,6 +434,11 @@ protected:
 	void Tick_ActionMove(float DeltaSeconds);
 	void Tick_SnapOnPlatform(float DeltaSeconds);
 	
+	float DieRotationValue = 360;
+	int RotationType = 0;  // 0:Pitch, 1:Yaw, 2:Roll
+	bool RotationRot = false; // 顺逆
+	void Tick_OnDieRotation(float DeltaSeconds);
+	
 
 	
 };

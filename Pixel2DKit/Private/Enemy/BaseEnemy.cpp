@@ -693,6 +693,10 @@ void ABaseEnemy::OnDie_Implementation()
 	Message.Enemy = this;
 	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 	MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnEnemyDie, Message);
+	
+	DieRotationValue = 0;
+	RotationType = FMath::RandRange(0, 2);
+	RotationRot = FMath::RandBool();
 }
 
 
@@ -1370,6 +1374,22 @@ void ABaseEnemy::Tick_SnapOnPlatform(float DeltaSeconds)
 	}
 }
 
+void ABaseEnemy::Tick_OnDieRotation(float DeltaSeconds)
+{	
+	if (DieRotationValue >= 360) return;
+	
+	float RotationValue = 720 * DeltaSeconds;
+	DieRotationValue += RotationValue;
+
+	RotationValue *= RotationRot ? 1 : -1;
+	FRotator PlusRotation = FRotator(
+		RotationType == 0 ? RotationValue : 0, 
+		RotationType == 1 ? RotationValue : 0, 
+		RotationType == 2 ? RotationValue : 0);
+	
+	AddActorWorldRotation(PlusRotation);
+}
+
 void ABaseEnemy::OnDispel(int DispelLevel, float BasicRate)
 {
 	int SkillIndex = FMath::RandRange(0, SummonSkills.Num()-1);
@@ -1385,6 +1405,7 @@ void ABaseEnemy::Tick(float DeltaSeconds)
 	Tick_KeepFaceToPixelCharacter(DeltaSeconds);
 	Tick_ActionMove(DeltaSeconds);
 	Tick_SnapOnPlatform(DeltaSeconds);
+	Tick_OnDieRotation(DeltaSeconds);
 	
 	// 目前只有 HealthWidget
 	if (UWidgetComponent* Widget = FindComponentByClass<UWidgetComponent>())
