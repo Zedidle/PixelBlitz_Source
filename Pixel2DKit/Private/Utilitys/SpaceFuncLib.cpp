@@ -361,3 +361,43 @@ ABaseEnemy* USpaceFuncLib::FindEnemyInRangeRandomOne(const UObject* WorldContext
 {
 	return FindActorInRangeRandomOne<ABaseEnemy>(WorldContextObject, A,ActorsToIgnore,  InRange);
 }
+
+TArray<ABaseEnemy*> USpaceFuncLib::FindEnemiesInRange(const UObject* WorldContextObject, AActor* A,
+	const TArray<AActor*>& ActorsToIgnore, FVector2D InRange)
+{
+	return FindActorsInRange<ABaseEnemy>(WorldContextObject, A, ActorsToIgnore, InRange);
+}
+
+TArray<FVector> USpaceFuncLib::GetRadialDirections(const UObject* WorldContextObject, AActor* A, int DirectionNum)
+{
+	TArray<FVector> OutDirections;
+
+	// 1. 参数有效性检查
+	if (!IsValid(A) || DirectionNum <= 0)
+	{
+		return OutDirections;
+	}
+
+	// 消除未使用参数的编译警告
+	(void)WorldContextObject;
+
+	// 2. 获取旋转基准轴
+	const FVector Forward = A->GetActorForwardVector();
+	const FVector Up = A->GetActorUpVector();   // 绕自身Z轴（上轴）旋转
+
+	// 3. 计算步长角度（度）
+	const float StepDeg = 360.0f / static_cast<float>(DirectionNum);
+
+	// 预分配内存以提升性能
+	OutDirections.Reserve(DirectionNum);
+
+	// 4. 生成方向列表
+	for (int32 i = 0; i < DirectionNum; ++i)
+	{
+		const float CurrentDeg = static_cast<float>(i) * StepDeg;
+		// 绕Up轴旋转Forward向量，步进角度 CurrentDeg
+		OutDirections.Add(Forward.RotateAngleAxis(CurrentDeg, Up));
+	}
+
+	return OutDirections;
+}

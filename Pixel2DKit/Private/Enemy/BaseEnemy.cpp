@@ -151,20 +151,6 @@ void ABaseEnemy::SetHurt(bool V, float Duration)
 	if (!bHurt) return;
 
 	FName TimerName = FName(GetName() + "_ABaseEnemy::SetHurt");
-
-	// float RemainingTime = UTimerManagerFuncLib::GetRemainingTime(GetWorld(), TimerName);
-	// if (RemainingTime > 0)
-	// {
-	// 	if (RemainingTime > Duration)
-	// 	{
-	// 		Duration = Duration / 2 + RemainingTime;
-	// 	}
-	// 	else
-	// 	{
-	// 		Duration = RemainingTime / 2 + Duration;
-	// 	}
-	// }
-	
 	UTimerManagerFuncLib::SetRetriggerableDelay(GetWorld(), TimerName, [WeakThis = TWeakObjectPtr(this)]
 	{
 		if (WeakThis.IsValid())
@@ -387,6 +373,7 @@ ABaseEnemy::ABaseEnemy(const FObjectInitializer& ObjectInitializer)
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComp"));
 	EnemyAIComponent = CreateDefaultSubobject<UEnemyAIComponent>(TEXT("EnemyAIComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("UAbilityComponent"));
 
 	CachedASC = CreateDefaultSubobject<UPXEnemyASComponent>(TEXT("AbilitySystem"));
 	CachedASC->SetIsReplicated(true);
@@ -960,10 +947,10 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 	OutDamage = InDamage;
 	if (Execute_GetOwnCamp(this).HasTag(TAG("Enemy.BOSS")))
 	{
-		if (UAbilityComponent* AbilityComponent = Maker->GetComponentByClass<UAbilityComponent>())
+		if (UAbilityComponent* MakerAbilityComponent = Maker->GetComponentByClass<UAbilityComponent>())
 		{
 			float FoundR;
-			if (AbilityComponent->FindExtendData(TAG("Ability.GiantSlayer.Set.ToBossDamagePlusPercent"),FoundR))
+			if (MakerAbilityComponent->FindExtendData(TAG("Ability.GiantSlayer.Set.ToBossDamagePlusPercent"),FoundR))
 			{
 				OutDamage *= 1 + FoundR;
 			}

@@ -103,6 +103,9 @@ public:
 	static T* FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = {0, 1000}, bool bAlive = true);
 	template<typename T>
 	static T* FindActorInRangeRandomOne(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange = {0, 1000}, bool bAlive = true);
+	template<typename T>
+	static TArray<T*> FindActorsInRange(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange = {0, 1000}, bool bAlive = true);
+	
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
 	static ABaseEnemy* FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = FVector2D(0, 1000));
@@ -112,92 +115,78 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
 	static ABaseEnemy* FindEnemyInRangeRandomOne(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = FVector2D(0, 1000));
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
+	static TArray<ABaseEnemy*> FindEnemiesInRange(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = FVector2D(0, 1000));
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space", meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm="ActorsToIgnore"))
+	static TArray<FVector> GetRadialDirections(const UObject* WorldContextObject, AActor* A, int DirectionNum);
+	
 };
 
 template <typename T>
 T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange, bool bAlive)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
-	UWorld* World = WorldContextObject->GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, nullptr)
-
-	T* Result = nullptr;
-	float TmpCurDistance = BIG_NUMBER;
+	TArray<T*> TmpTargets = FindActorsInRange<T>(WorldContextObject, A, ActorsToIgnore, InRange, bAlive);
+	if (TmpTargets.IsEmpty()) return nullptr;
 	
-	for (TActorIterator<T> It(World); It; ++It)
+	T* Result = nullptr;
+	float TmpCurDistance = 0;
+	
+	for (T* B : TmpTargets)
 	{
-		T* B = *It;
-		if (A == B) continue;
-		if (!IsValid(B)) continue;
-		if (ActorsToIgnore.Contains(B)) continue;
-		
-		if (bAlive)
-		{
-			if (!B->template Implements<UFight_Interface>() || !IFight_Interface::Execute_IsAlive(B))
-			{
-				continue;
-			}
-		}
-		
 		float Distance = A->GetDistanceTo(B);
-		if (Distance < InRange.X || Distance > InRange.Y) continue;
-		
 		if (Distance < TmpCurDistance)
 		{
 			TmpCurDistance = Distance;
 			Result = B;
 		}
 	}
-
+	
 	return Result;
 }
 
 template <typename T>
 T* USpaceFuncLib::FindActorInRangeFarthest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange, bool bAlive)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
-	UWorld* World = WorldContextObject->GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, nullptr)
+	TArray<T*> TmpTargets = FindActorsInRange<T>(WorldContextObject, A, ActorsToIgnore, InRange, bAlive);
+	if (TmpTargets.IsEmpty()) return nullptr;
 	
 	T* Result = nullptr;
 	float TmpCurDistance = 0;
-	for (TActorIterator<T> It(World); It; ++It)
+	
+	for (T* B : TmpTargets)
 	{
-		T* B = *It;
-		if (A == B) continue;
-		if (!IsValid(B)) continue;
-		if (ActorsToIgnore.Contains(B)) continue;
-
-		if (bAlive)
-		{
-			if (!B->template Implements<UFight_Interface>() || !IFight_Interface::Execute_IsAlive(B))
-			{
-				continue;
-			}
-		}
-
 		float Distance = A->GetDistanceTo(B);
-		if (Distance < InRange.X || Distance > InRange.Y) continue;
-		
 		if (Distance > TmpCurDistance)
 		{
 			TmpCurDistance = Distance;
 			Result = B;
 		}
 	}
-
+	
 	return Result;
 }
 
 template <typename T>
 T* USpaceFuncLib::FindActorInRangeRandomOne(const UObject* WorldContextObject, AActor* A,const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange, bool bAlive)
 {
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, nullptr)
-	UWorld* World = WorldContextObject->GetWorld();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, nullptr)
+	TArray<T*> TmpTargets = FindActorsInRange<T>(WorldContextObject, A, ActorsToIgnore, InRange, bAlive);
+	if (TmpTargets.IsEmpty()) return nullptr;
 	
-	TArray<T*> TmpTargets;
+	return TmpTargets[FMath::RandHelper(TmpTargets.Num())];
+}
 
+template <typename T>
+TArray<T*> USpaceFuncLib::FindActorsInRange(const UObject* WorldContextObject, AActor* A,
+	const TArray<AActor*>& ActorsToIgnore, FVector2D InRange, bool bAlive)
+{
+	TArray<T*> TmpTargets;
+	
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(A, TmpTargets)
+	UWorld* World = WorldContextObject->GetWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(World, TmpTargets)
+	
 	for (TActorIterator<T> It(World); It; ++It)
 	{
 		T* B = *It;
@@ -219,8 +208,5 @@ T* USpaceFuncLib::FindActorInRangeRandomOne(const UObject* WorldContextObject, A
 		TmpTargets.Add(B);
 	}
 
-	if (TmpTargets.IsEmpty()) return nullptr;
-
-	
-	return TmpTargets[FMath::RandHelper(TmpTargets.Num())];
+	return TmpTargets;
 }

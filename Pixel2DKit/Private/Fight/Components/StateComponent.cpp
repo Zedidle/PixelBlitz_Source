@@ -97,9 +97,6 @@ FVector UStateComponent::CalRepel(FVector& IncomeRepel, const AActor* Instigator
 	if (!IsValid(Instigator)) return IncomeRepel;
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, IncomeRepel)
 	
-	float CurRepelResist = CachedASC->GetAttributeValue(EPXAttribute::CurRepelResist);
-	
-	IncomeRepel = (1.0f - CurRepelResist) * IncomeRepel;
 	IncomeRepel.X = IncomeRepel.X > 0 ? FMath::Max(IncomeRepel.X - RepelResistance.X, 0) : FMath::Min(IncomeRepel.X + RepelResistance.X, 0);
 	IncomeRepel.Y = IncomeRepel.Y > 0 ? FMath::Max(IncomeRepel.Y - RepelResistance.Y, 0) : FMath::Min(IncomeRepel.Y + RepelResistance.Y, 0);
 	IncomeRepel.Z = IncomeRepel.Z > 0 ? FMath::Max(IncomeRepel.Z - RepelResistance.Z, 0) : FMath::Min(IncomeRepel.Z + RepelResistance.Z, 0);
@@ -175,6 +172,13 @@ void UStateComponent::BeginPlay()
 		float RecoverValue = WeakThis->CachedASC->GetAttributeValue(EPXAttribute::CurEPRecoverValue);
 		WeakThis->IncreaseEP(RecoverValue);
 	}, EPRecoverInterval);
+	
+	// 击退值初始化
+	float CurRepelResist = CachedASC->GetAttributeValue(EPXAttribute::CurRepelResist);
+	if (CurRepelResist > 0)
+	{
+		RepelResistance = FVector(CurRepelResist);
+	}
 }
 
 void UStateComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -303,8 +307,6 @@ void UStateComponent::KnockBack(FVector Repel, AActor* Maker)
 		UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_INROCK", "霸体"),
 			GetOwner()->GetActorLocation(), FColor::Purple, FVector2D(0.8, 0.8));
 	}
-
-	if (bInvulnerable) return;
 
 	Repel = CalRepel(Repel, Maker) * KnockBackMultiplier;
 	if (UCharacterMovementComponent* MovementComponent = GetOwner()->GetComponentByClass<UCharacterMovementComponent>())

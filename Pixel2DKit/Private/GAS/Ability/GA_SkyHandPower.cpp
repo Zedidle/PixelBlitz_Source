@@ -48,8 +48,8 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		K2_EndAbility();
 		return;
 	}
-	UStateComponent* EnemyHealthComponent = Enemy->GetComponentByClass<UStateComponent>();
-	if (!EnemyHealthComponent)
+	UStateComponent* EnemyStateComponent = Enemy->GetComponentByClass<UStateComponent>();
+	if (!EnemyStateComponent)
 	{
 		K2_EndAbility();
 		return;
@@ -72,7 +72,7 @@ void UGA_SkyHandPower::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	Enemy->SetActorLocation(EnemyNewLocation);
 	PXCharacter->SetActorLocation(PreEnemyLocation);
 
-	EnemyHealthComponent->DecreaseHP(Damage, PXCharacter, PlayerCameraOffset, true);
+	EnemyStateComponent->DecreaseHP(Damage, PXCharacter, PlayerCameraOffset, true);
 
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
