@@ -166,12 +166,9 @@ void UPXGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 		}
 	}
 	
-	// 4. 【第四步】确保结束瞬时技能
-	// 因为你的技能逻辑是瞬时完成的，所以必须调用 EndAbility
-	// 参数根据技能是正常结束(false)还是被取消(true)来设置
-	constexpr bool bReplicateEndAbility = true;
-	constexpr bool bWasCancelled = false; // 假设是正常结束
-	EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	// 4. 【第四步】确保结束技能
+	// 由于技能逻辑改为非瞬时完成了，所以禁掉 EndAbility，需要在具体技能内End
+	// EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
 bool UPXGameplayAbility::ActivatePreCheck()
