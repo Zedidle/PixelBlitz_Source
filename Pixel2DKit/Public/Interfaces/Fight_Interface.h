@@ -104,7 +104,7 @@ public:
     void OnAttackEffectEnd();
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnPickGold();
-    
+
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     APawn* GetPawn();
 

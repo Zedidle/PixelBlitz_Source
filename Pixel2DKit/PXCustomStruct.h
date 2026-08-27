@@ -146,6 +146,7 @@ enum class EAbilityTiming : uint8
 	DefenseFinish  UMETA(DisplayName = "防御结束"),
 	Dying  UMETA(DisplayName = "死亡时"),
 	PickGold  UMETA(DisplayName = "拾取金币时"),
+	Interact  UMETA(DisplayName = "交互"),
 	Loop  UMETA(DisplayName = "周期性持续（可不配置）"),
 };
 #pragma endregion

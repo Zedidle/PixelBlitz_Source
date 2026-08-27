@@ -235,7 +235,6 @@ public:
 	virtual void OnPickGold_Implementation() override;
 	virtual void OnDashEffectEnd_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
-	
 #pragma endregion
 
 

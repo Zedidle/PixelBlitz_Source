@@ -236,6 +236,11 @@ public:
 	bool BP_OnPickGold();
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnPickGold();
+	
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnInteract")
+	bool BP_OnInteract();
+	UFUNCTION(Category="Skill | Timing")
+	virtual bool OnInteract();
 };
 
 inline void ABaseSkill::SetColor_Implementation(FLinearColor Color)

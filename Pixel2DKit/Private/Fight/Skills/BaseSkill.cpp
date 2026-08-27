@@ -309,3 +309,11 @@ bool ABaseSkill::OnPickGold()
 	BP_OnPickGold();
 	return true;
 }
+
+bool ABaseSkill::OnInteract()
+{
+	if (ActivateTiming != EAbilityTiming::Interact) return false;
+	ApplyAttributeEffects();
+	BP_OnInteract();
+	return true;
+}

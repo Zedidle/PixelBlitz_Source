@@ -129,11 +129,16 @@ void UPXGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 	const FGameplayEventData* TriggerEventData)
 {
+	if (!ActivatePreCheck())
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+	
+	
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{			
-		constexpr bool bReplicateEndAbility = true;
-		constexpr bool bWasCancelled = true;
-		EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
 
@@ -167,6 +172,16 @@ void UPXGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	constexpr bool bReplicateEndAbility = true;
 	constexpr bool bWasCancelled = false; // 假设是正常结束
 	EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+bool UPXGameplayAbility::ActivatePreCheck()
+{
+	return BP_ActivatePreCheck();
+}
+
+bool UPXGameplayAbility::BP_ActivatePreCheck_Implementation()
+{
+	return true;
 }
 
 #undef LOCTEXT_NAMESPACE

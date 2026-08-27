@@ -721,17 +721,24 @@ void UAbilityComponent::OnInteract(bool& Keep)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter->DataAsset->InputConfig)
 
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnInteract();
+		}
+	}
+	ActivateAbilityByTiming(EAbilityTiming::Interact);
+	
 	const auto& ActionMap = PXCharacter->DataAsset->InputConfig->ActionMap;
 	FGameplayTag Tag = TAG("InputAction.Interact");
 	if (!ActionMap.Contains(Tag))
 	{
-		Keep = true;
 		return;
 	}
 	
 	if (!IsValid(KeyPressCountDownWidget))
 	{
-		Keep = true;
 		return;
 	}
 
@@ -740,7 +747,6 @@ void UAbilityComponent::OnInteract(bool& Keep)
 
 	if (!Effect)
 	{
-		Keep = true;
 		return;
 	}
 
