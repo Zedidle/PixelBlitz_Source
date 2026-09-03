@@ -131,7 +131,7 @@ T* USpaceFuncLib::FindActorInRangeClosest(const UObject* WorldContextObject, AAc
 	if (TmpTargets.IsEmpty()) return nullptr;
 	
 	T* Result = nullptr;
-	float TmpCurDistance = 0;
+	float TmpCurDistance = BIG_NUMBER;
 	
 	for (T* B : TmpTargets)
 	{
