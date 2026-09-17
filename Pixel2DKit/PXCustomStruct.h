@@ -699,6 +699,30 @@ struct FNPCDialogues : public FTableRowBase
 #pragma endregion
 
 
+#pragma region FGuidesWord
+USTRUCT(BlueprintType)
+struct FGuidesWord : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	FName GuideID = "";
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	FString GuideTitle = TEXT("引导标题");
+	
+	//引导具体内容
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
+	FText GuideDesc;
+};
+#pragma endregion
+
+
+
+
+
+
+
 USTRUCT(BlueprintType)
 struct FLocalizedTableData: public FTableRowBase
 {

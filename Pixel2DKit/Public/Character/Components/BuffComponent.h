@@ -111,9 +111,7 @@ public:
 	FName TimerName_CheckBuffEnd;
 	UFUNCTION()
 	void CheckBuffExpire();
-	
-	
-	
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

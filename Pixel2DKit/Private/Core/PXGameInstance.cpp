@@ -14,10 +14,35 @@
 #include "Utilitys/PXGameplayStatics.h"
 #include "Utilitys/SoundFuncLib.h"
 
+bool UPXGameInstance::InGuideLevel()
+{
+	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXSG, false)
+	
+	return PXSG->GetMainData()->CurLevelName == GuideLevelName;
+}
+
 void UPXGameInstance::SetLevelType(ELevelType _LevelType)
 {
 	LevelType = _LevelType;
 }
+
+void UPXGameInstance::StartNewGuide()
+{
+	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXSG)
+	
+	PXSG->Main_TotalInit();
+	PXSG->GetMainData()->RemLevels.Add(GuideLevelName);
+	PXSG->GetMainData()->CurCharacterName = "1"; // 默认红发剑客作为新手角色
+	PXSG->GetMainData()->CurLevelName = FName();
+	
+	// 流程加在新手引导关卡测试中……
+	PXSG->SaveMainData();
+	
+	UGameplayStatics::OpenLevel(GetWorld(), "L_Main");
+}
+
 
 void UPXGameInstance::StartNewGame()
 {

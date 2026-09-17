@@ -9,6 +9,7 @@
 #include "Core/PXGameInstance.h"
 #include "Controller/PXPlayerController.h"
 #include "Components/CapsuleComponent.h"
+#include "Core/PXGameState.h"
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Engine/LevelStreamingDynamic.h"
@@ -213,7 +214,19 @@ void APXGameMode::PrepareGame()
 
 	ABasePXCharacter* PXCharacter = UPXGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
-
+	
+	// 如果是新手引导关卡，则不需要技能选择和倒计时
+	if (MainSaveGame->CurLevelName == "L_NewGuide")
+	{
+		PXCharacter->PreReadyToStart();
+		
+		if (APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld()))
+		{
+			GS->OnGameStart();
+		}
+		return;
+	}
+	
 	if (SaveGameSubsystem->Main_HasChoiceAbility())
 	{
 		if (GameStartCountWidgetClass)

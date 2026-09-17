@@ -35,6 +35,7 @@ ABaseEnemy* AEnemySpawner::SpawnEnemy()
 	{
 		return SelfEnemy;
 	}
+	
 	TSubclassOf<ABaseEnemy> EnemyClass;
 	if (UCommonFuncLib::CalRandomMap(EnemyClassRate, EnemyClass))
 	{

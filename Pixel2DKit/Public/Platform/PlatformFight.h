@@ -18,6 +18,9 @@ class PIXEL2DKIT_API APlatformFight : public ABasePlatform
 {
 	GENERATED_BODY()
 
+	// 怪物死完了
+	bool EnemiesClearEnd = false;
+	
 	float HorizontalInvert = 1;
 	
 	

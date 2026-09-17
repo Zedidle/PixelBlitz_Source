@@ -85,6 +85,7 @@ void APlatformFight::OnEnemyDie_Implementation(FGameplayTag Channel, const FEnem
 
 	if (Enemies.IsEmpty())
 	{
+		EnemiesClearEnd = true;
 		FightEnd();
 	}
 }
@@ -160,7 +161,13 @@ void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if (Enemies.IsEmpty()) return;
+	if (EnemiesClearEnd) return;
+	
+	// 由于某种原因没有生成，一般是通过 APXGameState::OnGameStart 生成的
+	if (Enemies.IsEmpty())
+	{
+		RegisterEnemies();
+	}
 	
 	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
 	{

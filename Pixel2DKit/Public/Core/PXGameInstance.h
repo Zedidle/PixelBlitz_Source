@@ -12,7 +12,7 @@ enum class ELevelType : uint8
 {
 	None UMETA(DisplayName = "无"),
 	Race UMETA(DisplayName = "战斗竞速"),
-	Arena UMETA(DisplayName = "竞技场"),
+	Arena UMETA(DisplayName = "竞技场")
 };
 
 
@@ -21,9 +21,14 @@ class PIXEL2DKIT_API UPXGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+	FName GuideLevelName = "L_NewGuide";
+	
 
 public:
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category=GameplayFlow)
+	bool InGuideLevel();
+	
 	UPROPERTY(BlueprintReadWrite, Category = "Game")
 	bool bGameStarted = false;
 
@@ -32,6 +37,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void SetLevelType(ELevelType _LevelType = ELevelType::Race);
+	
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void StartNewGuide();
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void StartNewGame();
