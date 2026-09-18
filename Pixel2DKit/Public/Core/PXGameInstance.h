@@ -22,12 +22,15 @@ class PIXEL2DKIT_API UPXGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 	FName GuideLevelName = "L_NewGuide";
+	FName HomeLevelName = "L_Home";
 	
-
 public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category=GameplayFlow)
 	bool InGuideLevel();
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category=GameplayFlow)
+	bool InHome();
 	
 	UPROPERTY(BlueprintReadWrite, Category = "Game")
 	bool bGameStarted = false;
@@ -37,6 +40,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void SetLevelType(ELevelType _LevelType = ELevelType::Race);
+	
+	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
+	void ToHome();
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void StartNewGuide();

@@ -19,12 +19,35 @@ bool UPXGameInstance::InGuideLevel()
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXSG, false)
 	
-	return PXSG->GetMainData()->CurLevelName == GuideLevelName;
+	FName CurLevelName = PXSG->GetMainData()->CurLevelName;
+	return CurLevelName == GuideLevelName;
+}
+
+bool UPXGameInstance::InHome()
+{
+	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXSG, false)
+	
+	FName CurLevelName = PXSG->GetMainData()->CurLevelName;
+	return CurLevelName == HomeLevelName;
 }
 
 void UPXGameInstance::SetLevelType(ELevelType _LevelType)
 {
 	LevelType = _LevelType;
+}
+
+void UPXGameInstance::ToHome()
+{
+	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXSG)
+	
+	PXSG->Main_TotalInit();
+	PXSG->GetMainData()->RemLevels.Add(HomeLevelName);
+	
+	PXSG->SaveMainData();
+	
+	UGameplayStatics::OpenLevel(GetWorld(), "L_Home");
 }
 
 void UPXGameInstance::StartNewGuide()
@@ -35,9 +58,7 @@ void UPXGameInstance::StartNewGuide()
 	PXSG->Main_TotalInit();
 	PXSG->GetMainData()->RemLevels.Add(GuideLevelName);
 	PXSG->GetMainData()->CurCharacterName = "1"; // 默认红发剑客作为新手角色
-	PXSG->GetMainData()->CurLevelName = FName();
 	
-	// 流程加在新手引导关卡测试中……
 	PXSG->SaveMainData();
 	
 	UGameplayStatics::OpenLevel(GetWorld(), "L_Main");

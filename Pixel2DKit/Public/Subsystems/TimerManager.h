@@ -19,6 +19,11 @@ class PIXEL2DKIT_API UTimerManager : public UWorldSubsystem
 	TMap<FName, FTimerHandle> ActiveTimers;
 	TMap<FName, int> RemLoopTimes;
 
+	// 匿名延迟（SetDelay 无 TimerName 版本）的句柄，仅用于随 World 一起清理
+	TArray<FTimerHandle> AnonymousDelayHandles;
+
+	// 匿名延迟的自增序号，保证 Name 唯一
+	int32 AnonymousDelaySerial = 0;
 	
 public:
 	static UTimerManager* GetInstance(UObject* WorldContextObject);
@@ -27,6 +32,7 @@ public:
 	virtual void Deinitialize() override;
 	
 	void SetDelay(TFunction<void()>&& Callback, float DelayDuration);
+	void SetDelay(TFunction<void()>&& Callback, float DelayDuration, FName TimerName);
 
 	void SetDelayLoop(const FName& TimerName, TFunction<void()>&& Callback, float InRate, float SustainTime = -1, int LoopTimes = -1);
 	

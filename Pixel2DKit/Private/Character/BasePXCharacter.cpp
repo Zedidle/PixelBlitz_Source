@@ -1275,9 +1275,22 @@ void ABasePXCharacter::AddViewPitch(const FInputActionValue& Value)
 }
 
 void ABasePXCharacter::PreReadyToStart_Implementation()
-{
+{	
+	UPXGameInstance* GI = UPXGameplayStatics::GetGameInstance(this);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GI)
+	
+	if (GI->InHome())
+	{
+		if (PlayerStatusWidget)
+		{
+			PlayerStatusWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+		return;
+	}
+	
 	if (PlayerStatusWidget)
 	{
+		PlayerStatusWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		PlayerStatusWidget->RefreshLife();
 	}
 	else

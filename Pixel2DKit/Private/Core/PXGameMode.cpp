@@ -216,7 +216,8 @@ void APXGameMode::PrepareGame()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter);
 	
 	// 如果是新手引导关卡，则不需要技能选择和倒计时
-	if (MainSaveGame->CurLevelName == "L_NewGuide")
+	if (MainSaveGame->CurLevelName == "L_NewGuide" ||
+		MainSaveGame->CurLevelName == "L_Home")
 	{
 		PXCharacter->PreReadyToStart();
 		
