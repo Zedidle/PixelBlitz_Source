@@ -868,7 +868,10 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
 	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
 	{
-		UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
+		if (WeakThis.IsValid())
+		{
+			UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
+		}
 	}, SustainTime);
 }
 
