@@ -81,7 +81,6 @@ class PIXEL2DKIT_API APXGameState : public AGameState
 {
 	GENERATED_BODY()
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather", meta = (AllowPrivateAccess))
 	FName ForceWeatherIndex;
 

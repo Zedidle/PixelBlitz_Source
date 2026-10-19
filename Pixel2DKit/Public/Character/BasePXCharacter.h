@@ -365,7 +365,7 @@ public:
 	void AddViewPitch(const FInputActionValue& Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = View)
-	FVector2D ViewPitchRange = FVector2D(-50, 20);
+	FVector2D ViewPitchRange = FVector2D(-50, 5);
 	
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Game)

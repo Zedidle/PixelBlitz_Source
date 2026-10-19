@@ -12,6 +12,7 @@
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXLocalPlayer.h"
+#include "Player/PXPlayerState.h"
 #include "Settings/PXSettingsShared.h"
 #include "Utilitys/DebugFuncLab.h"
 
@@ -42,6 +43,16 @@ APXGameState* UPXGameplayStatics::GetGameState(const UObject* WorldContextObject
 	if (AGameStateBase* GameState = UGameplayStatics::GetGameState(WorldContextObject))
 	{
 		return Cast<APXGameState>(GameState);
+	}
+
+	return nullptr;
+}
+
+APXPlayerState* UPXGameplayStatics::GetPlayerState(const UObject* WorldContextObject, int32 PlayerIndex)
+{
+	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, PlayerIndex))
+	{
+		return Cast<APXPlayerState>(PC->PlayerState);
 	}
 
 	return nullptr;

@@ -26,7 +26,18 @@
 #include "Subsystems/PXAudioSubsystem.h"
 #include "Subsystems/TimerManagerFuncLib.h"
 #include "UI/UIManager.h"
+#include "UI/PXHUD.h"
 #include "Utilitys/PXGameplayStatics.h"
+
+
+APXGameMode::APXGameMode(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	// 配置默认的框架类
+	PlayerControllerClass = APXPlayerController::StaticClass();
+	GameStateClass = APXGameState::StaticClass();
+	HUDClass = APXHUD::StaticClass();
+}
 
 
 void APXGameMode::BeginPlay()

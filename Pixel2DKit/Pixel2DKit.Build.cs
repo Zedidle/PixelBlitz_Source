@@ -47,7 +47,8 @@ public class Pixel2DKit : ModuleRules
 			"GameplayMessageRuntime",
 			"AudioModulation",
 			"AudioMixer",
-			"Foliage"
+			"Foliage",
+			"MounteaDialogueSystem"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{

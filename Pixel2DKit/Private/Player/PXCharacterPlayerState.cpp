@@ -11,6 +11,7 @@
 
 
 APXCharacterPlayerState::APXCharacterPlayerState(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	
 	AbilitySystem = CreateDefaultSubobject<UPXCharacterASComponent>(TEXT("AbilitySystem"));

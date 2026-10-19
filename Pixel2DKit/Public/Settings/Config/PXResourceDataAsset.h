@@ -55,9 +55,6 @@ public:
 	UPROPERTY( EditAnywhere, Category = "GameplayFlow | Actor")
 	TSubclassOf<APlayerRespawnPoint> PlayerRespawnPointClass;
 
-	
-	UPROPERTY( EditAnywhere, Category = "Buff | Sound")
-	TSoftObjectPtr<USoundWave> SW_BeginBGM;
 
 	UPROPERTY( EditAnywhere, Category = "Combo | Sound")
 	TArray<TSoftObjectPtr<USoundBase>> SW_ComboWeakPoints;

@@ -11,6 +11,7 @@
 class UPXLocalPlayer;
 class UPXSettingsShared;
 class APXGameState;
+class APXPlayerState;
 class APXPlayerController;
 
 UCLASS()
@@ -28,6 +29,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
 	static APXGameState* GetGameState(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
+	static APXPlayerState* GetPlayerState(const UObject* WorldContextObject, int32 PlayerIndex = 0);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "PXGameplayStatics", meta=(WorldContext="WorldContextObject"))
 	static APXPlayerController* GetPlayerController(const UObject* WorldContextObject, int32 PlayerIndex = 0);
