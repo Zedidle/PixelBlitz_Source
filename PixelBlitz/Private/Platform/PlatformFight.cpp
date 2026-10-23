@@ -1,0 +1,190 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Platform/PlatformFight.h"
+
+#include "PXGameplayTags.h"
+#include "Kismet/GameplayStatics.h"
+#include "PixelBlitz/PixelBlitz.h"
+#include "Settings/PXSettingsShared.h"
+#include "Subsystems/TimerManagerFuncLib.h"
+#include "Utilitys/DebugFuncLab.h"
+#include "Utilitys/PXGameplayStatics.h"
+
+void APlatformFight::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
+	ListenerHandle_OnEnemyDie = MessageSubsystem.RegisterListener(
+		PXGameplayTags::GameplayFlow_OnEnemyDie, this, &ThisClass::OnEnemyDie);
+}
+
+void APlatformFight::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	ListenerHandle_OnEnemyDie.Unregister();
+}
+
+void APlatformFight::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	
+	if (Enemies.IsEmpty())
+	{
+		PXCharacter->RemoveCameraOffset(FName("PlatformFight"));
+		return;
+	}
+	int32 TmpNum = 0;
+	FVector TmpCenterLocation = FVector::ZeroVector;
+
+	for (auto Enemy: Enemies)
+	{
+		if (Enemy->Implements<UFight_Interface>())
+		{
+			if (IFight_Interface::Execute_GetTarget(Enemy))
+			{
+				if (PXCharacter->CurSpringArmLength * 1.2 > Enemy->GetDistanceTo(PXCharacter))
+				{
+					TmpCenterLocation += Enemy->GetActorLocation();
+					TmpNum++;
+				}
+			}
+		}
+	}
+
+	if (TmpNum == 0)
+	{
+		PXCharacter->RemoveCameraOffset(FName("PlatformFight"));
+		return;
+	}
+
+	// 设置镜头中心偏移
+	TmpCenterLocation = TmpCenterLocation / TmpNum;
+	FVector PlayerLocation = PXCharacter->GetActorLocation();
+	FVector DirLength = TmpCenterLocation - PlayerLocation;
+	float DistanceCenterToPlayer = DirLength.Size();
+
+	float FightCameraOffsetPoint = FMath::Pow(DistanceCenterToPlayer, 0.8) / PXCharacter->CurSpringArmLength;
+	PXCharacter->AddCameraOffset(FName("PlatformFight"), FightCameraOffsetFactor * DirLength * FightCameraOffsetPoint);
+}
+
+void APlatformFight::OnEnemyDie_Implementation(FGameplayTag Channel, const FEnemyMessage& Message)
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Message.Enemy)
+	
+	if (!Enemies.Contains(Message.Enemy)) return;
+	
+	Enemies.Remove(Message.Enemy);
+	
+	if (IsValid(PlatformFightCountWidget))
+	{
+		PlatformFightCountWidget->UpdateCount(Enemies.Num());
+	}
+
+	if (Enemies.IsEmpty())
+	{
+		EnemiesClearEnd = true;
+		FightEnd();
+	}
+}
+
+void APlatformFight::RegisterEnemies_Implementation()
+{
+	for (auto spawner : EnemySpawners)
+	{
+		if (!IsValid(spawner)) continue;
+		if (ABaseEnemy* enemy = spawner->GetSelfEnemy())
+		{
+			Enemies.Add(enemy);
+		}
+	}
+}
+
+
+void APlatformFight::FightEnd_Implementation()
+{
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXCharacter)
+	
+	PXCharacter->RemoveCameraOffset(FName("PlatformFight"));
+
+	PXCharacter->OnPlayerDie.RemoveDynamic(this, &ThisClass::FightEnd);
+	PXCharacter = nullptr;
+
+	ActivateFight(false);
+	SetActorTickEnabled(false);
+}
+
+void APlatformFight::ShowCountWidget()
+{
+	if (IsValid(PlatformFightCountWidget))
+	{
+		PlatformFightCountWidget->Show();
+	}
+	else if (PlatformFightCountWidgetClass)
+	{
+		PlatformFightCountWidget = CreateWidget<UPlatformFightCountWidget>(GetWorld(), PlatformFightCountWidgetClass);
+		if (PlatformFightCountWidget)
+		{
+			PlatformFightCountWidget->CurNum = Enemies.Num();
+			PlatformFightCountWidget->AddToViewport(999);
+		}
+	}
+}
+
+void APlatformFight::HideCountWidget()
+{
+	if (IsValid(PlatformFightCountWidget))
+	{
+		PlatformFightCountWidget->Fade();
+	}
+}
+
+bool APlatformFight::ActivateFight_Implementation(bool bActivate)
+{
+	if (bActivate)
+	{
+		if (Enemies.IsEmpty()) return false;
+
+		SetActorTickEnabled(true);
+		ShowCountWidget();
+		return true;
+	}
+
+	HideCountWidget();
+	
+	return false;
+}
+
+void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+
+	if (EnemiesClearEnd) return;
+	
+	// 由于某种原因没有生成，一般是通过 APXGameState::OnGameStart 生成的
+	if (Enemies.IsEmpty())
+	{
+		RegisterEnemies();
+	}
+	
+	if (ABasePXCharacter* C = Cast<ABasePXCharacter>(OtherActor))
+	{
+		PXCharacter = C;
+		PXCharacter->OnPlayerDie.AddUniqueDynamic(this, &ThisClass::FightEnd);
+		ActivateFight(true);
+		OnPlayerIn();
+	}
+}
+
+void APlatformFight::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+	if (OtherActor == PXCharacter && Enemies.Num() > 0)
+	{
+		FightEnd();
+		OnPlayerOut();
+	}
+
+}

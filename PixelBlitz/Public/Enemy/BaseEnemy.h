@@ -1,0 +1,445 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
+#include "PaperZDCharacter.h"
+#include "Character/BasePXCharacter.h"
+#include "Components/EnemyAIComponent.h"
+#include "Curves/CurveVector.h"
+#include "Interfaces/Fight_Interface.h"
+#include "Interfaces/Enemy/AI/EnemyAI_Interface.h"
+#include "PXCustomStruct.h"
+#include "Engine/DataTable.h"
+#include "Fight/Components/StateComponent.h"
+#include "Fight/Skills/Common/CommonSummonSkill.h"
+#include "GAS/PXEnemyASComponent.h"
+#include "BaseEnemy.generated.h"
+
+
+class UAISenseConfig_Sight;
+class UPXEnemyAttributeSet;
+
+USTRUCT(BlueprintType)
+struct FEnemyData : public FTableRowBase 
+{
+	GENERATED_BODY()
+
+	// Level 可以用来递增 外貌，行动复杂度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 Level = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 BasicMaxHP = 20;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BasicBodySizeScale = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	int32 BasicAttackValue = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BasicAttackCD = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BasicSpeed = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BasicAcceleration = 100.f;
+
+	// 击退力，想想如何整合通用 为 float
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	FVector RepelValue = FVector(200, 100, 50);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BasicRepelResist = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float BasicSight = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	float LostEnemyTime = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
+	TMap<FName, int> DropID_Rate;
+
+	// 行动区间范围定义
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FActionFieldDistance ActionFieldDistance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float WeakPointRefreshPeriod = 6.0f;
+};
+
+USTRUCT(BlueprintType)
+struct FActionData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FVector MoveVector = FVector::ZeroVector;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FName CurveName = FName();
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	float SustainTime = 0.5f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	bool bCabBeInterrupt = true;
+	
+};
+
+USTRUCT(BlueprintType)
+struct FActionMove
+{
+	GENERATED_BODY()
+
+	bool bActionMoving = false;
+	float CurTime = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FVector StartLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	FVector TargetLocation  = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	TObjectPtr<UCurveVector> CurveVector = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	float SustainTime = 0.5f;
+
+	// 是否能被打断？
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy | ActionMove")
+	bool bCabBeInterrupt = true;
+};
+
+
+
+class UAIPerceptionComponent;
+class UEnemyAIComponent;
+class UStateComponent;
+class UFightComponent;
+class UEnemyDataAsset;
+class ABasePXCharacter;
+
+
+
+UCLASS(Abstract)
+class PIXELBLITZ_API ABaseEnemy : public APaperZDCharacter, public IFight_Interface, public IEnemyAI_Interface, public IAbilitySystemInterface
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TEnumAsByte<ECollisionChannel> ECC_PlayerPawn; 
+	
+	UPROPERTY()
+	TWeakObjectPtr<ABasePXCharacter> PXCharacter;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	UEnemyDataAsset* DataAsset;
+	
+	void SetLanding(const bool V, const float time = 0.1f);
+
+	TQueue<FActionData> PreActionData;
+	FActionMove ActionMove;
+
+	// 当前激活的召唤术技能
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPrivateAccess=true))
+	TArray<ACommonSummonSkill*> SummonSkills;
+	
+public:
+	ABaseEnemy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	UFUNCTION(BlueprintCallable)
+	void ActivateSummonSkill(FName SummonedID, int SkillLevel = 1);
+	
+	bool IsActionMoving() const;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EnemyAI)
+	TObjectPtr<UEnemyAIComponent> EnemyAIComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UStateComponent> StateComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UFightComponent> FightComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Fight)
+	TObjectPtr<UBuffComponent> BuffComponent;
+
+	// 怪物也可以使用技能与天赋，并获得对应属性
+	UPROPERTY()
+	FEffectGameplayTags EffectGameplayTags;
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	
+	UFUNCTION(BlueprintCallable)
+	void AddActionMove(const FVector& MoveVector, const FName& CurveName, float SustainTime = 0.5f, bool bInterrupt = false, bool bCabBeInterrupt = false);
+
+	UFUNCTION()
+	void UpdateActionMove();
+	
+	UFUNCTION(BlueprintCallable)
+	void TryJumpToOtherPlatform(const FVector& StartLocation, const FVector& TargetLocation);
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void Initialize(FName Level);
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void LoadData(FName Level);
+
+	virtual float GetDefaultHalfHeight() const override;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	AActor* GetPixelCharacter();
+	UFUNCTION(BlueprintCallable, Category="Enemy")
+	void SetPXCharacter(ABasePXCharacter* Character);
+
+	UFUNCTION()
+	void Event_OnPlayerDie();
+
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "OnSensingPlayer")
+	void BP_OnSensingPlayer(AActor* PlayerActor);
+	UFUNCTION()
+	void OnSensingPlayer(AActor* PlayerActor);
+	UFUNCTION()
+	void OnLostPlayer(AActor* PlayerActor);
+	UFUNCTION()
+	void GoPatrol();
+
+	UPROPERTY(BlueprintReadOnly)
+	FEnemyData EnemyData;
+
+	// 最大水平跳跃距离，应该取决于自身速度
+	float MaxHorizontalDistance = 200;
+	
+	FVector CurRepelValue = FVector(50,50,100);
+
+	UPROPERTY(BlueprintReadWrite)
+	float WeakPointRefreshPeriod = 6.0f;
+
+	UPROPERTY(BlueprintReadOnly);
+	float LostEnemyTime = 10.0f;
+
+	UPROPERTY(BlueprintReadOnly)
+	int InjuredNum;
+
+	// 巡逻时随机移动的范围, 不应该超过平台的间隔导致空间位置不足，从而强行寻路掉落平台
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "EnemyAI")
+	float RandomMoveRange = 200.0f; 
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bDead; 
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bHurt;
+
+	// 是否处于攻击状态，理解为 冷却 即可，同步给行为树黑板控制状态
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bInAttackState;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bInAttackEffect;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bAttackAnimToggle;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bInDefendState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bInHesitationState;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bDefendStart;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bDefendHurt;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bJumping;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy")
+	bool bLanding;
+
+	virtual void Jump() override;
+	virtual void Landed(const FHitResult& Hit) override;
+
+#pragma region Animations
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetDead(const bool V);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetHurt(const bool V, float Duration);
+	
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetInAttackState(const bool V);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetInAttackEffect(const bool V);
+	
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetAttackAnimToggle(const bool V);
+	
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetInDefendState(const bool V);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetInHesitationState(const bool V, float Duration = 0.0f);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetDefendStart(const bool V);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetDefendHurt(const bool V);
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy | Anim")
+	void SetJumping(const bool V, const float time = 0.2f);
+#pragma endregion
+
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	float GetHorizontalDistanceToPlayer() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	float GetVerticalDistanceToPlayer() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	bool IsInHesitationState() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Enemy | Fight")
+	bool CanEnterHesitationState() const;
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Enemy | Fight")
+	void TryAttack();
+
+	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
+	void OnHPChanged(int32 OldValue, int32 NewValue);
+
+	UFUNCTION(BlueprintNativeEvent, Category="Enemy | Fight")
+	void OnHurt(int RemainHP);
+
+	UFUNCTION(Blueprintable, BlueprintPure)
+	FVector GetHorizontalDirectionToPlayer();
+	
+	
+#pragma region GAS
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPXEnemyASComponent* CachedASC = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPXEnemyAttributeSet* AttributeSet = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UAbilityComponent* AbilityComponent = nullptr;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayAbility>> InitAbilitiesToGive;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TSubclassOf<UGameplayEffect>> InitEffects;
+	
+#pragma endregion
+
+	
+	UFUNCTION()
+	void OnAttributeChanged(const FGameplayAttribute& Attribute, float  OldValue, float NewValue);
+	
+#pragma region Fight_Interface
+	virtual bool GetIsAttacking() override;
+	virtual bool GetIsDefending() override;
+	virtual bool IsAlive_Implementation() override;
+	virtual AActor* GetTarget_Implementation() override;
+	virtual bool CanMove_Implementation() override;
+	virtual bool CanAttack_Implementation() override;
+	virtual bool Dash_Implementation() override;
+	virtual void OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& OutDamage, bool bForce) override;
+	virtual void OnBeAttacked_Invulnerable_Implementation() override;
+	virtual int DamagePlus_Implementation(int InDamage, AActor* Receiver) override;
+	virtual void PowerRepulsion_Implementation(float Power) override;
+	virtual int OnDefendingHit_Implementation(int iniDamage) override;
+	virtual void OnDefendingHitEffect_Implementation() override;
+	virtual void OnDie_Implementation() override;
+	virtual void OnAnimDieEnd_Implementation() override;
+	virtual void OnRemoteAttackEffect_Implementation() override;
+	virtual void OnRemoteAttackEnd_Implementation() override;
+	virtual void OnDefendEffectBegin_Implementation() override;
+	virtual void OnDefendEffectEnd_Implementation() override;
+	virtual void OnAttackEffectBegin_Implementation() override;
+	virtual void OnAttackEffectEnd_Implementation() override;
+	virtual APawn* GetPawn_Implementation() override;
+	virtual float GetAttackCD_Implementation() override;
+	virtual int GetAttackDamage_Implementation() override;
+	virtual FVector GetAttackRepel_Implementation() override;
+	virtual void OnAnimVulnerableBegin_Implementation() override;
+	virtual void OnAnimVulnerableEnd_Implementation() override;
+#pragma endregion
+	
+#pragma region ActionFields
+	// 战斗的行动模式
+	virtual void ActionAtPlayerEastNear_Implementation(float Distance) override;
+	virtual void ActionAtPlayerEastMid_Implementation(float Distance) override;
+	virtual void ActionAtPlayerEastFar_Implementation(float Distance) override;
+	virtual void ActionAtPlayerEastRemote_Implementation(float Distance) override;
+	virtual void ActionAtPlayerWestNear_Implementation(float Distance) override;
+	virtual void ActionAtPlayerWestMid_Implementation(float Distance) override;
+	virtual void ActionAtPlayerWestFar_Implementation(float Distance) override;
+	virtual void ActionAtPlayerWestRemote_Implementation(float Distance) override;
+	virtual void ActionAtPlayerNorthNear_Implementation(float Distance) override;
+	virtual void ActionAtPlayerNorthMid_Implementation(float Distance) override;
+	virtual void ActionAtPlayerNorthFar_Implementation(float Distance) override;
+	virtual void ActionAtPlayerNorthRemote_Implementation(float Distance) override;
+	virtual void ActionAtPlayerSouthNear_Implementation(float Distance) override;
+	virtual void ActionAtPlayerSouthMid_Implementation(float Distance) override;
+	virtual void ActionAtPlayerSouthFar_Implementation(float Distance) override;
+	virtual void ActionAtPlayerSouthRemote_Implementation(float Distance) override;
+#pragma endregion ActionFields
+
+	
+	// 战斗距离判断, 当前的距离是否适合当前区间的攻击
+	virtual bool InAttackRange() override;
+	virtual bool InAttackRange_Vertical();
+	
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void OnAttack();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void DelayLosePlayer();
+
+	// 默认可行动方位，一般为全方位距离可行，实际行动受设定距离限制与ActionAtPlayerXXXXX接口，需要针对不同怪物部分删除
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight")
+	FGameplayTagContainer ActionFieldsCanAttack;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fight", meta = (ExposeOnSpawn = true))
+	FName EnemyLevel = "1"; 
+	
+	
+	
+	
+	
+	
+	UFUNCTION()
+	void OnDispel(int DispelLevel, float BasicRate);
+	
+	
+	
+protected:
+	virtual void Tick(float DeltaSeconds) override;
+
+	void Tick_KeepFaceToPixelCharacter(float DeltaSeconds);
+	void Tick_ActionMove(float DeltaSeconds);
+	void Tick_SnapOnPlatform(float DeltaSeconds);
+	
+	float DieRotationValue = 360;
+	int RotationType = 0;  // 0:Pitch, 1:Yaw, 2:Roll
+	bool RotationRot = false; // 顺逆
+	void Tick_OnDieRotation(float DeltaSeconds);
+	
+
+	
+};
+

@@ -1,0 +1,32 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "EnhancedPlayerInput.h"
+#include "PXPlayerInput.generated.h"
+
+
+UCLASS(config = Input, transient)
+class PIXELBLITZ_API UPXPlayerInput : public UEnhancedPlayerInput
+{
+	GENERATED_BODY()
+
+public:
+	UPXPlayerInput();
+	virtual ~UPXPlayerInput() override;
+
+protected:
+	//~ Begin UEnhancedPlayerInput Interface
+	virtual bool InputKey(const FInputKeyEventArgs& Params) override;
+	//~ End of UEnhancedPlayerInput interface
+
+	virtual void EvaluateInputDelegates(const TArray<UInputComponent*>& InputComponentStack, const float DeltaTime, const bool bGamePaused, const TArray<TPair<FKey, FKeyState*>>& KeysWithEvents) override;
+
+	
+	void ProcessInputEventForLatencyMarker(const FInputKeyEventArgs& Params);
+	void BindToLatencyMarkerSettingChange();
+	void UnbindLatencyMarkerSettingChangeListener();
+	void HandleLatencyMarkerSettingChanged();
+
+	bool bShouldTriggerLatencyFlash = false;
+};
