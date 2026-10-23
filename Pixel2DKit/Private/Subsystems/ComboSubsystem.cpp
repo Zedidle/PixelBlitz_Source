@@ -77,7 +77,10 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 	}
 	CurComboWeakPoint = FMath::Min(CurComboWeakPoint + 1, MaxComboWeakPoint);
 
-	ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint, GetDamagePlusPercent() * 100);
+	if (IsValid(ComboWeakPointCountWidget))
+	{
+		ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint, GetDamagePlusPercent() * 100);
+	}
 	
 	UTimerManagerFuncLib::SetDelayLoop(this, "UComboSubsystem::CalDamageByComboWeakPoint",
 		[WeakThis = TWeakObjectPtr(this)]

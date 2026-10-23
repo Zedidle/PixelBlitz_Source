@@ -17,6 +17,7 @@
 #include "Core/PXGameMode.h"
 #include "Core/PXGameState.h"
 #include "Controller/PXPlayerController.h"
+#include "UI/Player/BasePlayerStatusWidget.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Character/PXCharacterDataAsset.h"

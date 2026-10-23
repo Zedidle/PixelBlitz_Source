@@ -9,7 +9,9 @@
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Interfaces/Interact_Interface.h"
-#include "UI/Player/BasePlayerStatusWidget.h"
+
+class UBasePlayerStatusWidget;
+
 #include "BasePXCharacter.generated.h"
 
 class ABaseInteractableItem;
