@@ -106,6 +106,12 @@ public:
 	mutable TMap<FGameplayTag, FBuffOnWidget> Tag2BuffOnWidgetData;
 	void LoadBuffOnWidgetData();
 	const FBuffOnWidget* GetBuffOnWidgetDataByTag(const FGameplayTag& Tag) ;
+	
+	
+	mutable TMap<FGameplayTag, FNPCData> Tag2NPCData;
+	void LoadNPCData();
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="NPCData", meta=(Categories="Mountea_Dialogue"))
+	FNPCData GetNPCDataByTag(const FGameplayTag& Tag);
 
 };
 

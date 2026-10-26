@@ -15,6 +15,11 @@ void ABaseNPC::Tick_KeepFaceToPlayer2D()
 		
 }
 
+ABaseNPC::ABaseNPC(const FObjectInitializer& ObjectInitializer)	:Super(ObjectInitializer)
+{
+	DialogueParticipant = CreateDefaultSubobject<UMounteaDialogueParticipant>(TEXT("DialogueParticipant"));
+}
+
 void ABaseNPC::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);

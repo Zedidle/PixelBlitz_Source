@@ -535,6 +535,29 @@ struct FCharacterData : public FTableRowBase
 #pragma endregion
 
 
+USTRUCT(BlueprintType)
+struct FNPCData : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	// 对话参与者标签，同时也是NPC的ID，必须与 NPC 身上 Mountea Dialogue Participant 组件的 ParticipantTag 一致。
+	// ❗ 用 HasTagExact 匹配对话图节点 tag，父子标签不算命中。
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="NPCData", meta=(Categories="Mountea_Dialogue"))
+	FGameplayTag DialogueParticipantTag;
+	
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="NPCData")
+	FText NPCName;
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="NPCData")
+	FText NPCDesc;
+	
+	// 对话立绘
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="NPCData")
+	TSoftObjectPtr<UTexture2D> Image_Dialogue;  
+	
+};
+
+
 #pragma region FBuffOnWidget
 USTRUCT(BlueprintType)
 struct FBuffOnWidget : public FTableRowBase

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "PaperZDCharacter.h"
 #include "Character/BasePXCharacter.h"
+#include "Components/MounteaDialogueParticipant.h"
 #include "Interfaces/Interact_Interface.h"
 #include "BaseNPC.generated.h"
 
@@ -19,16 +20,29 @@ class PIXELBLITZ_API ABaseNPC : public APaperZDCharacter, public IInteract_Inter
 	UPROPERTY(BlueprintReadWrite, Category = NPC, meta = (AllowPrivateAccess = "true"))
 	ABasePXCharacter* PxCharacter;
 
+	UPROPERTY(EditDefaultsOnly, Category = NPC, meta = (AllowPrivateAccess = "true"))
+	FName NPCID;
 	
 	void Tick_KeepFaceToPlayer2D();
-
 	
 	
 public:
 
+	ABaseNPC(const FObjectInitializer& ObjectInitializer);
+	
 	virtual void Tick(float DeltaSeconds) override;
 
 	
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+	
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UMounteaDialogueParticipant* DialogueParticipant;
+	
+	
+	
+	
+	
+	
 };

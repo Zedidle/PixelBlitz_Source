@@ -232,3 +232,26 @@ const FBuffOnWidget* UDataTableSubsystem::GetBuffOnWidgetDataByTag(const FGamepl
 
 	return Tag2BuffOnWidgetData.Find(Tag);
 }
+
+void UDataTableSubsystem::LoadNPCData()
+{
+	UDataTable* DataTable = GetDataTable("NPCData");
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTable)
+	
+	TArray<FName> Rownames = DataTable->GetRowNames();
+	for (auto& Row : Rownames)
+	{
+		FNPCData* Data = DataTable->FindRow<FNPCData>(Row, "LoadNPCData");
+		Tag2NPCData.Add(Data->DialogueParticipantTag, *Data);
+	}
+}
+
+FNPCData UDataTableSubsystem::GetNPCDataByTag(const FGameplayTag& Tag)
+{
+	if (!Tag2NPCData.Contains(Tag))
+	{
+		LoadNPCData();
+	}
+
+	return Tag2NPCData.FindRef(Tag);
+}
