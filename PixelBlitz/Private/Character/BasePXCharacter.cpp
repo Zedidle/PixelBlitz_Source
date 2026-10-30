@@ -37,8 +37,15 @@
 #include "Input/PXInputComponent.h"
 #include "Item/BaseInteractableItem.h"
 #include "Item/Weapon/BaseWeapon.h"
+#include "Components/Interactor/ActorInteractorComponentOverlap.h"
+#include "Components/CapsuleComponent.h"
+// ❗ PXPlayerState.h 只前向声明了 UMounteaDialogueManager，这里要转成 UObject* 就必须拿完整定义
+#include "Components/MounteaDialogueManager.h"
+#include "Interfaces/ActorInteractorInterface.h"
+#include "Interfaces/Core/MounteaDialogueManagerInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/PXCharacterPlayerState.h"
+#include "Player/PXPlayerState.h"
 #include "Player/PXLocalPlayer.h"
 #include "Platform/BasePlatform.h"
 #include "Settings/PXSettingsLocal.h"
@@ -464,6 +471,7 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	InteractorComponent = CreateDefaultSubobject<UActorInteractorComponentOverlap>(TEXT("InteractorComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bEnableCameraLag = true;
@@ -491,6 +499,17 @@ void ABasePXCharacter::BeginPlay()
 	if (StateComponent)
 	{
 		StateComponent->RegisterComponent();
+	}
+
+	// Mountea 交互：用胶囊体作为探测体，靠近 NPC 时才能被发现（走 ABaseNPC 的 InteractableComponent）
+	if (InteractorComponent)
+	{
+		if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+		{
+			// ❗ AddCollisionComponent 是 Overlap 组件自己的 UFUNCTION，不在 ActorInteractorInterface 里，
+			//    所以必须直接调，不能走 IActorInteractorInterface::Execute_（那个不存在）
+			InteractorComponent->AddCollisionComponent(Capsule);
+		}
 	}
 	
 	InitScale = GetActorScale3D();
@@ -1819,6 +1838,27 @@ void ABasePXCharacter::JumpRelease()
 	StopJumping();
 }
 
+/**
+ * 对话进行中时，E 键不该再去触发新交互。
+ *
+ * ⚠️ UAbilityComponent::OnInteract 设计之初只考虑了拾取物，没有对话概念，
+ *    它的出参语义是 Keep（继续处理这次按键），只有 SkyHandPower 激活时才会为 false，
+ *    因此它挡不住"对话中再按 E 触发下一次对话"，必须由调用方额外判一层。
+ */
+static bool PX_IsDialogueActive(const APawn* Pawn)
+{
+	const APlayerController* PC = Pawn ? Pawn->GetController<APlayerController>() : nullptr;
+	const APXPlayerState* PS = PC ? PC->GetPlayerState<APXPlayerState>() : nullptr;
+	if (!PS || !PS->MounteaDialogueManager)
+	{
+		return false;
+	}
+
+	// CloseDialogue 会把 Context 置 nullptr，所以非空即代表对话正在进行。
+	// ❗ const TObjectPtr 没有到裸指针的隐式转换，必须 .Get()
+	return IMounteaDialogueManagerInterface::Execute_GetDialogueContext(PS->MounteaDialogueManager.Get()) != nullptr;
+}
+
 void ABasePXCharacter::Interact()
 {
 	bool CanTry = false;
@@ -1828,7 +1868,8 @@ void ABasePXCharacter::Interact()
 	}
 	if (!CanTry) return;
 
-	// 尝试交互
+	// 尝试交互（物品优先，保持原逻辑）
+	bool bItemInteracted = false;
 	if (!InteractableItems.IsEmpty())
 	{
 		for (int i = InteractableItems.Num() - 1; i >= 0; i--)
@@ -1838,8 +1879,16 @@ void ABasePXCharacter::Interact()
 			if (!Item.IsValid()) continue;
 
 			Item->OnInteractEffect(this);
+			bItemInteracted = true;
 			break;
 		}
+	}
+
+	// 没有物品被拾取时，把这次按键交给 Mountea 交互系统（NPC 对话等）。
+	// Interactor 会去驱动当前 Active 的 Interactable（如 ABaseNPC::InteractableComponent）。
+	if (!bItemInteracted && InteractorComponent && !PX_IsDialogueActive(this))
+	{
+		IActorInteractorInterface::Execute_StartInteraction(InteractorComponent, GetWorld()->GetTimeSeconds());
 	}
 }
 

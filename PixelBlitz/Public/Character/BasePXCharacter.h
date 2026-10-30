@@ -34,6 +34,7 @@ class UFightComponent;
 
 class UCameraComponent;
 class USpringArmComponent;
+class UActorInteractorComponentOverlap;
 
 struct FInputActionValue;
 
@@ -501,6 +502,13 @@ public:
 	TArray<TWeakObjectPtr<ABaseInteractableItem>> InteractableItems;
 	void AddInteractableItem(ABaseInteractableItem* Item);
 	void RemoveInteractableItem(ABaseInteractableItem* Item);
+
+	/**
+	 * Mountea 交互发起方（Overlap 版：靠胶囊体重叠发现周围可交互物）。
+	 * InputAction.Interact 已绑到 Interact()，按键时把意图转给它即可。
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction")
+	TObjectPtr<UActorInteractorComponentOverlap> InteractorComponent;
 	
 
 	UFUNCTION(BlueprintNativeEvent)

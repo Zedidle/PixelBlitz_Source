@@ -46,7 +46,8 @@ public class PixelBlitz : ModuleRules
 			"AudioModulation",
 			"AudioMixer",
 			"Foliage",
-			"MounteaDialogueSystem"
+			"MounteaDialogueSystem",
+			"ActorInteractionPlugin"
 		});
 
 		PrivateIncludePaths.AddRange(new string[]{
