@@ -39,9 +39,6 @@ public:
 	TSoftObjectPtr<UPXForceFeedbackEffectDataAsset> ForceFeedbackEffectDataAsset;
 	
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
-	TSoftObjectPtr<UPXDataTablesDataAsset> DataTablesDataAsset;
-
-	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)
 	TSoftObjectPtr<UPXResourceDataAsset> ResourceDataAsset;
 
 	UPROPERTY(Config, BlueprintReadOnly,EditAnywhere)

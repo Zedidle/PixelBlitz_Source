@@ -504,12 +504,15 @@ public:
 	void RemoveInteractableItem(ABaseInteractableItem* Item);
 
 	/**
-	 * Mountea 交互发起方（Overlap 版：靠胶囊体重叠发现周围可交互物）。
+	 * Mountea 交互发起方（Overlap 版）：靠玩家胶囊体和 NPC 的 Box 重叠发现目标，
+	 * 与 B_InteractionExample_Character 同一套做法。
+	 * 胶囊的注册在 BeginPlay 里（必须早于 Super::BeginPlay，见 .cpp 注释），
+	 * 唯一必须在蓝图里设的是 Safety Tracing Mode = None（构造默认从世界原点打射线，必失败）。
 	 * InputAction.Interact 已绑到 Interact()，按键时把意图转给它即可。
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Interaction")
 	TObjectPtr<UActorInteractorComponentOverlap> InteractorComponent;
-	
+
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnLevelLoading(FGameplayTag Channel, const FDefaultEmptyMessage& Message);

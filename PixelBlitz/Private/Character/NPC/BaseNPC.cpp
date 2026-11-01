@@ -6,10 +6,9 @@
 #include "PixelBlitz/PixelBlitz.h"
 #include "Utilitys/SpaceFuncLib.h"
 
-#include "Blueprint/UserWidget.h"
 #include "Components/MounteaDialogueManager.h"
 #include "GameFramework/PlayerController.h"
-#include "Helpers/ActorInteractionFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Interfaces/Core/MounteaDialogueManagerInterface.h"
 #include "Player/PXPlayerState.h"
 
@@ -38,42 +37,64 @@ void ABaseNPC::BeginPlay()
 		return;
 	}
 
-	// WidgetClass 为空时回落到插件 Project Settings（Mountea Interaction）里的默认 Widget，
-	// 否则 ValidateInteractable 会判定组件 Disabled，提示永远不显示。
-	if (!InteractableComponent->GetWidgetClass())
+	// ① 通道对齐：ProcessOverlap 会拿它跟玩家 Interactor 的 ResponseChannel 比对，不等直接 continue。
+	//    这是唯一没法用蓝图替代的：蓝图只能写死一个值，这里读的是玩家运行时的真值。
+	AlignInteractionCollisionChannel();
+	IActorInteractableInterface::Execute_SetCollisionChannel(InteractableComponent, InteractionCollisionChannel);
+
+	UE_LOG(LogTemp, Log, TEXT("[%s] Interactable 就绪：Channel=%d, CollisionComponents=%d"),
+		*GetName(),
+		(int32)InteractionCollisionChannel.GetValue(),
+		IActorInteractableInterface::Execute_GetCollisionComponents(InteractableComponent).Num());
+
+	// ② 把提示顶到头顶。
+	// ❗ 必须留在 C++：Attach 必须晚于 Super::BeginPlay()（组件的 AutoSetup 在里面跑），
+	//    否则 EST_Quick 会拿 GetAttachParent() 当碰撞体，把胶囊登记进去。
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
 	{
-		if (const TSubclassOf<UUserWidget> DefaultWidget = UActorInteractionFunctionLibrary::GetInteractableDefaultWidgetClass())
-		{
-			InteractableComponent->SetWidgetClass(DefaultWidget);
-		}
+		InteractableComponent->AttachToComponent(Capsule, FAttachmentTransformRules::KeepRelativeTransform);
+		InteractableComponent->SetRelativeLocation(FVector(0.f, 0.f, InteractionPromptHeight));
 	}
 
-	// ❗ OnInteractionCompleted 是 protected 成员，C++ 必须走 GetOnInteractionCompletedHandle() 取引用再绑定
-	InteractableComponent->GetOnInteractionCompletedHandle().AddDynamic(this, &ThisClass::HandleInteractionCompleted);
+	// ③ Cycled 模式下 Press 每按一次发的是 OnInteractionCycleCompleted（OnInteractionCompleted 被
+	//    TriggerCooldown 的提前 return 吞掉了）。委托是 protected 成员，C++ 必须走
+	//    GetOnInteractionCycleCompletedHandle() 取引用再绑定。
+	InteractableComponent->GetOnInteractionCycleCompletedHandle().AddDynamic(this, &ThisClass::HandleInteractionCycleCompleted);
+}
+
+void ABaseNPC::AlignInteractionCollisionChannel()
+{
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (!PlayerPawn)
+	{
+		return;
+	}
+
+	if (UActorComponent* Interactor = PlayerPawn->FindComponentByInterface(UActorInteractorInterface::StaticClass()))
+	{
+		InteractionCollisionChannel = IActorInteractorInterface::Execute_GetResponseChannel(Interactor);
+	}
 }
 
 void ABaseNPC::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (InteractableComponent)
 	{
-		InteractableComponent->GetOnInteractionCompletedHandle().RemoveDynamic(this, &ThisClass::HandleInteractionCompleted);
+		// 兜底：把状态机放回 Awake，防止任何路径（交互中断/冷却）把它留在失效态
+		IActorInteractableInterface::Execute_SetState(InteractableComponent, EInteractableStateV2::EIS_Awake);
+
+		InteractableComponent->GetOnInteractionCycleCompletedHandle().RemoveDynamic(this, &ThisClass::HandleInteractionCycleCompleted);
 	}
 
 	Super::EndPlay(EndPlayReason);
 }
 
-void ABaseNPC::HandleInteractionCompleted(const float& FinishTime, const TScriptInterface<IActorInteractorInterface>& CausingInteractor)
+void ABaseNPC::HandleInteractionCycleCompleted(const float& FinishTime, const int32 RemainingLifecycles, const TScriptInterface<IActorInteractorInterface>& CausingInteractor)
 {
-	const UObject* InteractorObject = CausingInteractor.GetObject();
-	if (!InteractorObject)
-	{
-		return;
-	}
-
 	AActor* Initiator = nullptr;
-	if (const UActorComponent* InteractorComp = Cast<UActorComponent>(InteractorObject))
+	if (const UObject* InteractorObject = CausingInteractor.GetObject())
 	{
-		Initiator = InteractorComp->GetOwner();
+		Initiator = IActorInteractorInterface::Execute_GetOwningActor(InteractorObject);
 	}
 
 	StartDialogueWith(Initiator);

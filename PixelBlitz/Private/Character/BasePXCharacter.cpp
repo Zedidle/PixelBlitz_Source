@@ -41,6 +41,7 @@
 #include "Components/CapsuleComponent.h"
 // ❗ PXPlayerState.h 只前向声明了 UMounteaDialogueManager，这里要转成 UObject* 就必须拿完整定义
 #include "Components/MounteaDialogueManager.h"
+#include "Interfaces/ActorInteractableInterface.h"
 #include "Interfaces/ActorInteractorInterface.h"
 #include "Interfaces/Core/MounteaDialogueManagerInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -471,6 +472,8 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	FightComponent = CreateDefaultSubobject<UFightComponent>(TEXT("FightComponent"));
 	AbilityComponent = CreateDefaultSubobject<UAbilityComponent>(TEXT("AbilityComponent"));
 	BuffComponent = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
+	// Mountea 交互发起方（Overlap 版）：靠玩家胶囊体和 NPC 的 Box 重叠来发现目标，
+	// 与 B_InteractionExample_Character 同一套做法。胶囊的注册在 BeginPlay 里做。
 	InteractorComponent = CreateDefaultSubobject<UActorInteractorComponentOverlap>(TEXT("InteractorComponent"));
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
@@ -492,6 +495,20 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 
 void ABasePXCharacter::BeginPlay()
 {
+	// Mountea 交互（Overlap 版）：把玩家胶囊登记成探测体，走近 NPC 的 Box 才能被发现。
+	//
+	// ❗ 必须放在 Super::BeginPlay() 之前：Interactor 组件的 BeginPlay 里会走
+	//    SetState(EIS_Awake) → ProcessStateChanged() → BindCollisions()，
+	//    只有那一刻已经在 CollisionShapes 里的组件才会被绑上 OnComponentBeginOverlap 委托。
+	//    （B_InteractionExample_Character 走的是面板里的 Override Collision Components，同一条路。）
+	if (InteractorComponent)
+	{
+		if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+		{
+			InteractorComponent->AddCollisionComponent(Capsule);
+		}
+	}
+
 	Super::BeginPlay();
 
 	// 莫名其妙在构造函数生成的会失效
@@ -501,17 +518,6 @@ void ABasePXCharacter::BeginPlay()
 		StateComponent->RegisterComponent();
 	}
 
-	// Mountea 交互：用胶囊体作为探测体，靠近 NPC 时才能被发现（走 ABaseNPC 的 InteractableComponent）
-	if (InteractorComponent)
-	{
-		if (UCapsuleComponent* Capsule = GetCapsuleComponent())
-		{
-			// ❗ AddCollisionComponent 是 Overlap 组件自己的 UFUNCTION，不在 ActorInteractorInterface 里，
-			//    所以必须直接调，不能走 IActorInteractorInterface::Execute_（那个不存在）
-			InteractorComponent->AddCollisionComponent(Capsule);
-		}
-	}
-	
 	InitScale = GetActorScale3D();
 
 	if (SpringArm)
@@ -1345,6 +1351,7 @@ float ABasePXCharacter::GetFallingTime()
 void ABasePXCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
 	Tick_SaveFallingStartTime(DeltaSeconds);
 	Tick_SpriteRotation(DeltaSeconds);
 	Tick_SpringArmMotivation(DeltaSeconds);
@@ -1886,6 +1893,7 @@ void ABasePXCharacter::Interact()
 
 	// 没有物品被拾取时，把这次按键交给 Mountea 交互系统（NPC 对话等）。
 	// Interactor 会去驱动当前 Active 的 Interactable（如 ABaseNPC::InteractableComponent）。
+	// 射线没命中目标时插件不会设置 ActiveInteractable，StartInteraction 自然空转，无需额外判断。
 	if (!bItemInteracted && InteractorComponent && !PX_IsDialogueActive(this))
 	{
 		IActorInteractorInterface::Execute_StartInteraction(InteractorComponent, GetWorld()->GetTimeSeconds());
