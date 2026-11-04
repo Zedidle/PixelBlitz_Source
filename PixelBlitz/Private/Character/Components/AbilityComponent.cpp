@@ -985,7 +985,7 @@ void UAbilityComponent::OnPickGold_Implementation()
 	ActivateAbilityByTiming(EAbilityTiming::PickGold);
 }
 
-void UAbilityComponent::OnDashEffectEnd_Implementation()
+void UAbilityComponent::OnSkillEffectEnd_Implementation()
 {
 	for (auto& Skill : SkillsHolding)
 	{

@@ -16,7 +16,7 @@ void UZDANS_OnDashEffect::OnNotifyBegin_Implementation(UPaperZDAnimInstance* Own
 	{
 		if (PaperZDCharacter->Implements<UFight_Interface>())
 		{
-			IFight_Interface::Execute_OnDashEffectBegin(PaperZDCharacter);
+			IFight_Interface::Execute_OnSkillEffectBegin(PaperZDCharacter);
 		}
 	}
 }
@@ -29,7 +29,7 @@ void UZDANS_OnDashEffect::OnNotifyEnd_Implementation(UPaperZDAnimInstance* Ownin
 	{
 		if (PaperZDCharacter->Implements<UFight_Interface>())
 		{
-			IFight_Interface::Execute_OnDashEffectEnd(PaperZDCharacter);
+			IFight_Interface::Execute_OnSkillEffectEnd(PaperZDCharacter);
 		}
 	}
 }

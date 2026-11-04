@@ -197,6 +197,14 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	UPXASComponent* CachedASC;
+
+	// 自带 ASC：不依赖 PlayerState 的角色（对话切换 / NPC 展示）用它做属性容器，
+	// 否则这类角色 GetAbilitySystemComponent() 返回空，LoadData 与蓝图全部失效
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GAS")
+	TObjectPtr<UPXASComponent> OwnedASC;
+
+	UPROPERTY()
+	TObjectPtr<class UPXAttributeSet> OwnedAttributeSet;
 		
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
@@ -244,6 +252,10 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
+
+	// ASC 依赖 PlayerState，Possess / PlayerState 复制到达后需要通知 StateComponent 重新解析
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_PlayerState() override;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = GameplayFlow)
 	void ToStartPoint();
@@ -458,8 +470,8 @@ public:
 	virtual void OnAttackEffectBegin_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
 	virtual void OnPickGold_Implementation() override;
-	virtual void OnDashEffectBegin_Implementation() override;
-	virtual void OnDashEffectEnd_Implementation() override;
+	virtual void OnSkillEffectBegin_Implementation() override;
+	virtual void OnSkillEffectEnd_Implementation() override;
 	virtual APawn* GetPawn_Implementation() override;
 	virtual float GetAttackCD_Implementation() override;
 	virtual int GetAttackDamage_Implementation() override;
@@ -490,6 +502,14 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="TryUseSkill")
 	void BP_TryUseSkill();
 	void TryUseSkill();
+
+	/**
+	 * 控制台调试命令（PIE 里按 ` 输入 DebugInteraction）：
+	 * 打印自身 Interactor 与场上所有 ABaseNPC Interactable 的交互快照，
+	 * 用于定位"换人后无法交互"卡在哪一环（状态/通道/占用/对话门控）。
+	 */
+	UFUNCTION(Exec, Category="PX|Debug")
+	void DebugInteraction();
 	
 #pragma endregion
 

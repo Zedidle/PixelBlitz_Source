@@ -47,8 +47,18 @@ class UStateComponent : public UActorComponent
 
 	float HPRecoverInterval = 5;
 	float EPRecoverInterval = 2;
+
+	void InitRepelResistanceFromASC();
 	
 public:
+
+	/** 从 Owner 重新解析 ASC（幂等，已解析成功则直接返回）。 */
+	UFUNCTION(BlueprintCallable, Category = "StateComponent")
+	void RefreshASC();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateComponent")
+	bool HasASC() const { return CachedASC != nullptr; }
+
 
 	// 因为掉落地面死亡
 	UPROPERTY(BlueprintReadWrite, Category = "StateComponent")

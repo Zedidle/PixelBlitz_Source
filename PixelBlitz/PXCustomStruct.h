@@ -404,6 +404,7 @@ struct FAbility: public FTableRowBase
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TMap<FGameplayTag, float> ExtendData;
 	
+	// 对角色属性的影响列表，含 目标属性、百分比、直接值、持续时间
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	TArray<FAttributeEffect> AttributeEffectsOnActivated;
 	

@@ -48,6 +48,9 @@
 #include "Player/PXCharacterPlayerState.h"
 #include "Player/PXPlayerState.h"
 #include "Player/PXLocalPlayer.h"
+#include "EngineUtils.h"
+#include "Engine/Engine.h"
+#include "Character/NPC/BaseNPC.h"
 #include "Platform/BasePlatform.h"
 #include "Settings/PXSettingsLocal.h"
 #include "Settings/PXSettingsShared.h"
@@ -130,6 +133,8 @@ void ABasePXCharacter::LoadData()
 
 
 #pragma region GAS
+	// 覆盖式刷新：SwitchCharacter 会二次调用 LoadData，避免 InitEffects 累积导致 GE 重复应用
+	InitEffects.Reset();
 	InitEffects.Append(DataAsset->InitEffects);
 	// AttributeSet 初始化
 	if (UAbilitySystemComponent* AbilitySystem = GetAbilitySystemComponent())
@@ -475,6 +480,18 @@ ABasePXCharacter::ABasePXCharacter(const FObjectInitializer& ObjectInitializer)
 	// Mountea 交互发起方（Overlap 版）：靠玩家胶囊体和 NPC 的 Box 重叠来发现目标，
 	// 与 B_InteractionExample_Character 同一套做法。胶囊的注册在 BeginPlay 里做。
 	InteractorComponent = CreateDefaultSubobject<UActorInteractorComponentOverlap>(TEXT("InteractorComponent"));
+
+	// 自带 ASC + 属性集（对齐 ABaseEnemy 的做法）：没有 PlayerState 的角色也能读写属性
+	OwnedASC = CreateDefaultSubobject<UPXASComponent>(TEXT("OwnedASC"));
+	OwnedASC->SetIsReplicated(true);
+	OwnedAttributeSet = CreateDefaultSubobject<UPXAttributeSet>(TEXT("OwnedAttributeSet"));
+
+	// Possess 之前（对话/NPC 生成的展示角色）也允许跑移动物理（重力下落）；
+	// 有 Controller 的正常玩家不受该标志影响
+	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
+	{
+		CMC->bRunPhysicsWithNoController = true;
+	}
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->bEnableCameraLag = true;
@@ -509,6 +526,12 @@ void ABasePXCharacter::BeginPlay()
 		}
 	}
 
+	// 没有 PlayerState 的角色：激活自带的 ASC，否则 SpawnedAttributes 为空，属性读写全部无效
+	if (OwnedASC && GetPlayerState() == nullptr)
+	{
+		OwnedASC->InitAbilityActorInfo(this, this);
+	}
+
 	Super::BeginPlay();
 
 	// 莫名其妙在构造函数生成的会失效
@@ -527,7 +550,13 @@ void ABasePXCharacter::BeginPlay()
 	
 	if (GetCharacterMovement())
 	{
+		// 启动时动画状态显式归零：地面开始的角色永远不会触发 Landed()，
+		// 若 AnimBP 的默认值/初始状态是浮空，会一直卡在跳跃/下落动画
 		SetFalling(GetCharacterMovement()->IsFalling());
+		SetJumping(false, 0);
+		SetLanding(false, 0);
+		SetMoving(false);
+
 		GetCharacterMovement()->AirControlBoostVelocityThreshold = 600;
 		GetCharacterMovement()->AirControlBoostMultiplier = 10.0f;
 	}
@@ -566,11 +595,84 @@ void ABasePXCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	ListenerHandle_OnLevelLoading.Unregister();
 	ListenerHandle_OnLevelLoaded.Unregister();
 	
+	// RemoveAll（而非 RemoveDynamic）：同时清除 C++ 绑定与蓝图 Bind Event 的绑定。
+	// PlayerState 的 AttributeSet 是持久对象，旧角色销毁后若残留绑定，
+	// 下一次属性广播（如 SetHP）会调进已销毁对象 → 0xC0000005。
+	// 需同时覆盖 PlayerState 的 ASC 与角色自带的 OwnedASC（Possess 前后分别绑定过）。
+	auto UnbindAttributeChange = [this](UPXASComponent* ASC)
+	{
+		if (ASC)
+		{
+			if (const UPXAttributeSet* AttributeSet = ASC->GetSet<UPXAttributeSet>())
+			{
+				const_cast<UPXAttributeSet*>(AttributeSet)->OnPXAttributeChange.RemoveAll(this);
+			}
+		}
+	};
+	// 绑定分布在两个来源：BeginPlay 用 GetSet<UPXAttributeSet>()，
+	// PossessedBy/OnRep 用 GetAttributeSet()（AttributeSetBase）——解绑必须两路都清
+	if (UPXAttributeSet* AttributeSet = AttributeSetBase.Get())
+	{
+		AttributeSet->OnPXAttributeChange.RemoveAll(this);
+	}
+	UnbindAttributeChange(CachedASC);
+	UnbindAttributeChange(OwnedASC);
+}
+
+void ABasePXCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	// 蓝图侧 Possess 切换角色时，同步 Controller 的角色缓存（OnCharacterControl / CanPause 依赖它）
+	if (APXPlayerController* PXPC = Cast<APXPlayerController>(NewController))
+	{
+		if (PXPC->PXCharacter != this)
+		{
+			PXPC->PXCharacter = this;
+		}
+	}
+
+	// ASC 挂在 PlayerState 上，Possess 之后才可用：通知 StateComponent 重新解析，
+	// 否则动态生成的角色 CachedASC 会一直为空。
+	if (StateComponent)
+	{
+		StateComponent->RefreshASC();
+	}
+
+	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+
+	// 切换角色场景：ASC 挂在 PlayerState 上（Owner != this），把 Avatar 重定向到新 Pawn，
+	// 否则属性/GE/GameplayCue 仍指向旧角色
+	if (CachedASC && CachedASC->GetOwner() && CachedASC->GetOwner() != this)
+	{
+		CachedASC->InitAbilityActorInfo(CachedASC->GetOwner(), this);
+	}
+
 	if (CachedASC)
 	{
-		if (const UPXAttributeSet* PXAttributeSet = CachedASC->GetSet<UPXAttributeSet>())
+		if (UPXAttributeSet* PXAttributeSet = GetAttributeSet())
 		{
-			PXAttributeSet->OnPXAttributeChange.RemoveDynamic(this, &ThisClass::OnAttributeChanged);
+			PXAttributeSet->OnPXAttributeChange.AddDynamic(this, &ThisClass::OnAttributeChanged);
+		}
+	}
+}
+
+void ABasePXCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	// 客户端：PlayerState 是复制到达的，此时 BeginPlay 早已执行完毕
+	if (StateComponent)
+	{
+		StateComponent->RefreshASC();
+	}
+
+	CachedASC = Cast<UPXASComponent>(GetAbilitySystemComponent());
+	if (CachedASC)
+	{
+		if (UPXAttributeSet* PXAttributeSet = GetAttributeSet())
+		{
+			PXAttributeSet->OnPXAttributeChange.AddDynamic(this, &ThisClass::OnAttributeChanged);
 		}
 	}
 }
@@ -845,7 +947,8 @@ UAbilitySystemComponent* ABasePXCharacter::GetAbilitySystemComponent() const
 		return CharacterPlayerState->GetAbilitySystemComponent();
 	}
 
-	return nullptr;
+	// 没有 PlayerState 的角色回退到自带 ASC，避免返回空导致蓝图 Accessed None / LoadData 跳过
+	return OwnedASC;
 }
 
 
@@ -1032,6 +1135,7 @@ void ABasePXCharacter::OnHPChanged(int32 OldValue, int32 NewValue)
 {
 	if (bDead) return;
 	if (OldValue == NewValue) return;
+	if (!IsValid(Owner)) return;
 
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance);
@@ -1612,7 +1716,7 @@ void ABasePXCharacter::OnPickGold_Implementation()
 	}
 }
 
-void ABasePXCharacter::OnDashEffectBegin_Implementation()
+void ABasePXCharacter::OnSkillEffectBegin_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
 	
@@ -1629,13 +1733,13 @@ void ABasePXCharacter::OnDashEffectBegin_Implementation()
 	}
 }
 
-void ABasePXCharacter::OnDashEffectEnd_Implementation()
+void ABasePXCharacter::OnSkillEffectEnd_Implementation()
 {
 	InDashEffect = false;
 
 	if (AbilityComponent)
 	{
-		Execute_OnDashEffectEnd(AbilityComponent);
+		Execute_OnSkillEffectEnd(AbilityComponent);
 
 		if (bInAttackSkill)
 		{
@@ -1897,6 +2001,92 @@ void ABasePXCharacter::Interact()
 	if (!bItemInteracted && InteractorComponent && !PX_IsDialogueActive(this))
 	{
 		IActorInteractorInterface::Execute_StartInteraction(InteractorComponent, GetWorld()->GetTimeSeconds());
+	}
+}
+
+void ABasePXCharacter::DebugInteraction()
+{
+	int32 Key = 9000;
+	auto Print = [&Key](const FString& Msg, const FColor& Color)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(Key++, 15.f, Color, Msg);
+		}
+		UE_LOG(LogTemp, Log, TEXT("[DebugInteraction] %s"), *Msg);
+	};
+
+	// ① 自身 Interactor 快照
+	if (InteractorComponent)
+	{
+		const EInteractorStateV2 State = IActorInteractorInterface::Execute_GetState(InteractorComponent);
+		const EInteractorStateV2 DefaultState = IActorInteractorInterface::Execute_GetDefaultState(InteractorComponent);
+		Print(FString::Printf(TEXT("[自身] %s | Interactor 状态=%s (默认=%s) 通道=%d 忽略列表=%d"),
+			*GetName(),
+			*UEnum::GetValueAsString(State),
+			*UEnum::GetValueAsString(DefaultState),
+			(int32)IActorInteractorInterface::Execute_GetResponseChannel(InteractorComponent),
+			IActorInteractorInterface::Execute_GetIgnoredActors(InteractorComponent).Num()),
+			FColor::Cyan);
+	}
+	else
+	{
+		Print(FString::Printf(TEXT("[自身] %s | 没有 InteractorComponent！"), *GetName()), FColor::Red);
+	}
+
+	// ② 对话门控：PX_IsDialogueActive 为 true 时 E 键交互被整体拦截
+	const bool bDialogueActive = PX_IsDialogueActive(this);
+	Print(FString::Printf(TEXT("[自身] 对话进行中=%s%s"), bDialogueActive ? TEXT("true") : TEXT("false"),
+		bDialogueActive ? TEXT("（E 键交互被门控拦截！）") : TEXT("")),
+		bDialogueActive ? FColor::Orange : FColor::Cyan);
+
+	// ③ 场上所有 NPC 的 Interactable 快照
+	bool bFoundNPC = false;
+	for (TActorIterator<ABaseNPC> It(GetWorld()); It; ++It)
+	{
+		bFoundNPC = true;
+		ABaseNPC* NPC = *It;
+		UActorInteractableComponentPress* Interactable = NPC->InteractableComponent;
+		if (!Interactable)
+		{
+			Print(FString::Printf(TEXT("[NPC] %s | 没有 InteractableComponent！"), *NPC->GetName()), FColor::Red);
+			continue;
+		}
+
+		const TScriptInterface<IActorInteractorInterface> Bound = IActorInteractableInterface::Execute_GetInteractor(Interactable);
+		AActor* BoundOwner = Bound.GetObject()
+			? IActorInteractorInterface::Execute_GetOwningActor(Bound.GetObject())
+			: nullptr;
+		const APawn* BoundPawn = Cast<APawn>(BoundOwner);
+
+		int32 OverlapCount = 0;
+		for (UPrimitiveComponent* Comp : IActorInteractableInterface::Execute_GetCollisionComponents(Interactable))
+		{
+			if (Comp && Comp->IsOverlappingActor(this))
+			{
+				++OverlapCount;
+			}
+		}
+
+		const bool bCanTrigger = IActorInteractableInterface::Execute_CanBeTriggered(Interactable);
+		const EInteractableStateV2 NpcState = IActorInteractableInterface::Execute_GetState(Interactable);
+
+		Print(FString::Printf(TEXT("[NPC] %s | 状态=%s 可触发=%s 通道=%d 我方重叠碰撞体=%d | 占用者=%s"),
+			*NPC->GetName(),
+			*UEnum::GetValueAsString(NpcState),
+			bCanTrigger ? TEXT("true") : TEXT("false"),
+			(int32)IActorInteractableInterface::Execute_GetCollisionChannel(Interactable),
+			OverlapCount,
+			BoundOwner
+				? *FString::Printf(TEXT("%s (玩家控制=%s)"), *BoundOwner->GetName(),
+					(BoundPawn && BoundPawn->IsPlayerControlled()) ? TEXT("是") : TEXT("否"))
+				: TEXT("无")),
+			bCanTrigger ? FColor::Green : FColor::Red);
+	}
+
+	if (!bFoundNPC)
+	{
+		Print(TEXT("场景内没有 ABaseNPC"), FColor::Red);
 	}
 }
 

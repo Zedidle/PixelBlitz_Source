@@ -34,6 +34,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	// Possess 时同步角色缓存并把 PlayerState 的 ASC Avatar 重定向到新 Pawn，
+	// 切换目标可能不是 ABasePXCharacter 系（如 B_SwitchCharacter_*），不能依赖角色的 PossessedBy
+	virtual void OnPossess(APawn* InPawn) override;
 	
 public:
 	UPROPERTY(BlueprintReadOnly)

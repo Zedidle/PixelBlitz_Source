@@ -96,6 +96,23 @@ private:
 	 * 这是唯一没法用蓝图替代的一项：蓝图只能写死一个值，这里读的是玩家运行时真值。
 	 */
 	void AlignInteractionCollisionChannel();
+
+	/**
+	 * 换人恢复：每帧（Tick 兜底）+ 玩家进入重叠时调用。
+	 *
+	 * 背景：MDD_SwitchCharacter（对话装饰器）切换角色只 Possess 新 Pawn，不销毁旧 Pawn。
+	 * 旧 Pawn 原地不动，其 Interactor 仍占用本 NPC 的 Interactable（Interactor != null），
+	 * 而 CanBeTriggered 要求占用者为空 → 新 Pawn 的 Interactor 永远绑不上 → 无法再交互。
+	 *
+	 * 处理：① 重对齐碰撞通道（换人后 ResponseChannel 可能与 BeginPlay 时的玩家不同）；
+	 *       ② 若当前占用者不是当前玩家 Pawn，视为陈旧绑定：压制旧 Interactor 并释放占用，
+	 *          必要时把状态机拉回 Awake；
+	 *       ③ 主动补发一次 InteractorFound，让 E 提示立刻点亮（不依赖下一次 BeginOverlap）。
+	 */
+	void TryRecoverInteraction();
+
+	/** 上次完成通道对齐时的玩家 Pawn，避免每帧重复对齐。 */
+	TWeakObjectPtr<APawn> LastAlignedPlayerPawn;
 	
 	
 	

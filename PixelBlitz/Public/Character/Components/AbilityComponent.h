@@ -233,7 +233,7 @@ public:
 	virtual void OnAttackEffect_Implementation() override;
 	virtual void OnAttackWeakPoint_Implementation(AActor* Receiver) override;
 	virtual void OnPickGold_Implementation() override;
-	virtual void OnDashEffectEnd_Implementation() override;
+	virtual void OnSkillEffectEnd_Implementation() override;
 	virtual void OnAttackEffectEnd_Implementation() override;
 #pragma endregion
 

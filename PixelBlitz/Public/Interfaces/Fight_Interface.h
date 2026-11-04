@@ -87,9 +87,9 @@ public:
     void OnAnimVulnerableEnd();
 
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    void OnDashEffectBegin();
+    void OnSkillEffectBegin();
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
-    void OnDashEffectEnd();
+    void OnSkillEffectEnd();
     
     UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="Fight_Interface")
     void OnDefendEffectBegin();

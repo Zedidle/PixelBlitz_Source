@@ -22,6 +22,8 @@
 #include "Settings/Config/PXForceFeedbackEffectDataAsset.h"
 #include "Settings/Config/PXResourceDataAsset.h"
 #include "Subsystems/TimerManagerFuncLib.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/PXGameplayStatics.h"
 
@@ -144,12 +146,10 @@ void UStateComponent::BeginPlay()
 
 	bOwnerIsPlayer = IFight_Interface::Execute_GetOwnCamp(GetOwner()).HasTag(FGameplayTag::RequestGameplayTag(FName("Player")));
 
-	
-	if (IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(GetOwner()))
-	{
-		CachedASC = Cast<UPXASComponent>(ASI->GetAbilitySystemComponent());
-	}
-	
+	// 动态生成的角色此刻 PlayerState 可能还不存在，ASC 会解析失败；
+	// 先尝试一次，失败则交给 ScheduleASCRetry 补齐。
+	RefreshASC();
+
 	OnHPChanged.AddDynamic(this, &UStateComponent::Event_OnHPChanged);
 
 	AActor* Owner = GetOwner();
@@ -173,8 +173,41 @@ void UStateComponent::BeginPlay()
 		WeakThis->IncreaseEP(RecoverValue);
 	}, EPRecoverInterval);
 	
-	// 击退值初始化
-	float CurRepelResist = CachedASC->GetAttributeValue(EPXAttribute::CurRepelResist);
+	// 击退值初始化（ASC 未就绪时跳过，等 Tick 里 RefreshASC 成功后再补）
+	InitRepelResistanceFromASC();
+}
+
+void UStateComponent::RefreshASC()
+{
+	if (IsValid(CachedASC)) return;
+
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner)) return;
+
+	// 1. 走 IAbilitySystemInterface（玩家角色的 ASC 在 PlayerState 上）
+	if (IAbilitySystemInterface* ASI = Cast<IAbilitySystemInterface>(Owner))
+	{
+		CachedASC = Cast<UPXASComponent>(ASI->GetAbilitySystemComponent());
+	}
+
+	// 2. 兜底：从 Actor/PlayerState 上查找
+	if (!CachedASC)
+	{
+		CachedASC = Cast<UPXASComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Owner));
+	}
+
+	if (CachedASC)
+	{
+		InitRepelResistanceFromASC();
+	}
+}
+
+void UStateComponent::InitRepelResistanceFromASC()
+{
+	// ⚠️ CachedASC 可能为空（角色没有 ASC 或 ASC 尚未初始化），必须判空
+	if (!CachedASC) return;
+
+	const float CurRepelResist = CachedASC->GetAttributeValue(EPXAttribute::CurRepelResist);
 	if (CurRepelResist > 0)
 	{
 		RepelResistance = FVector(CurRepelResist);
@@ -185,7 +218,6 @@ void UStateComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-
 	OnHPChanged.RemoveAll(this);
 }
 
@@ -195,6 +227,12 @@ void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// ASC 可能晚于组件 BeginPlay 就绪（玩家 ASC 挂在 PlayerState 上），
+	// 未解析到就惰性补齐；解析成功后该分支不再进入。
+	if (!IsValid(CachedASC))
+	{
+		RefreshASC();
+	}
 }
 
 
