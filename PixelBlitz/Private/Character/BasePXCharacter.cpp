@@ -388,6 +388,19 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	}
 
 
+	// 对话镜头：把锚点移向玩家与 NPC 之间，并平滑拉近视距
+	if (DialogueCameraTargetActor.IsValid())
+	{
+		const FVector Anchor = FMath::Lerp(GetActorLocation(), DialogueCameraTargetActor->GetActorLocation(), DialogueCameraFocusFactor);
+		AddCameraOffset(FName("Dialogue"), Anchor - GetActorLocation());
+		CurDialogueSpringArmFactor = FMath::Lerp(CurDialogueSpringArmFactor, DialogueSpringArmLengthFactor, FMath::Clamp(DeltaSeconds * 4.f, 0.f, 1.f));
+	}
+	else
+	{
+		RemoveCameraOffset(FName("Dialogue"));
+		CurDialogueSpringArmFactor = FMath::Lerp(CurDialogueSpringArmFactor, 1.f, FMath::Clamp(DeltaSeconds * 4.f, 0.f, 1.f));
+	}
+
 	TArray<FVector> OffsetValues;
 	CameraOffsetMap.GenerateValueArray(OffsetValues);
 	
@@ -416,11 +429,11 @@ void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
 	if (AttackHitComboNum > 0)
 	{
 		SpringArm->TargetArmLength = UKismetMathLibrary::Lerp( SpringArm->TargetArmLength,
-			CurSpringArmLength * FMath::Max(0.75, 1 - AttackHitComboNum * 0.05),0.08);
+			CurSpringArmLength * CurDialogueSpringArmFactor * FMath::Max(0.75, 1 - AttackHitComboNum * 0.05),0.08);
 	}
 	else
 	{
-		SpringArm->TargetArmLength = UKismetMathLibrary::Lerp(SpringArm->TargetArmLength, CurSpringArmLength, 0.06);
+		SpringArm->TargetArmLength = UKismetMathLibrary::Lerp(SpringArm->TargetArmLength, CurSpringArmLength * CurDialogueSpringArmFactor, 0.06);
 	}
 }
 
@@ -453,6 +466,18 @@ void ABasePXCharacter::RemoveCameraOffset(FName OffsetName)
 	{
 		CameraOffsetMap.Remove(OffsetName);
 	}
+}
+
+void ABasePXCharacter::SetDialogueCameraFocus(AActor* TargetNPC)
+{
+	DialogueCameraTargetActor = TargetNPC;
+}
+
+void ABasePXCharacter::ClearDialogueCameraFocus()
+{
+	DialogueCameraTargetActor = nullptr;
+	// 立刻移除对话偏移，让 Tick 里的 Lerp 平滑收回
+	RemoveCameraOffset(FName("Dialogue"));
 }
 
 

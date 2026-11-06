@@ -181,6 +181,30 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void RemoveCameraOffset(FName OffsetName);
+
+#pragma region 对话镜头
+	// 对话进行时把镜头锚点移向玩家与 NPC 之间，并拉近视距
+	// 由 APXPlayerState 在对话 UI 创建/销毁时驱动（SetDialogueCameraFocus / ClearDialogueCameraFocus）
+
+	TWeakObjectPtr<AActor> DialogueCameraTargetActor;
+
+	/** 镜头锚点在 玩家→NPC 连线上的位置比例：0=玩家位置，1=NPC 位置 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Dialogue")
+	float DialogueCameraFocusFactor = 0.6f;
+
+	/** 对话时的视距缩放系数（乘在 CurSpringArmLength 上，1=不缩放） */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera|Dialogue")
+	float DialogueSpringArmLengthFactor = 0.55f;
+
+	/** 当前实际生效的视距系数，逐帧向目标值平滑 */
+	float CurDialogueSpringArmFactor = 1.f;
+
+	UFUNCTION(BlueprintCallable, Category = "Camera|Dialogue")
+	void SetDialogueCameraFocus(AActor* TargetNPC);
+
+	UFUNCTION(BlueprintCallable, Category = "Camera|Dialogue")
+	void ClearDialogueCameraFocus();
+#pragma endregion
 	
 	void SetLanding(const bool V, const float time = 0.1f);
 

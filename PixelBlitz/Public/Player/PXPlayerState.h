@@ -50,6 +50,15 @@ protected:
 	UFUNCTION()
 	void HandleDialogueUserInterfaceChanged(TSubclassOf<UUserWidget> DialogueWidgetClass, UUserWidget* DialogueWidget);
 
+	/** 对话镜头：对话 UI 上屏时，把玩家 Pawn 的镜头拉近并对准对话 NPC */
+	void ApplyDialogueCameraFocus();
+
+	/** 对话镜头：对话结束时恢复默认镜头 */
+	void ClearDialogueCameraFocus();
+
+	/** 从当前对话上下文里找出玩家之外的对话参与者 Actor（NPC） */
+	AActor* FindDialogueTargetActor() const;
+
 	/** 当前已挂进 Viewport 的对话 Widget，用于在对话结束时摘除。 */
 	UPROPERTY(Transient)
 	TObjectPtr<UUserWidget> PickedUpDialogueWidget = nullptr;

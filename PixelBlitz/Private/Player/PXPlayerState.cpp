@@ -6,10 +6,12 @@
 #include "Blueprint/UserWidget.h"
 #include "Character/BasePXCharacter.h"
 #include "Components/MounteaDialogueManager.h"
+#include "Data/MounteaDialogueContext.h"
 #include "GameFramework/PlayerController.h"
 #include "Helpers/MounteaDialogueHUDStatics.h"
 #include "Helpers/MounteaDialogueManagerStatics.h"
 #include "Interfaces/Core/MounteaDialogueManagerInterface.h"
+#include "Interfaces/Core/MounteaDialogueParticipantInterface.h"
 #include "UI/PXHUD.h"
 
 APXPlayerState::APXPlayerState(const FObjectInitializer& ObjectInitializer)
@@ -75,6 +77,9 @@ void APXPlayerState::HandleDialogueUserInterfaceChanged(TSubclassOf<UUserWidget>
 		//   不要再拿旧指针去 RemoveChildWidgetFromViewport（对象已在销毁队列，属悬空访问）。
 		//   这里只清引用即可。
 		PickedUpDialogueWidget = nullptr;
+
+		// 对话结束：恢复默认镜头
+		ClearDialogueCameraFocus();
 		return;
 	}
 
@@ -97,4 +102,67 @@ void APXPlayerState::HandleDialogueUserInterfaceChanged(TSubclassOf<UUserWidget>
 
 	// 记住指针，对话结束时用来摘除
 	PickedUpDialogueWidget = DialogueWidget;
+
+	// 对话开始：拉近镜头并对准 NPC
+	ApplyDialogueCameraFocus();
+}
+
+void APXPlayerState::ApplyDialogueCameraFocus()
+{
+	APlayerController* PC = GetPlayerController();
+	ABasePXCharacter* PXCharacter = PC ? Cast<ABasePXCharacter>(PC->GetPawn()) : nullptr;
+	if (!PXCharacter)
+	{
+		return;
+	}
+
+	if (AActor* DialogueTarget = FindDialogueTargetActor())
+	{
+		PXCharacter->SetDialogueCameraFocus(DialogueTarget);
+	}
+}
+
+void APXPlayerState::ClearDialogueCameraFocus()
+{
+	APlayerController* PC = GetPlayerController();
+	ABasePXCharacter* PXCharacter = PC ? Cast<ABasePXCharacter>(PC->GetPawn()) : nullptr;
+	if (PXCharacter)
+	{
+		PXCharacter->ClearDialogueCameraFocus();
+	}
+}
+
+AActor* APXPlayerState::FindDialogueTargetActor() const
+{
+	if (!MounteaDialogueManager)
+	{
+		return nullptr;
+	}
+
+	// 对话 UI 创建时 Context 一定已就绪（StartDialogue 会等 Context 有效后才创建 UI）
+	const UMounteaDialogueContext* Context = UMounteaDialogueManagerStatics::GetDialogueContext(MounteaDialogueManager);
+	if (!Context)
+	{
+		return nullptr;
+	}
+
+	const AActor* PlayerPawn = GetPlayerController() ? GetPlayerController()->GetPawn() : nullptr;
+
+	// 取玩家之外的第一个对话参与者作为镜头目标
+	for (const TScriptInterface<IMounteaDialogueParticipantInterface>& Participant : Context->GetDialogueParticipants())
+	{
+		UObject* ParticipantObject = Participant.GetObject();
+		if (!ParticipantObject)
+		{
+			continue;
+		}
+
+		AActor* OwnerActor = IMounteaDialogueParticipantInterface::Execute_GetOwningActor(ParticipantObject);
+		if (OwnerActor && OwnerActor != PlayerPawn)
+		{
+			return OwnerActor;
+		}
+	}
+
+	return nullptr;
 }
