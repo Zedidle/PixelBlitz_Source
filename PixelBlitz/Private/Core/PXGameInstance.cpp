@@ -16,20 +16,14 @@
 
 bool UPXGameInstance::InGuideLevel()
 {
-	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXSG, false)
-	
-	FName CurLevelName = PXSG->GetMainData()->CurLevelName;
-	return CurLevelName == GuideLevelName;
+	// 按当前世界名判定，不再读取 Main 存档（教程/主城与 Main 数据脱钩）
+	return UGameplayStatics::GetCurrentLevelName(this).Contains(GuideLevelName.ToString());
 }
 
 bool UPXGameInstance::InHome()
 {
-	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(PXSG, false)
-	
-	FName CurLevelName = PXSG->GetMainData()->CurLevelName;
-	return CurLevelName == HomeLevelName;
+	// 按当前世界名判定，不再读取 Main 存档（L_Home2/L_Home3 等主城变体一并命中）
+	return UGameplayStatics::GetCurrentLevelName(this).Contains(HomeLevelName.ToString());
 }
 
 void UPXGameInstance::SetLevelType(ELevelType _LevelType)
@@ -42,7 +36,7 @@ void UPXGameInstance::ToHome()
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXSG)
 	
-	PXSG->Main_TotalInit();
+	PXSG->Main_TotalInit(ESaveDomain::Home);
 	PXSG->GetMainData()->RemLevels.Add(HomeLevelName);
 	
 	PXSG->SaveMainData();
@@ -55,7 +49,7 @@ void UPXGameInstance::StartNewGuide()
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXSG)
 	
-	PXSG->Main_TotalInit();
+	PXSG->Main_TotalInit(ESaveDomain::Guide);
 	PXSG->GetMainData()->RemLevels.Add(GuideLevelName);
 	PXSG->GetMainData()->CurCharacterName = "1"; // 默认红发剑客作为新手角色
 	
@@ -86,7 +80,7 @@ void UPXGameInstance::StartNewGame()
 	UDataTable* LevelData = DataTableSubsystem->GetDataTable(LevelTableName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(LevelData)
 	
-	PXSG->Main_TotalInit();
+	PXSG->Main_TotalInit(LevelType == ELevelType::Arena ? ESaveDomain::Arena : ESaveDomain::Race);
 
 	PXSG->GetMainData()->RemLevels.Empty();
 	TArray<FLevelData> LevelDataArray = DataTableSubsystem->GetRowMap<FLevelData>(LevelData);

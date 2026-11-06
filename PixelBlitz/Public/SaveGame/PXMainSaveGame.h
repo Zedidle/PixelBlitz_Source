@@ -8,6 +8,18 @@
 #include "PXMainSaveGame.generated.h"
 
 
+// Main 存档的域归属：语义上 Main 数据只属于战斗竞速（R8 隔离裁决）。
+// 教程/主城/竞技场激活时会清空 Main 并改写归属；Load 按钮(Main_Saved)只认 Race。
+UENUM(BlueprintType)
+enum class ESaveDomain : uint8
+{
+	None UMETA(DisplayName = "无"),
+	Race UMETA(DisplayName = "战斗竞速"),
+	Arena UMETA(DisplayName = "竞技场"),
+	Guide UMETA(DisplayName = "教程"),
+	Home UMETA(DisplayName = "主城")
+};
+
 UCLASS(BlueprintType)
 class PIXELBLITZ_API UPXMainSaveGame : public USaveGame
 {
@@ -15,6 +27,10 @@ class PIXELBLITZ_API UPXMainSaveGame : public USaveGame
 
 
 public:
+	// 当前存档归属域（竞速运行时为 Race，其余模式激活时被清空并改写）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESaveDomain OwnerDomain = ESaveDomain::None;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName CurLevelToChoiceAbility;
 

@@ -54,8 +54,9 @@ public:
 
 
 	// EStyleType StyleType 这个配置应该改为全局设置保存，开始时读取即可
+	// Domain：本次清空后的归属域（教程/主城/竞技场激活即清空竞速进度，保留现状语义）
 	UFUNCTION(BlueprintCallable, Category = "SaveGame | Main")
-	void Main_TotalInit();
+	void Main_TotalInit(ESaveDomain Domain = ESaveDomain::None);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "SaveGame | Main")
 	bool Main_Saved();

@@ -18,6 +18,17 @@ void UPXSaveGameSubsystem::InitData_Main()
 {
     if (UPXMainSaveGame* SaveGame = Cast<UPXMainSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName_Main, UserIndex)))
     {
+        // 一次性迁移：旧档无 OwnerDomain 字段（默认 None）。
+        // 关卡指针为教程/主城图名的归不入竞速，其余视为竞速进度，避免老玩家丢失续关入口。
+        if (SaveGame->OwnerDomain == ESaveDomain::None && !SaveGame->CurLevelName.IsNone())
+        {
+            const FName L = SaveGame->CurLevelName;
+            if (L != FName("L_NewGuide") && !L.ToString().StartsWith(TEXT("L_Home")))
+            {
+                SaveGame->OwnerDomain = ESaveDomain::Race;
+            }
+        }
+
         MainSaveGame = SaveGame;
     }
     else
@@ -112,17 +123,24 @@ bool UPXSaveGameSubsystem::Main_HasChoiceAbility()
     return MainSaveGame->CurLevelToChoiceAbility ==  MainSaveGame->CurLevelName;
 }
 
-void UPXSaveGameSubsystem::Main_TotalInit()
+void UPXSaveGameSubsystem::Main_TotalInit(ESaveDomain Domain)
 {
     UPXMainSaveGame* OldSaveGame = MainSaveGame;
     MainSaveGame = NewObject<UPXMainSaveGame>(this);
     MainSaveGame->CurCharacterName = OldSaveGame->CurCharacterName;
     MainSaveGame->CurLevelName = FName();
+    MainSaveGame->OwnerDomain = Domain;
+
+    UE_LOG(LogTemp, Log, TEXT("UPXSaveGameSubsystem::Main_TotalInit Domain=%d (原竞速进度已清空)"), static_cast<int32>(Domain));
 }
 
 bool UPXSaveGameSubsystem::Main_Saved()
 {
-    return !MainSaveGame->CurLevelName.IsNone();
+    // 只有归属战斗竞速且有有效关卡指针时，才算"有可续存的竞速进度"
+    // （教程/主城/竞技场激活后 OwnerDomain 被改写，Load 按钮不会误亮）
+    return MainSaveGame
+        && MainSaveGame->OwnerDomain == ESaveDomain::Race
+        && !MainSaveGame->CurLevelName.IsNone();
 }
 
 void UPXSaveGameSubsystem::Main_AddResult(float Result)
