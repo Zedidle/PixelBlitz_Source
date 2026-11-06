@@ -571,6 +571,8 @@ void UAbilityComponent::OnCrossPlatformLanding()
 
 void UAbilityComponent::OnSkillStart()
 {
+	UE_LOG(LogTemp, Warning, TEXT("UAbilityComponent::OnSkillStart"));
+
 	ActivateAbilityByTiming(EAbilityTiming::SkillStart);
 }
 
@@ -626,6 +628,21 @@ void UAbilityComponent::OnAttackSkillEnd()
 		}
 	}
 	ActivateAbilityByTiming(EAbilityTiming::AttackSkillEnd);
+}
+
+void UAbilityComponent::OnSkillEndTrigger()
+{
+	if (!bSkillEndTriggerWindowOpen) return;
+
+	for (auto& Skill : SkillsHolding)
+	{
+		if (Skill.IsValid())
+		{
+			Skill->OnSkillEndTrigger();
+		}
+	}
+
+	ActivateAbilityByTiming(EAbilityTiming::SkillEndTrigger);
 }
 
 void UAbilityComponent::OnKillEnemy()
@@ -995,7 +1012,15 @@ void UAbilityComponent::OnSkillEffectEnd_Implementation()
 		}
 	}
 	
-	ActivateAbilityByTiming(EAbilityTiming::SkillFinish);
+	ActivateAbilityByTiming(EAbilityTiming::SkillEnd);
+
+	// 技能结束后的 0.3s 内允许触发 SkillEndTrigger（燕返等连段技）
+	bSkillEndTriggerWindowOpen = true;
+	UTimerManagerFuncLib::SetRetriggerableDelaySafe(this, "SkillEndTriggerWindow", this,
+		[this]()
+		{
+			bSkillEndTriggerWindowOpen = false;
+		}, 0.3f);
 }
 
 void UAbilityComponent::OnAttackEffectEnd_Implementation()

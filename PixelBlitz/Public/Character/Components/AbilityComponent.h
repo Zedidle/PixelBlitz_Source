@@ -90,6 +90,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FGameplayTagContainer CreateGameplayTagContainer(FName TagName, bool WithChildren = false);
+
 	
 protected:
 	// Called when the game starts
@@ -173,6 +174,9 @@ public:
 	void OnAttackSkillEnd();
 	
 	UFUNCTION()
+	void OnSkillEndTrigger();
+	
+	UFUNCTION()
 	void OnKillEnemy(); // 后续可能会补充参数
 
 	UFUNCTION(BlueprintCallable)
@@ -184,6 +188,9 @@ public:
 	UFUNCTION()
 	void ActivateAbilityByTiming(EAbilityTiming Timing);
 
+	// 技能结束后的 0.3s 内，处于可触发 SkillEndTrigger 的状态（燕返等连段技）
+	UPROPERTY(BlueprintReadOnly, Category = "Ability | SkillEndTrigger")
+	bool bSkillEndTriggerWindowOpen = false;
 	
 	UFUNCTION(BlueprintCosmetic, BlueprintCallable)
 	void CreateQTE(float _SustainTime = 1.5f, float _Scale = 1.0f);

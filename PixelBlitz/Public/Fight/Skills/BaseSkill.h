@@ -172,6 +172,12 @@ public:
 	UFUNCTION(Category="Skill | Timing")
 	virtual bool OnSkillFinish();
 
+	// 技能结束后短期内再次按下技能键时触发（燕返等连段技），只在玩家主动按键时回调
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnSkillEndTrigger")
+	bool BP_OnSkillEndTrigger();
+	UFUNCTION(Category="Skill | Timing")
+	virtual bool OnSkillEndTrigger();
+
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnKillEnemy")
 	bool BP_OnKillEnemy();
 	UFUNCTION(Category="Skill | Timing")

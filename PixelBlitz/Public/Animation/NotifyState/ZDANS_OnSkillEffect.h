@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Notifies/PaperZDAnimNotifyState.h"
-#include "ZDANS_OnDashEffect.generated.h"
+#include "ZDANS_OnSkillEffect.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PIXELBLITZ_API UZDANS_OnDashEffect : public UPaperZDAnimNotifyState
+class PIXELBLITZ_API UZDANS_OnSkillEffect : public UPaperZDAnimNotifyState
 {
 	GENERATED_BODY()
 public:

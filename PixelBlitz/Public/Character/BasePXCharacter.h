@@ -349,7 +349,7 @@ public:
 
 	// 冲刺生效期间
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
-	bool InDashEffect;
+	bool InSkillEffect;
 
 	// 攻击蓄力中
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
@@ -437,6 +437,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Anim)
 	void SetAttackFire(const bool V);
+	
+	UFUNCTION(BlueprintCallable, Category = Anim)
+	void SetInAttackEffect(const bool V);
 	
 	UFUNCTION(BlueprintCallable, Category = Anim)
 	void SetMoving(const bool V);

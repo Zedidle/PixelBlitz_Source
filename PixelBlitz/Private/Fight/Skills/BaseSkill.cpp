@@ -201,9 +201,17 @@ bool ABaseSkill::OnSkillHit()
 
 bool ABaseSkill::OnSkillFinish()
 {
-	if (ActivateTiming != EAbilityTiming::SkillFinish) return false;
+	if (ActivateTiming != EAbilityTiming::SkillEnd) return false;
 	ApplyAttributeEffects();
 	BP_OnSkillFinish();
+	return true;
+}
+
+bool ABaseSkill::OnSkillEndTrigger()
+{
+	if (ActivateTiming != EAbilityTiming::SkillEndTrigger) return false;
+	ApplyAttributeEffects();
+	BP_OnSkillEndTrigger();
 	return true;
 }
 

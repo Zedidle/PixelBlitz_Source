@@ -1201,7 +1201,7 @@ void ABasePXCharacter::OnHPChanged(int32 OldValue, int32 NewValue)
 	}
 	else
 	{
-		bInAttackEffect = false;
+		SetInAttackEffect(false);
 		SetAttackAnimToggle(false);
 		SetDead(true);
 
@@ -1336,6 +1336,17 @@ void ABasePXCharacter::SetAttackFire(bool V)
 {
 	bAttackFire = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackFire")), V);
+}
+
+void ABasePXCharacter::SetInAttackEffect(const bool V)
+{
+	bInAttackEffect = V;
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bInAttackEffect")), V);
+	
+	if (V)
+	{
+		bAttackStartup = false;
+	}
 }
 
 void ABasePXCharacter::SetMoving(bool V)
@@ -1692,15 +1703,16 @@ void ABasePXCharacter::OnAttackEffect_Implementation()
 
 void ABasePXCharacter::OnAttackEffectBegin_Implementation()
 {
-	bInAttackEffect = true;
-	bAttackStartup = false;
+	SetInAttackEffect(true);
 	SetAttackFire(false);
+	
 	Execute_OnAttackEffect(this);
 }
 
 void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 {
-	bInAttackEffect = false;
+	SetInAttackEffect(false);
+	SetAttackAnimToggle(false);
 	
 	if (AbilityComponent)
 	{
@@ -1720,13 +1732,13 @@ void ABasePXCharacter::OnSkillEffectBegin_Implementation()
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AbilityComponent)
 	
-	InDashEffect = true;
+	InSkillEffect = true;
 	AbilityComponent->OnSkillStart();
 	if (bAttackStartup)
 	{
-		SetAttackAnimToggle(false);
 		bAttackStartup = false;
-		bInAttackEffect = false;
+		SetInAttackEffect(false);
+		SetAttackAnimToggle(false);
 
 		bInAttackSkill = true;
 		AbilityComponent->OnAttackSkillStart();
@@ -1735,7 +1747,7 @@ void ABasePXCharacter::OnSkillEffectBegin_Implementation()
 
 void ABasePXCharacter::OnSkillEffectEnd_Implementation()
 {
-	InDashEffect = false;
+	InSkillEffect = false;
 
 	if (AbilityComponent)
 	{
@@ -1778,23 +1790,6 @@ void ABasePXCharacter::OnKillEnemy_Implementation()
 	}
 }
 
-
-
-
-// float ABasePXCharacter::GetSlowDownResistancePercent()
-// {
-// 	float Result = 0.0f;
-// 	
-// 	FGameplayTag Tag = TAG("CommonSet.SpeedDownResistance");
-// 	if (EffectGameplayTags.Contains(Tag))
-// 	{
-// 		Result += EffectGameplayTags[Tag];
-// 	}
-// 	
-// 	return Result;
-// }
-
-
 void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousFloorImpactNormal,
                                                         const FVector& PreviousFloorContactNormal, const FVector& PreviousLocation, float TimeDelta)
 {
@@ -1802,7 +1797,6 @@ void ABasePXCharacter::OnWalkingOffLedge_Implementation(const FVector& PreviousF
 	                                        TimeDelta);
 	SetFalling(true);
 	SetMoving(false);
-	// GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 }
 
 void ABasePXCharacter::SetScale(const float targetValue)
@@ -1898,7 +1892,7 @@ void ABasePXCharacter::TryToAttack()
 			GetCharacterMovement()->Velocity.Z /= 5;
 		}
 		
-		// 近战时按下按键时 广播
+		// 近战时按下按键时 广播状态给怪物
 		if (DataAsset && DataAsset->NormalAttackType == EAttackType::Melee)
 		{
 			OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType, GetSpriteForwardVector());
@@ -2093,13 +2087,20 @@ void ABasePXCharacter::DebugInteraction()
 
 void ABasePXCharacter::TryUseSkill()
 {
-	BP_TryUseSkill();
-	
-	if (AbilityComponent)
+	if (AbilityComponent->bSkillEndTriggerWindowOpen)
 	{
-		if (AbilityComponent->HasExtendData(TAG("Ability.MoonStep")))
+		AbilityComponent->OnSkillEndTrigger();
+	}
+	else
+	{
+		BP_TryUseSkill();
+
+		if (AbilityComponent)
 		{
-			CurJumpCount -- ;
+			if (AbilityComponent->HasExtendData(TAG("Ability.MoonStep")))
+			{
+				CurJumpCount -- ;
+			}
 		}
 	}
 }
