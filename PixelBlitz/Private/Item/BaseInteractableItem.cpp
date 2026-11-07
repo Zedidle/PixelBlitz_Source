@@ -28,11 +28,7 @@ void ABaseInteractableItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis=TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		WeakThis->SetActorEnableCollision(true);
-	}, 1);
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &AActor::SetActorEnableCollision, 1, true);
 
 }
 

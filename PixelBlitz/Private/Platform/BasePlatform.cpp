@@ -109,11 +109,7 @@ void ABasePlatform::OnPlayerLand_Implementation()
 	
 	SetMobility(EComponentMobility::Movable);
 
-	UTimerManagerFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		WeakThis->SetMobility(EComponentMobility::Static);
-	}, MovePeriod);
+	UTimerManagerFuncLib::SetDelaySafe(this, this, &ABasePlatform::SetMobility, MovePeriod, EComponentMobility::Static);
 }
 
 void ABasePlatform::Tick_LandToPass(float DeltaTime)

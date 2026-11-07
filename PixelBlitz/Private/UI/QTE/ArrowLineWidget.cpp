@@ -19,13 +19,7 @@ void UArrowLineWidget::NativeConstruct()
 
 	if (LifeSpan > 0)
 	{
-		UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
-		{
-			if (WeakThis.IsValid())
-			{
-				WeakThis->RemoveArrowLine();
-			}
-		}, LifeSpan);
+		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &UArrowLineWidget::RemoveArrowLine, LifeSpan);
 	}
 
 	if (UArrowLineHeadWidget* Widget = CreateWidget<UArrowLineHeadWidget>(this, ArrowHeadWidgetClass))

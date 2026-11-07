@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "TimerManager.h"
+#include <tuple>
+#include <type_traits>
 #include "TimerManagerFuncLib.generated.h"
 
 
@@ -33,18 +35,41 @@ public:
     }
 
     
-    template<typename T, typename Callable>
-    static void SetDelaySafe(UObject* WorldContext,T* Object, Callable&& Callback,float Delay)
+    /* 安全对象版本：内部弱引用，对象销毁后不触发回调。
+     * 两种用法：
+     *   1. 成员函数指针 + 绑定参数（跟在 Delay 之后）：
+     *      SetDelaySafe(GetWorld(), this, &ABaseEnemy::SetLanding, time, false, 0);
+     *   2. Lambda（第一个参数会收到校验后的 T*）：
+     *      SetDelaySafe(GetWorld(), this, [](ABaseEnemy* E){ E->SetLanding(false, 0); }, time);
+     */
+    template<typename T, typename Callable, typename... ArgTypes>
+    static void SetDelaySafe(UObject* WorldContext, T* Object, Callable&& Callback, float Delay, ArgTypes&&... Args)
     {
         if (!Object) return;
-        
+
         TWeakObjectPtr<T> WeakObject(Object);
+        auto BoundArgs = std::make_tuple(std::forward<ArgTypes>(Args)...);
+
         SetDelay(WorldContext,
-            [WeakObject, Callback = MoveTemp(Callback)]() mutable
+            [WeakObject, Callback = MoveTemp(Callback), BoundArgs = MoveTemp(BoundArgs)]() mutable
             {
-                if (T* Object = WeakObject.Get())
+                if (!WeakObject.IsValid()) return;
+                T* Local = WeakObject.Get();
+
+                if constexpr (std::is_member_pointer_v<std::decay_t<Callable>>)
                 {
-                   (Object->*Callback)();
+                    std::apply([Local, &Callback](auto&&... Unpacked) mutable
+                    {
+                        (Local->*Callback)(std::forward<decltype(Unpacked)>(Unpacked)...);
+                    }, std::move(BoundArgs));
+                }
+                else if constexpr (std::is_invocable_v<Callable&, T*, ArgTypes&...>)
+                {
+                    std::apply(Callback, std::tuple_cat(std::make_tuple(Local), std::move(BoundArgs)));
+                }
+                else
+                {
+                    std::apply(Callback, std::move(BoundArgs));
                 }
             },
             Delay

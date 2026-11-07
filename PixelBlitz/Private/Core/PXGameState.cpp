@@ -150,11 +150,7 @@ void APXGameState::PassDayTime(float Time, bool DirectSet, bool AbortWeatherChan
 	if (!_ForceWeatherIndex.IsNone())
 	{
 		ForceWeatherIndex = _ForceWeatherIndex;
-		UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-		{
-			if (!WeakThis.IsValid()) return;
-			WeakThis->ForceWeatherIndex = FName();
-		}, TransitionDuration + 0.5);
+		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](APXGameState* GS){ GS->ForceWeatherIndex = FName(); }, TransitionDuration + 0.5);
 	}
 	
 	TimeOfDay = DirectSet ? Time : TimeOfDay + Time;
@@ -297,11 +293,7 @@ void APXGameState::OnEnemyBossDie_Implementation()
 {
 	StartRaceTimer(false);
 	
-	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		WeakThis->ToNextLevel();
-	}, 1.2);
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &APXGameState::ToNextLevel, 1.2);
 
 	if (UPXAudioSubsystem* AudioSubsystem = UPXAudioSubsystem::GetInstance(this))
 	{

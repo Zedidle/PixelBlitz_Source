@@ -450,13 +450,7 @@ void ABasePXCharacter::AddCameraOffset(FName OffsetName, FVector Offset, float S
 
 	if (SustainTime > 0)
 	{
-		UTimerManagerFuncLib::SetDelay(GetWorld(), 
-	[WeakThis = TWeakObjectPtr(this), OffsetName]
-		{
-			if (!WeakThis.IsValid()) return;
-			
-			WeakThis->RemoveCameraOffset(OffsetName);
-		}, SustainTime);
+		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABasePXCharacter::RemoveCameraOffset, SustainTime, OffsetName);
 	}
 }
 
@@ -1020,13 +1014,7 @@ void ABasePXCharacter::CameraOffset_BulletTime(float SustainTime, FVector Camera
 	AddCameraOffset(FName("BulletTime"), TempOffset, SustainTime);
 	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeRate);
-	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-	{
-		if (WeakThis.IsValid())
-		{
-			UGameplayStatics::SetGlobalTimeDilation(WeakThis->GetWorld(), 1.0f);
-		}
-	}, SustainTime);
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](ABasePXCharacter* Character){ UGameplayStatics::SetGlobalTimeDilation(Character->GetWorld(), 1.0f); }, SustainTime);
 }
 
 void ABasePXCharacter::OutOfControl(float SustainTime)
@@ -1087,13 +1075,7 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 	if (!bHurt) return;
 	if (duration > 0)
 	{
-		UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
-		{
-			if (WeakThis.IsValid())
-			{
-				WeakThis->SetHurt(false, 0);
-			}
-		}, duration);
+		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABasePXCharacter::SetHurt, duration, false, 0);
 	}
 }
 
@@ -1104,13 +1086,7 @@ void ABasePXCharacter::SetJumping(bool V, float time)
 	
 	if (!bJumping) return;
 
-	UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
-	{
-		if (WeakThis.IsValid())
-		{
-			WeakThis->SetJumping(false, 0);
-		}
-	}, time);
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABasePXCharacter::SetJumping, time, false, 0);
 }
 
 void ABasePXCharacter::SetFalling(bool V)
@@ -1127,11 +1103,7 @@ void ABasePXCharacter::SetLanding(bool V, float time)
 	if (!bLanding) return;
 
 	PreFrameFalling = false;
-	UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		WeakThis->SetLanding(false, 0);
-	}, time);
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABasePXCharacter::SetLanding, time, false, 0);
 }
 
 void ABasePXCharacter::CheckNearDeath_Implementation()
@@ -1247,11 +1219,7 @@ void ABasePXCharacter::OnHPChanged(int32 OldValue, int32 NewValue)
 			{
 				StateComponent->InvulnerableForDuration(2.5);
 			}
-			UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-			{
-				if (!WeakThis.IsValid()) return;
-					WeakThis->Revive();
-			}, 2);
+			UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABasePXCharacter::Revive, 2);
 		}
 		else
 		{
@@ -1277,16 +1245,13 @@ void ABasePXCharacter::OnHPChanged(int32 OldValue, int32 NewValue)
 				{
 					StateComponent->DestroyComponent();
 				}
-				UTimerManagerFuncLib::SetDelay(GetWorld(),[WeakThis = TWeakObjectPtr(this)]
+				UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](ABasePXCharacter* Character)
 				{
-					if (WeakThis.IsValid())
+					if (UCharacterMovementComponent* Movement = Character->GetCharacterMovement(); Movement && !Movement->IsFalling())
 					{
-						if (WeakThis->GetCharacterMovement() && !WeakThis->GetCharacterMovement()->IsFalling())
-						{
-							WeakThis->GetCharacterMovement()->DisableMovement();
-						}
+						Movement->DisableMovement();
 					}
-				},1);
+				}, 1);
 			}
 			else
 			{
@@ -1510,13 +1475,7 @@ void ABasePXCharacter::ToStartPoint_Implementation()
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling, 0);
 
-		UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-		{
-			if (WeakThis.IsValid())
-			{
-				WeakThis->CustomTimeDilation = 1.0f;
-			}
-		}, 1.0f);
+		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](ABasePXCharacter* Character){ Character->CustomTimeDilation = 1.0f; }, 1.0f);
 	}
 
 	if (AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass()))
@@ -1603,15 +1562,13 @@ void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 	bRepulsion = true;
 	OutOfControl(Power/1000);
 
-	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](ABasePXCharacter* Character)
 	{
-		if (!WeakThis.IsValid()) return;
-
-		WeakThis->bRepulsion = false;
+		Character->bRepulsion = false;
 		UCommonFuncLib::SpawnFloatingText(LOCTEXT("BUFF_DE-STUN", "解除硬直"),
-			WeakThis->GetActorLocation(),
+			Character->GetActorLocation(),
 		FLinearColor(0.68, 0.35, 1.0f, 1.0f),
-			FVector2D(0.8,0.8)
+			FVector2D(0.8, 0.8)
 		);
 	}, Power/1000);
 }

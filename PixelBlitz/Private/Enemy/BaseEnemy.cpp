@@ -234,14 +234,9 @@ void ABaseEnemy::SetJumping(const bool V, const float time)
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bJumping")), V);
 	
 	if (!bJumping) return;
-	
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-[this]{
-			SetJumping(false, 0);
-	});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
-	
+
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABaseEnemy::SetJumping, time, false, 0);
+
 }
 
 float ABaseEnemy::GetHorizontalDistanceToPlayer() const
@@ -357,13 +352,8 @@ void ABaseEnemy::SetLanding(const bool V, const float time)
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bLanding")), V);
 	
 	if (!bLanding) return;
-	
-	FTimerHandle TimerHandle;
-	FTimerDelegate TimerDel = FTimerDelegate::CreateLambda(
-[this]{
-			SetLanding(false, 0);
-	});
-	GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, time, false);
+
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABaseEnemy::SetLanding, time, false, 0);
 }
 
 
@@ -963,13 +953,7 @@ void ABaseEnemy::OnBeAttacked_Implementation(AActor* Maker, int InDamage, int& O
 		OutDamage *= 0.5;
 	}
 
-	UTimerManagerFuncLib::SetDelay(this,[WeakThis = TWeakObjectPtr(this), Maker]
-	{
-		if (WeakThis.IsValid())
-		{
-			WeakThis->OnSensingPlayer(Maker);
-		}
-	}, 0.2);
+	UTimerManagerFuncLib::SetDelaySafe(this, this, &ABaseEnemy::OnSensingPlayer, 0.2, Maker);
 }
 
 
@@ -990,12 +974,11 @@ void ABaseEnemy::PowerRepulsion_Implementation(float Power)
 	if (GetCharacterMovement())
 	{
 		GetCharacterMovement()->SetMovementMode(MOVE_Flying);
-		UTimerManagerFuncLib::SetDelay(this, [WeakThis = TWeakObjectPtr(this)]
+		UTimerManagerFuncLib::SetDelaySafe(this, this, [](ABaseEnemy* Enemy)
 		{
-			if (!WeakThis.IsValid()) return;
-			if (WeakThis->GetCharacterMovement())
+			if (UCharacterMovementComponent* Movement = Enemy->GetCharacterMovement())
 			{
-				WeakThis->GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+				Movement->SetMovementMode(MOVE_Falling);
 			}
 		}, Power / 6000);
 	}

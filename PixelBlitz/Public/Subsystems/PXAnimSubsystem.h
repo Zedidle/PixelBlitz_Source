@@ -27,8 +27,8 @@ public:
 	template <typename T>
 	static void SetAnimInstanceProperty(UPaperZDAnimInstance* AnimInstance, const FName& PropertyName, T V)
 	{
-		if (AnimInstance == nullptr) return;
-	
+		if (!IsValid(AnimInstance)) return;
+
 		UClass* Class = AnimInstance->GetClass();
 		if (!IsValid(Class)) return;
 

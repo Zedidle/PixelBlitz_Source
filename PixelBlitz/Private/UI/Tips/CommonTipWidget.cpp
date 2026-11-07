@@ -21,11 +21,7 @@ void UCommonTipWidget::SetContent(const FString& InContent, float InTime)
 
 	PlayAnimIn();
 	
-	UTimerManagerFuncLib::SetDelay(World, [WeakThis = TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		WeakThis->PlayAnimOut();
-	}, InTime);
+	UTimerManagerFuncLib::SetDelaySafe(World, this, &UCommonTipWidget::PlayAnimOut, InTime);
 
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Anim_out)
 	float AnimOutPlayTime = Anim_out->GetEndTime() - Anim_out->GetStartTime();

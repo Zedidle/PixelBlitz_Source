@@ -63,11 +63,7 @@ void UStateComponent::OnHurtInvulnerable()
 void UStateComponent::InvulnerableForDuration(float duration)
 {
 	SetInvulnerable(true);
-	UTimerManagerFuncLib::SetDelay(GetWorld(), [WeakThis = TWeakObjectPtr(this)]
-	{
-		if (!WeakThis.IsValid()) return;
-		WeakThis->SetInvulnerable(false);
-	}, duration);
+	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &UStateComponent::SetInvulnerable, duration, false);
 }
 
 void UStateComponent::FlashForDuration(float Duration, float FlashRate, FLinearColor FlashColor) 
