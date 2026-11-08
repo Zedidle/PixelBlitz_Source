@@ -16,8 +16,10 @@
 
 bool UPXGameInstance::InGuideLevel()
 {
-	// 按当前世界名判定，不再读取 Main 存档（教程/主城与 Main 数据脱钩）
-	return UGameplayStatics::GetCurrentLevelName(this).Contains(GuideLevelName.ToString());
+	// 教程局与正式局共用 L_Main 地图，地图名无法区分，按 Main 存档归属域判定
+	// （StartNewGuide 会把 OwnerDomain 置为 Guide，正式开局置为 Race/Arena）
+	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
+	return PXSG && PXSG->GetMainData() && PXSG->GetMainData()->OwnerDomain == ESaveDomain::Guide;
 }
 
 bool UPXGameInstance::InHome()

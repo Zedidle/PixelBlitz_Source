@@ -307,7 +307,11 @@ void UUIManager::InitRoot()
 	
 	if (FUIConfigData ConfigData; GetUIConfigData("UIRoot", ConfigData))
 	{
-		if (const auto& UIRoot = UWidgetBlueprintLibrary::Create(World, ConfigData.UI_WidgetClass, nullptr))
+		// 必须传入 PlayerController，否则整棵 CommonUI 树没有 LocalPlayer 上下文，
+		// 推入的界面（如 W_PXSettingScreen）GetOwningLocalPlayer() 返回空，
+		// CreateRegistry 中的 CastChecked 会触发 check 断言（Exception 0x3）
+		APlayerController* RootOwningPC = UGameplayStatics::GetPlayerController(World, 0);
+		if (const auto& UIRoot = UWidgetBlueprintLibrary::Create(World, ConfigData.UI_WidgetClass, RootOwningPC))
 		{
 			Root = Cast<UPXUIRoot>(UIRoot);
 			if (!Root.Get()->IsInViewport())
