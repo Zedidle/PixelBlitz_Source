@@ -466,6 +466,9 @@ public:
 	void SetInAttackEffect(const bool V);
 	
 	UFUNCTION(BlueprintCallable, Category = Anim)
+	void SetAttackStartup(const bool V);
+	
+	UFUNCTION(BlueprintCallable, Category = Anim)
 	void SetMoving(const bool V);
 
 	UFUNCTION(BlueprintCallable, Category = Anim)

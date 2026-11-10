@@ -55,6 +55,9 @@ public:
 	bool bAttackHolding;
 
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
+	bool bAttackStartup;	
+	
+	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackFire;
 	
 	UPROPERTY(BlueprintReadOnly, Category = Animation)

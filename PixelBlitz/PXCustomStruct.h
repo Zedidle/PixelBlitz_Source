@@ -555,7 +555,7 @@ struct FNPCData : public FTableRowBase
 	
 	// 对话立绘
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Category="NPCData")
-	TSoftObjectPtr<UTexture2D> Image_Dialogue;  
+	TObjectPtr<UTexture2D> Image_Dialogue;  
 	
 };
 
@@ -705,7 +705,7 @@ struct FLevelSeriesData : public FTableRowBase
 	
 	// 关卡预览图
 	UPROPERTY(BlueprintReadWrite,EditAnywhere, Category= LevelSeriesData)
-	TSoftObjectPtr<UTexture2D> PreviewImage;
+	TObjectPtr<UTexture2D> PreviewImage;
 	
 };
 #pragma endregion

@@ -1335,8 +1335,14 @@ void ABasePXCharacter::SetInAttackEffect(const bool V)
 	
 	if (V)
 	{
-		bAttackStartup = false;
+		SetAttackStartup(false);
 	}
+}
+
+void ABasePXCharacter::SetAttackStartup(const bool V)
+{
+	bAttackStartup = V;
+	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackStartup")), V);
 }
 
 void ABasePXCharacter::SetMoving(bool V)
@@ -1718,7 +1724,7 @@ void ABasePXCharacter::OnSkillEffectBegin_Implementation()
 	AbilityComponent->OnSkillStart();
 	if (bAttackStartup)
 	{
-		bAttackStartup = false;
+		SetAttackStartup(false);
 		SetInAttackEffect(false);
 		SetAttackAnimToggle(false);
 
@@ -1863,7 +1869,7 @@ void ABasePXCharacter::TryToAttack()
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	if (CachedASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
 	{
-		bAttackStartup = true;
+		SetAttackStartup(true);
 		SetAttackAnimToggle(true);
 		SetAttackFire(false);
 
