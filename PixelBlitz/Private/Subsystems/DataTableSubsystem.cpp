@@ -43,11 +43,13 @@ UDataTable* UDataTableSubsystem::GetDataTable(FString InName)
 		return NewDataTable;
 	}
 
-	FString ConfigPath = GetConfigPath(InName);
-	if (UDataTable* NewDataTable = LoadObject<UDataTable>(nullptr, *ConfigPath))
+	for (const FString& CandidatePath : GetConfigCandidatePaths(InName))
 	{
-		DataTableMap.Add(*InName, NewDataTable);
-		return NewDataTable;
+		if (UDataTable* NewDataTable = LoadObject<UDataTable>(nullptr, *CandidatePath))
+		{
+			DataTableMap.Add(*InName, NewDataTable);
+			return NewDataTable;
+		}
 	}
 
 	UE_LOG(LogTemp, Error, TEXT("Failed to load data table: %s"), *InName);
@@ -161,18 +163,46 @@ const FWeaponData* UDataTableSubsystem::GetWeaponDataByTag(const FGameplayTag& W
 
 void UDataTableSubsystem::LoadLevelData()
 {
-	TArray<FString> LevelTableNames = {"LevelData_Race", "LevelData_Arena"};
+	// 表名约定：LevelData_{模式}_{系列序号两位}，序号连续，首个缺失即结束该模式
+	static const TArray<FString> ModeNames = { TEXT("Race"), TEXT("Arena") };
+	constexpr int32 MaxSeriesIndex = 9;
 
-	for (auto& LevelName : LevelTableNames)
+	for (const FString& ModeName : ModeNames)
 	{
-		UDataTable* DataTable = GetDataTable(LevelName);
-		if (!DataTable) continue;
-	
-		TArray<FName> RowNames = DataTable->GetRowNames();
-		for (auto& Row : RowNames)
+		for (int32 SeriesIdx = 1; SeriesIdx <= MaxSeriesIndex; ++SeriesIdx)
 		{
-			FLevelData* Data = DataTable->FindRow<FLevelData>(Row, "LoadLevelData");
-			LevelData.Add(Data->LevelInstanceName, *Data);
+			const FString TableName = FString::Printf(TEXT("LevelData_%s_%02d"), *ModeName, SeriesIdx);
+
+			// 探测加载：缺表是"序列结束"的正常信号，不走 GetDataTable 的报错路径
+			UDataTable* DataTable = nullptr;
+			for (const FString& CandidatePath : GetConfigCandidatePaths(TableName))
+			{
+				DataTable = LoadObject<UDataTable>(nullptr, *CandidatePath);
+				if (DataTable) break;
+			}
+			if (!DataTable)
+			{
+				break;
+			}
+			DataTableMap.Add(FName(*TableName), DataTable);
+
+			const TArray<FName> RowNames = DataTable->GetRowNames();
+			for (const FName& Row : RowNames)
+			{
+				const FLevelData* Data = DataTable->FindRow<FLevelData>(Row, TEXT("LoadLevelData"));
+				if (!Data)
+				{
+					UE_LOG(LogTemp, Error, TEXT("[LoadLevelData] 行解析失败: %s.%s"), *TableName, *Row.ToString());
+					continue;
+				}
+
+				if (LevelData.Contains(Data->LevelInstanceName))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] LevelInstanceName 冲突，后者覆盖: %s (来自 %s)"),
+						*Data->LevelInstanceName.ToString(), *TableName);
+				}
+				LevelData.Add(Data->LevelInstanceName, *Data);
+			}
 		}
 	}
 }
@@ -186,6 +216,33 @@ const FLevelData* UDataTableSubsystem::GetLevelDataByName(const FName& LevelInst
 
 	return LevelData.Find(LevelInstanceName);
 }
+
+void UDataTableSubsystem::LoadLevelSeriesData()
+{
+	for (auto LevelSeriesDataPath : LevelSeriesDataPaths)
+	{
+		UDataTable* DataTable = GetDataTable(LevelSeriesDataPath);
+		if (!IsValid(DataTable)) continue;
+		
+		TArray<FName> Rownames = DataTable->GetRowNames();
+		for (auto& Row : Rownames)
+		{
+			FLevelSeriesData* Data = DataTable->FindRow<FLevelSeriesData>(Row, "LoadLevelSeriesData");
+			LevelSeriesData.Add(Data->LevelSeriesID, *Data);
+		}
+	}
+}
+
+FLevelSeriesData UDataTableSubsystem::GetLevelSeriesData(const FName& LevelSeriesID)
+{
+	if (!LevelSeriesData.Contains(LevelSeriesID))
+	{
+		LoadLevelData();
+	}
+
+	return LevelSeriesData.FindRef(LevelSeriesID);
+}
+
 
 void UDataTableSubsystem::LoadDropTableData()
 {

@@ -28,11 +28,6 @@ bool UPXGameInstance::InHome()
 	return UGameplayStatics::GetCurrentLevelName(this).Contains(HomeLevelName.ToString());
 }
 
-void UPXGameInstance::SetLevelType(ELevelType _LevelType)
-{
-	LevelType = _LevelType;
-}
-
 void UPXGameInstance::ToHome()
 {
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
@@ -61,23 +56,13 @@ void UPXGameInstance::StartNewGuide()
 }
 
 
-void UPXGameInstance::StartNewGame()
+void UPXGameInstance::StartNewGame(FString LevelTableName)
 {
 	UPXSaveGameSubsystem* PXSG = GetSubsystem<UPXSaveGameSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(PXSG)
 
 	UDataTableSubsystem* DataTableSubsystem = GetSubsystem<UDataTableSubsystem>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DataTableSubsystem)
-
-	FString LevelTableName = "";
-	if (LevelType == ELevelType::Race)
-	{
-		LevelTableName = "LevelData_Race";
-	}
-	else if(LevelType == ELevelType::Arena)
-	{
-		LevelTableName = "LevelData_Arena";
-	}
 	
 	UDataTable* LevelData = DataTableSubsystem->GetDataTable(LevelTableName);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(LevelData)

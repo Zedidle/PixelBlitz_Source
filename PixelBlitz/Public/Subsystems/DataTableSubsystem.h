@@ -21,7 +21,13 @@ class PIXELBLITZ_API UDataTableSubsystem : public UGameInstanceSubsystem
 	mutable TMap<FString, TObjectPtr<UDataTable>> LocalizedDataTables;
 	
 	UFUNCTION()
-	FString GetConfigPath(FString InName){ return FString::Printf(TEXT("/Game/Assets/Config/%s.%s"), *InName, *InName); };
+	TArray<FString> GetConfigCandidatePaths(FString InName)
+	{
+		return {
+			FString::Printf(TEXT("/Game/Assets/Config/%s.%s"), *InName, *InName),
+			FString::Printf(TEXT("/Game/Assets/Config/Levels/%s.%s"), *InName, *InName)
+		};
+	}
 	
 public:
 	
@@ -96,8 +102,17 @@ public:
 	mutable TMap<FName, FLevelData> LevelData;
 	void LoadLevelData();
 	const FLevelData* GetLevelDataByName(const FName& LevelInstanceName) ;
-
-
+	
+	
+	// 获取关卡数据
+	mutable TMap<FName, FLevelSeriesData> LevelSeriesData;
+	void LoadLevelSeriesData();
+	TArray<FString> LevelSeriesDataPaths = {"LevelSeriesData_Arena", "LevelSeriesData_Race"};
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="LevelSeriesData")
+	FLevelSeriesData GetLevelSeriesData(const FName& LevelSeriesID) ;
+	
+	
+	
 	mutable TMap<FName, FDrop> DropTableData;
 	void LoadDropTableData();
 	const FDrop* GetDropDataByName(const FName& DropID) ;

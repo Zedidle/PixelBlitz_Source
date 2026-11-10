@@ -682,6 +682,34 @@ struct FWeaponData : public FTableRowBase
 #pragma endregion
 
 
+// 分别包括 战斗竞速、竞技场
+#pragma region FLevelData
+USTRUCT(BlueprintType)
+struct FLevelSeriesData : public FTableRowBase
+{
+	GENERATED_BODY()
+	
+	// 命名方式为：Race_01、Race_02、Arena_01、Arena_02
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LevelSeriesData)
+	FName LevelSeriesID;
+	
+	// 直接加载表数据
+	UPROPERTY(BlueprintReadWrite,EditAnywhere, Category=LevelSeriesData)
+	FString LevelTableName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LevelSeriesData)
+	FText LevelSeriesName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LevelSeriesData)
+	FText LevelSeriesDesc;
+	
+	// 关卡预览图
+	UPROPERTY(BlueprintReadWrite,EditAnywhere, Category= LevelSeriesData)
+	TSoftObjectPtr<UTexture2D> PreviewImage;
+	
+};
+#pragma endregion
+
 
 #pragma region FLevelData
 USTRUCT(BlueprintType)

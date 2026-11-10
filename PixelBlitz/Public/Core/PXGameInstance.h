@@ -37,9 +37,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Game")
 	ELevelType LevelType = ELevelType::Race;
-
-	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void SetLevelType(ELevelType _LevelType = ELevelType::Race);
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void ToHome();
@@ -48,7 +45,7 @@ public:
 	void StartNewGuide();
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void StartNewGame();
+	void StartNewGame(FString LevelTableName);
 
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
 	void StartGame();
