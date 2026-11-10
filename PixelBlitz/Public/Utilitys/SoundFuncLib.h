@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Sound FuncLib")
 	static void PlaySound2D(USoundBase* Sound);
 
+	/** 带音量/音高倍率的 2D 播放（最终音量仍会乘以设置项音量） */
+	static void PlaySound2D(USoundBase* Sound, float VolumeMultiplier, float PitchMultiplier = 1.0f);
+
 	UFUNCTION(BlueprintCallable, Category="Sound FuncLib")
 	static void PlayUISound(USoundBase* Sound);
 

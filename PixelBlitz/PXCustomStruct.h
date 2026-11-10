@@ -38,6 +38,29 @@ struct FGameplayTagArray
 	TArray<FGameplayTag> Tags;
 };
 
+/** 弱点连击连音配置：达到 TriggerCombo 连击时，按顺序播放 NoteIndices 指定的音符 */
+USTRUCT(BlueprintType)
+struct FComboWeakPointRun
+{
+	GENERATED_BODY()
+
+	/** 触发连击数（从 1 起算） */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 TriggerCombo = 0;
+
+	/** 播放 SW_ComboWeakPoints 的下标序列，如 2,5,7 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int32> NoteIndices;
+
+	/** 音量倍率 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "2.0"))
+	float Volume = 1.0f;
+
+	/** 连音间隔（秒），<=0 时使用 DA 的 ComboWeakPoint_RunNoteInterval */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0.0", ClampMax = "0.3"))
+	float NoteInterval = 0.f;
+};
+
 USTRUCT(BlueprintType)
 struct FDefaultEmptyMessage
 {

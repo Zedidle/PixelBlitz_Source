@@ -53,6 +53,21 @@ void USoundFuncLib::PlaySound2D(USoundBase* Sound)
 	UGameplayStatics::PlaySound2D(World, Sound, Volume);
 }
 
+void USoundFuncLib::PlaySound2D(USoundBase* Sound, float VolumeMultiplier, float PitchMultiplier)
+{
+	UWorld* World = GEngine->GetCurrentPlayWorld();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(World)
+
+	const UPXSettingsLocal* SettingsLocal = GetDefault<UPXSettingsLocal>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(SettingsLocal)
+
+	if (SettingsLocal->GetOverallVolume() <= 0) return;
+
+	float Volume = SettingsLocal->GetOverallVolume() * GetDefault<UPXSettingsLocal>()->GetSoundFXVolume();
+
+	UGameplayStatics::PlaySound2D(World, Sound, Volume * VolumeMultiplier, PitchMultiplier);
+}
+
 void USoundFuncLib::PlayUISound(USoundBase* Sound)
 {
 	UWorld* World = GEngine->GetCurrentPlayWorld();
