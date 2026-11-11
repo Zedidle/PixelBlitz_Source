@@ -240,6 +240,30 @@ void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 		return;
 	}
 
+	// 瞄准写权：瞄准方持有期间 Sprite 旋转归瞄准，漂移偏转让位
+	if (bAimOverride)
+	{
+		DeltaBlendYaw = 0;
+		GetSprite()->SetWorldRotation(FRotator(0, AimOverrideYaw, 0));
+		return;
+	}
+
+	// 松弓归还：瞄准期间暂存的视角横移增量指数平滑还给 CurBlendYaw
+	if (!FMath::IsNearlyZero(PendingBlendYaw))
+	{
+		const float K = FMath::Exp(-DeltaSeconds / FMath::Max(AimReleaseBlendTime, KINDA_SMALL_NUMBER));
+		const float ReturnYaw = PendingBlendYaw * (1.f - K);
+		PendingBlendYaw -= ReturnYaw;
+		CurBlendYaw += ReturnYaw;
+		if (FMath::IsNearlyZero(PendingBlendYaw))
+		{
+			PendingBlendYaw = 0.f;
+		}
+	}
+
+	bool bAsserted = false;
+	float TargetYaw = 0.f;
+
 	FVector Acceleration = MovementComponent->GetCurrentAcceleration();
 
 	FVector Velocity;
@@ -264,57 +288,59 @@ void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 	{
 		if (TurnRight)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 		else if (TurnLeft)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 		else if (MoveRight)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 		else if (MoveLeft)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 	}
 	else if (MoveBack)
 	{
 		if (TurnRight)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 		else if (TurnLeft)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 		else if (MoveRight)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 		else if (MoveLeft)
 		{
-			float RotateYaw = FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + RotateYaw, 0));
+			TargetYaw = CurBlendYaw + FMath::GetMappedRangeValueClamped( FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
+			bAsserted = true;
 		}
 	}
 	else
 	{
 		if (MoveRight)
 		{
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw, 0));
+			TargetYaw = CurBlendYaw;
+			bAsserted = true;
 		}
 		else if (MoveLeft)
 		{
-			GetSprite()->SetWorldRotation(FRotator(0, CurBlendYaw + 180, 0));
+			TargetYaw = CurBlendYaw + 180;
+			bAsserted = true;
 		}
 	}
 
@@ -330,6 +356,27 @@ void ABasePXCharacter::Tick_SpriteRotation(float DeltaSeconds)
 		TurnRight = true;
 	}
 	DeltaBlendYaw = 0;
+
+	// 松弓残差：从瞄准朝向指数滑回漂移朝向（残差相对漂移断言值记账，静止时相对上一帧漂移基准），只动贴图，不影响镜头/输入坐标系
+	if (bAsserted || !FMath::IsNearlyZero(AimRemainYaw))
+	{
+		if (!FMath::IsNearlyZero(AimRemainYaw))
+		{
+			AimRemainYaw *= FMath::Exp(-DeltaSeconds / FMath::Max(AimReleaseBlendTime, KINDA_SMALL_NUMBER));
+			if (FMath::IsNearlyZero(AimRemainYaw, 0.01f))
+			{
+				AimRemainYaw = 0.f;
+			}
+		}
+
+		const float BaseYaw = bAsserted ? TargetYaw : LastSpriteBaseYaw;
+		GetSprite()->SetWorldRotation(FRotator(0, BaseYaw + AimRemainYaw, 0));
+
+		if (bAsserted)
+		{
+			LastSpriteBaseYaw = TargetYaw;
+		}
+	}
 }
 
 void ABasePXCharacter::Tick_SpringArmMotivation(float DeltaSeconds)
@@ -1320,6 +1367,84 @@ void ABasePXCharacter::SetAttackHolding(bool V)
 	bAttackHolding = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bAttackHolding")), V);
 	RefreshAttackHoldingMoveSpeed();
+}
+
+void ABasePXCharacter::SetAimOverride(bool V)
+{
+	if (bAimOverride == V) return;
+
+	if (V)
+	{
+		// 上弓：清掉上一轮未滑完的残差，避免叠加
+		AimRemainYaw = 0.f;
+	}
+	else
+	{
+		// 松弓：残差 = 瞄准朝向 − 漂移本应断言的朝向（与 Tick 用同一套判定，保证滑回终点正确）
+		// 静止时漂移本就不断言，残差记 0：贴图停在瞄准朝向，移动恢复时漂移自然接管（与旧行为一致）
+		bool bValid = false;
+		const float DriftYaw = CalcDriftTargetYaw(bValid);
+		AimRemainYaw = bValid ? FRotator::NormalizeAxis(AimOverrideYaw - DriftYaw) : 0.f;
+	}
+	bAimOverride = V;
+}
+
+float ABasePXCharacter::CalcDriftTargetYaw(bool& bOutAsserted)
+{
+	bOutAsserted = false;
+
+	const UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent) return 0.f;
+
+	FVector Acceleration = MovementComponent->GetCurrentAcceleration();
+	FVector Velocity = Acceleration.IsZero() ? MovementComponent->Velocity : Acceleration;
+
+	float Dot_VelocityToCamera = FVector::DotProduct(Velocity.GetSafeNormal2D(MinDot_VelocityToCamera), GetVectorFaceToCamera().GetSafeNormal2D());
+	float CP_VelocityToCamera_Z = FVector::CrossProduct(Velocity.GetSafeNormal2D(MinCP_VelocityToCamera), GetVectorFaceToCamera().GetSafeNormal2D()).Z;
+
+	const bool MoveForward = Dot_VelocityToCamera < -0.1f;
+	const bool MoveBack = Dot_VelocityToCamera > 0.1f;
+	const bool MoveLeft = CP_VelocityToCamera_Z < -0.01f;
+	const bool MoveRight = CP_VelocityToCamera_Z > 0.01f;
+
+	if (MoveForward)
+	{
+		if (TurnRight || MoveRight)
+		{
+			bOutAsserted = true;
+			return CurBlendYaw + FMath::GetMappedRangeValueClamped(FVector2D(0, -0.5), FVector2D(0, -45), Dot_VelocityToCamera);
+		}
+		if (TurnLeft || MoveLeft)
+		{
+			bOutAsserted = true;
+			return CurBlendYaw + FMath::GetMappedRangeValueClamped(FVector2D(0, -0.5), FVector2D(-180, -135), Dot_VelocityToCamera);
+		}
+	}
+	else if (MoveBack)
+	{
+		if (TurnRight || MoveRight)
+		{
+			bOutAsserted = true;
+			return CurBlendYaw + FMath::GetMappedRangeValueClamped(FVector2D(0, 0.5), FVector2D(180, 135), Dot_VelocityToCamera);
+		}
+		if (TurnLeft || MoveLeft)
+		{
+			bOutAsserted = true;
+			return CurBlendYaw + FMath::GetMappedRangeValueClamped(FVector2D(0, 0.5), FVector2D(0, 45), Dot_VelocityToCamera);
+		}
+	}
+	else if (MoveRight)
+	{
+		bOutAsserted = true;
+		return CurBlendYaw;
+	}
+	else if (MoveLeft)
+	{
+		bOutAsserted = true;
+		return CurBlendYaw + 180;
+	}
+
+	return 0.f;
 }
 
 void ABasePXCharacter::SetAttackFire(bool V)

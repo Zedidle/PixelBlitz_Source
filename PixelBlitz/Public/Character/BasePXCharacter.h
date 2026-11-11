@@ -383,6 +383,35 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bAttackFire;
 
+#pragma region 瞄准写权（漂移偏转 / BlendYaw / 瞄准 三者争抢 Sprite 旋转的仲裁）
+	// 瞄准方（蓄力箭蓝图）置 true 后接管 Sprite 旋转：漂移偏转暂停、BlendYaw 增量暂存
+	UPROPERTY(BlueprintReadOnly, Category = "Attack|Aim")
+	bool bAimOverride = false;
+
+	// 瞄准期间 Sprite 应取的世界朝向 Yaw，由瞄准方每帧更新（通常 = 指向锁定目标）
+	UPROPERTY(BlueprintReadWrite, Category = "Attack|Aim")
+	float AimOverrideYaw = 0.f;
+
+	// 瞄准期间被暂存的视角横移增量，松弓后归还给 CurBlendYaw
+	float PendingBlendYaw = 0.f;
+
+	// 松弓后 Sprite 从瞄准朝向滑回漂移朝向的残差
+	float AimRemainYaw = 0.f;
+
+	// 最近一次漂移偏转实际断言的基准朝向（静止松弓滑回时作终点）
+	float LastSpriteBaseYaw = 0.f;
+
+	// 漂移偏转目标朝向计算（Tick 与松弓残差共用同一套判定，保证滑回终点=漂移本应断言的朝向）
+	float CalcDriftTargetYaw(bool& bOutAsserted);
+
+	// 松弓后视角增量归还 / 朝向残差滑回的时间常数（指数平滑）
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attack|Aim", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float AimReleaseBlendTime = 0.15f;
+
+	UFUNCTION(BlueprintCallable, Category = "Attack|Aim")
+	void SetAimOverride(bool V);
+#pragma endregion
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack|Holding", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float AttackHoldMoveSpeedSub = 50.0f;
 
@@ -606,6 +635,12 @@ inline void ABasePXCharacter::SetBlendYaw(float V)
 
 inline void ABasePXCharacter::AddBlendYaw(float V)
 {
+	// 瞄准期间视角锁死：横移增量暂存，松弓后由 Tick_SpriteRotation 归还
+	if (bAimOverride)
+	{
+		PendingBlendYaw += V;
+		return;
+	}
 	DeltaBlendYaw = -V;
 	CurBlendYaw += V;
 }
