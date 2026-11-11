@@ -14,7 +14,7 @@
 #include "Utilitys/UserWidgetFuncLib.h"
 
 // 波浪式增幅常量
-constexpr float ComboBasePercent = 0.12f;    // 基础增幅
+constexpr float ComboBasePercent = 0.08f;    // 基础增幅
 constexpr float WithinStageBonus = 0.01f;    // 阶段内每次连击 +1%
 constexpr float StageUpBonus = 0.05f;        // 升阶一次性 +5%
 constexpr float CapOverflowStep = 0.01f;     // 封顶溢出：每打满一轮 +1%，无上限
@@ -190,7 +190,8 @@ int UComboSubsystem::AddComboWeakPoint(int Amount)
 	EnsureComboWidget();
 
 	// 升阶宣告：额外连击跨过阶段边界时，同样播放前置垫音 + 新阶段上行连音
-	if (GetStageOfCombo(CurComboWeakPoint) > GetStageOfCombo(PrevCombo))
+	// （PrevCombo > 0：从 0 起连的第一击只是"激活"，不算升阶，不播宣告连音）
+	if (PrevCombo > 0 && GetStageOfCombo(CurComboWeakPoint) > GetStageOfCombo(PrevCombo))
 	{
 		PlayComboStageAscendSound(GetStageOfCombo(CurComboWeakPoint), GetComboHitVolume(PrevCombo));
 	}

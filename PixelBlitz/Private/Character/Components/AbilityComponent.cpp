@@ -9,6 +9,7 @@
 #include "Fight/Components/StateComponent.h"
 #include "Fight/Skills/BaseDefenseSkill.h"
 #include "Fight/Skills/BaseSkill.h"
+#include "GAS/PXGameplayAbility.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PixelBlitz/PixelBlitz.h"
@@ -175,6 +176,21 @@ void UAbilityComponent::InitTalents()
 			{
 				FGameplayAbilitySpec Spec(LoadedClass);
 				CachedASC->GiveAbility(Spec);
+
+				// GA 声明的额外触发时机（ExtraTriggerTimings）：把 GA 的 AssetTag 注册进对应 Timing 触发表。
+				// Talent.csv 的 Timing 列只负责主触发时机；同一天赋需要响应多个事件时由 GA 自行声明
+				// （如踏击：落地加增益 / 攻击结束消耗增益）
+				if (const UPXGameplayAbility* GACDO = Cast<UPXGameplayAbility>(LoadedClass->GetDefaultObject()))
+				{
+					for (const EAbilityTiming ExtraTiming : GACDO->ExtraTriggerTimings)
+					{
+						FGameplayTagArray& ExtraTagArray = AbilitiesTiming.FindOrAdd(ExtraTiming);
+						for (const FGameplayTag& AssetTag : GACDO->GetAssetTags().GetGameplayTagArray())
+						{
+							ExtraTagArray.Tags.AddUnique(AssetTag);
+						}
+					}
+				}
 			}
 		}
 
@@ -696,7 +712,10 @@ void UAbilityComponent::OnDying(int& RemReviveTimes)
 void UAbilityComponent::ActivateAbilityByTiming(EAbilityTiming Timing)
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
-	
+
+	// 同步派发：记录本次触发时机，GA 在 ActivateAbility 内据此区分触发事件
+	LastActivatedTiming = Timing;
+
 	FGameplayTagArray TagArray = AbilitiesTiming.FindRef(Timing);
 	for (auto& Tag : TagArray.Tags)
 	{

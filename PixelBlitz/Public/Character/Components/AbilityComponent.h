@@ -61,8 +61,16 @@ class PIXELBLITZ_API UAbilityComponent : public UActorComponent, public IFight_I
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ABaseSkill>> SkillsHolding;
 
-	
-public:	
+
+public:
+	// 最近一次触发的事件时机。ActivateAbilityByTiming 为同步派发，GA 在 ActivateAbility 内
+	// 读取此字段即可区分自己被哪个事件激活（同一天赋多个触发事件时只需一个 GA）
+	UPROPERTY(BlueprintReadOnly)
+	EAbilityTiming LastActivatedTiming = EAbilityTiming::None;
+
+	UFUNCTION(BlueprintPure)
+	EAbilityTiming GetLastActivatedTiming() const { return LastActivatedTiming; }
+
 	// Sets default values for this component's properties
 	UAbilityComponent();
 	

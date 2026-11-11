@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "PXCustomStruct.h"
 #include "PXGameplayAbility.generated.h"
 
 /**
@@ -29,6 +30,11 @@ public:
 	
 	UPROPERTY(Transient)
 	mutable FGameplayTagContainer TempCooldownTags;
+
+	/** 额外触发时机：天赋授予时（AbilityComponent::InitTalents）会把本 GA 的 AssetTag 注册进这些时机的触发表。
+	 *  Talent.csv 的 Timing 列只负责主触发时机；同一天赋需要响应多个事件时在此声明（如"落地加增益/攻击结束消耗增益"）。 */
+	UPROPERTY(EditDefaultsOnly, Category = "PXGameplayAbility | Trigger")
+	TArray<EAbilityTiming> ExtraTriggerTimings;
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure, BlueprintNativeEvent, Category = "Cooldown")
 	float GetCooldownDuration() const;
