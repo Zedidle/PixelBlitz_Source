@@ -67,7 +67,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="ComboSubsystem")
 	float GetDamagePlusPercent();
-	
+
+	/** 阶段内每层连击的额外伤害增幅（0.01 = 每层 +1%，连击之魂用）：叠加在阶段内基础 1% 之上；Set 语义，重复调用不叠加 */
+	UFUNCTION(BlueprintCallable, Category="ComboSubsystem")
+	void SetWithinStageBonusExtra(float ExtraPercent);
+
 	// 当命中弱点时，累计弱点击破连击次数（有副作用：加连击、播音效，每次命中只调用一次）
 	UFUNCTION(BlueprintCallable, Category="ComboSubsystem")
 	int CalDamageByComboWeakPoint(int InitDamage);
@@ -80,6 +84,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="ComboSubsystem")
 	void ScheduleComboDecay();
 
+	/** 额外累积连击（借力打力等天赋用）：加连击并同步刷新 UI / 衰减计时 / BGM 闪避；超过上限截断。返回累积后的连击数 */
+	UFUNCTION(BlueprintCallable, Category="ComboSubsystem")
+	int AddComboWeakPoint(int Amount = 1);
+
 private:
 
 	/** 封顶乐句轮播游标（配置了 ComboWeakPoint_CapRuns 时使用） */
@@ -90,6 +98,9 @@ private:
 
 	/** 封顶溢出加成：封顶后每打满 5 次连击 +1%，无上限；跌落出封顶即清空 */
 	float CapOverflowPercent = 0.f;
+
+	/** 阶段内每层连击的额外增幅（连击之魂：Ability.ComboSoul.Set.DamagePlusPercent），叠加在 WithinStageBonus 上 */
+	float WithinStageBonusExtra = 0.f;
 
 	/** 最近一次重排衰减定时器的世界时间（进度条用） */
 	float LastDecayScheduleTime = -1000.f;
@@ -109,7 +120,19 @@ private:
 	/** 连音默认间隔（DA 配置，下限 0.02s） */
 	float GetRunNoteIntervalSafe() const;
 
+	/** 命中音量：随连击递增（ComboBefore = 命中前连击数） */
+	float GetComboHitVolume(int ComboBefore) const;
+
+	/** 播放一次弱点连击音阶音效：含封顶节奏、连音触发与低八度叠层（ComboBefore = 命中前连击数） */
+	void PlayComboWeakPointHitSound(int ComboBefore, float Volume);
+
+	/** 升阶宣告音效：前置垫音 + 该阶段 1~5 快速上行连音 */
+	void PlayComboStageAscendSound(int Stage, float Volume);
+
 	/** 衰减 1 层连击；跨阶跌落时播放该阶段的 5→1 倒连音 */
 	void DecayComboStep();
+
+	/** 惰性创建连击 UI（不存在时按 WidgetsDataAsset 创建并加入视口） */
+	void EnsureComboWidget();
 
 };

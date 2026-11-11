@@ -3,6 +3,8 @@
 
 #include "Utilitys/SpaceFuncLib.h"
 
+#include "Character/BasePXCharacter.h"
+#include "Character/Components/AbilityComponent.h"
 #include "CollisionDebugDrawingPublic.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Enemy/BaseEnemy.h"
@@ -345,6 +347,38 @@ float USpaceFuncLib::CalAngle2D(FVector2D A, FVector2D B)
 {
 	float Angle = UKismetMathLibrary::DegAcos(FVector2D::DotProduct(A.GetSafeNormal(), B.GetSafeNormal()));
 	return Angle;
+}
+
+float USpaceFuncLib::GetWeakPointBiasYaw(AActor* Enemy, float RandomYaw, int PlayerIndex, float DefaultBiasAngle)
+{
+	if (!Enemy || !Enemy->GetWorld()) return RandomYaw;
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(Enemy->GetWorld(), PlayerIndex);
+	if (!PlayerPawn) return RandomYaw;
+
+	// 未学心眼刀（天赋数据不存在）时保持原随机方位
+	ABasePXCharacter* PXCharacter = Cast<ABasePXCharacter>(PlayerPawn);
+	if (!PXCharacter || !PXCharacter->AbilityComponent) return RandomYaw;
+
+	float BiasAngle = 0.f;
+	if (!PXCharacter->AbilityComponent->FindExtendData(TAG("Ability.HeartEyeSword.Set.BiasAngle"), BiasAngle))
+	{
+		return RandomYaw;
+	}
+	if (BiasAngle <= 0.f) BiasAngle = DefaultBiasAngle;
+
+	const FVector ToPlayer = (PlayerPawn->GetActorLocation() - Enemy->GetActorLocation()).GetSafeNormal2D();
+	if (ToPlayer.IsNearlyZero()) return RandomYaw;
+
+	const float ToPlayerYaw = ToPlayer.Rotation().Yaw;
+	// 随机方位与「敌人→玩家」方位的最小夹角，范围 [-180, 180]
+	const float Delta = FRotator::NormalizeAxis(RandomYaw - ToPlayerYaw);
+
+	// 本来就在偏向范围内：偏移 0，直接沿用随机方位
+	if (FMath::Abs(Delta) <= BiasAngle) return RandomYaw;
+
+	// 超出范围：收拢到偏差 BiasAngle 的边界
+	return ToPlayerYaw + FMath::Sign(Delta) * BiasAngle;
 }
 
 ABaseEnemy* USpaceFuncLib::FindEnemyInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore,  FVector2D InRange)

@@ -66,7 +66,20 @@ float UComboSubsystem::GetDamagePlusPercent()
 		return 0;
 	}
 	const int Stage = GetStageOfCombo(CurComboWeakPoint);
-	return ComboBasePercent + WithinStageBonus * CurComboWeakPoint + StageUpBonus * (Stage - 1) + CapOverflowPercent;
+	// 阶段内每层连击增幅 = 基础 1% + 天赋额外（连击之魂 +1%，即每层 2%）
+	const float WithinStageTotal = WithinStageBonus + WithinStageBonusExtra;
+	return ComboBasePercent + WithinStageTotal * CurComboWeakPoint + StageUpBonus * (Stage - 1) + CapOverflowPercent;
+}
+
+void UComboSubsystem::SetWithinStageBonusExtra(float ExtraPercent)
+{
+	WithinStageBonusExtra = FMath::Max(ExtraPercent, 0.f);
+
+	// 增幅变化立即传导到 UI（连击未激活时无显示，无需刷新）
+	if (CurComboWeakPoint > 0 && IsValid(ComboWeakPointCountWidget))
+	{
+		ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint, GetDamagePlusPercent() * 100);
+	}
 }
 
 UComboSubsystem* UComboSubsystem::GetInstance(const UObject* WorldContextObject)
@@ -111,126 +124,18 @@ int UComboSubsystem::CalDamageByComboWeakPoint(int InitDamage)
 	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(Settings, InitDamage)
 
-	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(ResourceDataAsset, InitDamage)
-	// 音量随连击递增：越连越响
-	constexpr float BaseVolume = 0.85f;
-	constexpr float VolumeBoost = 0.35f;
-	const float ComboRatio = MaxComboWeakPoint > 0
-		? static_cast<float>(CurComboWeakPoint) / static_cast<float>(MaxComboWeakPoint)
-		: 0.f;
-	const float Volume = BaseVolume + VolumeBoost * ComboRatio;
+	// 命中音阶音效（含封顶节奏与连音触发）：以本次命中前的连击数为准
+	const float Volume = GetComboHitVolume(CurComboWeakPoint);
+	PlayComboWeakPointHitSound(CurComboWeakPoint, Volume);
 
-	const int StageSize = FMath::Max(ComboWeakPointStageSize, 1);
-	const bool bAtCap = MaxComboWeakPoint > 0 && CurComboWeakPoint >= MaxComboWeakPoint;
-
-	// 封顶乐句轮播：达到最大连击后，每次命中轮播一条封顶乐句
-	if (bAtCap && ResourceDataAsset->ComboWeakPoint_CapRuns.Num() > 0)
-	{
-		const int RunIndex = CapRunCursor % ResourceDataAsset->ComboWeakPoint_CapRuns.Num();
-		++CapRunCursor;
-		if (const FComboWeakPointRun* Run = &ResourceDataAsset->ComboWeakPoint_CapRuns[RunIndex]; Run->NoteIndices.Num() > 0)
-		{
-			PlayComboWeakPointRun(Run->NoteIndices, Volume * Run->Volume, Run->NoteInterval);
-		}
-	}
-	else if (ResourceDataAsset->SW_ComboWeakPoints.Num() > 0)
-	{
-		// 封顶节奏（未配置封顶乐句时）：4 次随机单音 + 第 5 次五音乱序连音，循环往复
-		bool bCapRunHit = false;
-		TArray<int32> CapRunNotes;
-
-		int NoteIndex = INDEX_NONE;
-		if (bAtCap)
-		{
-			const int StageStart = (GetStageOfCombo(MaxComboWeakPoint) - 1) * StageSize;
-			const int TopNoteCount = FMath::Max(FMath::Min(StageSize, ResourceDataAsset->SW_ComboWeakPoints.Num() - StageStart), 1);
-
-			if (CapCycleCursor < CapSinglesPerCycle)
-			{
-				++CapCycleCursor;
-				NoteIndex = StageStart + FMath::RandRange(0, TopNoteCount - 1);
-			}
-			else
-			{
-				CapCycleCursor = 0;
-				bCapRunHit = true;
-				// 溢出积累：封顶状态每打满一轮（连音触发时）+1%，无上限
-				CapOverflowPercent += CapOverflowStep;
-				for (int i = 0; i < TopNoteCount; ++i)
-				{
-					CapRunNotes.Add(StageStart + i);
-				}
-				// Fisher-Yates 洗牌：五音乱序
-				for (int i = CapRunNotes.Num() - 1; i > 0; --i)
-				{
-					const int j = FMath::RandRange(0, i);
-					Swap(CapRunNotes[i], CapRunNotes[j]);
-				}
-			}
-		}
-		else
-		{
-			NoteIndex = ResourceDataAsset->SW_ComboWeakPoints.IsValidIndex(CurComboWeakPoint)
-				? CurComboWeakPoint
-				: ResourceDataAsset->SW_ComboWeakPoints.Num() - 1;
-		}
-
-		if (bCapRunHit)
-		{
-			PlayComboWeakPointRun(CapRunNotes, Volume, 0.f);
-		}
-		else if (NoteIndex != INDEX_NONE)
-		{
-			if (USoundBase* NoteSound = ResourceDataAsset->SW_ComboWeakPoints[NoteIndex].LoadSynchronous())
-			{
-				USoundFuncLib::PlaySound2D(NoteSound, Volume);
-
-				// 低八度叠层：加厚力量感（ComboWeakPoint_SubOctaveVolume = 0 时关闭）
-				const float SubOctaveVolume = ResourceDataAsset->ComboWeakPoint_SubOctaveVolume;
-				if (SubOctaveVolume > 0.f)
-				{
-					USoundFuncLib::PlaySound2D(NoteSound, Volume * SubOctaveVolume, 0.5f);
-				}
-
-				// 连击连音：达到配置的连击数时，按 NoteIndices 下标序列播放连音
-				const int ComboCount = CurComboWeakPoint + 1;
-				for (const FComboWeakPointRun& Run : ResourceDataAsset->ComboWeakPoint_Runs)
-				{
-					if (Run.TriggerCombo == ComboCount)
-					{
-						PlayComboWeakPointRun(Run.NoteIndices, Volume * Run.Volume, Run.NoteInterval);
-					}
-				}
-			}
-		}
-	}
-
-	if (!ComboWeakPointCountWidget)
-	{
-		if (const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous())
-		{
-			if (WidgetsDataAsset->ComboWeakPointCountWidget)
-			{
-				ComboWeakPointCountWidget = CreateWidget<UComboWeakPointCountWidget>(GetWorld(), WidgetsDataAsset->ComboWeakPointCountWidget);
-				ComboWeakPointCountWidget->AddToViewport(100);
-			}
-		}
-	}
+	EnsureComboWidget();
 	const int PrevCombo = CurComboWeakPoint;
 	CurComboWeakPoint = FMath::Min(CurComboWeakPoint + 1, MaxComboWeakPoint);
 
 	// 升阶宣告：从 N 阶升入 N+1 阶时，前置垫音 + 新阶段的 1~5 快速上行连音
 	if (GetStageOfCombo(CurComboWeakPoint) > GetStageOfCombo(PrevCombo) && CurComboWeakPoint > 1)
 	{
-		TArray<int32> AscendRun;
-		const int StageStart = (GetStageOfCombo(CurComboWeakPoint) - 1) * FMath::Max(ComboWeakPointStageSize, 1);
-		for (int i = 0; i < ComboWeakPointStageSize; ++i)
-		{
-			AscendRun.Add(StageStart + i);
-		}
-		PlayComboWeakPointImpact(Volume);
-		PlayComboWeakPointRun(AscendRun, Volume, 0.f, GetRunNoteIntervalSafe());
+		PlayComboStageAscendSound(GetStageOfCombo(CurComboWeakPoint), Volume);
 	}
 
 	if (IsValid(ComboWeakPointCountWidget))
@@ -267,6 +172,56 @@ void UComboSubsystem::ScheduleComboDecay()
 				WeakThis->DecayComboStep();
 			}
 		}, Delay);
+}
+
+int UComboSubsystem::AddComboWeakPoint(int Amount)
+{
+	if (Amount <= 0 || CurComboWeakPoint >= MaxComboWeakPoint) return CurComboWeakPoint;
+
+	const int PrevCombo = CurComboWeakPoint;
+	CurComboWeakPoint = FMath::Min(CurComboWeakPoint + Amount, MaxComboWeakPoint);
+
+	// 每一层新增连击都按弱点命中处理：播放对应音阶单音（封顶时走封顶节奏）
+	for (int Combo = PrevCombo; Combo < CurComboWeakPoint; ++Combo)
+	{
+		PlayComboWeakPointHitSound(Combo, GetComboHitVolume(Combo));
+	}
+
+	EnsureComboWidget();
+
+	// 升阶宣告：额外连击跨过阶段边界时，同样播放前置垫音 + 新阶段上行连音
+	if (GetStageOfCombo(CurComboWeakPoint) > GetStageOfCombo(PrevCombo))
+	{
+		PlayComboStageAscendSound(GetStageOfCombo(CurComboWeakPoint), GetComboHitVolume(PrevCombo));
+	}
+
+	if (IsValid(ComboWeakPointCountWidget))
+	{
+		ComboWeakPointCountWidget->UpdateCount(CurComboWeakPoint, GetDamagePlusPercent() * 100);
+	}
+
+	// 额外连击同样视为一次命中：重排衰减计时并保持 BGM 闪避
+	ScheduleComboDecay();
+	UpdateBgmDuck();
+
+	return CurComboWeakPoint;
+}
+
+void UComboSubsystem::EnsureComboWidget()
+{
+	if (ComboWeakPointCountWidget) return;
+
+	if (const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>())
+	{
+		if (const UPXWidgetsDataAsset* WidgetsDataAsset = Settings->WidgetsDataAsset.LoadSynchronous())
+		{
+			if (WidgetsDataAsset->ComboWeakPointCountWidget)
+			{
+				ComboWeakPointCountWidget = CreateWidget<UComboWeakPointCountWidget>(GetWorld(), WidgetsDataAsset->ComboWeakPointCountWidget);
+				ComboWeakPointCountWidget->AddToViewport(100);
+			}
+		}
+	}
 }
 
 void UComboSubsystem::DecayComboStep()
@@ -315,6 +270,127 @@ void UComboSubsystem::DecayComboStep()
 	}
 
 	ScheduleComboDecay();
+}
+
+float UComboSubsystem::GetComboHitVolume(int ComboBefore) const
+{
+	// 音量随连击递增：越连越响
+	constexpr float BaseVolume = 0.85f;
+	constexpr float VolumeBoost = 0.35f;
+	const float ComboRatio = MaxComboWeakPoint > 0
+		? static_cast<float>(ComboBefore) / static_cast<float>(MaxComboWeakPoint)
+		: 0.f;
+	return BaseVolume + VolumeBoost * ComboRatio;
+}
+
+void UComboSubsystem::PlayComboStageAscendSound(int Stage, float Volume)
+{
+	if (Stage <= 0) return;
+
+	TArray<int32> AscendRun;
+	const int StageStart = (Stage - 1) * FMath::Max(ComboWeakPointStageSize, 1);
+	for (int i = 0; i < ComboWeakPointStageSize; ++i)
+	{
+		AscendRun.Add(StageStart + i);
+	}
+	PlayComboWeakPointImpact(Volume);
+	PlayComboWeakPointRun(AscendRun, Volume, 0.f, GetRunNoteIntervalSafe());
+}
+
+void UComboSubsystem::PlayComboWeakPointHitSound(int ComboBefore, float Volume)
+{
+	const UPXCustomSettings* Settings = GetDefault<UPXCustomSettings>();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(Settings)
+
+	const UPXResourceDataAsset* ResourceDataAsset = Settings->ResourceDataAsset.LoadSynchronous();
+	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(ResourceDataAsset)
+
+	const int StageSize = FMath::Max(ComboWeakPointStageSize, 1);
+	const bool bAtCap = MaxComboWeakPoint > 0 && ComboBefore >= MaxComboWeakPoint;
+
+	// 封顶乐句轮播：达到最大连击后，每次命中轮播一条封顶乐句
+	if (bAtCap && ResourceDataAsset->ComboWeakPoint_CapRuns.Num() > 0)
+	{
+		const int RunIndex = CapRunCursor % ResourceDataAsset->ComboWeakPoint_CapRuns.Num();
+		++CapRunCursor;
+		if (const FComboWeakPointRun* Run = &ResourceDataAsset->ComboWeakPoint_CapRuns[RunIndex]; Run->NoteIndices.Num() > 0)
+		{
+			PlayComboWeakPointRun(Run->NoteIndices, Volume * Run->Volume, Run->NoteInterval);
+		}
+		return;
+	}
+
+	if (ResourceDataAsset->SW_ComboWeakPoints.Num() <= 0) return;
+
+	// 封顶节奏（未配置封顶乐句时）：3 次随机单音 + 第 4 次五音乱序连音，循环往复
+	bool bCapRunHit = false;
+	TArray<int32> CapRunNotes;
+
+	int NoteIndex = INDEX_NONE;
+	if (bAtCap)
+	{
+		const int StageStart = (GetStageOfCombo(MaxComboWeakPoint) - 1) * StageSize;
+		const int TopNoteCount = FMath::Max(FMath::Min(StageSize, ResourceDataAsset->SW_ComboWeakPoints.Num() - StageStart), 1);
+
+		if (CapCycleCursor < CapSinglesPerCycle)
+		{
+			++CapCycleCursor;
+			NoteIndex = StageStart + FMath::RandRange(0, TopNoteCount - 1);
+		}
+		else
+		{
+			CapCycleCursor = 0;
+			bCapRunHit = true;
+			// 溢出积累：封顶状态每打满一轮（连音触发时）+1%，无上限
+			CapOverflowPercent += CapOverflowStep;
+			for (int i = 0; i < TopNoteCount; ++i)
+			{
+				CapRunNotes.Add(StageStart + i);
+			}
+			// Fisher-Yates 洗牌：五音乱序
+			for (int i = CapRunNotes.Num() - 1; i > 0; --i)
+			{
+				const int j = FMath::RandRange(0, i);
+				Swap(CapRunNotes[i], CapRunNotes[j]);
+			}
+		}
+	}
+	else
+	{
+		NoteIndex = ResourceDataAsset->SW_ComboWeakPoints.IsValidIndex(ComboBefore)
+			? ComboBefore
+			: ResourceDataAsset->SW_ComboWeakPoints.Num() - 1;
+	}
+
+	if (bCapRunHit)
+	{
+		PlayComboWeakPointRun(CapRunNotes, Volume, 0.f);
+		return;
+	}
+
+	if (NoteIndex == INDEX_NONE) return;
+
+	USoundBase* NoteSound = ResourceDataAsset->SW_ComboWeakPoints[NoteIndex].LoadSynchronous();
+	if (!NoteSound) return;
+
+	USoundFuncLib::PlaySound2D(NoteSound, Volume);
+
+	// 低八度叠层：加厚力量感（ComboWeakPoint_SubOctaveVolume = 0 时关闭）
+	const float SubOctaveVolume = ResourceDataAsset->ComboWeakPoint_SubOctaveVolume;
+	if (SubOctaveVolume > 0.f)
+	{
+		USoundFuncLib::PlaySound2D(NoteSound, Volume * SubOctaveVolume, 0.5f);
+	}
+
+	// 连击连音：达到配置的连击数时，按 NoteIndices 下标序列播放连音
+	const int ComboCount = ComboBefore + 1;
+	for (const FComboWeakPointRun& Run : ResourceDataAsset->ComboWeakPoint_Runs)
+	{
+		if (Run.TriggerCombo == ComboCount)
+		{
+			PlayComboWeakPointRun(Run.NoteIndices, Volume * Run.Volume, Run.NoteInterval);
+		}
+	}
 }
 
 void UComboSubsystem::PlayComboWeakPointRun(const TArray<int32>& NoteIndices, float VolumeMultiplier, float NoteInterval, float StartDelay)

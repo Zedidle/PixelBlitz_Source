@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PixelBlitz/PixelBlitz.h"
 #include "Settings/Config/PXCustomSettings.h"
+#include "Subsystems/ComboSubsystem.h"
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/TimerManagerFuncLib.h"
 #include "PXCustomStruct.h"
@@ -150,6 +151,15 @@ void UAbilityComponent::InitTalents()
 		for (auto& D: TalentData.ExtendData)
 		{
 			AbilityExtendData.AddData(D.Key, D.Value);
+		}
+
+		// 连击之魂：不需要 GA，直接把「阶段内每层连击额外增幅」写入连击系统
+		if (const float ComboSoulExtra = TalentData.ExtendData.FindRef(TAG("Ability.ComboSoul.Set.DamagePlusPercent")))
+		{
+			if (UComboSubsystem* ComboSubsystem = UComboSubsystem::GetInstance(this))
+			{
+				ComboSubsystem->SetWithinStageBonusExtra(ComboSoulExtra);
+			}
 		}
 
 		// 事先把技能的属性影响记录下来，当触发技能时再激活

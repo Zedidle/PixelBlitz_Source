@@ -96,6 +96,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
 	static float CalAngle2D(FVector2D A, FVector2D B);
 
+	// 心眼刀：把弱点刷新方位向玩家方位靠拢。偏离超过 BiasAngle 时收拢到边界，本来就在范围内则偏移 0；未学该天赋时原样返回 RandomYaw
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Space")
+	static float GetWeakPointBiasYaw(AActor* Enemy, float RandomYaw, int PlayerIndex = 0, float DefaultBiasAngle = 30.f);
+
 
 	template<typename T>
 	static T* FindActorInRangeClosest(const UObject* WorldContextObject, AActor* A, const TArray<AActor*>& ActorsToIgnore, FVector2D InRange = {0, 1000}, bool bAlive = true);
