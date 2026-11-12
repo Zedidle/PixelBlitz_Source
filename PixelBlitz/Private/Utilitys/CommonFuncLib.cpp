@@ -146,6 +146,38 @@ bool UCommonFuncLib::CalRandMap_Vector2D(const TMap<FVector2D, int32>& M, FVecto
 	return CalRandomMap(M, Result);
 }
 
+bool UCommonFuncLib::CalRandMap_ChineseHour(const TMap<EChineseHour, int32>& M, EChineseHour& Result)
+{
+	return CalRandomMap(M, Result);
+}
+
+FVector2D UCommonFuncLib::GetChineseHourRange(EChineseHour Hour, bool bRandomRange)
+{
+	// 子时 23:00-01:00 跨零点，拆成 [2300,2400) / [0000,0100) 两段
+	if (Hour == EChineseHour::Zi)
+	{
+		const bool bLateNight = bRandomRange ? FMath::RandBool() : true;
+		return bLateNight ? FVector2D(2300.f, 2400.f) : FVector2D(0.f, 100.f);
+	}
+
+	// 丑时(index 1)=01:00 起，每加一个时辰 +2h
+	const float StartHour = static_cast<float>(static_cast<int32>(Hour) * 2 - 1);
+	return FVector2D(StartHour * 100.f, (StartHour + 2.f) * 100.f);
+}
+
+float UCommonFuncLib::ChineseHourToTime(EChineseHour Hour, bool bRandom)
+{
+	const FVector2D Range = GetChineseHourRange(Hour, bRandom);
+	return bRandom ? FMath::FRandRange(Range.X, Range.Y) : (Range.X + Range.Y) * 0.5f;
+}
+
+float UCommonFuncLib::CalRandTimeByChineseHourRate(const TMap<EChineseHour, int32>& M, bool& bSuccess)
+{
+	EChineseHour Hour = EChineseHour::Zi;
+	bSuccess = CalRandomMap(M, Hour);
+	return bSuccess ? ChineseHourToTime(Hour, true) : 0.f;
+}
+
 float UCommonFuncLib::CalEndTime(float Duration)
 {
 	if (!GEngine)

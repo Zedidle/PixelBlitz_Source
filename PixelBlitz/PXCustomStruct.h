@@ -191,6 +191,30 @@ enum class EWeather : uint8
 
 #pragma endregion
 
+#pragma region EWeatherDetail
+// 天气细分类型：与 Content/_Configs/Weather/WeatherData.csv 的 14 行一一对应（注释为 UDS 天气预设）
+UENUM(BlueprintType, meta = (ScriptName = "WeatherDetail"))
+enum class EWeatherDetail : uint8
+{
+	None UMETA(DisplayName = "无"),
+	ClearSky UMETA(DisplayName = "万里无云"),		// Clear_Skies
+	FewClouds UMETA(DisplayName = "少云"),			// Partly_Cloudy
+	Cloudy UMETA(DisplayName = "多云"),			// Cloudy
+	DenseOvercast UMETA(DisplayName = "乌云密布"),	// Overcast
+	HeavyFog UMETA(DisplayName = "大雾"),			// Foggy
+	QuietRain UMETA(DisplayName = "静雨"),			// Rain_Quiet
+	LightRain UMETA(DisplayName = "小雨"),			// Rain_Light
+	HeavyRain UMETA(DisplayName = "大雨"),			// Rain
+	Thunderstorm UMETA(DisplayName = "雷阵雨"),		// Rain_Thunderstorm
+	LightSnow UMETA(DisplayName = "小雪"),			// Snow_Light
+	HeavySnow UMETA(DisplayName = "大雪"),			// Snow
+	Blizzard UMETA(DisplayName = "暴风雪"),			// Snow_Blizzard
+	SandDust UMETA(DisplayName = "风沙尘"),		// Sand_Dust_Calm
+	Sandstorm UMETA(DisplayName = "沙暴"),			// Sand_Dust_Storm
+};
+
+#pragma endregion
+
 #pragma region EStyleType
 UENUM(BlueprintType)
 enum class EStyleType : uint8
@@ -832,6 +856,23 @@ struct FUDSLevelArgs : public FTableRowBase
 	// 曝光 Metering Mode 是否切为 Manual（项目裁决：true；=false 保持 UDS 自动曝光）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
 	bool bManualExposure = true;
+
+	// ---- 昼夜时段（B_PXGameState::CheckNewDayTime 的判定阈值，按关卡配置） ----
+	// UDS 纯蓝图且各关日出日落不固定，故阈值放本表做唯一真相源：BP 每关读本行喂给 CheckNewDayTime
+	// 白天起点 = 黎明结束（HHMM 刻度，800 = 08:00）；黎明 = [DawnTime - ExtendDawnAndDusk, DawnTime]
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Dawn Time"))
+	float DawnTime = 800.0f;
+
+	// 白天终点 = 黄昏开始（HHMM 刻度，1800 = 18:00）；黄昏 = [DuskTime, DuskTime + ExtendDawnAndDusk]
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Dusk Time"))
+	float DuskTime = 1800.0f;
+
+	// 黎明/黄昏过渡时长（HHMM 分钟刻度，300 = 3 小时）：决定黎明/黄昏时段的窗口宽度
+	// 黎明 = [DawnTime-300, DawnTime]，黄昏 = [DuskTime, DuskTime+300]，其余为白天/黑夜；
+	// 同时透传给 UDS 的 Extend Dawn And Dusk（拉平太阳轨迹），让视觉上的日出/日落过渡与游戏时段等长；
+	// 使用 Simulate Real Sun 时 UDS 忽略透传值，但游戏时段判定不受影响
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Extend Dawn and Dusk"))
+	float ExtendDawnAndDusk = 300.0f;
 
 	// ---- Lighting Brightness（直射光/月光亮度） ----
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Lighting Brightness Day"))

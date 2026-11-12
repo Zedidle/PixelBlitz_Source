@@ -38,10 +38,10 @@ void APXGameState::EventOnDayTimeTypeChanged_Implementation()
 {
 	if (!bAbortWeatherChange)
 	{
-		if (!ForceWeatherIndex.IsNone())
+		if (ForceWeather != EWeatherDetail::None)
 		{
-			CurWeatherIndex = ForceWeatherIndex;
-			SetWeather(CurWeatherIndex);
+			CurWeatherDetail = ForceWeather;
+			SetWeather(CurWeatherDetail);
 		}
 		else
 		{
@@ -65,6 +65,31 @@ float APXGameState::GetDamagePlusPercent()
 	return WeatherEffect.DamagePlusPercent;
 }
 
+EDayTimeType APXGameState::CalDayTimeType(float NewTimeOfDay) const
+{
+	// 归一到 [0, 2400)
+	auto Norm = [](float V)
+	{
+		return FMath::Fmod(FMath::Fmod(V, 2400.f) + 2400.f, 2400.f);
+	};
+	// 环形窗口判定 [Min, Max)，允许跨零点（如黑夜窗口）
+	auto InWindow = [](float V, float Min, float Max)
+	{
+		return Min <= Max ? (V >= Min && V < Max) : (V >= Min || V < Max);
+	};
+
+	const float T = Norm(NewTimeOfDay);
+	const float DawnStart = Norm(DawnTime - DawnDuskExtend);
+	const float DawnEnd = Norm(DawnTime);
+	const float DuskStart = Norm(DuskTime);
+	const float DuskEnd = Norm(DuskTime + DawnDuskExtend);
+
+	if (InWindow(T, DawnStart, DawnEnd)) return EDayTimeType::Dawn;
+	if (InWindow(T, DuskStart, DuskEnd)) return EDayTimeType::Dusk;
+	if (InWindow(T, DawnEnd, DuskStart)) return EDayTimeType::Light;
+	return EDayTimeType::Night;
+}
+
 void APXGameState::RandomWeather()
 {
 	UPXGameInstance* GameInstance= GetGameInstance<UPXGameInstance>();
@@ -78,11 +103,11 @@ void APXGameState::RandomWeather()
 		FName LevelName = GameInstance->GetCurLevelName(true);
 		if (FLevelWeatherRate* WeatherRateData = Data->FindRow<FLevelWeatherRate>(LevelName, TEXT("GetLevelWeatherRateData")))
 		{
-			UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherIndex);
+			UCommonFuncLib::CalRandomMap(WeatherRateData->WeatherRate, CurWeatherDetail);
 		}
 	}
-	
-	SetWeather(CurWeatherIndex);
+
+	SetWeather(CurWeatherDetail);
 }
 
 void APXGameState::DealUI_Implementation()
@@ -143,21 +168,21 @@ void APXGameState::DealStatics_Implementation()
 	}
 }
 
-void APXGameState::PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange, float TransitionDuration, FName _ForceWeatherIndex)
+void APXGameState::PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange, float TransitionDuration, EWeatherDetail _ForceWeather)
 {
 	bAbortWeatherChange = AbortWeatherChange;
 	
-	if (!_ForceWeatherIndex.IsNone())
+	if (_ForceWeather != EWeatherDetail::None)
 	{
-		ForceWeatherIndex = _ForceWeatherIndex;
-		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](APXGameState* GS){ GS->ForceWeatherIndex = FName(); }, TransitionDuration + 0.5);
+		ForceWeather = _ForceWeather;
+		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](APXGameState* GS){ GS->ForceWeather = EWeatherDetail::None; }, TransitionDuration + 0.5);
 	}
 	
 	TimeOfDay = DirectSet ? Time : TimeOfDay + Time;
 	BP_OnPassDayTime(TimeOfDay, TransitionDuration);
 }
 
-void APXGameState::SetWeather(FName WeatherRowName)
+void APXGameState::SetWeather(EWeatherDetail Weather)
 {
 	UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(GameInstance)
@@ -168,8 +193,33 @@ void APXGameState::SetWeather(FName WeatherRowName)
 	UDataTable* DT= DataTableSubsystem->GetWeatherData();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(DT)
 
-	FWeather* WeatherData = DT->FindRow<FWeather>(WeatherRowName, TEXT("APXGameState::SetWeather_Implementation"));
-	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(WeatherData);
+	// 按行的 WeatherDetail 匹配，行名不再参与索引
+	TArray<FWeather*> Rows;
+	DT->GetAllRows<FWeather>(TEXT("APXGameState::SetWeather_Implementation"), Rows);
+	FWeather* WeatherData = nullptr;
+	int32 MatchCount = 0;
+	for (FWeather* Row : Rows)
+	{
+		if (Row && Row->WeatherDetail == Weather)
+		{
+			WeatherData = Row;
+			++MatchCount;
+		}
+	}
+	if (!WeatherData)
+	{
+		// 找不到匹配行：多为 Weather 表的 WeatherDetail 列未填/与枚举值错位（如中途插入 None 导致整体 +1）
+		UE_LOG(LogTemp, Warning,
+			TEXT("[SetWeather] Weather 表（%d 行）中不存在 WeatherDetail=%s 的行，本次天气切换被跳过；请检查表列与枚举是否一致"),
+			Rows.Num(), *UEnum::GetValueAsString(Weather));
+		return;
+	}
+	if (MatchCount > 1)
+	{
+		UE_LOG(LogTemp, Warning,
+			TEXT("[SetWeather] Weather 表中有 %d 行的 WeatherDetail=%s，将使用第一行；请去重"),
+			MatchCount, *UEnum::GetValueAsString(Weather));
+	}
 
 	WeatherName = WeatherData->WeatherName;
 	WeatherType = WeatherData->WeatherType;

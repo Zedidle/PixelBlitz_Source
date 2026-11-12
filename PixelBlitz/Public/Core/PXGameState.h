@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PXCustomStruct.h"
+#include "Utilitys/CommonFuncLib.h"
 #include "Character/BasePXCharacter.h"
 #include "GameFramework/GameState.h"
 #include "PXGameState.generated.h"
@@ -45,11 +46,13 @@ struct FLevelWeatherRate: public FTableRowBase
 {
 	GENERATED_BODY()
 
+	// 天气权重（细分天气，与 Weather 表各行 WeatherDetail 对应）；经 RandomWeather 抽取后按 WeatherDetail 匹配 Weather 表
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	TMap<FName, int> WeatherRate;
+	TMap<EWeatherDetail, int> WeatherRate;
 
+	// 时段权重（十二时辰）；用 UCommonFuncLib::CalRandTimeByChineseHourRate / ChineseHourToTime 换算成 PassDayTime 的 Time
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
-	TMap<FVector2D, int> TimeOfDayRate;
+	TMap<EChineseHour, int> TimeOfDayRate;
 };
 
 USTRUCT(BlueprintType)
@@ -62,6 +65,9 @@ struct FWeather: public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
 	EWeather WeatherType = EWeather::Sunny;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
+	EWeatherDetail WeatherDetail = EWeatherDetail::ClearSky;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
 	UPrimaryDataAsset* WeatherSetting = nullptr;
@@ -82,7 +88,7 @@ class PIXELBLITZ_API APXGameState : public AGameState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState | Weather", meta = (AllowPrivateAccess))
-	FName ForceWeatherIndex;
+	EWeatherDetail ForceWeather = EWeatherDetail::None;
 
 	
 	float CurRaceTime = 0.0f; 
@@ -104,9 +110,19 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
 	float TimeOfDay;
-	
+
+	// 当前关卡昼夜判定阈值（关卡加载后由 BP 从 LevelLighting 表行 FUDSLevelArgs 写入）
+	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
+	float DawnTime = 800.0f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
+	float DuskTime = 1800.0f;
+
+	UPROPERTY(BlueprintReadWrite, Category = "GameState | Weather")
+	float DawnDuskExtend = 300.0f;
+
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
-	FName CurWeatherIndex;
+	EWeatherDetail CurWeatherDetail = EWeatherDetail::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather")
 	FText WeatherName;
@@ -116,6 +132,11 @@ public:
 	
 	UPROPERTY(BlueprintReadOnly, Category = "GameState | Weather")
 	FWeatherEffectData WeatherEffect;
+
+	// 时刻（HHMM 刻度，800 = 08:00）→ 昼夜时段，阈值取 DawnTime/DuskTime/DawnDuskExtend（来自 LevelLighting 表行）
+	// 判定：黎明 [Dawn-Ext, Dawn) / 白天 [Dawn, Dusk) / 黄昏 [Dusk, Dusk+Ext) / 黑夜 其余（含跨零点）
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameState | Weather")
+	EDayTimeType CalDayTimeType(float NewTimeOfDay) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "GameState | Weather")
 	float GetEPConsumePlusPercent();
@@ -128,13 +149,13 @@ public:
 	void RandomWeather();
 	
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
-	void PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange = false, float TransitionDuration = 3, FName _ForceWeatherIndex = FName("None"));
+	void PassDayTime(float Time, bool DirectSet, bool AbortWeatherChange = false, float TransitionDuration = 3, EWeatherDetail _ForceWeather = EWeatherDetail::None);
 	UFUNCTION(BlueprintImplementableEvent, Category = "GameState | Weather", DisplayName="OnPassDayTime")
 	void BP_OnPassDayTime(float NewTime, float TransitionDuration = 3);
 
 	
 	UFUNCTION(BlueprintCallable, Category = "GameState | Weather")
-	void SetWeather(FName WeatherRowName);
+	void SetWeather(EWeatherDetail Weather);
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, DisplayName = "SetWeather", Category = "GameState | Weather")
 	void BP_SetWeather(UPrimaryDataAsset* WeatherDataAsset);
 
