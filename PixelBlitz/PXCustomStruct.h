@@ -805,3 +805,64 @@ struct FLocalizedTableData: public FTableRowBase
 	GENERATED_BODY()
 
 };
+
+#pragma region FUDSLevelLighting
+/**
+ * UDS 关卡光照参数表行（DataTable: LevelLighting）
+ * 裁决：UDS 为项目唯一全局光照系统；曝光由关卡实例接管为 Manual；
+ *       本表是每关 UDS 参数的唯一真相源，关卡实例上的 UDS 保持默认值。
+ * 行名 = 关卡标识（与 LevelWeatherRate 等环境表对齐），如 L1_HomingMoon。
+ * 应用方式：关卡加载后（UDS 初始化完成）由 BP 读取本行并逐项 Set 到 UDS actor。
+ * 注意：UDS 部分属性为 Static Properties，运行时修改后需调用对应的
+ *       Static Properties 函数才会生效（见 UltraDynamicSky/Blueprints/README.txt）。
+ */
+USTRUCT(BlueprintType)
+struct FUDSLevelArgs : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	// 如 L1_HomingMoon 直接对照关卡文件名
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	FName LevelName;
+	
+	// 是否应用本行参数（false 时跳过该关卡，使用 UDS 默认）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	bool bApply = true;
+
+	// 曝光 Metering Mode 是否切为 Manual（项目裁决：true；=false 保持 UDS 自动曝光）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	bool bManualExposure = true;
+
+	// ---- Lighting Brightness（直射光/月光亮度） ----
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Lighting Brightness Day"))
+	float LightingBrightnessDay = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Lighting Brightness DawnDusk"))
+	float LightingBrightnessDawnDusk = 20.f;
+
+	// L1 校准值：18.0（Manual EV 下试出 15~20 区间定稿）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Lighting Brightness Night"))
+	float LightingBrightnessNight = 18.f;
+
+	// ---- 夜空环境亮度 ----
+	// L1 校准值：1.2
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	float NightBrightness = 1.2f;
+
+	// 多云时夜间额外亮度（L1 少云下为 0；若有乌云夜演出，该档需给值）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	float ExtraNightBrightnessWhenCloudy = 0.0f;
+
+	// 阴天夜间亮度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	float OvercastBrightnessNight = 0.2f;
+
+	// 太空层（星空）夜间亮度
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	float SpaceLayerBrightnessNight = 1.0f;
+
+	// 备注：校准说明/日期，不参与逻辑
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
+	FText Note;
+};
+#pragma endregion
