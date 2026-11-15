@@ -13,6 +13,7 @@ class UTextBlock;
 class UImage;
 class UTalentTipWidget;
 class UCommonTextBlock;
+class SButton;
 
 UCLASS()
 class PIXELBLITZ_API UTalentSelectItemWidget : public UPXButtonBase
@@ -33,6 +34,16 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
+	virtual void NativeOnSelected(bool bBroadcast) override;
+	virtual void NativeOnDeselected(bool bBroadcast) override;
+
+	// 抓取内部 SButton，用于逐实例设置背景色（SetBorderBackgroundColor 只影响背景画刷，不影响文字）
+	virtual TSharedRef<SWidget> RebuildWidget() override;
+
+	void ApplyTalentBGColor();
+
+	TWeakPtr<SButton> CachedSButton;
+
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidgetOptional))
 	UCommonTextBlock* TextBlock_TalentName;
 
@@ -47,6 +58,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TalentSelectItemWidget")
 	FGameplayTag TalentTag;
+
+	// BuffOnWidget 表中该天赋对应 Buff 的颜色（用于选中色泽）
+	UPROPERTY(BlueprintReadOnly, Category = "TalentSelectItemWidget")
+	FLinearColor TalentColor = FLinearColor::White;
 	
 	UPROPERTY(BlueprintReadWrite, Category = "TalentSelectItemWidget", meta = (ExposeOnSpawn = true))
 	FTalent TalentData;

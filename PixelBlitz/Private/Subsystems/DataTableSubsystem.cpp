@@ -290,6 +290,15 @@ const FBuffOnWidget* UDataTableSubsystem::GetBuffOnWidgetDataByTag(const FGamepl
 	return Tag2BuffOnWidgetData.Find(Tag);
 }
 
+FLinearColor UDataTableSubsystem::GetBuffOnWidgetColorByTag(const FGameplayTag& Tag) const
+{
+	if (const FBuffOnWidget* Data = const_cast<UDataTableSubsystem*>(this)->GetBuffOnWidgetDataByTag(Tag))
+	{
+		return Data->Color;
+	}
+	return FLinearColor::White;
+}
+
 void UDataTableSubsystem::LoadNPCData()
 {
 	UDataTable* DataTable = GetDataTable("NPCData");

@@ -121,6 +121,8 @@ public:
 	mutable TMap<FGameplayTag, FBuffOnWidget> Tag2BuffOnWidgetData;
 	void LoadBuffOnWidgetData();
 	const FBuffOnWidget* GetBuffOnWidgetDataByTag(const FGameplayTag& Tag) ;
+	UFUNCTION(BlueprintPure, Category="BuffOnWidget")
+	FLinearColor GetBuffOnWidgetColorByTag(const FGameplayTag& Tag) const;
 	
 	
 	mutable TMap<FGameplayTag, FNPCData> Tag2NPCData;
