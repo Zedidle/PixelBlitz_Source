@@ -186,12 +186,19 @@ bool ABasePXCharacter::IsProjectileNormalAttack() const
 
 float ABasePXCharacter::GetAttackHoldMoveSpeedSub() const
 {
-	if (!bAttackHolding || !IsProjectileNormalAttack())
+	if (!bAttackHolding)
 	{
 		return 0.0f;
 	}
 
-	return FMath::Max(0.0f, AttackHoldMoveSpeedSub);
+	// 远战（弓箭手蓄力箭）：原有路径始终生效
+	if (IsProjectileNormalAttack())
+	{
+		return FMath::Max(0.0f, AttackHoldMoveSpeedSub);
+	}
+
+	// 近战蓄力：按 DataAsset 开关生效（默认关闭，蓄力期间移速无惩罚）
+	return (DataAsset && DataAsset->bAttackHoldSlowDown) ? FMath::Max(0.0f, AttackHoldMoveSpeedSub) : 0.0f;
 }
 
 void ABasePXCharacter::RefreshAttackHoldingMoveSpeed()
@@ -869,6 +876,15 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	SetJumping(false);
 	SetFalling(false);
 	CurJumpCount = 0;
+
+	// 空中蓄力松开的缓存释放：落地瞬间结算旋风斩
+	if (bPendingChargeRelease && !bDead)
+	{
+		bPendingChargeRelease = false;
+		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
+		BP_OnAttackChargeRelease(PendingChargeScale);
+		PendingChargeScale = 0.f;
+	}
 	
 	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
 	{
@@ -1107,9 +1123,16 @@ void ABasePXCharacter::SetDead(bool V)
 {
 	bDead = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDead")), V);
-	
+
+	if (V)
+	{
+		// 死亡打断蓄力（含空中缓存）
+		bAttackInputDown = false;
+		CancelAttackHold(false);
+	}
+
 	if(GetCharacterMovement())
-	{	
+	{
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 	}
 }
@@ -1118,8 +1141,12 @@ void ABasePXCharacter::SetHurt(const bool V, const float duration)
 {
 	bHurt = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bHurt")), V);
-	
+
 	if (!bHurt) return;
+
+	// 受击打断蓄力（含空中缓存）
+	CancelAttackHold(false);
+
 	if (duration > 0)
 	{
 		UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, &ABasePXCharacter::SetHurt, duration, false, 0);
@@ -1691,6 +1718,8 @@ void ABasePXCharacter::OnSkillHit_Implementation()
 void ABasePXCharacter::PowerRepulsion_Implementation(float Power)
 {
 	bRepulsion = true;
+	// 击退硬直打断蓄力（含空中缓存），先于硬直结算执行
+	CancelAttackHold(false);
 	OutOfControl(Power/1000);
 
 	UTimerManagerFuncLib::SetDelaySafe(GetWorld(), this, [](ABasePXCharacter* Character)
@@ -1761,7 +1790,6 @@ int ABasePXCharacter::OnDefendingHit_Implementation(int inValue)
 
 void ABasePXCharacter::OnAttackHolding_Implementation()
 {
-	IFight_Interface::OnAttackHolding_Implementation();
 	SetAttackHolding(true);
 	
 	const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>();
@@ -1895,6 +1923,166 @@ void ABasePXCharacter::OnAttackHoldingRelease_Implementation()
 	SetAttackHolding(false);
 }
 
+#pragma region 近战蓄力（Melee AttackHold）
+bool ABasePXCharacter::IsMeleeChargeEnabled() const
+{
+	return DataAsset
+		&& DataAsset->NormalAttackType == EAttackType::Melee
+		&& DataAsset->bEnableMeleeAttackHold;
+}
+
+bool ABasePXCharacter::IsMeleeChargeActive() const
+{
+	return bAttackHolding && IsMeleeChargeEnabled();
+}
+
+bool ABasePXCharacter::IsAttackFullyCharged() const
+{
+	return bAttackFullyCharged;
+}
+
+float ABasePXCharacter::GetAttackChargePercent() const
+{
+	if (!DataAsset)
+	{
+		return 0.f;
+	}
+	return FMath::Clamp(AttackHoldElapsed / FMath::Max(DataAsset->AttackHoldFullTime, 0.1f), 0.f, 1.f);
+}
+
+float ABasePXCharacter::GetAttackChargeScale() const
+{
+	if (!DataAsset || !bAttackHolding)
+	{
+		return 0.f;
+	}
+	return FMath::Lerp(DataAsset->AttackHoldChargeScaleFloor, 1.f, GetAttackChargePercent());
+}
+
+void ABasePXCharacter::StartAttackHoldAccumulate()
+{
+	CancelAttackHold(false);
+	if (!IsMeleeChargeEnabled())
+	{
+		return;
+	}
+
+	bAttackHoldAccumulating = true;
+	bAttackFullyCharged = false;
+	bPendingChargeRelease = false;
+	AttackHoldElapsed = 0.f;
+
+	UTimerManagerFuncLib::SetDelayLoopSafe(this, TEXT("PXAttackHold"),
+		this, &ABasePXCharacter::TickAttackHold, AttackHoldTickRate);
+}
+
+void ABasePXCharacter::TickAttackHold()
+{
+	// 双保险：松键/死亡后循环立即收口
+	if (!bAttackInputDown || bDead)
+	{
+		CancelAttackHold(false);
+		return;
+	}
+
+	AttackHoldElapsed += AttackHoldTickRate;
+
+	if (!DataAsset)
+	{
+		return;
+	}
+
+	// 守卫入场：超过入场阈值 + 普攻已结算 + 按键仍按住（动画变长时入场自动顺延，不会咬进普攻）
+	if (!bAttackHolding
+		&& AttackHoldElapsed >= DataAsset->AttackHoldStartTime
+		&& !GetIsAttacking())
+	{
+		SetAttackHolding(true);
+		BP_OnAttackChargeBegin();
+		return;
+	}
+
+	// 满蓄：一次性触发（伤害封顶 + 满蓄表现）
+	if (!bAttackFullyCharged && AttackHoldElapsed >= DataAsset->AttackHoldFullTime)
+	{
+		bAttackFullyCharged = true;
+		OnAttackFullyCharged();
+	}
+}
+
+void ABasePXCharacter::OnAttackFullyCharged()
+{
+	BP_OnAttackFullyCharged();
+
+	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
+	{
+		if (UPXForceFeedbackEffectDataAsset* FeedbackDataAsset = CustomSettings->ForceFeedbackEffectDataAsset.LoadSynchronous())
+		{
+			if (!FeedbackDataAsset->AttackFullyCharged.IsNull())
+			{
+				UPXGameplayStatics::SpawnForceFeedbackAttached(this,
+					FeedbackDataAsset->AttackFullyCharged.LoadSynchronous(), GetRootComponent());
+			}
+		}
+	}
+}
+
+void ABasePXCharacter::CancelAttackHold(const bool bConsume)
+{
+	// 弓手保护：远战蓄力是动画帧驱动管线（AttackHolding 动画通知 → OnAttackHolding → 松弓释放），
+	// 任何经由本函数的打断路径（受击/击退/死亡/技能键）都不得触碰远战蓄力状态。
+	// 副作用：弓手受击/死亡时 bAttackHolding 不会像近战一样被清理（历史遗留行为，保持原样）。
+	if (!IsMeleeChargeEnabled())
+	{
+		return;
+	}
+
+	UTimerManagerFuncLib::CancelDelay(this, TEXT("PXAttackHold"));
+	bAttackHoldAccumulating = false;
+	bAttackFullyCharged = false;
+	AttackHoldElapsed = 0.f;
+
+	// 修复历史泄漏：此前只有释放路径会清 bAttackHolding，受击/死亡后蓄力态卡死
+	if (bAttackHolding)
+	{
+		SetAttackHolding(false);
+	}
+
+	// bConsume=false：连空中缓存的释放一起丢弃（受击/死亡/取消）；bConsume=true：蓄力已被本次释放消耗
+	if (!bConsume)
+	{
+		bPendingChargeRelease = false;
+	}
+}
+
+void ABasePXCharacter::ResolveChargeRelease()
+{
+	if (bAttackHolding)
+	{
+		const float ChargeScale = GetAttackChargeScale();
+
+		// 空中松开：缓存到落地瞬间结算（v1 不做空中旋风斩判定）
+		if (GetCharacterMovement() && !GetCharacterMovement()->IsMovingOnGround())
+		{
+			bPendingChargeRelease = true;
+			PendingChargeScale = ChargeScale;
+			CancelAttackHold(true);
+			return;
+		}
+
+		CancelAttackHold(true);
+
+		// 近战释放广播（原 2020 行 TODO）：敌人 AI 的闪避/令牌反应以此为准
+		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
+		BP_OnAttackChargeRelease(ChargeScale);
+		return;
+	}
+
+	// 未入场：静默取消本按累积
+	CancelAttackHold(false);
+}
+#pragma endregion
+
 void ABasePXCharacter::OnKillEnemy_Implementation()
 {
 	if (AbilityComponent)
@@ -1989,8 +2177,25 @@ void ABasePXCharacter::Input_Move2D(const FInputActionValue& Value)
 
 void ABasePXCharacter::TryToAttack()
 {
+	const bool bFirstPress = !bAttackInputDown;
+	bAttackInputDown = true;
+
+	// 近战蓄力模式：按住不放 = 蓄力，Triggered 的持续触发不再自动连击（连击靠点按）
+	// 未开启蓄力的角色（弓箭手 / 旧近战）保持原有行为不变
+	if (!bFirstPress && IsMeleeChargeEnabled())
+	{
+		return;
+	}
+
+	// 近战蓄力：按下即开启累积窗口——无论本次 CanAttack 是否通过（攻击 CD / 上一段攻击动画中），
+	// 按住都不会排队下一次攻击，而是进入蓄力阶段（入场判定里 !GetIsAttacking() 会等普攻结算完）
+	if (IsMeleeChargeEnabled())
+	{
+		StartAttackHoldAccumulate();
+	}
+
 	if (!Execute_CanAttack(this)) return;
-	
+
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(CachedASC)
 	if (CachedASC->TryActivateAbilityByTagName("Ability.NormalAttack"))
 	{
@@ -2004,7 +2209,7 @@ void ABasePXCharacter::TryToAttack()
 			GetCharacterMovement()->Velocity.Y /= 1.5;
 			GetCharacterMovement()->Velocity.Z /= 5;
 		}
-		
+
 		// 近战时按下按键时 广播状态给怪物
 		if (DataAsset && DataAsset->NormalAttackType == EAttackType::Melee)
 		{
@@ -2015,9 +2220,17 @@ void ABasePXCharacter::TryToAttack()
 
 void ABasePXCharacter::AttackRelease()
 {
+	bAttackInputDown = false;
 	EndNormalAttack();
 
-	// 远战攻击释放时 广播 ， 后续有什么近战蓄力技能的释放再考虑额外处理 ？ 
+	// 近战蓄力：本按累积窗口收口（已入场 → 结算旋风斩/空中缓存；未入场 → 静默取消）
+	if (IsMeleeChargeEnabled() && (bAttackHoldAccumulating || bAttackHolding))
+	{
+		ResolveChargeRelease();
+		return;
+	}
+
+	// 远战攻击释放时 广播（近战蓄力释放的广播已挪入 ResolveChargeRelease）
 	if (DataAsset && DataAsset->NormalAttackType == EAttackType::Projectile)
 	{
 		OnPlayerAttackStart.Broadcast(DataAsset->NormalAttackType, GetSpriteForwardVector());
@@ -2202,10 +2415,20 @@ void ABasePXCharacter::TryUseSkill()
 {
 	if (AbilityComponent->bSkillEndTriggerWindowOpen)
 	{
+		CancelAttackHold(false);
 		AbilityComponent->OnSkillEndTrigger();
+	}
+	else if (bAttackHolding && IsMeleeChargeEnabled())
+	{
+		// 蓄力态按技能键 = 强化剑锋闪（劫持技能/冲刺通道，消耗本次蓄力）
+		const float ChargeScale = GetAttackChargeScale();
+		CancelAttackHold(true);
+		BP_OnAttackChargeDash(ChargeScale);
 	}
 	else
 	{
+		// 非蓄力态的技能（含前摇期冲刺 = 原样剑锋闪）解除本按的蓄力累积
+		CancelAttackHold(false);
 		BP_TryUseSkill();
 
 		if (AbilityComponent)

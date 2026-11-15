@@ -415,6 +415,79 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack|Holding", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float AttackHoldMoveSpeedSub = 50.0f;
 
+#pragma region 近战蓄力（Melee AttackHold：蓄力剑锋闪 / 旋风斩）
+	// 累积从按下起算（含普攻动画期）；入场 = 超过 DataAsset->AttackHoldStartTime 且普攻已结算且仍按住
+	// 表现（VFX/震动）与技能实现（旋风斩/强化剑锋闪）都在 BP 插拔面，通过下方 BP_ 钩子接入
+
+	// 输入层按下标志：NormalAttack 绑定在 Triggered（持续触发），用它区分"本按首帧"与"按住重复触发"
+	bool bAttackInputDown = false;
+
+	// 本按的蓄力累积窗口是否开启（成功发起普攻后开启，松开/打断后关闭）
+	bool bAttackHoldAccumulating = false;
+
+	// 蓄力累积时长（秒），从按下起算
+	float AttackHoldElapsed = 0.f;
+
+	// 蓄力循环计时器步长
+	static constexpr float AttackHoldTickRate = 0.02f;
+
+	// 已满蓄
+	bool bAttackFullyCharged = false;
+
+	// 空中松开缓存的释放（落地瞬间结算，v1 不做空中旋风斩判定）
+	bool bPendingChargeRelease = false;
+	float PendingChargeScale = 0.f;
+
+	// 近战蓄力是否开启（Melee + DataAsset 开关）
+	bool IsMeleeChargeEnabled() const;
+
+	// 按下成功发起普攻后开启累积窗口
+	void StartAttackHoldAccumulate();
+
+	// 循环计时器回调：入场判定（守卫：仍按住 + 普攻已结算）与满蓄判定
+	void TickAttackHold();
+
+	// 统一打断/取消：bConsume=false 连同空中缓存一起丢弃；bConsume=true 表示蓄力已被本次释放消耗
+	void CancelAttackHold(const bool bConsume = false);
+
+	// 松开时的近战释放结算：已入场 → 旋风斩（空中则缓存到落地）；未入场 → 静默取消
+	void ResolveChargeRelease();
+
+	// 满蓄瞬间（震动在 C++，爆闪/色相在 BP）
+	void OnAttackFullyCharged();
+
+	// 伤害缩放：[AttackHoldChargeScaleFloor, 1]，未进入蓄力态返回 0
+	float GetAttackChargeScale() const;
+
+	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
+	bool IsMeleeChargeActive() const;
+
+	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
+	bool IsAttackFullyCharged() const;
+
+	// VFX 爬坡参数：累积进度 [0,1]
+	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
+	float GetAttackChargePercent() const;
+
+	// ---- BP 钩子（红发 BP 子类实现）----
+
+	// 进入蓄力态：起播蓄力 VFX（起播瞬间建议给一个"点燃"脉冲）
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackChargeBegin")
+	void BP_OnAttackChargeBegin();
+
+	// 满蓄瞬间：爆闪 + 色相偏移（震动已由 C++ 处理）
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackFullyCharged")
+	void BP_OnAttackFullyCharged();
+
+	// 松开 → 旋风斩（伤害按 ChargeScale 缩放）；空中松开会延迟到落地后触发
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackChargeRelease")
+	void BP_OnAttackChargeRelease(float ChargeScale);
+
+	// 蓄力态按技能键 → 强化剑锋闪（伤害按 ChargeScale 缩放）
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackChargeDash")
+	void BP_OnAttackChargeDash(float ChargeScale);
+#pragma endregion
+
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
 	bool bMoving;
 	

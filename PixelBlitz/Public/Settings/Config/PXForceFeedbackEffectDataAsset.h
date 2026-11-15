@@ -34,6 +34,10 @@ public:
 	UPROPERTY( EditAnywhere, Category = "ForceFeedbackEffect")
 	TSoftObjectPtr<UForceFeedbackEffect> AttackHolding;
 
+	// 近战蓄力满蓄瞬间（空 = 不震动）
+	UPROPERTY( EditAnywhere, Category = "ForceFeedbackEffect")
+	TSoftObjectPtr<UForceFeedbackEffect> AttackFullyCharged;
+
 	UPROPERTY( EditAnywhere, Category = "ForceFeedbackEffect")
 	TSoftObjectPtr<UForceFeedbackEffect> Attack;
 };
