@@ -210,6 +210,19 @@ public:
 	UFUNCTION()
 	void GoPatrol();
 
+	// 所属战斗区（由 APlatformFight::RegisterEnemies 设置）；为空表示不限定战斗区，行为与旧版一致
+	TWeakObjectPtr<class APlatformFight> OwnerFightZone;
+
+	// 已发现玩家但玩家尚未进入战斗区时暂存的目标，待玩家进入战斗区后由 OnPlayerEnteredFightZone 正式接敌
+	TWeakObjectPtr<AActor> PendingSensedPlayer;
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy|FightZone")
+	void SetOwnerFightZone(class APlatformFight* Zone);
+
+	// 玩家进入所属战斗区时由 APlatformFight 调用
+	UFUNCTION()
+	void OnPlayerEnteredFightZone();
+
 	UPROPERTY(BlueprintReadOnly)
 	FEnemyData EnemyData;
 

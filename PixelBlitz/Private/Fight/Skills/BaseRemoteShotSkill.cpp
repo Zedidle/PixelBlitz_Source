@@ -6,6 +6,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Enemy/BaseEnemy.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Utilitys/DebugFuncLab.h"
 #include "Utilitys/SpaceFuncLib.h"
 

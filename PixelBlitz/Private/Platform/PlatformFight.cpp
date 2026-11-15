@@ -90,6 +90,11 @@ void APlatformFight::OnEnemyDie_Implementation(FGameplayTag Channel, const FEnem
 	}
 }
 
+bool APlatformFight::IsPlayerInside() const
+{
+	return !EnemiesClearEnd && IsValid(PXCharacter);
+}
+
 void APlatformFight::RegisterEnemies_Implementation()
 {
 	for (auto spawner : EnemySpawners)
@@ -97,7 +102,9 @@ void APlatformFight::RegisterEnemies_Implementation()
 		if (!IsValid(spawner)) continue;
 		if (ABaseEnemy* enemy = spawner->GetSelfEnemy())
 		{
-			Enemies.Add(enemy);
+			// 登记战斗区归属：战斗区怪物发现玩家后需等待玩家进入战斗区才追击
+			enemy->SetOwnerFightZone(this);
+			Enemies.AddUnique(enemy);
 		}
 	}
 }
@@ -175,6 +182,15 @@ void APlatformFight::NotifyActorBeginOverlap(AActor* OtherActor)
 		PXCharacter->OnPlayerDie.AddUniqueDynamic(this, &ThisClass::FightEnd);
 		ActivateFight(true);
 		OnPlayerIn();
+
+		// 通知区内怪物：玩家已进入战斗区，之前发现过玩家的怪物正式接敌
+		for (ABaseEnemy* Enemy : Enemies)
+		{
+			if (IsValid(Enemy))
+			{
+				Enemy->OnPlayerEnteredFightZone();
+			}
+		}
 	}
 }
 
@@ -183,6 +199,15 @@ void APlatformFight::NotifyActorEndOverlap(AActor* OtherActor)
 	Super::NotifyActorEndOverlap(OtherActor);
 	if (OtherActor == PXCharacter && Enemies.Num() > 0)
 	{
+		// 玩家逃出战斗区：区内怪物放弃目标归位巡逻，不允许追出战斗区
+		for (ABaseEnemy* Enemy : Enemies)
+		{
+			if (IsValid(Enemy))
+			{
+				Enemy->GoPatrol();
+			}
+		}
+
 		FightEnd();
 		OnPlayerOut();
 	}

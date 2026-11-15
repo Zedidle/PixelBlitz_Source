@@ -19,6 +19,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Enemy/EnemyAIController.h"
 #include "Enemy/EnemyDataAsset.h"
+#include "Platform/PlatformFight.h"
 #include "Fight/Components/FightComponent.h"
 #include "Fight/Components/StateComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -88,9 +89,18 @@ void ABaseEnemy::Event_OnPlayerDie()
 
 void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 {
+	// 战斗区怪物：玩家未进入所属战斗区时不接敌，仅暂存目标，待玩家进入战斗区后由战斗区通知触发
+	if (OwnerFightZone.IsValid() && !OwnerFightZone->IsPlayerInside()
+		&& PlayerActor && PlayerActor != GetPixelCharacter()
+		&& Cast<ABasePXCharacter>(PlayerActor))
+	{
+		PendingSensedPlayer = PlayerActor;
+		return;
+	}
+
 	bool bPrePlayerNull = PXCharacter == nullptr;
 	SetPXCharacter(Cast<ABasePXCharacter>(PlayerActor));
-	
+
 	if (bPrePlayerNull && Execute_CanMove(this))
 	{
 		if (PlayerActor->GetDistanceTo(this) < 100.0f)
@@ -102,6 +112,21 @@ void ABaseEnemy::OnSensingPlayer(AActor* PlayerActor)
 	BP_OnSensingPlayer(PlayerActor);
 }
 
+void ABaseEnemy::SetOwnerFightZone(APlatformFight* Zone)
+{
+	OwnerFightZone = Zone;
+}
+
+void ABaseEnemy::OnPlayerEnteredFightZone()
+{
+	AActor* Pending = PendingSensedPlayer.Get();
+	PendingSensedPlayer = nullptr;
+	if (Pending && !Pending->IsPendingKillPending())
+	{
+		OnSensingPlayer(Pending);
+	}
+}
+
 void ABaseEnemy::OnLostPlayer(AActor* PlayerActor)
 {
 	if (PlayerActor != PXCharacter) return;
@@ -110,6 +135,7 @@ void ABaseEnemy::OnLostPlayer(AActor* PlayerActor)
 
 void ABaseEnemy::GoPatrol()
 {
+	PendingSensedPlayer = nullptr;
 	SetAttackAnimToggle(false);
 	SetInAttackState(false);
 	SetPXCharacter(nullptr);

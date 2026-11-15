@@ -71,6 +71,10 @@ public:
 	void ShowCountWidget();
 	UFUNCTION(BlueprintCallable)
 	void HideCountWidget();
+
+	// 玩家当前是否处于本战斗区内（怪物接敌门控使用）
+	UFUNCTION(BlueprintPure, Category = "Fight")
+	bool IsPlayerInside() const;
 	
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool ActivateFight(bool bActivate);
