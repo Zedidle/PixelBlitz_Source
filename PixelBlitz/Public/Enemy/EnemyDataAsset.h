@@ -10,6 +10,7 @@
 #include "EnemyDataAsset.generated.h"
 
 class USoundCue;
+class APaperDeathEffect;
 
 UCLASS(Blueprintable)
 class PIXELBLITZ_API UEnemyDataAsset : public UDataAsset
@@ -34,6 +35,18 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<USoundCue> HurtSound;
+
+	// 死亡表现：纸片撕裂并落地融为颜料滩（撕裂成功会隐藏原尸体）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Death")
+	bool bDeathPaperTear = true;
+
+	// 撕裂效果融化后的颜料颜色
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Death")
+	FLinearColor DeathPaintColor = FLinearColor(0.55f, 0.1f, 0.12f, 1.f);
+
+	// 自定义撕裂效果类（留空使用 APaperDeathEffect 默认参数）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy|Death")
+	TSubclassOf<APaperDeathEffect> PaperDeathEffectClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Stats")
 	TArray<FGameplayTag> ActionFieldsCanAttack = {

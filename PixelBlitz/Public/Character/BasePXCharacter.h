@@ -436,7 +436,12 @@ public:
 
 	// 空中松开缓存的释放（落地瞬间结算，v1 不做空中旋风斩判定）
 	bool bPendingChargeRelease = false;
-	float PendingChargeScale = 0.f;
+
+	// 释放瞬间锁存的蓄力强度 [0,1]（本次释放动作内有效；<0 = 无蓄力，伤害/速度等倍率均为原值）
+	float ChargeStrengthLatch = -1.f;
+
+	// 空中释放缓存的蓄力强度（落地结算时转为锁存）
+	float PendingChargeStrength = -1.f;
 
 	// 近战蓄力是否开启（Melee + DataAsset 开关）
 	bool IsMeleeChargeEnabled() const;
@@ -448,7 +453,10 @@ public:
 	void TickAttackHold();
 
 	// 统一打断/取消：bConsume=false 连同空中缓存一起丢弃；bConsume=true 表示蓄力已被本次释放消耗
-	void CancelAttackHold(const bool bConsume = false);
+	// bConsume=false（默认）：打断语义，清蓄力态 + 清空中缓存 + 清伤害/冲刺倍率锁存
+	// bConsume=true：仅"蓄力已被本次释放消耗"，保留释放窗口（一般由 C++ 内部使用，BP 慎用）
+	UFUNCTION(BlueprintCallable, Category = "Attack|MeleeHold")
+	void CancelAttackHold(bool bConsume = false);
 
 	// 松开时的近战释放结算：已入场 → 旋风斩（空中则缓存到落地）；未入场 → 静默取消
 	void ResolveChargeRelease();
@@ -456,8 +464,22 @@ public:
 	// 满蓄瞬间（震动在 C++，爆闪/色相在 BP）
 	void OnAttackFullyCharged();
 
-	// 伤害缩放：[AttackHoldChargeScaleFloor, 1]，未进入蓄力态返回 0
+	// 蓄力强度：[0,1]，入场（0.8s）= 0 → 满蓄（1.5s）= 1；未进入蓄力态返回 0
+	// 这是表现强度与伤害乘区共用的唯一进度源，伤害倍率 = Lerp(Min, Max, 强度)，由 GetAttackDamage 统一结算
+	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
 	float GetAttackChargeScale() const;
+
+	// 本次攻击生效的蓄力强度：取释放瞬间锁存值；返回 <0 表示本次攻击没有蓄力加成
+	float GetChargeStrengthForAttack() const;
+
+	// 蓄力伤害倍率：无蓄力 = 1，否则 Lerp(AttackHoldDamageScaleMin, Max, 强度)
+	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
+	float GetAttackChargeDamageMultiplier() const;
+
+	// 蓄力冲刺倍率：无蓄力 = 1，否则 Lerp(AttackHoldSpeedScaleMin, Max, 强度)
+	// 已接入 GetDashSpeedValue（冲刺时长恒定 → 速度倍率即近战冲刺距离倍率）；不参与 MaxWalkSpeed
+	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
+	float GetAttackChargeSpeedScale() const;
 
 	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
 	bool IsMeleeChargeActive() const;
@@ -465,7 +487,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
 	bool IsAttackFullyCharged() const;
 
-	// VFX 爬坡参数：累积进度 [0,1]
+	// VFX 爬坡参数：从按下起算的整体进度 [0,1]（起播爬坡用；蓄力强度请用 GetAttackChargeScale）
 	UFUNCTION(BlueprintPure, Category = "Attack|MeleeHold")
 	float GetAttackChargePercent() const;
 
@@ -475,17 +497,22 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackChargeBegin")
 	void BP_OnAttackChargeBegin();
 
+	// 蓄力态结束时同步通知蓝图（由 CancelAttackHold 在有蓄力状态时调用：打断 / 受击 / 击退 / 死亡 / 冲刺 / 释放 / 技能劫持）
+	// 用途：停蓄力 VFX / 复位材质参数 / 清理残留的蓄力表现。时序上总在 BP_OnAttackChargeRelease、BP_OnUseChargeSkill 之前
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnCancelAttackHold")
+	void BP_CancelAttackHold();
+
 	// 满蓄瞬间：爆闪 + 色相偏移（震动已由 C++ 处理）
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackFullyCharged")
 	void BP_OnAttackFullyCharged();
 
-	// 松开 → 旋风斩（伤害按 ChargeScale 缩放）；空中松开会延迟到落地后触发
+	// 松开 → 旋风斩；ChargeScale 为蓄力强度 [0,1]，用于表现/位移强度，伤害已由 GetAttackDamage 结算
 	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackChargeRelease")
 	void BP_OnAttackChargeRelease(float ChargeScale);
 
-	// 蓄力态按技能键 → 强化剑锋闪（伤害按 ChargeScale 缩放）
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnAttackChargeDash")
-	void BP_OnAttackChargeDash(float ChargeScale);
+	// 蓄力态按技能键
+	UFUNCTION(BlueprintImplementableEvent, DisplayName="OnUseChargeSkill")
+	void BP_OnUseChargeSkill(float ChargeScale);
 #pragma endregion
 
 	UPROPERTY(BlueprintReadOnly, Category = Animation)

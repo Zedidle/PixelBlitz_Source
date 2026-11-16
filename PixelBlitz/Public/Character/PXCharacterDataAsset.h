@@ -71,15 +71,29 @@ public:
 
 	// 蓄力入场阈值（秒，从按下起算）：超过该时长且普攻已结算、按键仍按住 → 进入蓄力态
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "0.05", UIMin = "0.05"))
-	float AttackHoldStartTime = 0.5f;
+	float AttackHoldStartTime = 0.8f;
 
 	// 满蓄时长（秒，从按下起算）：伤害缩放封顶并触发满蓄表现
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float AttackHoldFullTime = 1.0f;
+	float AttackHoldFullTime = 1.5f;
 
-	// 部分蓄力伤害下限（比例）：旋风斩/强化剑锋闪在 [Floor, 1] 间按累积进度缩放
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-	float AttackHoldChargeScaleFloor = 0.5f;
+	// 蓄力伤害倍率下限（入场瞬间，1.0 = 无增益）：0.8s 蓄力 = 1.3 倍
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float AttackHoldDamageScaleMin = 1.3f;
+
+	// 蓄力伤害倍率上限（满蓄瞬间）：1.5s 满蓄 = 1.5 倍
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float AttackHoldDamageScaleMax = 1.5f;
+
+	// 蓄力冲刺速度/距离倍率下限（入场瞬间，1.0 = 不改变手感）
+	// 直接乘在 GetDashSpeedValue 上：冲刺时长恒定，所以速度倍率 = 近战冲刺距离倍率（不影响移动速度）
+	// 蓄力期间的移速惩罚是独立机制（bAttackHoldSlowDown / AttackHoldMoveSpeedSub），两者互不影响
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float AttackHoldSpeedScaleMin = 1.0f;
+
+	// 蓄力冲刺速度/距离倍率上限（满蓄瞬间）
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float AttackHoldSpeedScaleMax = 1.0f;
 
 	// 蓄力期间移速惩罚开关（Projectile 原路径始终生效，不受此项影响）
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "HeroDataAsset | AttackHold")

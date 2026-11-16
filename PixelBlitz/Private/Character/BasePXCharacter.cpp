@@ -881,9 +881,11 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	if (bPendingChargeRelease && !bDead)
 	{
 		bPendingChargeRelease = false;
+		// 强度随之转成锁存，落地这次攻击才能吃到空中蓄力的伤害/速度/冲刺距离加成
+		ChargeStrengthLatch = PendingChargeStrength;
 		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
-		BP_OnAttackChargeRelease(PendingChargeScale);
-		PendingChargeScale = 0.f;
+		BP_OnAttackChargeRelease(PendingChargeStrength);
+		PendingChargeStrength = -1.f;
 	}
 	
 	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
@@ -963,11 +965,20 @@ void ABasePXCharacter::ReadyToStart_Implementation()
 int ABasePXCharacter::GetAttackDamage_Implementation()
 {
 	int AttackDamagePlus = AbilityComponent ? AbilityComponent->GetAttackDamagePlusRealtime() : 0;
-	
-	return AttackDamagePlus + (CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue) : 1);
+
+	const int BaseDamage = AttackDamagePlus + (CachedASC ? static_cast<int>(CachedASC->GetAttributeValue(EPXAttribute::CurAttackValue)) : 1);
+
+	// 近战蓄力乘区：入场 1.3 倍 → 满蓄 1.5 倍（释放瞬间锁存，攻击结束/被打断后回归 1）
+	const float ChargeDamageMultiplier = GetAttackChargeDamageMultiplier();
+	if (ChargeDamageMultiplier <= 1.f)
+	{
+		return BaseDamage;
+	}
+
+	return FMath::RoundToInt(BaseDamage * ChargeDamageMultiplier);
 }
 
-FVector ABasePXCharacter::GetAttackRepel_Implementation()
+FVector ABasePXCharacter::GetAttackRepel_Implementation() 
 {
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(CachedASC, FVector::ZeroVector)
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AbilityComponent, FVector::ZeroVector)
@@ -1104,7 +1115,7 @@ void ABasePXCharacter::OutOfControl(float SustainTime)
 FVector ABasePXCharacter::GetDashSpeed()
 {
 	float DashSpeed = GetDashSpeedValue();
-	if (DashSpeed <= 0) return FVector(0);
+   	if (DashSpeed <= 0) return FVector(0);
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(MovementComponent, FVector::ZeroVector);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN_VAL(AbilityComponent, FVector::ZeroVector);
@@ -1380,8 +1391,28 @@ void ABasePXCharacter::OnDie_Implementation()
 
 void ABasePXCharacter::SetDashing(bool V)
 {
+	const bool bEnteringDash = V && !bDashing;
+
 	bDashing = V;
 	UPXAnimSubsystem::SetAnimInstanceProperty(GetAnimInstance(), FName(TEXT("bDashing")), V);
+
+	if (bEnteringDash)
+	{
+		// 冲刺开始即结束蓄力态：冲刺可能从技能键之外的蓝图通道触发，这里兜底收口。
+		// 例外：ChargeStrengthLatch >= 0 说明这次冲刺就是蓄力释放出来的（强化剑锋闪），不能打断自己。
+		if (ChargeStrengthLatch < 0.f)
+		{
+			CancelAttackHold(false);
+		}
+		return;
+	}
+
+	// 冲刺结束且已不在攻击效果窗口：蓄力释放窗口收口（避免蓄力速度倍率残留到下一次普通冲刺）
+	if (!V && !bInAttackEffect)
+	{
+		ChargeStrengthLatch = -1.f;
+		PendingChargeStrength = -1.f;
+	}
 }
 
 void ABasePXCharacter::SetAttackAnimToggle(bool V)
@@ -1854,6 +1885,14 @@ void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 {
 	SetInAttackEffect(false);
 	SetAttackAnimToggle(false);
+
+	// 本次攻击结算完毕：蓄力强度锁存作废，避免污染下一击
+	// （若强化剑锋闪的冲刺仍未结束，先留给 SetDashing(false) 收口，否则冲刺速度会在半途掉回原值）
+	if (!bDashing)
+	{
+		ChargeStrengthLatch = -1.f;
+		PendingChargeStrength = -1.f;
+	}
 	
 	if (AbilityComponent)
 	{
@@ -1956,7 +1995,43 @@ float ABasePXCharacter::GetAttackChargeScale() const
 	{
 		return 0.f;
 	}
-	return FMath::Lerp(DataAsset->AttackHoldChargeScaleFloor, 1.f, GetAttackChargePercent());
+
+	const float StartTime = FMath::Max(DataAsset->AttackHoldStartTime, 0.01f);
+	const float FullTime = FMath::Max(DataAsset->AttackHoldFullTime, StartTime + 0.01f);
+
+	// 蓄力强度：入场 = 0，满蓄 = 1（表现强度与伤害乘区共用的唯一进度源）
+	return FMath::Clamp((AttackHoldElapsed - StartTime) / (FullTime - StartTime), 0.f, 1.f);
+}
+
+float ABasePXCharacter::GetChargeStrengthForAttack() const
+{
+	// 只有"本次释放"窗口内才吃蓄力加成（释放瞬间锁存）；蓄力进行中不加成，
+	// 避免蓄力期间的普通冲刺 / 其它伤害结算被顺带放大。实时强度仅供表现层用（GetAttackChargeScale）。
+	return ChargeStrengthLatch;
+}
+
+float ABasePXCharacter::GetAttackChargeDamageMultiplier() const
+{
+	const float Strength = GetChargeStrengthForAttack();
+	if (Strength < 0.f)
+	{
+		return 1.f;
+	}
+
+	// 强度 0（入场 0.8s）= 1.3 倍，强度 1（满蓄 1.5s）= 1.5 倍
+	return FMath::Lerp(DataAsset->AttackHoldDamageScaleMin, DataAsset->AttackHoldDamageScaleMax, Strength);
+}
+
+float ABasePXCharacter::GetAttackChargeSpeedScale() const
+{
+	const float Strength = GetChargeStrengthForAttack();
+	if (Strength < 0.f)
+	{
+		return 1.f;
+	}
+
+	// 冲刺时长恒定，所以这个倍率等效于"近战冲刺距离倍率"；不参与 MaxWalkSpeed（移速有自己的蓄力惩罚）
+	return FMath::Lerp(DataAsset->AttackHoldSpeedScaleMin, DataAsset->AttackHoldSpeedScaleMax, Strength);
 }
 
 void ABasePXCharacter::StartAttackHoldAccumulate()
@@ -2029,6 +2104,13 @@ void ABasePXCharacter::OnAttackFullyCharged()
 
 void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 {
+	// 强度锁存不属于"蓄力态"，被打断/新按下时先作废（bConsume=true 表示本次释放已消耗，保留由调用方重新写入）
+	if (!bConsume)
+	{
+		ChargeStrengthLatch = -1.f;
+		PendingChargeStrength = -1.f;
+	}
+
 	// 弓手保护：远战蓄力是动画帧驱动管线（AttackHolding 动画通知 → OnAttackHolding → 松弓释放），
 	// 任何经由本函数的打断路径（受击/击退/死亡/技能键）都不得触碰远战蓄力状态。
 	// 副作用：弓手受击/死亡时 bAttackHolding 不会像近战一样被清理（历史遗留行为，保持原样）。
@@ -2036,6 +2118,9 @@ void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 	{
 		return;
 	}
+
+	// 记录清理前是否真的处于蓄力相关状态：避免每次按下都触发一次"取消"通知
+	const bool bHadChargeState = bAttackHolding || bAttackHoldAccumulating || bPendingChargeRelease;
 
 	UTimerManagerFuncLib::CancelDelay(this, TEXT("PXAttackHold"));
 	bAttackHoldAccumulating = false;
@@ -2053,28 +2138,37 @@ void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 	{
 		bPendingChargeRelease = false;
 	}
+
+	// 蓝图同步收口：只要蓄力态真的结束过就通知（打断 / 释放 / 技能劫持都算），
+	// 用于停蓄力 VFX、复位材质、清理残留表现；没有蓄力状态时不发，避免空通知
+	if (bHadChargeState)
+	{
+		BP_CancelAttackHold();
+	}
 }
 
 void ABasePXCharacter::ResolveChargeRelease()
 {
 	if (bAttackHolding)
 	{
-		const float ChargeScale = GetAttackChargeScale();
+		// 蓄力强度必须在 CancelAttackHold 之前取：之后 bAttackHolding 会被清掉，强度会掉回 0
+		const float ChargeStrength = GetAttackChargeScale();
 
 		// 空中松开：缓存到落地瞬间结算（v1 不做空中旋风斩判定）
 		if (GetCharacterMovement() && !GetCharacterMovement()->IsMovingOnGround())
 		{
 			bPendingChargeRelease = true;
-			PendingChargeScale = ChargeScale;
+			PendingChargeStrength = ChargeStrength;
 			CancelAttackHold(true);
 			return;
 		}
 
 		CancelAttackHold(true);
+		ChargeStrengthLatch = ChargeStrength;
 
 		// 近战释放广播（原 2020 行 TODO）：敌人 AI 的闪避/令牌反应以此为准
 		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
-		BP_OnAttackChargeRelease(ChargeScale);
+		BP_OnAttackChargeRelease(ChargeStrength);
 		return;
 	}
 
@@ -2413,22 +2507,29 @@ void ABasePXCharacter::DebugInteraction()
 
 void ABasePXCharacter::TryUseSkill()
 {
+	// 技能/冲刺入口一律先结束蓄力态，避免蓄力挂在技能动作上：
+	// - 蓄力态按技能键 = 强化剑锋闪：先取出强度，再按"已被本次释放消耗"收口（保留释放锁存）
+	// - 其余情况按"打断"收口（连空中缓存一起丢弃）
+	// 技能收尾窗口内不算蓄力技能：那条路径只触发技能结束，不消费蓄力
+	const bool bChargeSkill = bAttackHolding && IsMeleeChargeEnabled() && !AbilityComponent->bSkillEndTriggerWindowOpen;
+	const float ChargeStrength = bChargeSkill ? GetAttackChargeScale() : -1.f;
+
+	CancelAttackHold(bChargeSkill);
+	if (bChargeSkill)
+	{
+		ChargeStrengthLatch = ChargeStrength;
+	}
+
 	if (AbilityComponent->bSkillEndTriggerWindowOpen)
 	{
-		CancelAttackHold(false);
 		AbilityComponent->OnSkillEndTrigger();
 	}
-	else if (bAttackHolding && IsMeleeChargeEnabled())
+	else if (bChargeSkill)
 	{
-		// 蓄力态按技能键 = 强化剑锋闪（劫持技能/冲刺通道，消耗本次蓄力）
-		const float ChargeScale = GetAttackChargeScale();
-		CancelAttackHold(true);
-		BP_OnAttackChargeDash(ChargeScale);
+		BP_OnUseChargeSkill(ChargeStrength);
 	}
 	else
 	{
-		// 非蓄力态的技能（含前摇期冲刺 = 原样剑锋闪）解除本按的蓄力累积
-		CancelAttackHold(false);
 		BP_TryUseSkill();
 
 		if (AbilityComponent)
@@ -2549,7 +2650,10 @@ void ABasePXCharacter::OnAttributeChanged(const FGameplayAttribute& Attribute, f
 
 float ABasePXCharacter::GetDashSpeedValue()
 {
-	return CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurDashSpeed) : 0.0f;
+	const float BaseDashSpeed = CachedASC ? CachedASC->GetAttributeValue(EPXAttribute::CurDashSpeed) : 0.0f;
+
+	// 蓄力释放窗口内：冲刺速度按蓄力强度放大（时长恒定 = 冲刺距离放大；无蓄力时倍率为 1，行为不变）
+	return BaseDashSpeed * GetAttackChargeSpeedScale();
 }
 
 void ABasePXCharacter::OnLevelLoading_Implementation(FGameplayTag Channel, const FDefaultEmptyMessage& Message)

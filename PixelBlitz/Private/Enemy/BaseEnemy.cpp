@@ -8,6 +8,7 @@
 #include "PXGameplayTags.h"
 #include "StaticMeshAttributes.h"
 #include "Components/WidgetComponent.h"
+#include "Effects/PaperDeathEffect.h"
 #include "Enemy/Components/EnemyAIComponent.h"
 #include "Utilitys/SpaceFuncLib.h"
 #include "Kismet/GameplayStatics.h"
@@ -700,6 +701,23 @@ void ABaseEnemy::OnDie_Implementation()
 	DieRotationValue = 0;
 	RotationType = FMath::RandRange(0, 2);
 	RotationRot = FMath::RandBool();
+
+	// 纸片撕裂死亡表现：撕裂成功则隐藏原尸体并跳过尸体自转
+	if (DataAsset && DataAsset->bDeathPaperTear && GetSprite())
+	{
+		const FVector BurstDir = GetVelocity().GetSafeNormal();
+		if (APaperDeathEffect::SpawnPaperDeathEffect(this, GetSprite(), BurstDir, DataAsset->DeathPaintColor, DataAsset->PaperDeathEffectClass))
+		{
+			GetSprite()->SetVisibility(false);
+			DieRotationValue = 360.f;
+
+			// 尸体已消失，血条一并不再显示
+			if (UWidgetComponent* HealthWidget = FindComponentByClass<UWidgetComponent>())
+			{
+				HealthWidget->SetVisibility(false);
+			}
+		}
+	}
 }
 
 
@@ -1406,7 +1424,7 @@ void ABaseEnemy::Tick(float DeltaSeconds)
 	// 目前只有 HealthWidget
 	if (UWidgetComponent* Widget = FindComponentByClass<UWidgetComponent>())
 	{
-		Widget->SetVisibility(PXCharacter.IsValid());
+		Widget->SetVisibility(PXCharacter.IsValid() && !bDead);
 	}
 	
 }

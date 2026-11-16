@@ -37,6 +37,7 @@ public class PixelBlitz : ModuleRules
 			"OnlineSubsystemUtils",
 			"PaperZD", 
 			"Paper2D",
+			"ProceduralMeshComponent",
 			"WFCBaseOnActor",
 			"NavigationSystem",
 			"GameSubtitles", 
