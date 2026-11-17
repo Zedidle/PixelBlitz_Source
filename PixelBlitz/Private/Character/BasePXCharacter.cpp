@@ -883,6 +883,8 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 		bPendingChargeRelease = false;
 		// 强度随之转成锁存，落地这次攻击才能吃到空中蓄力的伤害/速度/冲刺距离加成
 		ChargeStrengthLatch = PendingChargeStrength;
+		// 蓄力技能开始：技能效果结束时 OnSkillEffectEnd 补发 AttackSkillEnd（天赋 GA 消耗）
+		bInHoldingSkill = true;
 		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
 		BP_OnAttackChargeRelease(PendingChargeStrength);
 		PendingChargeStrength = -1.f;
@@ -1933,10 +1935,11 @@ void ABasePXCharacter::OnSkillEffectEnd_Implementation()
 	{
 		Execute_OnSkillEffectEnd(AbilityComponent);
 
-		if (bInAttackSkill)
+		if (bInAttackSkill || bInHoldingSkill)
 		{
 			AbilityComponent->OnAttackSkillEnd();
 			bInAttackSkill = false;
+			bInHoldingSkill = false;
 		}
 	}
 }
@@ -2126,6 +2129,9 @@ void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 	bAttackHoldAccumulating = false;
 	bAttackFullyCharged = false;
 	AttackHoldElapsed = 0.f;
+	// 蓄力被打断：本次蓄力技能不再发生，OnSkillEffectEnd 不应补发 AttackSkillEnd
+	// 注意：释放/技能劫持路径（bConsume=true）会在此之后重新置位
+	bInHoldingSkill = false;
 
 	// 修复历史泄漏：此前只有释放路径会清 bAttackHolding，受击/死亡后蓄力态卡死
 	if (bAttackHolding)
@@ -2165,6 +2171,8 @@ void ABasePXCharacter::ResolveChargeRelease()
 
 		CancelAttackHold(true);
 		ChargeStrengthLatch = ChargeStrength;
+		// 蓄力技能开始：技能效果结束时 OnSkillEffectEnd 补发 AttackSkillEnd（天赋 GA 消耗）
+		bInHoldingSkill = true;
 
 		// 近战释放广播（原 2020 行 TODO）：敌人 AI 的闪避/令牌反应以此为准
 		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
@@ -2526,6 +2534,8 @@ void ABasePXCharacter::TryUseSkill()
 	}
 	else if (bChargeSkill)
 	{
+		// 蓄力技能开始（强化剑锋闪）：技能效果结束时 OnSkillEffectEnd 补发 AttackSkillEnd
+		bInHoldingSkill = true;
 		BP_OnUseChargeSkill(ChargeStrength);
 	}
 	else

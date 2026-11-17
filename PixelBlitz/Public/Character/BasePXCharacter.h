@@ -366,6 +366,10 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite, Category = Animation)
 	bool bInAttackSkill;
+
+	// 蓄力技能进行中（旋风斩 / 强化剑锋闪）：OnSkillEffectEnd 时与 bInAttackSkill 一起触发 AttackSkillEnd 时机（天赋 GA 消耗用）
+	// 独立于 bInAttackSkill，避免普攻转技能与蓄力技能时间线交叠时误消费；CancelAttackHold 打断时会清掉
+	bool bInHoldingSkill = false;
 	
 	// 冲刺进入
 	UPROPERTY(BlueprintReadOnly, Category = Animation)
