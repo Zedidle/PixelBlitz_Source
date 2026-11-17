@@ -293,16 +293,27 @@ void APXGameMode::OnLevelLoaded()
 	{
 		IsLevelLoaded = true;
 		TArray<TObjectPtr<AActor>>& FoundActors = CurLevelInstance->GetLoadedLevel()->Actors;
+		TArray<AActor*> TempLights;
 		for (AActor* Actor : FoundActors)
 		{
 			if (Actor)
 			{
 				Actor->Tags.Add(CurLevelName);
+				// 白盒临时编辑灯（Tag=EditorLight，由白盒生成脚本自动打标）：运行期移除，正式光照交给 UDS
+				if (Actor->ActorHasTag(TEXT("EditorLight")))
+				{
+					TempLights.Add(Actor);
+				}
 			}
 			if (ABasePlatform* Platform = Cast<ABasePlatform>(Actor))
 			{
 				Platform->SetLoadLevelLocationOffset(CurLevelInstance->LevelTransform.GetLocation());
 			}
+		}
+
+		for (AActor* TempLight : TempLights)
+		{
+			TempLight->Destroy();
 		}
 
 		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
