@@ -13,6 +13,7 @@
 #include "Core/PXSaveGameSubsystem.h"
 #include "Core/PXSaveGameSubSystemFuncLib.h"
 #include "Engine/LevelStreamingDynamic.h"
+#include "Engine/DataTable.h"
 #include "GameFramework/GameplayMessageSubsystem.h"
 #include "GameFramework/PlayerStart.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,7 +22,7 @@
 #include "Platform/BasePlatform.h"
 #include "Settings/Config/PXCustomSettings.h"
 #include "Settings/Config/PXGameDataAsset.h"
-#include "Settings/Config/PXResourceDataAsset.h"
+#include "Settings/Config/PXResourceDataAsset.h" 
 #include "Subsystems/DataTableSubsystem.h"
 #include "Subsystems/PXAudioSubsystem.h"
 #include "Subsystems/TimerManagerFuncLib.h"
@@ -29,6 +30,22 @@
 #include "UI/PXHUD.h"
 #include "Utilitys/PXGameplayStatics.h"
 
+
+namespace
+{
+	// 关卡推进/排序键 = 行内首个有效实例名（一行可由多个流送实例组成）
+	FName GetFirstValidInstanceName(const FLevelData& Row)
+	{
+		for (const FName& InstanceName : Row.LevelInstanceNames)
+		{
+			if (!InstanceName.IsNone())
+			{
+				return InstanceName;
+			}
+		}
+		return FName();
+	}
+}
 
 APXGameMode::APXGameMode(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -63,9 +80,57 @@ void APXGameMode::BeginPlay()
 			UDevelopConfigDataAsset* DevelopConfig = Settings->DevelopConfig.LoadSynchronous();
 			if (DevelopConfig && DevelopConfig->bLoadTestMap)
 			{
-				if (DevelopConfig->TestMap.IsValid())
+				if (const UDataTable* TestLevelTable = DevelopConfig->TestMap)
 				{
-					LevelName = *DevelopConfig->TestMap.GetAssetName();
+					// 读取测试关卡表：与 StartNewGame 相同的排序规则（LevelOrder 升序，未设置按行名兜底），
+					// 取首个有效行的首个有效 LevelInstanceNames 作为测试关卡
+					TArray<FLevelData> TestRows;
+					for (const FName& RowName : TestLevelTable->GetRowNames())
+					{
+						if (const FLevelData* Data = TestLevelTable->FindRow<FLevelData>(RowName, TEXT("DevelopTestMap")))
+						{
+							TestRows.Add(*Data);
+						}
+					}
+
+					TestRows.Sort([](const FLevelData& A, const FLevelData& B)
+					{
+						if (A.LevelOrder != B.LevelOrder)
+						{
+							if (A.LevelOrder == INDEX_NONE)
+							{
+								return false;
+							}
+
+							if (B.LevelOrder == INDEX_NONE)
+							{
+								return true;
+							}
+
+							return A.LevelOrder < B.LevelOrder;
+						}
+
+						return GetFirstValidInstanceName(A).ToString() < GetFirstValidInstanceName(B).ToString();
+					});
+
+					bool bFoundTestLevel = false;
+					for (const FLevelData& Row : TestRows)
+					{
+						const FName FirstInstance = GetFirstValidInstanceName(Row);
+						if (!FirstInstance.IsNone())
+						{
+							LevelName = FirstInstance;
+							bFoundTestLevel = true;
+							break;
+						}
+					}
+
+					if (!bFoundTestLevel)
+					{
+						UE_LOG(LogTemp, Warning, TEXT("DevelopConfig.TestMap 表 '%s' 中没有有效行，回退到 L_Test"),
+							*TestLevelTable->GetName());
+						LevelName = FName("L_Test");
+					}
 				}
 				else
 				{
@@ -117,9 +182,12 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 		}
 	}
 
-	if (CurLevelInstance)
+	for (ULevelStreamingDynamic* OldInstance : CurLevelInstances)
 	{
-		CurLevelInstance->OnLevelLoaded.RemoveAll(this);
+		if (OldInstance)
+		{
+			OldInstance->OnLevelLoaded.RemoveAll(this);
+		}
 	}
 
 	PreLevelName = CurLevelName;
@@ -129,25 +197,61 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 	{
 		DissolvePreLevel(PreLevelName, StartLocation);
 	}
-	
+
 	IsLevelLoaded = false;
 	IsLevelStarted = false;
-	
-	bool LoadLevelSuccess;
-	ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(),
-		LevelName.ToString(), StartLocation, FRotator(0, 0,0),
-		LoadLevelSuccess);
-	if (LoadLevelSuccess && LoadedLevel)
+	CurLevelInstance = nullptr;
+	CurLevelInstances.Reset();
+	ProcessedLevelInstances.Reset();
+	PendingLevelInstanceCount = 0;
+
+	// 读取关卡行：LevelInstanceNames 支持多实例，按数组顺序全部流送；
+	// 查不到行时退化为仅加载传入的实例名（保持旧行为）
+	TArray<FName> InstancesToLoad;
+	if (UDataTableSubsystem* DataTableSubsystem = UDataTableSubsystem::GetInstance(this))
 	{
-		CurLevelInstance = LoadedLevel;
-		CurLevelInstance->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
+		if (const FLevelData* LevelRow = DataTableSubsystem->GetLevelDataByName(LevelName))
+		{
+			for (const FName& InstanceName : LevelRow->LevelInstanceNames)
+			{
+				if (!InstanceName.IsNone())
+				{
+					InstancesToLoad.AddUnique(InstanceName);
+				}
+			}
+		}
+	}
+	InstancesToLoad.AddUnique(LevelName);
+
+	bool bAnyLoadSuccess = false;
+	for (const FName& InstanceName : InstancesToLoad)
+	{
+		bool LoadLevelSuccess = false;
+		ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(),
+			InstanceName.ToString(), StartLocation, FRotator(0, 0,0),
+			LoadLevelSuccess);
+		if (LoadLevelSuccess && LoadedLevel)
+		{
+			LoadedLevel->OnLevelLoaded.AddDynamic(this, &ThisClass::OnLevelLoaded);
+			CurLevelInstances.Add(LoadedLevel);
+			if (!CurLevelInstance)
+			{
+				CurLevelInstance = LoadedLevel;
+			}
+			bAnyLoadSuccess = true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("APXGameMode::LoadLevel failed to stream level instance '%s'."), *InstanceName.ToString());
+		}
+	}
+
+	if (bAnyLoadSuccess)
+	{
+		PendingLevelInstanceCount = CurLevelInstances.Num();
 
 		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelLoading, EMPTY_MESSAGE);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("APXGameMode::LoadLevel failed to stream level instance '%s'."), *LevelName.ToString());
 	}
 }
 
@@ -289,10 +393,16 @@ void APXGameMode::NavRebuild()
 
 void APXGameMode::OnLevelLoaded()
 {
-	if (CurLevelInstance && CurLevelInstance->GetLoadedLevel())
+	// 多实例关卡：每个实例加载完成后各处理一次（防重复），全部就绪才置 IsLevelLoaded
+	for (ULevelStreamingDynamic* Instance : CurLevelInstances)
 	{
-		IsLevelLoaded = true;
-		TArray<TObjectPtr<AActor>>& FoundActors = CurLevelInstance->GetLoadedLevel()->Actors;
+		if (!Instance || !Instance->GetLoadedLevel() || ProcessedLevelInstances.Contains(Instance))
+		{
+			continue;
+		}
+		ProcessedLevelInstances.Add(Instance);
+
+		TArray<TObjectPtr<AActor>>& FoundActors = Instance->GetLoadedLevel()->Actors;
 		TArray<AActor*> TempLights;
 		for (AActor* Actor : FoundActors)
 		{
@@ -307,7 +417,7 @@ void APXGameMode::OnLevelLoaded()
 			}
 			if (ABasePlatform* Platform = Cast<ABasePlatform>(Actor))
 			{
-				Platform->SetLoadLevelLocationOffset(CurLevelInstance->LevelTransform.GetLocation());
+				Platform->SetLoadLevelLocationOffset(Instance->LevelTransform.GetLocation());
 			}
 		}
 
@@ -315,10 +425,16 @@ void APXGameMode::OnLevelLoaded()
 		{
 			TempLight->Destroy();
 		}
+	}
+
+	if (PendingLevelInstanceCount > 0 && --PendingLevelInstanceCount == 0)
+	{
+		IsLevelLoaded = true;
+		ProcessedLevelInstances.Reset();
 
 		UGameplayMessageSubsystem& MessageSubsystem = UGameplayMessageSubsystem::Get(this);
 		MessageSubsystem.BroadcastMessage(PXGameplayTags::GameplayFlow_OnLevelLoaded, EMPTY_MESSAGE);
-		
+
 		if (IsLevelStarted)
 		{
 			OnLevelStarted();

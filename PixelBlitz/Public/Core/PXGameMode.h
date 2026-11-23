@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Containers/Set.h"
 #include "GameFramework/GameMode.h"
 #include "Player/PlayerRespawnPoint.h"
 
@@ -30,6 +31,15 @@ class PIXELBLITZ_API APXGameMode : public AGameMode
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	ULevelStreamingDynamic* CurLevelInstance;
+
+	// 当前关卡的全部流送实例（FLevelData.LevelInstanceNames 支持多实例，CurLevelInstance 指向首个）
+	TArray<TObjectPtr<ULevelStreamingDynamic>> CurLevelInstances;
+
+	// 尚未完成加载的实例数，归零即整关就绪
+	int32 PendingLevelInstanceCount = 0;
+
+	// 已完成加载处理的实例（防止 OnLevelLoaded 重复触发时重复处理）
+	TSet<TObjectPtr<ULevelStreamingDynamic>> ProcessedLevelInstances;
 
 	bool IsLevelLoaded = false;
 	bool IsLevelStarted = false;

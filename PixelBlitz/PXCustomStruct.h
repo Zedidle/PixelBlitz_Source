@@ -12,6 +12,7 @@ class ABasePXCharacter;
 class USoundCue;
 class ABaseSkill;
 class ABaseEnemy;
+class UDataTable;
 
 UCLASS()
 class PIXELBLITZ_API UPXCustomStruct : public UObject
@@ -99,8 +100,11 @@ public:
 	bool bLoadTestMap = false;
 
 	// 勾选 bLoadTestMap 后，进行测试，如果不选择，则默认测试 L_Test
-	UPROPERTY(EditAnywhere, Category=DefaultTestMap, meta=(AllowedClasses="/Script/Engine.World"))
-	FSoftObjectPath TestMap;
+	// 测试关卡表：行结构 FLevelData，按 LevelOrder 排序后读取首个有效行的首个 LevelInstanceNames 作为测试关卡
+	// RequiredAssetDataTags：资产选择器只允许行结构为 FLevelData 的 DataTable（DataTable 资产注册表自带 RowStructure 标签）
+	// 注意：USTRUCT 反射名去掉 F 前缀，标签实际值为 /Script/PixelBlitz.LevelData，不能写 FLevelData
+	UPROPERTY(EditAnywhere, Category=DefaultTestMap, meta=(RequiredAssetDataTags="RowStructure=/Script/PixelBlitz.LevelData"))
+	TObjectPtr<UDataTable> TestMap;
 
 };
 
@@ -771,8 +775,10 @@ struct FLevelData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	TSoftObjectPtr<USoundWave> BGM;
 
+	// 一行 = 一个关卡，可由多个流送实例组成；加载关卡时按数组顺序全部流送，
+	// 推进存档（RemLevels）以首个有效实例名作为该关卡的键
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
-	FName LevelInstanceName;
+	TArray<FName> LevelInstanceNames;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	FText LevelDisplayName;

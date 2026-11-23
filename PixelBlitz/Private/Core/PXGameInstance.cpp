@@ -71,7 +71,21 @@ void UPXGameInstance::StartNewGame(FString LevelTableName)
 
 	PXSG->GetMainData()->RemLevels.Empty();
 	TArray<FLevelData> LevelDataArray = DataTableSubsystem->GetRowMap<FLevelData>(LevelData);
-	LevelDataArray.Sort([](const FLevelData& A, const FLevelData& B)
+
+	// 关卡推进键 = 行内首个有效实例名（一行可由多个流送实例组成）
+	auto FirstInstanceName = [](const FLevelData& Row) -> FName
+	{
+		for (const FName& InstanceName : Row.LevelInstanceNames)
+		{
+			if (!InstanceName.IsNone())
+			{
+				return InstanceName;
+			}
+		}
+		return FName();
+	};
+
+	LevelDataArray.Sort([&FirstInstanceName](const FLevelData& A, const FLevelData& B)
 	{
 		if (A.LevelOrder != B.LevelOrder)
 		{
@@ -88,11 +102,17 @@ void UPXGameInstance::StartNewGame(FString LevelTableName)
 			return A.LevelOrder < B.LevelOrder;
 		}
 
-		return A.LevelInstanceName.ToString() < B.LevelInstanceName.ToString();
+		return FirstInstanceName(A).ToString() < FirstInstanceName(B).ToString();
 	});
 	for (auto& D : LevelDataArray)
 	{
-		PXSG->GetMainData()->RemLevels.Add(D.LevelInstanceName);
+		const FName LevelKey = FirstInstanceName(D);
+		if (LevelKey.IsNone())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[StartNewGame] 行无有效 LevelInstanceNames，跳过: %s"), *D.LevelDisplayName.ToString());
+			continue;
+		}
+		PXSG->GetMainData()->RemLevels.Add(LevelKey);
 	}
 	
 	PXSG->SaveMainData();

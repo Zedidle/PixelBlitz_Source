@@ -196,12 +196,27 @@ void UDataTableSubsystem::LoadLevelData()
 					continue;
 				}
 
-				if (LevelData.Contains(Data->LevelInstanceName))
+				if (Data->LevelInstanceNames.IsEmpty())
 				{
-					UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] LevelInstanceName 冲突，后者覆盖: %s (来自 %s)"),
-						*Data->LevelInstanceName.ToString(), *TableName);
+					UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] 行无有效 LevelInstanceNames，跳过: %s.%s"), *TableName, *Row.ToString());
+					continue;
 				}
-				LevelData.Add(Data->LevelInstanceName, *Data);
+
+				// 一行可含多个实例名：每个实例名都注册到该行，任意实例名均可反查关卡数据
+				for (const FName& InstanceName : Data->LevelInstanceNames)
+				{
+					if (InstanceName.IsNone())
+					{
+						continue;
+					}
+
+					if (LevelData.Contains(InstanceName))
+					{
+						UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] LevelInstanceName 冲突，后者覆盖: %s (来自 %s)"),
+							*InstanceName.ToString(), *TableName);
+					}
+					LevelData.Add(InstanceName, *Data);
+				}
 			}
 		}
 	}
