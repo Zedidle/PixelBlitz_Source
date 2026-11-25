@@ -877,19 +877,6 @@ void ABasePXCharacter::Landed(const FHitResult& Hit)
 	SetFalling(false);
 	CurJumpCount = 0;
 
-	// 空中蓄力松开的缓存释放：落地瞬间结算旋风斩
-	if (bPendingChargeRelease && !bDead)
-	{
-		bPendingChargeRelease = false;
-		// 强度随之转成锁存，落地这次攻击才能吃到空中蓄力的伤害/速度/冲刺距离加成
-		ChargeStrengthLatch = PendingChargeStrength;
-		// 蓄力技能开始：技能效果结束时 OnSkillEffectEnd 补发 AttackSkillEnd（天赋 GA 消耗）
-		bInHoldingSkill = true;
-		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());
-		BP_OnAttackChargeRelease(PendingChargeStrength);
-		PendingChargeStrength = -1.f;
-	}
-	
 	if (const UPXCustomSettings* CustomSettings = GetDefault<UPXCustomSettings>())
 	{
 		if (UPXCameraResourceDataAsset* DA = CustomSettings->CameraResourceDataAsset.LoadSynchronous())
@@ -1413,7 +1400,6 @@ void ABasePXCharacter::SetDashing(bool V)
 	if (!V && !bInAttackEffect)
 	{
 		ChargeStrengthLatch = -1.f;
-		PendingChargeStrength = -1.f;
 	}
 }
 
@@ -1893,7 +1879,6 @@ void ABasePXCharacter::OnAttackEffectEnd_Implementation()
 	if (!bDashing)
 	{
 		ChargeStrengthLatch = -1.f;
-		PendingChargeStrength = -1.f;
 	}
 	
 	if (AbilityComponent)
@@ -2047,7 +2032,6 @@ void ABasePXCharacter::StartAttackHoldAccumulate()
 
 	bAttackHoldAccumulating = true;
 	bAttackFullyCharged = false;
-	bPendingChargeRelease = false;
 	AttackHoldElapsed = 0.f;
 
 	UTimerManagerFuncLib::SetDelayLoopSafe(this, TEXT("PXAttackHold"),
@@ -2111,7 +2095,6 @@ void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 	if (!bConsume)
 	{
 		ChargeStrengthLatch = -1.f;
-		PendingChargeStrength = -1.f;
 	}
 
 	// 弓手保护：远战蓄力是动画帧驱动管线（AttackHolding 动画通知 → OnAttackHolding → 松弓释放），
@@ -2123,7 +2106,7 @@ void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 	}
 
 	// 记录清理前是否真的处于蓄力相关状态：避免每次按下都触发一次"取消"通知
-	const bool bHadChargeState = bAttackHolding || bAttackHoldAccumulating || bPendingChargeRelease;
+	const bool bHadChargeState = bAttackHolding || bAttackHoldAccumulating;
 
 	UTimerManagerFuncLib::CancelDelay(this, TEXT("PXAttackHold"));
 	bAttackHoldAccumulating = false;
@@ -2139,11 +2122,7 @@ void ABasePXCharacter::CancelAttackHold(const bool bConsume)
 		SetAttackHolding(false);
 	}
 
-	// bConsume=false：连空中缓存的释放一起丢弃（受击/死亡/取消）；bConsume=true：蓄力已被本次释放消耗
-	if (!bConsume)
-	{
-		bPendingChargeRelease = false;
-	}
+	// bConsume 语义：false = 打断（伤害/冲刺倍率锁存一并作废）；true = 蓄力已被本次释放消耗，保留释放锁存
 
 	// 蓝图同步收口：只要蓄力态真的结束过就通知（打断 / 释放 / 技能劫持都算），
 	// 用于停蓄力 VFX、复位材质、清理残留表现；没有蓄力状态时不发，避免空通知
@@ -2160,19 +2139,17 @@ void ABasePXCharacter::ResolveChargeRelease()
 		// 蓄力强度必须在 CancelAttackHold 之前取：之后 bAttackHolding 会被清掉，强度会掉回 0
 		const float ChargeStrength = GetAttackChargeScale();
 
-		// 空中松开：缓存到落地瞬间结算（v1 不做空中旋风斩判定）
-		if (GetCharacterMovement() && !GetCharacterMovement()->IsMovingOnGround())
-		{
-			bPendingChargeRelease = true;
-			PendingChargeStrength = ChargeStrength;
-			CancelAttackHold(true);
-			return;
-		}
-
 		CancelAttackHold(true);
 		ChargeStrengthLatch = ChargeStrength;
 		// 蓄力技能开始：技能效果结束时 OnSkillEffectEnd 补发 AttackSkillEnd（天赋 GA 消耗）
 		bInHoldingSkill = true;
+
+		// 空中释放：出招瞬间下坠速度减半（滞空手感；只削减下落，不影响上升/地面）
+		UCharacterMovementComponent* Movement = GetCharacterMovement();
+		if (Movement && !Movement->IsMovingOnGround() && Movement->Velocity.Z < 0.f)
+		{
+			Movement->Velocity.Z *= 0.5f;
+		}
 
 		// 近战释放广播（原 2020 行 TODO）：敌人 AI 的闪避/令牌反应以此为准
 		OnPlayerAttackStart.Broadcast(EAttackType::Melee, GetSpriteForwardVector());

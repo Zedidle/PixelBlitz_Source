@@ -438,14 +438,8 @@ public:
 	// 已满蓄
 	bool bAttackFullyCharged = false;
 
-	// 空中松开缓存的释放（落地瞬间结算，v1 不做空中旋风斩判定）
-	bool bPendingChargeRelease = false;
-
 	// 释放瞬间锁存的蓄力强度 [0,1]（本次释放动作内有效；<0 = 无蓄力，伤害/速度等倍率均为原值）
 	float ChargeStrengthLatch = -1.f;
-
-	// 空中释放缓存的蓄力强度（落地结算时转为锁存）
-	float PendingChargeStrength = -1.f;
 
 	// 近战蓄力是否开启（Melee + DataAsset 开关）
 	bool IsMeleeChargeEnabled() const;
@@ -456,13 +450,11 @@ public:
 	// 循环计时器回调：入场判定（守卫：仍按住 + 普攻已结算）与满蓄判定
 	void TickAttackHold();
 
-	// 统一打断/取消：bConsume=false 连同空中缓存一起丢弃；bConsume=true 表示蓄力已被本次释放消耗
-	// bConsume=false（默认）：打断语义，清蓄力态 + 清空中缓存 + 清伤害/冲刺倍率锁存
-	// bConsume=true：仅"蓄力已被本次释放消耗"，保留释放窗口（一般由 C++ 内部使用，BP 慎用）
+	// 统一打断/取消：bConsume=false 打断语义（清蓄力态 + 清伤害/冲刺倍率锁存）；bConsume=true 表示蓄力已被本次释放消耗
 	UFUNCTION(BlueprintCallable, Category = "Attack|MeleeHold")
 	void CancelAttackHold(bool bConsume = false);
 
-	// 松开时的近战释放结算：已入场 → 旋风斩（空中则缓存到落地）；未入场 → 静默取消
+	// 松开时的近战释放结算：已入场 → 旋风斩（地面/空中直接释放）；未入场 → 静默取消
 	void ResolveChargeRelease();
 
 	// 满蓄瞬间（震动在 C++，爆闪/色相在 BP）
