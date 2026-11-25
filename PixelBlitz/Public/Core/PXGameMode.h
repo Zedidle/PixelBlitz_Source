@@ -32,7 +32,7 @@ class PIXELBLITZ_API APXGameMode : public AGameMode
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	ULevelStreamingDynamic* CurLevelInstance;
 
-	// 当前关卡的全部流送实例（FLevelData.LevelInstanceNames 支持多实例，CurLevelInstance 指向首个）
+	// 当前流送的关卡实例（FLevelData.LevelInstanceNames 随机加载其一，故常态只有 1 个）
 	TArray<TObjectPtr<ULevelStreamingDynamic>> CurLevelInstances;
 
 	// 尚未完成加载的实例数，归零即整关就绪
@@ -62,7 +62,7 @@ public:
 	APlayerRespawnPoint* PlayerRespawnPoint;
 	
 	UFUNCTION(BlueprintCallable, Category=GameplayFlow)
-	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0));
+	void LoadLevel(FName LevelName, FVector StartLocation=FVector(0), bool bRandomInstanceFromRow=false);
 
 	UFUNCTION(BlueprintNativeEvent, Category=GameplayFlow)
 	void DissolvePreLevel(const FName& LevelName, FVector NewLevelLocation);

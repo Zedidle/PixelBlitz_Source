@@ -51,6 +51,12 @@ protected:
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UDataTable>> DataTableMap;
 
+	// 已注册过行数据的关卡表路径（LoadLevelData 幂等去重用）
+	TSet<FString> RegisteredLevelTables;
+
+	// 将一张 FLevelData 行结构表注册进 LevelData 反查缓存（按 LevelInstanceNames 逐实例注册）
+	void RegisterLevelDataTable(UDataTable* DataTable);
+
 
 public:
 	
@@ -102,6 +108,12 @@ public:
 	mutable TMap<FName, FLevelData> LevelData;
 	void LoadLevelData();
 	const FLevelData* GetLevelDataByName(const FName& LevelInstanceName) ;
+
+	// 行名 → 行数据（行名 = 关卡序号推进键，如 L1_Race；一行内 LevelInstanceNames 为同难度候选池）
+	// 候选池允许跨行重叠（如 L2_HomingMoon 同属 L1/L2 行），故实例名不能作推进键
+	mutable TMap<FName, FLevelData> LevelDataByRowName;
+	// 统一入口：先按行名查（推进键），查不到再按实例名反查（旧档/测试直填实例名的兼容路径）
+	const FLevelData* GetLevelDataByKey(const FName& Key);
 	
 	
 	// 获取关卡数据

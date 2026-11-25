@@ -775,8 +775,9 @@ struct FLevelData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	TSoftObjectPtr<USoundWave> BGM;
 
-	// 一行 = 一个关卡，可由多个流送实例组成；加载关卡时按数组顺序全部流送，
-	// 推进存档（RemLevels）以首个有效实例名作为该关卡的键
+	// 一行 = 一个关卡序号，行内多个实例名 = 同规模/同难度候选池（允许跨行重叠）：
+	// 运行时随机加载其中一个（其余仅作加载失败兜底），
+	// 推进存档（RemLevels）以行名作为该关卡序号的键
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = WeaponData)
 	TArray<FName> LevelInstanceNames;
 	

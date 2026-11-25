@@ -70,49 +70,50 @@ void UPXGameInstance::StartNewGame(FString LevelTableName)
 	PXSG->Main_TotalInit(LevelType == ELevelType::Arena ? ESaveDomain::Arena : ESaveDomain::Race);
 
 	PXSG->GetMainData()->RemLevels.Empty();
-	TArray<FLevelData> LevelDataArray = DataTableSubsystem->GetRowMap<FLevelData>(LevelData);
 
-	// 关卡推进键 = 行内首个有效实例名（一行可由多个流送实例组成）
-	auto FirstInstanceName = [](const FLevelData& Row) -> FName
+	// 行 = 关卡序号（L1_Race…L5_Race），行内 LevelInstanceNames = 同规模/同难度候选池
+	// 推进键 = 行名（候选池允许跨行重叠，实例名不能作键）；运行时加载该行时随机加载其一
+	struct FLevelRowEntry
 	{
-		for (const FName& InstanceName : Row.LevelInstanceNames)
-		{
-			if (!InstanceName.IsNone())
-			{
-				return InstanceName;
-			}
-		}
-		return FName();
+		FName RowName;
+		FLevelData Data;
 	};
-
-	LevelDataArray.Sort([&FirstInstanceName](const FLevelData& A, const FLevelData& B)
+	TArray<FLevelRowEntry> LevelRows;
+	for (const FName& RowName : LevelData->GetRowNames())
 	{
-		if (A.LevelOrder != B.LevelOrder)
+		if (const FLevelData* RowData = LevelData->FindRow<FLevelData>(RowName, TEXT("StartNewGame")))
 		{
-			if (A.LevelOrder == INDEX_NONE)
+			LevelRows.Add({RowName, *RowData});
+		}
+	}
+
+	LevelRows.Sort([](const FLevelRowEntry& A, const FLevelRowEntry& B)
+	{
+		if (A.Data.LevelOrder != B.Data.LevelOrder)
+		{
+			if (A.Data.LevelOrder == INDEX_NONE)
 			{
 				return false;
 			}
 
-			if (B.LevelOrder == INDEX_NONE)
+			if (B.Data.LevelOrder == INDEX_NONE)
 			{
 				return true;
 			}
 
-			return A.LevelOrder < B.LevelOrder;
+			return A.Data.LevelOrder < B.Data.LevelOrder;
 		}
 
-		return FirstInstanceName(A).ToString() < FirstInstanceName(B).ToString();
+		return A.RowName.ToString() < B.RowName.ToString();
 	});
-	for (auto& D : LevelDataArray)
+	for (const FLevelRowEntry& Row : LevelRows)
 	{
-		const FName LevelKey = FirstInstanceName(D);
-		if (LevelKey.IsNone())
+		if (Row.Data.LevelInstanceNames.IsEmpty())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("[StartNewGame] 行无有效 LevelInstanceNames，跳过: %s"), *D.LevelDisplayName.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("[StartNewGame] 行无有效 LevelInstanceNames，跳过: %s"), *Row.RowName.ToString());
 			continue;
 		}
-		PXSG->GetMainData()->RemLevels.Add(LevelKey);
+		PXSG->GetMainData()->RemLevels.Add(Row.RowName);
 	}
 	
 	PXSG->SaveMainData();

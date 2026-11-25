@@ -161,9 +161,87 @@ const FWeaponData* UDataTableSubsystem::GetWeaponDataByTag(const FGameplayTag& W
 	return WeaponData.Find(WeaponTag);
 }
 
+void UDataTableSubsystem::RegisterLevelDataTable(UDataTable* DataTable)
+{
+	if (!IsValid(DataTable))
+	{
+		return;
+	}
+
+	// 幂等去重：系列驱动与旧约定探测可能指向同一张表
+	const FString TablePath = DataTable->GetPathName();
+	if (RegisteredLevelTables.Contains(TablePath))
+	{
+		return;
+	}
+	RegisteredLevelTables.Add(TablePath);
+
+	const TArray<FName> RowNames = DataTable->GetRowNames();
+	for (const FName& Row : RowNames)
+	{
+		const FLevelData* Data = DataTable->FindRow<FLevelData>(Row, TEXT("RegisterLevelDataTable"));
+		if (!Data)
+		{
+			UE_LOG(LogTemp, Error, TEXT("[LoadLevelData] 行解析失败: %s.%s"), *DataTable->GetName(), *Row.ToString());
+			continue;
+		}
+
+		if (Data->LevelInstanceNames.IsEmpty())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] 行无有效 LevelInstanceNames，跳过: %s.%s"), *DataTable->GetName(), *Row.ToString());
+			continue;
+		}
+
+		// 行名注册：行名 = 关卡序号推进键（如 L1_Race），同系列表内唯一
+		if (LevelDataByRowName.Contains(Row))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] 行名冲突，后者覆盖: %s (来自 %s)"),
+				*Row.ToString(), *DataTable->GetName());
+		}
+		LevelDataByRowName.Add(Row, *Data);
+
+		// 实例名注册：候选池允许跨行重叠（后者覆盖），仅供任意实例名反查关卡数据
+		for (const FName& InstanceName : Data->LevelInstanceNames)
+		{
+			if (InstanceName.IsNone())
+			{
+				continue;
+			}
+
+			if (LevelData.Contains(InstanceName))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] LevelInstanceName 冲突，后者覆盖: %s (来自 %s)"),
+					*InstanceName.ToString(), *DataTable->GetName());
+			}
+			LevelData.Add(InstanceName, *Data);
+		}
+	}
+}
+
 void UDataTableSubsystem::LoadLevelData()
 {
-	// 表名约定：LevelData_{模式}_{系列序号两位}，序号连续，首个缺失即结束该模式
+	// 中介层：由 LevelSeriesData 驱动关卡表加载。
+	// 每条系列行（FLevelSeriesData）的 LevelTableName 指向该系列关卡表，
+	// 表名不受 LevelData_{模式}_{序号} 约定限制（如 LevelData_Race_Forest）。
+	LoadLevelSeriesData();
+	for (const auto& Pair : LevelSeriesData)
+	{
+		const FLevelSeriesData& SeriesData = Pair.Value;
+		if (SeriesData.LevelTableName.IsEmpty())
+		{
+			continue;
+		}
+		UDataTable* DataTable = GetDataTable(SeriesData.LevelTableName);
+		if (!IsValid(DataTable))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] 系列 %s 的关卡表加载失败: %s"),
+				*Pair.Key.ToString(), *SeriesData.LevelTableName);
+			continue;
+		}
+		RegisterLevelDataTable(DataTable);
+	}
+
+	// 旧命名约定兜底：LevelData_{模式}_{系列序号两位}，序号连续，首个缺失即结束该模式
 	static const TArray<FString> ModeNames = { TEXT("Race"), TEXT("Arena") };
 	constexpr int32 MaxSeriesIndex = 9;
 
@@ -186,38 +264,7 @@ void UDataTableSubsystem::LoadLevelData()
 			}
 			DataTableMap.Add(FName(*TableName), DataTable);
 
-			const TArray<FName> RowNames = DataTable->GetRowNames();
-			for (const FName& Row : RowNames)
-			{
-				const FLevelData* Data = DataTable->FindRow<FLevelData>(Row, TEXT("LoadLevelData"));
-				if (!Data)
-				{
-					UE_LOG(LogTemp, Error, TEXT("[LoadLevelData] 行解析失败: %s.%s"), *TableName, *Row.ToString());
-					continue;
-				}
-
-				if (Data->LevelInstanceNames.IsEmpty())
-				{
-					UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] 行无有效 LevelInstanceNames，跳过: %s.%s"), *TableName, *Row.ToString());
-					continue;
-				}
-
-				// 一行可含多个实例名：每个实例名都注册到该行，任意实例名均可反查关卡数据
-				for (const FName& InstanceName : Data->LevelInstanceNames)
-				{
-					if (InstanceName.IsNone())
-					{
-						continue;
-					}
-
-					if (LevelData.Contains(InstanceName))
-					{
-						UE_LOG(LogTemp, Warning, TEXT("[LoadLevelData] LevelInstanceName 冲突，后者覆盖: %s (来自 %s)"),
-							*InstanceName.ToString(), *TableName);
-					}
-					LevelData.Add(InstanceName, *Data);
-				}
-			}
+			RegisterLevelDataTable(DataTable);
 		}
 	}
 }
@@ -230,6 +277,21 @@ const FLevelData* UDataTableSubsystem::GetLevelDataByName(const FName& LevelInst
 	}
 
 	return LevelData.Find(LevelInstanceName);
+}
+
+const FLevelData* UDataTableSubsystem::GetLevelDataByKey(const FName& Key)
+{
+	if (!LevelDataByRowName.Contains(Key) && !LevelData.Contains(Key))
+	{
+		LoadLevelData();
+	}
+
+	// 行名优先（推进键语义），实例名兜底（旧档/测试路径）
+	if (const FLevelData* RowData = LevelDataByRowName.Find(Key))
+	{
+		return RowData;
+	}
+	return LevelData.Find(Key);
 }
 
 void UDataTableSubsystem::LoadLevelSeriesData()
@@ -252,7 +314,7 @@ FLevelSeriesData UDataTableSubsystem::GetLevelSeriesData(const FName& LevelSerie
 {
 	if (!LevelSeriesData.Contains(LevelSeriesID))
 	{
-		LoadLevelData();
+		LoadLevelSeriesData();
 	}
 
 	return LevelSeriesData.FindRef(LevelSeriesID);

@@ -279,7 +279,7 @@ void APXGameState::ToNextLevel()
 	{
 		if (!NextLevelName.IsNone())
 		{
-			GM->LoadLevel(NextLevelName, GetNewLevelInitLocation());
+			GM->LoadLevel(NextLevelName, GetNewLevelInitLocation(), true);
 		}
 	}
 }

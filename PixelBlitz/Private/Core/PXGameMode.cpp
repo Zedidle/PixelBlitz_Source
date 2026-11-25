@@ -70,6 +70,8 @@ void APXGameMode::BeginPlay()
 		}
 	}
 
+	bool bDevelopTestMap = false;
+
 	if (UPXGameInstance* GameInstance = GetGameInstance<UPXGameInstance>())
 	{
 
@@ -80,6 +82,7 @@ void APXGameMode::BeginPlay()
 			UDevelopConfigDataAsset* DevelopConfig = Settings->DevelopConfig.LoadSynchronous();
 			if (DevelopConfig && DevelopConfig->bLoadTestMap)
 			{
+				bDevelopTestMap = true;
 				if (const UDataTable* TestLevelTable = DevelopConfig->TestMap)
 				{
 					// 读取测试关卡表：与 StartNewGame 相同的排序规则（LevelOrder 升序，未设置按行名兜底），
@@ -139,7 +142,8 @@ void APXGameMode::BeginPlay()
 			}
 		}
 		#endif
-		LoadLevel(LevelName);
+		// 正式流程：行内候选变体随机加载其一；开发测试地图：确定性加载指定实例
+		LoadLevel(LevelName, FVector(0), !bDevelopTestMap);
 		TryStartCurLevel();
 	}
 }
@@ -151,7 +155,7 @@ void APXGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 
 
-void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
+void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation, bool bRandomInstanceFromRow)
 {
 	if (LevelName.IsNone())
 	{
@@ -205,26 +209,46 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 	ProcessedLevelInstances.Reset();
 	PendingLevelInstanceCount = 0;
 
-	// 读取关卡行：LevelInstanceNames 支持多实例，按数组顺序全部流送；
-	// 查不到行时退化为仅加载传入的实例名（保持旧行为）
-	TArray<FName> InstancesToLoad;
+	// 读取关卡行：传入名 = 行名（关卡序号推进键，如 L1_Race），行内 LevelInstanceNames
+	// 为同规模/同难度候选池，随机加载其中一个，其余候选仅作加载失败兜底；
+	// bRandomInstanceFromRow=false（测试地图等）优先加载传入的实例名；
+	// 行名/实例名都查不到时退化为仅加载传入名（保持旧行为）
+	TArray<FName> ValidInstances;
 	if (UDataTableSubsystem* DataTableSubsystem = UDataTableSubsystem::GetInstance(this))
 	{
-		if (const FLevelData* LevelRow = DataTableSubsystem->GetLevelDataByName(LevelName))
+		if (const FLevelData* LevelRow = DataTableSubsystem->GetLevelDataByKey(LevelName))
 		{
 			for (const FName& InstanceName : LevelRow->LevelInstanceNames)
 			{
 				if (!InstanceName.IsNone())
 				{
-					InstancesToLoad.AddUnique(InstanceName);
+					ValidInstances.AddUnique(InstanceName);
 				}
 			}
 		}
 	}
-	InstancesToLoad.AddUnique(LevelName);
+
+	TArray<FName> LoadOrder;
+	if (bRandomInstanceFromRow && ValidInstances.Num() > 0)
+	{
+		LoadOrder = ValidInstances;
+		// 随机选中的候选提到队首，其余保持原序作为失败兜底
+		if (LoadOrder.Num() > 1)
+		{
+			LoadOrder.Swap(0, FMath::RandRange(0, LoadOrder.Num() - 1));
+		}
+	}
+	else
+	{
+		LoadOrder.AddUnique(LevelName);
+		for (const FName& InstanceName : ValidInstances)
+		{
+			LoadOrder.AddUnique(InstanceName);
+		}
+	}
 
 	bool bAnyLoadSuccess = false;
-	for (const FName& InstanceName : InstancesToLoad)
+	for (const FName& InstanceName : LoadOrder)
 	{
 		bool LoadLevelSuccess = false;
 		ULevelStreamingDynamic* LoadedLevel = ULevelStreamingDynamic::LoadLevelInstance(GetWorld(),
@@ -239,6 +263,7 @@ void APXGameMode::LoadLevel(FName LevelName, FVector StartLocation)
 				CurLevelInstance = LoadedLevel;
 			}
 			bAnyLoadSuccess = true;
+			break; // 只加载一个实例：候选序中首个成功者
 		}
 		else
 		{
@@ -284,7 +309,7 @@ void APXGameMode::OnLevelStarted_Implementation()
 	UPXAudioSubsystem* AudioSubsystem = UPXAudioSubsystem::GetInstance(this);
 	CHECK_RAW_POINTER_IS_VALID_OR_RETURN(AudioSubsystem);
 
-	if (const FLevelData* Data = DataTableSubsystem->GetLevelDataByName(CurLevelName))
+	if (const FLevelData* Data = DataTableSubsystem->GetLevelDataByKey(CurLevelName))
 	{
 		AudioSubsystem->PlayBGM(Data->BGM.LoadSynchronous());
 	}
