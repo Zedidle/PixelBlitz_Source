@@ -899,15 +899,37 @@ struct FUDSLevelArgs : public FTableRowBase
 
 	// 多云时夜间额外亮度（L1 少云下为 0；若有乌云夜演出，该档需给值）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
-	float ExtraNightBrightnessWhenCloudy = 0.0f;
+	float ExtraNightBrightnessWhenCloudy = 20.0f;
 
 	// 阴天夜间亮度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
-	float OvercastBrightnessNight = 0.2f;
+	float OvercastBrightnessNight = 0.5f;
 
 	// 太空层（星空）夜间亮度
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")
 	float SpaceLayerBrightnessNight = 1.0f;
+
+	// ---- Exposure Bias（UDS 按时段/天气切曝光偏差，EV 值；Manual 曝光下的时段级补偿） ----
+	// 与 UDS 原生变量一一对应（接线时逐列写回 UDS actor 同名 float 属性）；
+	// 注意 DawnDusk 是时段级全局，会连坐晴天黎明/黄昏——过曝则把差值挪给 WeatherExposureOffset 的每天气系数
+	// L1 校准：DawnDusk=2.0（黎明×小雪实测，2026-11-26）；其余待校准
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Day"))
+	float ExposureBiasDay = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias DawnDusk"))
+	float ExposureBiasDawnDusk = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Night"))
+	float ExposureBiasNight = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Cloudy"))
+	float ExposureBiasCloudy = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Foggy"))
+	float ExposureBiasFoggy = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Dusty"))
+	float ExposureBiasDusty = 0.0f;
 
 	// 备注：校准说明/日期，不参与逻辑
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting")

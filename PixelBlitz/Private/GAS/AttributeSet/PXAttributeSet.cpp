@@ -96,18 +96,26 @@ void UPXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, fl
 	
 	if(Attribute == GetHPAttribute())
 	{
-		int ChangedValue = NewValue - GetHP();
+		// 用浮点计算变化量：int 截断会把小伤害归零（如暴风雪 -20% 修正下 1 点伤害 → -0.8 → 0，打不死人）
+		const float ChangedValue = NewValue - GetHP();
 
 		if (ChangedValue < 0)
 		{
+			float EffectiveValue = ChangedValue;
 			if (APXGameState* GS = UPXGameplayStatics::GetGameState(GetWorld()))
 			{
-				// 天气的统一影响
-				ChangedValue *= 1 + GS->GetDamagePlusPercent();
+				// 天气的统一影响（作用于所有 HP 减少：玩家与敌人双向）
+				EffectiveValue = ChangedValue * (1.f + GS->GetDamagePlusPercent());
 			}
+			// 保底 1 点伤害：防止小伤害被天气修正缩放归零，或极端负修正把伤害翻转为治疗
+			EffectiveValue = FMath::Min(EffectiveValue, -1.f);
+
+			NewValue = FMath::Clamp(GetHP() + FMath::RoundToInt(EffectiveValue), 0.0f, GetCurMaxHP());
 		}
-		
-		NewValue = FMath::Clamp(GetHP() + ChangedValue, 0.0f, GetCurMaxHP());
+		else
+		{
+			NewValue = FMath::Clamp(NewValue, 0.0f, GetCurMaxHP());
+		}
 	}
 	
 	if(Attribute == GetEPAttribute())
