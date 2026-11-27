@@ -6,29 +6,30 @@
 #include "PixelBlitz.h"
 #include "Core/PXGameState.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "TimerManager.h"
 #include "PXCustomStruct.h"
 #include "WeatherSubsystem.generated.h"
 
-class UMaterialParameterCollection;
+class UMaterialInterface;
+class UNiagaraSystem;
+class APointLight;
 
-// UDW 粒子 MPC 的分档倍率（Rain/Snow Sprite Alpha + Ambient Light Intensity）
-// 暗档下靠 Ambient Light Intensity 补 Manual EV 割裂的 emissive；Alpha 默认 1 不放大
+// 纯打光方案（用户裁决 2026-11-27）：UDS/UDW 资产与运行时参数零改动，
+// 暗档×雨/雪的粒子可见性只靠跟随相机的点光实现
 USTRUCT(BlueprintType)
 struct FWeatherParticleBrightness
 {
 	GENERATED_BODY()
 
+	// 暗档×雨雪时跟随相机的点光强度（cd）；0 = 关闭。全向光，与月光方向无关
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather | Particle")
-	float RainSpriteAlpha = 1.0f;
+	float ParticleLightIntensity = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather | Particle")
-	float RainAmbientLightIntensity = 1.0f;
+	float ParticleLightRadius = 600.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather | Particle")
-	float SnowSpriteAlpha = 1.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather | Particle")
-	float SnowAmbientLightIntensity = 1.0f;
+	FLinearColor ParticleLightColor = FLinearColor(0.8f, 0.85f, 1.0f);
 };
 
 UCLASS(Blueprintable)
@@ -54,7 +55,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<EDayTimeType, FText> DayTime2Name;	
 
-	// UDW 粒子 MPC 分档倍率：未配置的档位走 C++ 默认表（夜 3x / 晨昏 1.5x / 白天 1x）
+	// 粒子点光分档：未配置的档位走 C++ 默认表（夜 30 / 晨昏 15 / 白天 0）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weather | Particle")
 	TMap<EDayTimeType, FWeatherParticleBrightness> ParticleBrightness;
 };
@@ -75,6 +76,7 @@ public:
 	
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 
 	FString DayTimeNameString;
 	FString WeatherNameString;
@@ -84,20 +86,51 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WeatherSystem")
 	void MakeWeatherEffect();
 
-	// 按当前 EDayTimeType 写 UDW 粒子 MPC（零插件资产改动）；MakeWeatherEffect 内自动调用
+	// 纯打光方案：按当前 EDayTimeType 分档驱动跟随相机的点光；MakeWeatherEffect 内自动调用 + 0.5s 重刷
 	UFUNCTION(BlueprintCallable, Category = "WeatherSystem")
 	void ApplyParticleBrightness();
 
-	// PIE 阈值调试：负值 = 该参数恢复分档默认；全部负值 = 清空覆盖
-	void OverrideParticleBrightness(float RainAmbient = -1.f, float SnowAmbient = -1.f, float RainAlpha = -1.f, float SnowAlpha = -1.f);
+	// [默认关闭] 暗档把 UDW 雨/雪组件切到项目 UNLIT 复制体的备用路径；打光方案裁决后停用，
+	// 代码保留、bParticleMaterialRedirectEnabled 打开才生效
+	UFUNCTION(BlueprintCallable, Category = "WeatherSystem")
+	void ApplyParticleMaterialOverride();
 
-	// 读取 MPC 实例当前值，供 DumpCombo 核对是否落到材质参数
-	bool GetParticleParameterValues(float& OutRainAmbient, float& OutSnowAmbient, float& OutRainAlpha, float& OutSnowAlpha) const;
+	// 暗档×雨雪时维持一个跟随相机的点光，让受光的雨/雪丝在任意视角都受光可见
+	void UpdateParticleViewLight(const FWeatherParticleBrightness& Brightness);
+
+	// 当前粒子点光状态（DumpCombo 核对用）
+	bool GetParticleLightState(float& OutIntensity, float& OutRadius) const;
+
+	// PIE 阈值调试：负值 = 恢复分档默认
+	void OverrideParticleBrightness(float CameraLight = -1.f);
 
 private:
+	// 雨/雪 Niagara 原版与项目 UNLIT 复制体（备用路径，默认关闭）
 	UPROPERTY()
-	TObjectPtr<UMaterialParameterCollection> WeatherParticleCollection;
+	TObjectPtr<UNiagaraSystem> RainParticleOriginal;
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> SnowParticleOriginal;
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> RainParticleUnlit;
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> SnowParticleUnlit;
+	// Sprite 渲染器材质绑定在 USER 参数（Rain/Snow Sprite Material）上，运行时需同步驱动
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> RainMaterialUnlit;
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> SnowMaterialUnlit;
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> RainMaterialOriginalLit;
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> SnowMaterialOriginalLit;
+	bool bParticleSystemRedirectInitialized = false;
 
+	FTimerHandle ParticleBrightnessTimerHandle;
+	bool bParticleTimerStarted = false;
 	bool bParticleBrightnessOverride = false;
 	FWeatherParticleBrightness ParticleBrightnessOverride;
+
+	// 备用路径总开关（打光方案裁决后默认关闭）
+	bool bParticleMaterialRedirectEnabled = false;
+	TWeakObjectPtr<APointLight> ParticleViewLight;
 };

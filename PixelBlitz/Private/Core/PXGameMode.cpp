@@ -123,8 +123,8 @@ namespace
 		return false;
 	}
 
-	// 定位 UDS actor（蓝图类无法 C++ 强引用，按类名匹配）
-	AActor* PXFindUDSActor(UWorld* World)
+	// 定位 UDS/UDW actor（蓝图类无法 C++ 强引用，按类名匹配）
+	AActor* PXFindSkyActor(UWorld* World, const FString& ClassNameKeyword)
 	{
 		if (!World)
 		{
@@ -132,12 +132,22 @@ namespace
 		}
 		for (TActorIterator<AActor> It(World); It; ++It)
 		{
-			if (It->GetClass()->GetName().Contains(TEXT("Ultra_Dynamic_Sky")))
+			if (It->GetClass()->GetName().Contains(ClassNameKeyword))
 			{
 				return *It;
 			}
 		}
 		return nullptr;
+	}
+
+	AActor* PXFindUDSActor(UWorld* World)
+	{
+		return PXFindSkyActor(World, TEXT("Ultra_Dynamic_Sky"));
+	}
+
+	AActor* PXFindUDWActor(UWorld* World)
+	{
+		return PXFindSkyActor(World, TEXT("Ultra_Dynamic_Weather"));
 	}
 
 	// 名字规范化：去空格/下划线/斜杠、统一大写。UDS 蓝图的变量名带空格或斜杠
@@ -759,14 +769,12 @@ void APXGameMode::DumpCombo()
 		UE_LOG(LogTemp, Warning, TEXT("[DumpCombo] 未找到 UDS actor"));
 	}
 
-	float RainAmbient = 0.f, SnowAmbient = 0.f, RainAlpha = 0.f, SnowAlpha = 0.f;
+	float LightIntensity = 0.f, LightRadius = 0.f;
 	if (UWeatherSubsystem* Weather = GetGameInstance() ? GetGameInstance()->GetSubsystem<UWeatherSubsystem>() : nullptr)
 	{
-		if (Weather->GetParticleParameterValues(RainAmbient, SnowAmbient, RainAlpha, SnowAlpha))
-		{
-			UE_LOG(LogTemp, Log, TEXT("[DumpCombo] UDW粒子MPC: RainAmbient=%.2f SnowAmbient=%.2f RainAlpha=%.2f SnowAlpha=%.2f"),
-				RainAmbient, SnowAmbient, RainAlpha, SnowAlpha);
-		}
+		const bool bLightOn = Weather->GetParticleLightState(LightIntensity, LightRadius);
+		UE_LOG(LogTemp, Log, TEXT("[DumpCombo] 粒子点光: %s Intensity=%.2f Radius=%.1f"),
+			bLightOn ? TEXT("开") : TEXT("关"), LightIntensity, LightRadius);
 	}
 }
 
@@ -799,7 +807,7 @@ void APXGameMode::SetUDS(const FString& PropertyName, float Value)
 	UE_LOG(LogTemp, Warning, TEXT("[SetUDS] 未找到 float 属性 '%s'。可用属性（名字可去空格/下划线书写）：\n%s"), *PropertyName, *FloatProps);
 }
 
-void APXGameMode::TestParticleBrightness(float RainAmbient, float SnowAmbient, float RainAlpha, float SnowAlpha)
+void APXGameMode::TestParticleBrightness(float CameraLight)
 {
 	UGameInstance* GI = GetGameInstance();
 	UWeatherSubsystem* Weather = GI ? GI->GetSubsystem<UWeatherSubsystem>() : nullptr;
@@ -809,9 +817,69 @@ void APXGameMode::TestParticleBrightness(float RainAmbient, float SnowAmbient, f
 		return;
 	}
 
-	Weather->OverrideParticleBrightness(RainAmbient, SnowAmbient, RainAlpha, SnowAlpha);
-	UE_LOG(LogTemp, Log, TEXT("[TestParticleBrightness] 已下发 RainAmbient=%.2f SnowAmbient=%.2f RainAlpha=%.2f SnowAlpha=%.2f（负值=恢复分档默认）"),
-		RainAmbient, SnowAmbient, RainAlpha, SnowAlpha);
+	Weather->OverrideParticleBrightness(CameraLight);
+	UE_LOG(LogTemp, Log, TEXT("[TestParticleBrightness] 相机点光强度已下发 %.2f（负值=恢复分档默认）"), CameraLight);
+}
+
+void APXGameMode::DumpUDW()
+{
+	AActor* UDW = PXFindUDWActor(GetWorld());
+	if (!UDW)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[DumpUDW] 未找到 Ultra_Dynamic_Weather actor"));
+		return;
+	}
+
+	// 只列雨/雪/粒子链路相关变量，避免整表刷屏；需要全量时用 SetUDW 传未命中名字触发全列表
+	static const TCHAR* Keywords[] = { TEXT("Rain"), TEXT("Snow"), TEXT("Particle"), TEXT("Drop"), TEXT("Flake"), TEXT("Alpha"), TEXT("Exposure"), TEXT("Ambient") };
+	FString Props;
+	for (TFieldIterator<FFloatProperty> It(UDW->GetClass()); It; ++It)
+	{
+		const FString PropName = It->GetName();
+		bool bMatch = false;
+		for (const TCHAR* Kw : Keywords)
+		{
+			if (PropName.Contains(Kw, ESearchCase::IgnoreCase))
+			{
+				bMatch = true;
+				break;
+			}
+		}
+		if (bMatch)
+		{
+			Props += FString::Printf(TEXT("%s = %.3f\n"), *PropName, It->GetPropertyValue_InContainer(UDW));
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("[DumpUDW] %s 雨/雪/粒子相关 float 变量：\n%s"), *UDW->GetClass()->GetName(), *Props);
+}
+
+void APXGameMode::SetUDW(const FString& PropertyName, float Value)
+{
+	AActor* UDW = PXFindUDWActor(GetWorld());
+	if (!UDW)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[SetUDW] 未找到 Ultra_Dynamic_Weather actor"));
+		return;
+	}
+
+	const FName Target(*PXNormalizeName(PropertyName));
+	for (TFieldIterator<FFloatProperty> It(UDW->GetClass()); It; ++It)
+	{
+		if (FName(*PXNormalizeName(It->GetName())) == Target)
+		{
+			It->SetPropertyValue_InContainer(UDW, Value);
+			UE_LOG(LogTemp, Log, TEXT("[SetUDW] 已写入 %s = %.3f（若画面未变化，该变量可能需经 UDW 内部刷新流程，把现象发我）"), *It->GetName(), Value);
+			return;
+		}
+	}
+
+	// 未命中：列出全部 float 属性，帮用户对名字
+	FString FloatProps;
+	for (TFieldIterator<FFloatProperty> It(UDW->GetClass()); It; ++It)
+	{
+		FloatProps += FString::Printf(TEXT("%s=%.3f\n"), *It->GetName(), It->GetPropertyValue_InContainer(UDW));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("[SetUDW] 未找到 float 属性 '%s'。可用属性（名字可去空格/下划线书写）：\n%s"), *PropertyName, *FloatProps);
 }
 
 void APXGameMode::StabilizeCombo(const FString& WeatherInput, const FString& TimeInput)

@@ -920,7 +920,7 @@ struct FUDSLevelArgs : public FTableRowBase
 	float ExposureBiasDawnDusk = 2.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Night"))
-	float ExposureBiasNight = 0.0f;
+	float ExposureBiasNight = 2.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UDSLevelLighting", meta = (DisplayName = "Exposure Bias Cloudy"))
 	float ExposureBiasCloudy = 0.0f;

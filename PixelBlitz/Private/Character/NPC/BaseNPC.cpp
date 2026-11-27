@@ -3,6 +3,7 @@
 
 #include "Character/NPC/BaseNPC.h"
 
+#include "Components/CapsuleComponent.h"
 #include "PixelBlitz/PixelBlitz.h"
 #include "Utilitys/SpaceFuncLib.h"
 

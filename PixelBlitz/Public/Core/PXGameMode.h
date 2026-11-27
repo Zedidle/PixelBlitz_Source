@@ -128,10 +128,18 @@ public:
 	UFUNCTION(Exec, Category = "Testing|WeatherTime")
 	void SetUDS(const FString& PropertyName, float Value);
 
-	// 粒子亮度阈值调试：TestParticleBrightness 3 3 -1 -1（顺序 RainAmbient/SnowAmbient/RainAlpha/SnowAlpha）；
-	// 负值 = 该项恢复分档默认，全部负值 = 清空覆盖
+	// 粒子点光强度调试（纯打光方案）：TestParticleBrightness 60；负值 = 恢复分档默认（夜 30 / 晨昏 15）
 	UFUNCTION(Exec, Category = "Testing|WeatherTime")
-	void TestParticleBrightness(float RainAmbient = -1.f, float SnowAmbient = -1.f, float RainAlpha = -1.f, float SnowAlpha = -1.f);
+	void TestParticleBrightness(float CameraLight = -1.f);
+
+	// 实时改 UDW（Ultra_Dynamic_Weather）float 变量：SetUDW RainDropsAlpha 1（名字去空格/下划线亦可命中）；
+	// 未命中时日志列出全部 float 属性
+	UFUNCTION(Exec, Category = "Testing|WeatherTime")
+	void SetUDW(const FString& PropertyName, float Value);
+
+	// 打印 UDW 与雨/雪/粒子相关的全部 float 变量名与当前值（排查暗档 Alpha/生成率被 UDW 自身逻辑压 0）
+	UFUNCTION(Exec, Category = "Testing|WeatherTime")
+	void DumpUDW();
 
 	// 状态归零组合测试：先归零到锚点（白天×晴）等 8s 收敛，再切目标并延迟 10s 自动截图，
 	// 消除前置天气残留/UDW 积雪湿度累积/过渡未收敛对截图的影响
